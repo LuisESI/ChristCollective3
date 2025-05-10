@@ -227,7 +227,7 @@ export default function BusinessNetworkPage() {
                           )}
                           <div>
                             <h3 className="font-semibold text-white">{profile.companyName}</h3>
-                            <p className="text-sm text-gray-300">{profile.industry}</p>
+                            <p className="text-sm text-primary">{profile.industry}</p>
                           </div>
                         </div>
                         
