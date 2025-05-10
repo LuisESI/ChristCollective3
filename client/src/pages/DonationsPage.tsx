@@ -64,7 +64,7 @@ export default function DonationsPage() {
         <meta property="og:description" content="Support meaningful charitable initiatives that reflect Christian values. Make a difference today." />
       </Helmet>
       
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Support Our Causes</h1>
@@ -119,7 +119,7 @@ export default function DonationsPage() {
           ) : campaigns.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns.map((campaign: Campaign) => (
-                <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow bg-gray-800 border-gray-700">
                   {campaign.image ? (
                     <img 
                       src={campaign.image} 
@@ -132,21 +132,21 @@ export default function DonationsPage() {
                     </div>
                   )}
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">
+                    <h3 className="text-xl font-semibold mb-2 text-white">
                       <Link href={`/campaigns/${campaign.slug}`}>
                         <span className="hover:text-primary transition-colors cursor-pointer">
                           {campaign.title}
                         </span>
                       </Link>
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-200 mb-4">
                       {campaign.description.length > 100
                         ? campaign.description.substring(0, 100) + '...'
                         : campaign.description}
                     </p>
                     <div className="mb-4">
                       <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                      <div className="flex justify-between mt-2 text-sm text-gray-600">
+                      <div className="flex justify-between mt-2 text-sm text-gray-300">
                         <span>{formatCurrency(campaign.currentAmount)} raised</span>
                         <span>{formatCurrency(campaign.goal)} goal</span>
                       </div>
