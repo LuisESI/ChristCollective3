@@ -7,9 +7,9 @@ export function Logo({ className = "", dark = false }: LogoProps) {
   return (
     <div className={`${className}`}>
       <img 
-        src={dark ? "/assets/logo-dark.png" : "/assets/logo.png"}
+        src="/logo.png"
         alt="Christ Collective" 
-        className="h-12" 
+        className="h-10" 
       />
     </div>
   );
