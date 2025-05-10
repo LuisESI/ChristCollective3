@@ -1,0 +1,158 @@
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
+import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [path] = useLocation();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [path]);
+
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/#about" },
+    { name: "Donate", path: "/donate" },
+    { name: "Business", path: "/business" },
+  ];
+
+  return (
+    <header className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link href="/">
+          <a className="cursor-pointer">
+            <Logo />
+          </a>
+        </Link>
+        
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          {navItems.map((item) => (
+            <Link key={item.path} href={item.path}>
+              <a className="text-foreground hover:text-primary transition-colors font-medium">
+                {item.name}
+              </a>
+            </Link>
+          ))}
+        </nav>
+        
+        <div className="flex items-center space-x-4">
+          {isLoading ? (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          ) : isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                    <AvatarFallback>
+                      {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <a className="cursor-pointer w-full">Profile</a>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/api/logout" className="cursor-pointer w-full">Log Out</a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <a 
+                href="/api/login" 
+                className="hidden md:block text-foreground hover:text-primary transition-colors font-medium"
+              >
+                Log In
+              </a>
+              <a 
+                href="/api/login" 
+                className="hidden md:block bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              >
+                Sign Up
+              </a>
+            </>
+          )}
+          
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+      </div>
+      
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="md:hidden bg-white">
+          <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
+            {navItems.map((item) => (
+              <Link key={item.path} href={item.path}>
+                <a className="text-foreground hover:text-primary transition-colors font-medium py-2">
+                  {item.name}
+                </a>
+              </Link>
+            ))}
+            <hr className="border-gray-200" />
+            {isAuthenticated ? (
+              <>
+                <Link href="/profile">
+                  <a className="text-foreground hover:text-primary transition-colors font-medium py-2">
+                    Profile
+                  </a>
+                </Link>
+                <a 
+                  href="/api/logout" 
+                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
+                >
+                  Log Out
+                </a>
+              </>
+            ) : (
+              <div className="flex space-x-4">
+                <a 
+                  href="/api/login" 
+                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
+                >
+                  Log In
+                </a>
+                <a 
+                  href="/api/login" 
+                  className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                >
+                  Sign Up
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
