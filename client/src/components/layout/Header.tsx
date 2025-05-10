@@ -31,7 +31,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-background shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
           <div className="cursor-pointer">
@@ -111,7 +111,7 @@ export default function Header() {
       
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-white">
+        <div className="md:hidden bg-background">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
