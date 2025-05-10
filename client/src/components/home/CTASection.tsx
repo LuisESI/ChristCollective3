@@ -20,7 +20,7 @@ export default function CTASection() {
           >
             {isAuthenticated ? (
               <Link href="/profile">
-                <a>My Account</a>
+                <span>My Account</span>
               </Link>
             ) : (
               <a href="/api/login">Create Your Account</a>
@@ -33,7 +33,7 @@ export default function CTASection() {
             className="bg-transparent border border-white hover:border-primary hover:text-primary text-white font-semibold py-3 px-8 rounded-md transition-colors text-lg"
           >
             <Link href="/#about">
-              <a>Learn More</a>
+              <span>Learn More</span>
             </Link>
           </Button>
         </div>
