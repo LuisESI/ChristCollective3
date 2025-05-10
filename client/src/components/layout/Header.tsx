@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "@shared/schema";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,18 +34,18 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
-          <a className="cursor-pointer">
+          <div className="cursor-pointer">
             <Logo />
-          </a>
+          </div>
         </Link>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
             <Link key={item.path} href={item.path}>
-              <a className="text-foreground hover:text-primary transition-colors font-medium">
+              <div className="text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
                 {item.name}
-              </a>
+              </div>
             </Link>
           ))}
         </nav>
@@ -57,7 +58,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>
@@ -67,7 +68,7 @@ export default function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
-                    <a className="cursor-pointer w-full">Profile</a>
+                    <div className="cursor-pointer w-full">Profile</div>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -114,18 +115,18 @@ export default function Header() {
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
-                <a className="text-foreground hover:text-primary transition-colors font-medium py-2">
+                <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
                   {item.name}
-                </a>
+                </div>
               </Link>
             ))}
             <hr className="border-gray-200" />
             {isAuthenticated ? (
               <>
                 <Link href="/profile">
-                  <a className="text-foreground hover:text-primary transition-colors font-medium py-2">
+                  <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
                     Profile
-                  </a>
+                  </div>
                 </Link>
                 <a 
                   href="/api/logout" 
