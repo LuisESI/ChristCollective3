@@ -1,3 +1,5 @@
+import { LogoSvg } from './LogoSvg';
+
 interface LogoProps {
   className?: string;
   dark?: boolean;
@@ -6,11 +8,7 @@ interface LogoProps {
 export function Logo({ className = "", dark = false }: LogoProps) {
   return (
     <div className={`${className}`}>
-      <img 
-        src="/logo.png"
-        alt="Christ Collective" 
-        className="h-10" 
-      />
+      <LogoSvg className="h-10 w-auto" />
     </div>
   );
 }
