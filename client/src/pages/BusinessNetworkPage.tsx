@@ -227,11 +227,11 @@ export default function BusinessNetworkPage() {
                           )}
                           <div>
                             <h3 className="font-semibold">{profile.companyName}</h3>
-                            <p className="text-sm text-gray-500">{profile.industry}</p>
+                            <p className="text-sm text-gray-300">{profile.industry}</p>
                           </div>
                         </div>
                         
-                        <p className="text-gray-600 mb-4 line-clamp-3">
+                        <p className="text-gray-200 mb-4 line-clamp-3">
                           {profile.description}
                         </p>
                         
