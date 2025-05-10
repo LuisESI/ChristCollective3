@@ -67,8 +67,8 @@ export default function DonationsPage() {
       <section className="py-16 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Support Our Causes</h1>
-            <p className="text-lg text-gray-600">
+            <h1 className="text-4xl font-bold mb-4 text-white">Support Our Causes</h1>
+            <p className="text-lg text-gray-300">
               Browse our collection of charitable campaigns and support the causes that align with your values.
             </p>
           </div>
