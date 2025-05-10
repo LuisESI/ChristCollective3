@@ -30,9 +30,9 @@ export default function DonationSection() {
   });
 
   // Fetch featured campaigns
-  const { data: campaigns = [], isLoading } = useQuery({
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
     queryKey: ["/api/campaigns"],
-    select: (data) => data.slice(0, 2), // Only take first 2 for featured section
+    select: (data: Campaign[]) => data.slice(0, 2), // Only take first 2 for featured section
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -131,7 +131,7 @@ export default function DonationSection() {
                       </div>
                       <Button asChild className="w-full" variant="default">
                         <Link href={`/donate/checkout/${campaign.id}`}>
-                          <a>Donate Now</a>
+                          <span>Donate Now</span>
                         </Link>
                       </Button>
                     </CardContent>
@@ -146,9 +146,9 @@ export default function DonationSection() {
             
             <div className="text-center mt-8">
               <Link href="/donate">
-                <a className="inline-block text-primary hover:text-primary/80 font-medium transition-colors">
+                <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
                   View All Campaigns <span className="ml-2">→</span>
-                </a>
+                </span>
               </Link>
             </div>
           </div>
