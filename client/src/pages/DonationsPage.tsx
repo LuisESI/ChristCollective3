@@ -88,10 +88,10 @@ export default function DonationsPage() {
             <Button asChild variant="default" className="w-full md:w-auto">
               {isAuthenticated ? (
                 <Link href="/campaigns/create">
-                  <a className="inline-flex items-center">
+                  <span className="inline-flex items-center cursor-pointer">
                     <Plus className="mr-2" size={16} />
                     Create New Campaign
-                  </a>
+                  </span>
                 </Link>
               ) : (
                 <a href="/api/login" className="inline-flex items-center">
@@ -134,9 +134,9 @@ export default function DonationsPage() {
                   <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-2">
                       <Link href={`/campaigns/${campaign.slug}`}>
-                        <a className="hover:text-primary transition-colors">
+                        <span className="hover:text-primary transition-colors cursor-pointer">
                           {campaign.title}
-                        </a>
+                        </span>
                       </Link>
                     </h3>
                     <p className="text-gray-600 mb-4">
@@ -154,12 +154,12 @@ export default function DonationsPage() {
                     <div className="flex space-x-2">
                       <Button asChild variant="default" className="flex-1">
                         <Link href={`/donate/checkout/${campaign.id}`}>
-                          <a>Donate Now</a>
+                          <span className="cursor-pointer">Donate Now</span>
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="flex-1">
                         <Link href={`/campaigns/${campaign.slug}`}>
-                          <a>View Details</a>
+                          <span className="cursor-pointer">View Details</span>
                         </Link>
                       </Button>
                     </div>
@@ -176,7 +176,7 @@ export default function DonationsPage() {
               <Button asChild variant="default">
                 {isAuthenticated ? (
                   <Link href="/campaigns/create">
-                    <a>Create a Campaign</a>
+                    <span className="cursor-pointer">Create a Campaign</span>
                   </Link>
                 ) : (
                   <a href="/api/login">Sign in to Create a Campaign</a>
