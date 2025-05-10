@@ -19,7 +19,7 @@ export default function HeroSection() {
             className="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-8 rounded-md transition-colors text-lg"
           >
             <Link href="/donate">
-              <a>Donate Now</a>
+              <span>Donate Now</span>
             </Link>
           </Button>
           <Button 
@@ -30,7 +30,7 @@ export default function HeroSection() {
           >
             {isAuthenticated ? (
               <Link href="/profile">
-                <a>My Account</a>
+                <span>My Account</span>
               </Link>
             ) : (
               <a href="/api/login">Join Our Community</a>
