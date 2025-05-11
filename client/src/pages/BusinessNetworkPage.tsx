@@ -325,11 +325,11 @@ export default function BusinessNetworkPage() {
                         )}
                         
                         <div className="text-center mb-6">
-                          <h3 className="text-xl font-semibold mb-2">{tier.name}</h3>
-                          <div className="text-3xl font-bold mb-1">
+                          <h3 className="text-xl font-semibold mb-2 text-white">{tier.name}</h3>
+                          <div className="text-3xl font-bold mb-1 text-white">
                             ${tier.price}<span className="text-lg font-normal text-gray-400">/month</span>
                           </div>
-                          <p className="text-gray-500">{tier.description}</p>
+                          <p className="text-gray-300">{tier.description}</p>
                         </div>
                         
                         <ul className="space-y-3 mb-8">
@@ -338,7 +338,7 @@ export default function BusinessNetworkPage() {
                               <svg className="text-primary mt-1 mr-3 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
-                              <span className="text-gray-600">{feature}</span>
+                              <span className="text-gray-300">{feature}</span>
                             </li>
                           ))}
                         </ul>
