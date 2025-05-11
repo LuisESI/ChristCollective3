@@ -2,12 +2,12 @@ import { HandHelping, Heart, Handshake } from "lucide-react";
 
 export default function MissionSection() {
   return (
-    <section id="about" className="py-16 bg-gray-50">
+    <section id="about" className="py-16 bg-gray-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Mission</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Our Mission</h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
-          <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
             Christ Collective exists to unite Christians from all denominations worldwide, fostering community, charity, and business relationships grounded in shared faith.
           </p>
         </div>
