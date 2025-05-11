@@ -70,7 +70,7 @@ export default function CampaignDetailsPage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Campaign Not Found</h1>
-          <p className="text-gray-600 mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-300 mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
           <Button asChild>
             <Link href="/donate">
               <a>Browse Campaigns</a>
@@ -91,6 +91,7 @@ export default function CampaignDetailsPage() {
         <meta property="og:type" content="website" />
       </Helmet>
       
+      <div className="bg-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <Link href="/donate">
@@ -263,6 +264,7 @@ export default function CampaignDetailsPage() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </>
   );
