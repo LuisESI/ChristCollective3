@@ -103,7 +103,7 @@ export default function DonationSection() {
             ) : campaigns.length > 0 ? (
               <div className="space-y-6">
                 {campaigns.map((campaign: Campaign) => (
-                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow bg-gray-800 border-gray-700">
                     {campaign.image ? (
                       <img 
                         src={campaign.image} 
@@ -116,15 +116,15 @@ export default function DonationSection() {
                       </div>
                     )}
                     <CardContent className="p-6">
-                      <h4 className="text-xl font-semibold mb-2">{campaign.title}</h4>
-                      <p className="text-gray-600 mb-4">
+                      <h4 className="text-xl font-semibold mb-2 text-white">{campaign.title}</h4>
+                      <p className="text-gray-200 mb-4">
                         {campaign.description.length > 100
                           ? campaign.description.substring(0, 100) + '...'
                           : campaign.description}
                       </p>
                       <div className="mb-4">
                         <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                        <div className="flex justify-between mt-2 text-sm text-gray-600">
+                        <div className="flex justify-between mt-2 text-sm text-gray-300">
                           <span>{formatCurrency(campaign.currentAmount)} raised</span>
                           <span>{formatCurrency(campaign.goal)} goal</span>
                         </div>
@@ -140,7 +140,7 @@ export default function DonationSection() {
               </div>
             ) : (
               <Card className="p-6 text-center">
-                <p className="text-gray-500">No campaigns found.</p>
+                <p className="text-gray-300">No campaigns found.</p>
               </Card>
             )}
             
@@ -161,7 +161,7 @@ export default function DonationSection() {
             
             <form onSubmit={handleCreateCampaign} className="space-y-6">
               <div>
-                <label htmlFor="title" className="block text-gray-700 font-medium mb-2">Campaign Title</label>
+                <label htmlFor="title" className="block text-white font-medium mb-2">Campaign Title</label>
                 <Input
                   id="title"
                   name="title"
@@ -172,9 +172,9 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="goal" className="block text-gray-700 font-medium mb-2">Fundraising Goal</label>
+                <label htmlFor="goal" className="block text-white font-medium mb-2">Fundraising Goal</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-300">
                     $
                   </span>
                   <Input
