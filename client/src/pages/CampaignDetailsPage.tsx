@@ -91,16 +91,16 @@ export default function CampaignDetailsPage() {
         <meta property="og:type" content="website" />
       </Helmet>
       
-      <div className="bg-gray-900">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/donate">
-            <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6">
-              ← Back to All Campaigns
-            </a>
-          </Link>
-          
-          <h1 className="text-3xl md:text-4xl font-bold mb-6">{campaign.title}</h1>
+      <section className="bg-gray-900">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <Link href="/donate">
+              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6">
+                ← Back to All Campaigns
+              </a>
+            </Link>
+            
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-white">{campaign.title}</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div className="md:col-span-2">
@@ -117,8 +117,8 @@ export default function CampaignDetailsPage() {
               )}
               
               <div className="prose max-w-none">
-                <h2 className="text-2xl font-semibold mb-4">About this campaign</h2>
-                <p className="whitespace-pre-line">{campaign.description}</p>
+                <h2 className="text-2xl font-semibold mb-4 text-white">About this campaign</h2>
+                <p className="whitespace-pre-line text-gray-200">{campaign.description}</p>
               </div>
             </div>
             
@@ -242,7 +242,7 @@ export default function CampaignDetailsPage() {
                               : "Generous Donor")}
                         </h3>
                         {donation.message && (
-                          <p className="text-sm text-gray-500">{donation.message}</p>
+                          <p className="text-sm text-gray-300">{donation.message}</p>
                         )}
                       </div>
                       <div className="font-medium">{formatCurrency(donation.amount)}</div>
@@ -253,7 +253,7 @@ export default function CampaignDetailsPage() {
             ) : (
               <Card>
                 <CardContent className="p-6 text-center">
-                  <p className="text-gray-500 mb-4">No donations yet. Be the first to contribute!</p>
+                  <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
                   <Button asChild>
                     <Link href={`/donate/checkout/${campaign.id}`}>
                       <a>Make a Donation</a>
@@ -265,7 +265,7 @@ export default function CampaignDetailsPage() {
           </div>
         </div>
       </div>
-      </div>
+      </section>
     </>
   );
 }
