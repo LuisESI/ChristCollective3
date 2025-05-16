@@ -154,14 +154,14 @@ export default function DonationSection() {
           </div>
           
           <div className="bg-gray-50 rounded-xl p-8">
-            <h3 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Start Your Own Campaign</h3>
-            <p className="text-gray-800 dark:text-gray-300 mb-6">
+            <h3 className="text-2xl font-semibold mb-6 text-gray-800">Start Your Own Campaign</h3>
+            <p className="text-gray-700 mb-6">
               Creating a fundraising campaign is simple. Share your story, set a goal, and start receiving support from our community.
             </p>
             
             <form onSubmit={handleCreateCampaign} className="space-y-6">
               <div>
-                <label htmlFor="title" className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Title</label>
+                <label htmlFor="title" className="block text-gray-700 font-medium mb-2">Campaign Title</label>
                 <Input
                   id="title"
                   name="title"
