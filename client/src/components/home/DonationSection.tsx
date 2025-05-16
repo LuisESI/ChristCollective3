@@ -154,14 +154,14 @@ export default function DonationSection() {
           </div>
           
           <div className="bg-gray-50 rounded-xl p-8">
-            <h3 className="text-2xl font-semibold mb-6 text-black dark:text-white">Start Your Own Campaign</h3>
+            <h3 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Start Your Own Campaign</h3>
             <p className="text-gray-800 dark:text-gray-300 mb-6">
               Creating a fundraising campaign is simple. Share your story, set a goal, and start receiving support from our community.
             </p>
             
             <form onSubmit={handleCreateCampaign} className="space-y-6">
               <div>
-                <label htmlFor="title" className="block text-black dark:text-white font-medium mb-2">Campaign Title</label>
+                <label htmlFor="title" className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Title</label>
                 <Input
                   id="title"
                   name="title"
@@ -172,7 +172,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="goal" className="block text-black dark:text-white font-medium mb-2">Fundraising Goal</label>
+                <label htmlFor="goal" className="block text-gray-900 dark:text-white font-medium mb-2">Fundraising Goal</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-300">
                     $
@@ -190,7 +190,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="description" className="block text-black dark:text-white font-medium mb-2">Campaign Description</label>
+                <label htmlFor="description" className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Description</label>
                 <Textarea
                   id="description"
                   name="description"
@@ -202,7 +202,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label className="block text-black dark:text-white font-medium mb-2">Campaign Image</label>
+                <label className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Image</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                   <ImageIcon className="mx-auto text-gray-400 text-3xl mb-3" size={32} />
                   <p className="text-gray-800 dark:text-gray-300 mb-2">
