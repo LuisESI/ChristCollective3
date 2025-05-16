@@ -99,6 +99,8 @@ export const campaigns = pgTable("campaigns", {
   goal: decimal("goal", { precision: 10, scale: 2 }).notNull(),
   currentAmount: decimal("current_amount", { precision: 10, scale: 2 }).default("0"),
   image: varchar("image"),
+  additionalImages: text("additional_images").array(),
+  video: varchar("video"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
