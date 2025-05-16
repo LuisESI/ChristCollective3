@@ -12,19 +12,19 @@ interface Testimonial {
 export default function TestimonialsSection() {
   const testimonials: Testimonial[] = [
     {
-      name: "James Anderson",
-      role: "Anderson Kingdom Solutions",
+      name: "Michael Thompson",
+      role: "Thompson Consulting, LLC",
       content: "Christ Collective has transformed my business by connecting me with like-minded entrepreneurs who share my values. The networking events and resources have been invaluable.",
       rating: 5
     },
     {
-      name: "Rachel Martinez",
+      name: "Sarah Johnson",
       role: "Grace Community Church",
       content: "The donation platform made it easy for our church to raise funds for our mission trip. The support from the community was overwhelming and we exceeded our goal within weeks.",
       rating: 5
     },
     {
-      name: "Marcus Williams",
+      name: "David Rodriguez",
       role: "Faithful Foundations",
       content: "Being part of Christ Collective has been a blessing. I've met incredible people from different denominations and backgrounds, all united by our shared faith and commitment to service.",
       rating: 4.5
