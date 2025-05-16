@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: 220 20% 10%;
-  --foreground: 0 0% 98%;
-  --muted: 220 20% 15%;
-  --muted-foreground: 0 0% 80%;
-  --popover: 220 20% 10%;
-  --popover-foreground: 0 0% 98%;
-  --card: 220 20% 12%;
-  --card-foreground: 0 0% 98%;
-  --border: 220 20% 20%;
-  --input: 220 20% 20%;
-  --primary: 43 90% 50%; /* Brighter Gold */
-  --primary-foreground: 220 20% 10%;
-  --secondary: 220 20% 15%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 43 90% 50%; /* Brighter Gold */
-  --accent-foreground: 220 20% 10%;
-  --destructive: 0 90% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --ring: 43 90% 50%; /* Brighter Gold */
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 90%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --primary: 45 100% 50%; /* Pure Gold */
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 45 100% 50%; /* Pure Gold */
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 45 100% 50%; /* Pure Gold */
   --radius: 0.5rem;
   --chart-1: 43 77% 53%;
   --chart-2: 0 0% 10%;
