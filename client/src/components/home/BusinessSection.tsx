@@ -67,7 +67,7 @@ export default function BusinessSection() {
   const tiers = membershipTiers.length > 0 ? membershipTiers : defaultTiers;
 
   return (
-    <section id="business" className="py-16 bg-[#121212] text-white">
+    <section id="business" className="py-16 bg-black text-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Business Network</h2>
