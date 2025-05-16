@@ -190,7 +190,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="description" className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Description</label>
+                <label htmlFor="description" className="block text-gray-900 dark:text-white font-medium mb-2">Ministry Vision</label>
                 <Textarea
                   id="description"
                   name="description"
@@ -202,7 +202,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label className="block text-gray-900 dark:text-white font-medium mb-2">Campaign Image</label>
+                <label className="block text-gray-900 dark:text-white font-medium mb-2">Vision Board</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                   <ImageIcon className="mx-auto text-gray-400 text-3xl mb-3" size={32} />
                   <p className="text-gray-800 dark:text-gray-300 mb-2">

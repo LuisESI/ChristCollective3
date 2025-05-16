@@ -17,7 +17,7 @@ export default function MissionSection() {
             <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
               <HandHelping className="text-primary text-2xl" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Community Service</h3>
+            <h3 className="text-xl font-semibold mb-3">Faith-Based Support</h3>
             <p className="text-gray-600">Supporting each other through challenging times and celebrating our shared faith through service.</p>
           </div>
 
@@ -25,7 +25,7 @@ export default function MissionSection() {
             <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Heart className="text-primary text-2xl" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Charitable Giving</h3>
+            <h3 className="text-xl font-semibold mb-3">Kingdom Impact</h3>
             <p className="text-gray-600">Creating and supporting meaningful charitable initiatives that reflect our Christian values.</p>
           </div>
 
@@ -33,7 +33,7 @@ export default function MissionSection() {
             <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Handshake className="text-primary text-2xl" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Business Networking</h3>
+            <h3 className="text-xl font-semibold mb-3">Christian Commerce</h3>
             <p className="text-gray-600">Connecting Christian business owners to build relationships that honor our faith and values.</p>
           </div>
         </div>
