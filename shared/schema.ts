@@ -43,11 +43,7 @@ export const users = pgTable("users", {
   phone: varchar("phone"),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
-  businessProfiles: many(businessProfiles),
-  campaigns: many(campaigns),
-  donations: many(donations),
-}));
+// Note: User relations are defined at the bottom of this file after all tables
 
 // Membership tiers
 export const membershipTiers = pgTable("membership_tiers", {
@@ -165,3 +161,85 @@ export type InsertBusinessProfile = z.infer<typeof insertBusinessProfileSchema>;
 export type BusinessProfile = typeof businessProfiles.$inferSelect;
 
 export type MembershipTier = typeof membershipTiers.$inferSelect;
+
+// Content creators
+export const contentCreators = pgTable("content_creators", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  platform: varchar("platform").notNull(), // YouTube, Instagram, TikTok, etc.
+  profileUrl: varchar("profile_url").notNull(),
+  content: text("content").notNull(), // Type of content they create
+  audience: varchar("audience"), // Target audience
+  subscriberCount: integer("subscriber_count"),
+  bio: text("bio"),
+  isSponsored: boolean("is_sponsored").default(false),
+  sponsorshipStartDate: timestamp("sponsorship_start_date"),
+  sponsorshipEndDate: timestamp("sponsorship_end_date"),
+  sponsorshipAmount: varchar("sponsorship_amount"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Sponsorship applications
+export const sponsorshipApplications = pgTable("sponsorship_applications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  platform: varchar("platform").notNull(),
+  profileUrl: varchar("profile_url").notNull(),
+  content: text("content").notNull(),
+  audience: varchar("audience"),
+  subscriberCount: integer("subscriber_count"),
+  message: text("message"),
+  status: varchar("status").default("pending").notNull(), // pending, approved, rejected
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations
+export const contentCreatorsRelations = relations(contentCreators, ({ one }) => ({
+  user: one(users, {
+    fields: [contentCreators.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sponsorshipApplicationsRelations = relations(sponsorshipApplications, ({ one }) => ({
+  user: one(users, {
+    fields: [sponsorshipApplications.userId],
+    references: [users.id],
+  }),
+}));
+
+// Add relations to users
+export const usersRelations = relations(users, ({ many, one }) => ({
+  campaigns: many(campaigns),
+  businessProfile: one(businessProfiles, {
+    fields: [users.id],
+    references: [businessProfiles.userId],
+  }),
+  contentCreator: one(contentCreators, {
+    fields: [users.id],
+    references: [contentCreators.userId],
+  }),
+  sponsorshipApplications: many(sponsorshipApplications),
+}));
+
+// Schema for creating content creators
+export const insertContentCreatorSchema = createInsertSchema(contentCreators)
+  .omit({ id: true, userId: true, isSponsored: true, sponsorshipStartDate: true, 
+    sponsorshipEndDate: true, sponsorshipAmount: true, createdAt: true, updatedAt: true });
+
+// Schema for creating sponsorship applications
+export const insertSponsorshipApplicationSchema = createInsertSchema(sponsorshipApplications)
+  .omit({ id: true, userId: true, status: true, reviewedAt: true, createdAt: true, updatedAt: true });
+
+// Types
+export type InsertContentCreator = z.infer<typeof insertContentCreatorSchema>;
+export type ContentCreator = typeof contentCreators.$inferSelect;
+
+export type InsertSponsorshipApplication = z.infer<typeof insertSponsorshipApplicationSchema>;
+export type SponsorshipApplication = typeof sponsorshipApplications.$inferSelect;

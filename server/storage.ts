@@ -4,6 +4,8 @@ import {
   donations,
   businessProfiles,
   membershipTiers,
+  contentCreators,
+  sponsorshipApplications,
   type User,
   type UpsertUser,
   type Campaign,
@@ -13,6 +15,10 @@ import {
   type BusinessProfile,
   type InsertBusinessProfile,
   type MembershipTier,
+  type ContentCreator,
+  type InsertContentCreator,
+  type SponsorshipApplication,
+  type InsertSponsorshipApplication,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like } from "drizzle-orm";
@@ -54,6 +60,20 @@ export interface IStorage {
   getMembershipTier(id: number): Promise<MembershipTier | undefined>;
   listMembershipTiers(): Promise<MembershipTier[]>;
   updateBusinessProfileSubscription(id: number, subscriptionId: string): Promise<BusinessProfile>;
+  
+  // Content creator operations
+  createContentCreator(creatorData: InsertContentCreator & { userId: string }): Promise<ContentCreator>;
+  getContentCreator(id: number): Promise<ContentCreator | undefined>;
+  getUserContentCreator(userId: string): Promise<ContentCreator | undefined>;
+  updateContentCreator(id: number, data: Partial<ContentCreator>): Promise<ContentCreator>;
+  listContentCreators(sponsoredOnly?: boolean): Promise<ContentCreator[]>;
+  
+  // Sponsorship application operations
+  createSponsorshipApplication(applicationData: InsertSponsorshipApplication & { userId: string }): Promise<SponsorshipApplication>;
+  getSponsorshipApplication(id: number): Promise<SponsorshipApplication | undefined>;
+  getUserSponsorshipApplications(userId: string): Promise<SponsorshipApplication[]>;
+  listSponsorshipApplications(status?: string): Promise<SponsorshipApplication[]>;
+  updateSponsorshipApplication(id: number, data: Partial<SponsorshipApplication>): Promise<SponsorshipApplication>;
 }
 
 export class DatabaseStorage implements IStorage {
