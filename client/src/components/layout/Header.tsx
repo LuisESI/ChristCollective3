@@ -43,7 +43,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
             <Link key={item.path} href={item.path}>
-              <div className="text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
+              <div className="text-black hover:text-primary transition-colors font-medium cursor-pointer">
                 {item.name}
               </div>
             </Link>
