@@ -172,7 +172,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="goal" className="block text-gray-900 dark:text-white font-medium mb-2">Fundraising Goal</label>
+                <label htmlFor="goal" className="block text-gray-700 font-medium mb-2">Fundraising Goal</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-300">
                     $

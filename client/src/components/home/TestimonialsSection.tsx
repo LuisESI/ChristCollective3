@@ -35,11 +35,11 @@ export default function TestimonialsSection() {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<Star key={`full-${i}`} className="fill-primary text-primary" size={18} />);
     }
-    
+
     if (hasHalfStar) {
       stars.push(
         <div key="half" className="relative">
@@ -50,12 +50,12 @@ export default function TestimonialsSection() {
         </div>
       );
     }
-    
+
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
       stars.push(<Star key={`empty-${i}`} className="text-gray-300" size={18} />);
     }
-    
+
     return stars;
   };
 
@@ -66,7 +66,7 @@ export default function TestimonialsSection() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">What Our Community Says</h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
