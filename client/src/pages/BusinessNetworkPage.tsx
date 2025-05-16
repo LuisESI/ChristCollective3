@@ -149,7 +149,7 @@ export default function BusinessNetworkPage() {
               <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div className="w-full md:w-auto flex flex-1 gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 dark:text-gray-400" size={18} />
                     <Input
                       type="text"
                       placeholder="Search businesses..."

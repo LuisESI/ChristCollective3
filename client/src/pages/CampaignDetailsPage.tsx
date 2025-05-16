@@ -292,7 +292,7 @@ export default function CampaignDetailsPage() {
                         ? `${campaign.user.firstName} ${campaign.user.lastName || ''}`
                         : "Campaign Creator"}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
                       {campaign.user?.location || "Christ Collective Member"}
                     </p>
                   </div>

@@ -155,7 +155,7 @@ export default function DonationSection() {
           
           <div className="bg-gray-50 rounded-xl p-8">
             <h3 className="text-2xl font-semibold mb-6 text-black dark:text-white">Start Your Own Campaign</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-800 dark:text-gray-300 mb-6">
               Creating a fundraising campaign is simple. Share your story, set a goal, and start receiving support from our community.
             </p>
             
@@ -205,10 +205,10 @@ export default function DonationSection() {
                 <label className="block text-black dark:text-white font-medium mb-2">Campaign Image</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                   <ImageIcon className="mx-auto text-gray-400 text-3xl mb-3" size={32} />
-                  <p className="text-gray-500 dark:text-gray-300 mb-2">
+                  <p className="text-gray-800 dark:text-gray-300 mb-2">
                     Drag and drop an image here, or click to select a file
                   </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-300">Recommended size: 1200 x 675 pixels</p>
+                  <p className="text-xs text-gray-800 dark:text-gray-300">Recommended size: 1200 x 675 pixels</p>
                   <input type="file" className="hidden" />
                   <Button type="button" variant="outline" className="mt-4">
                     Select Image
