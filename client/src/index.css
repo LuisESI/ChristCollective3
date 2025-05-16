@@ -84,7 +84,7 @@
 }
 
 .hero-section {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://pixabay.com/get/ga02b284ae01eed3203e88af8e26dde9069e5c9de07c2fe910581fcab4759ecef9ac89b258ce3bbce64b01d373b32826ab8eaddc88b66238734fe0bd2aef977e5_1280.jpg');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1545424273-4321e21b1e13?q=80&w=1920&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
 }
