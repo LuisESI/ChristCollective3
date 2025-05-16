@@ -143,7 +143,7 @@ export default function CreateCampaignPage() {
       const response = await apiRequest("POST", "/api/campaigns", {
         title: values.title,
         description: values.description,
-        goal: parseFloat(values.goal),
+        goal: values.goal, // Pass as string, not parseFloat
         image: imageUrl,
         endDate: values.endDate ? new Date(values.endDate).toISOString() : undefined,
       });
