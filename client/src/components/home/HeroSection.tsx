@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import mountainBackground from "../../assets/mountain-cross-background.jpg";
 
 export default function HeroSection() {
   const { isAuthenticated } = useAuth();
@@ -9,7 +10,7 @@ export default function HeroSection() {
     <section 
       className="h-[600px] flex items-center justify-center relative bg-cover bg-center"
       style={{ 
-        backgroundImage: 'url("/images/mountain-cross-background.jpg")',
+        backgroundImage: `url(${mountainBackground})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
