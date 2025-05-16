@@ -19,6 +19,7 @@ import { CalendarDays, Share2, Heart, Users, ImageIcon, PlayIcon, X } from "luci
 import { format } from "date-fns";
 import { Helmet } from "react-helmet";
 import { useState } from "react";
+import type { Campaign, Donation } from "@shared/schema";
 import {
   Dialog,
   DialogContent,
@@ -31,13 +32,13 @@ export default function CampaignDetailsPage() {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
 
-  const { data: campaign, isLoading: isLoadingCampaign } = useQuery({
+  const { data: campaign = {}, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${slug}`],
   });
 
-  const { data: donations = [], isLoading: isLoadingDonations } = useQuery({
-    queryKey: [campaign?.id ? `/api/campaigns/${campaign.id}/donations` : null],
-    enabled: !!campaign?.id,
+  const { data: donations = [], isLoading: isLoadingDonations } = useQuery<Donation[]>({
+    queryKey: [campaign && 'id' in campaign ? `/api/campaigns/${campaign.id}/donations` : null],
+    enabled: !!(campaign && 'id' in campaign),
   });
 
   function calculateProgress(current: string, goal: string): number {

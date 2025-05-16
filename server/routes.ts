@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Update campaign amount
       await storage.updateDonationAmount(
-        donationData.campaignId,
+        donationData.campaignId || '',
         parseFloat(donationData.amount.toString())
       );
       
@@ -492,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{
-          price: tier.stripePriceId,
+          price: tier.stripePriceId === null ? undefined : tier.stripePriceId,
         }],
         payment_behavior: 'default_incomplete',
         expand: ['latest_invoice.payment_intent'],
