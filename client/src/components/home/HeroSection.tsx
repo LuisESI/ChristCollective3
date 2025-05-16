@@ -30,7 +30,7 @@ export default function HeroSection() {
           >
             {isAuthenticated ? (
               <Link href="/profile">
-                <span>My Account</span>
+                <span className="text-black">My Account</span>
               </Link>
             ) : (
               <a href="/api/login">Join Our Community</a>
