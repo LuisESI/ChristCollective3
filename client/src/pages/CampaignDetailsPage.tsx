@@ -32,7 +32,7 @@ export default function CampaignDetailsPage() {
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
 
-  const { data: campaign = {}, isLoading: isLoadingCampaign } = useQuery<Campaign>({
+  const { data: campaign = {} as Campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${slug}`],
   });
 
@@ -105,7 +105,7 @@ export default function CampaignDetailsPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link href="/donate">
-              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6">
+              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6 font-medium">
                 ← Back to All Campaigns
               </a>
             </Link>
@@ -227,10 +227,10 @@ export default function CampaignDetailsPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-2xl text-black dark:text-white">
                     {formatCurrency(campaign.currentAmount)}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-700 dark:text-gray-300">
                     raised of {formatCurrency(campaign.goal)} goal
                   </CardDescription>
                 </CardHeader>
@@ -240,7 +240,7 @@ export default function CampaignDetailsPage() {
                     className="h-2.5 mb-4" 
                   />
                   
-                  <div className="flex justify-between text-sm text-gray-500 mb-6">
+                  <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300 mb-6">
                     <div className="flex items-center">
                       <Users className="mr-1" size={16} />
                       <span>{donations.length} donors</span>
@@ -248,7 +248,7 @@ export default function CampaignDetailsPage() {
                     <div className="flex items-center">
                       <CalendarDays className="mr-1" size={16} />
                       <span>
-                        {format(new Date(campaign.createdAt), "MMM d, yyyy")}
+                        {campaign.createdAt ? format(new Date(campaign.createdAt), "MMM d, yyyy") : ""}
                       </span>
                     </div>
                   </div>
