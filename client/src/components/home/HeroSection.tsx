@@ -19,7 +19,7 @@ export default function HeroSection() {
             className="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-8 rounded-md transition-colors text-lg"
           >
             <Link href="/donate">
-              <span>Donate Now</span>
+              <span className="text-black">Donate Now</span>
             </Link>
           </Button>
           <Button 
