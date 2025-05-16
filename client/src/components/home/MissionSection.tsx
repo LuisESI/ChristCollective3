@@ -2,7 +2,7 @@ import { HandHelping, Heart, Handshake } from "lucide-react";
 
 export default function MissionSection() {
   return (
-    <section id="about" className="py-16 bg-gray-900">
+    <section id="about" className="py-16 bg-black">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Our Mission</h2>
