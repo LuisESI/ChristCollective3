@@ -15,12 +15,21 @@ import {
   AvatarImage 
 } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Share2, Heart, Users, ImageIcon } from "lucide-react";
+import { CalendarDays, Share2, Heart, Users, ImageIcon, PlayIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog";
 
 export default function CampaignDetailsPage() {
   const { slug } = useParams();
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
 
   const { data: campaign, isLoading: isLoadingCampaign } = useQuery({
     queryKey: [`/api/campaigns/${slug}`],
@@ -104,17 +113,109 @@ export default function CampaignDetailsPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div className="md:col-span-2">
-              {campaign.image ? (
-                <img 
-                  src={campaign.image} 
-                  alt={campaign.title} 
-                  className="w-full h-auto rounded-lg mb-6"
-                />
-              ) : (
-                <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center mb-6">
-                  <ImageIcon size={64} className="text-gray-400" />
-                </div>
-              )}
+              {/* Main media display (image or video) */}
+              <div className="mb-4">
+                {campaign.image ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className="cursor-pointer relative">
+                        <img 
+                          src={selectedMedia || campaign.image} 
+                          alt={campaign.title} 
+                          className="w-full h-auto rounded-lg object-cover aspect-video"
+                        />
+                        {mediaType === 'video' && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                            <PlayIcon size={64} className="text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-4xl bg-gray-900 border-gray-800">
+                      <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                        <X className="h-4 w-4 text-white" />
+                        <span className="sr-only">Close</span>
+                      </DialogClose>
+                      {mediaType === 'image' ? (
+                        <img 
+                          src={selectedMedia || campaign.image} 
+                          alt={campaign.title} 
+                          className="w-full h-auto max-h-[80vh] object-contain"
+                        />
+                      ) : (
+                        <video
+                          src={selectedMedia || campaign.video}
+                          controls
+                          className="w-full h-auto max-h-[80vh]"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center mb-6">
+                    <ImageIcon size={64} className="text-gray-400" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Media gallery (additional images and video) */}
+              <div className="grid grid-cols-6 gap-2 mb-6">
+                {/* Main image thumbnail */}
+                {campaign.image && (
+                  <div 
+                    className={`relative rounded-md overflow-hidden cursor-pointer aspect-square ${selectedMedia === campaign.image || (!selectedMedia && mediaType === 'image') ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => {
+                      setSelectedMedia(campaign.image);
+                      setMediaType('image');
+                    }}
+                  >
+                    <img 
+                      src={campaign.image} 
+                      alt={`${campaign.title} - main`} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Additional images thumbnails */}
+                {campaign.additionalImages && campaign.additionalImages.length > 0 && campaign.additionalImages.map((img: string, idx: number) => (
+                  <div 
+                    key={`img-${idx}`}
+                    className={`relative rounded-md overflow-hidden cursor-pointer aspect-square ${selectedMedia === img ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => {
+                      setSelectedMedia(img);
+                      setMediaType('image');
+                    }}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`${campaign.title} - ${idx + 1}`} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+                
+                {/* Video thumbnail (if available) */}
+                {campaign.video && (
+                  <div 
+                    className={`relative rounded-md overflow-hidden cursor-pointer aspect-square ${mediaType === 'video' ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => {
+                      setSelectedMedia(campaign.video);
+                      setMediaType('video');
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                      <PlayIcon className="text-gray-400" size={24} />
+                    </div>
+                    <div className="absolute inset-0 bg-black/30"></div>
+                    <div className="absolute bottom-1 right-1 bg-primary text-primary-foreground text-xs p-1 rounded">
+                      Video
+                    </div>
+                  </div>
+                )}
+              </div>
               
               <div className="prose max-w-none">
                 <h2 className="text-2xl font-semibold mb-4 text-white">About this campaign</h2>

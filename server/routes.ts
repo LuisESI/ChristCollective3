@@ -45,8 +45,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
+    // Accept image and video files
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
       cb(null, false);
@@ -57,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     storage: multerStorage,
     fileFilter,
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB file size limit
+      fileSize: 50 * 1024 * 1024, // 50MB file size limit for videos
     } 
   });
   
@@ -76,25 +76,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // File upload route
-  app.post('/api/upload', isAuthenticated, upload.single('image'), async (req: any, res) => {
+  // File upload route - supports both images and videos
+  app.post('/api/upload', isAuthenticated, (req, res, next) => {
+    // Create a fields configuration that accepts both 'image' and 'video' fields
+    const uploadFields = upload.fields([
+      { name: 'image', maxCount: 1 },
+      { name: 'video', maxCount: 1 }
+    ]);
+    
+    uploadFields(req, res, (err) => {
+      if (err) {
+        console.error("Upload error:", err);
+        return res.status(400).json({ message: err.message || "Error uploading file" });
+      }
+      next();
+    });
+  }, async (req: any, res) => {
     try {
-      if (!req.file) {
+      const files = req.files;
+      
+      if (!files || ((!files.image || files.image.length === 0) && (!files.video || files.video.length === 0))) {
         return res.status(400).json({ message: "No file uploaded" });
       }
       
+      // Determine which file was uploaded (image or video)
+      const file = files.image ? files.image[0] : files.video[0];
+      
       // Create a public URL for the uploaded file
       const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+      const fileUrl = `${baseUrl}/uploads/${file.filename}`;
       
       res.status(200).json({ 
         url: fileUrl,
-        filename: req.file.filename,
+        filename: file.filename,
+        fileType: files.image ? 'image' : 'video',
         success: true 
       });
     } catch (error) {
-      console.error("Error uploading file:", error);
-      res.status(500).json({ message: "Failed to upload file" });
+      console.error("Error processing uploaded file:", error);
+      res.status(500).json({ message: "Failed to process uploaded file" });
     }
   });
 
