@@ -1,4 +1,4 @@
-import type { Express, RequestHandler } from "express";
+import type { Express, RequestHandler, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -6,6 +6,10 @@ import { z } from "zod";
 import { insertCampaignSchema, insertDonationSchema, insertBusinessProfileSchema } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
@@ -23,6 +27,40 @@ try {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up uploads directory if it doesn't exist
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  
+  // Configure multer for file uploads
+  const multerStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+      cb(null, uniqueName);
+    }
+  });
+  
+  const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  };
+  
+  const upload = multer({ 
+    storage: multerStorage,
+    fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB file size limit
+    } 
+  });
+  
   // Auth middleware
   await setupAuth(app);
 
@@ -35,6 +73,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+  
+  // File upload route
+  app.post('/api/upload', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      // Create a public URL for the uploaded file
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+      
+      res.status(200).json({ 
+        url: fileUrl,
+        filename: req.file.filename,
+        success: true 
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
