@@ -15,6 +15,8 @@ import BusinessNetworkPage from "@/pages/BusinessNetworkPage";
 import MembershipCheckoutPage from "@/pages/MembershipCheckoutPage";
 import DonateCheckoutPage from "@/pages/DonateCheckoutPage";
 import ProfilePage from "@/pages/ProfilePage";
+import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
+import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
 
 function Router() {
   return (
@@ -27,6 +29,8 @@ function Router() {
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/donate/checkout/:campaignId" component={DonateCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
+      <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route component={NotFound} />
     </Switch>
   );

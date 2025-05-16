@@ -293,6 +293,99 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedProfile;
   }
+  
+  // Content creator operations
+  async createContentCreator(creatorData: InsertContentCreator & { userId: string }): Promise<ContentCreator> {
+    const [creator] = await db
+      .insert(contentCreators)
+      .values(creatorData)
+      .returning();
+    return creator;
+  }
+
+  async getContentCreator(id: number): Promise<ContentCreator | undefined> {
+    const [creator] = await db
+      .select()
+      .from(contentCreators)
+      .where(eq(contentCreators.id, id));
+    return creator;
+  }
+
+  async getUserContentCreator(userId: string): Promise<ContentCreator | undefined> {
+    const [creator] = await db
+      .select()
+      .from(contentCreators)
+      .where(eq(contentCreators.userId, userId));
+    return creator;
+  }
+
+  async updateContentCreator(id: number, data: Partial<ContentCreator>): Promise<ContentCreator> {
+    const [creator] = await db
+      .update(contentCreators)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(contentCreators.id, id))
+      .returning();
+    return creator;
+  }
+
+  async listContentCreators(sponsoredOnly = false): Promise<ContentCreator[]> {
+    let query = db.select().from(contentCreators);
+    
+    if (sponsoredOnly) {
+      query = query.where(eq(contentCreators.isSponsored, true));
+    }
+    
+    return await query.orderBy(desc(contentCreators.createdAt));
+  }
+
+  // Sponsorship application operations
+  async createSponsorshipApplication(applicationData: InsertSponsorshipApplication & { userId: string }): Promise<SponsorshipApplication> {
+    const [application] = await db
+      .insert(sponsorshipApplications)
+      .values(applicationData)
+      .returning();
+    return application;
+  }
+
+  async getSponsorshipApplication(id: number): Promise<SponsorshipApplication | undefined> {
+    const [application] = await db
+      .select()
+      .from(sponsorshipApplications)
+      .where(eq(sponsorshipApplications.id, id));
+    return application;
+  }
+
+  async getUserSponsorshipApplications(userId: string): Promise<SponsorshipApplication[]> {
+    return await db
+      .select()
+      .from(sponsorshipApplications)
+      .where(eq(sponsorshipApplications.userId, userId));
+  }
+
+  async listSponsorshipApplications(status?: string): Promise<SponsorshipApplication[]> {
+    let query = db.select().from(sponsorshipApplications);
+    
+    if (status) {
+      query = query.where(eq(sponsorshipApplications.status, status));
+    }
+    
+    return await query.orderBy(desc(sponsorshipApplications.createdAt));
+  }
+
+  async updateSponsorshipApplication(id: number, data: Partial<SponsorshipApplication>): Promise<SponsorshipApplication> {
+    const [application] = await db
+      .update(sponsorshipApplications)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(sponsorshipApplications.id, id))
+      .returning();
+    return application;
+  }
 }
 
 export const storage = new DatabaseStorage();
