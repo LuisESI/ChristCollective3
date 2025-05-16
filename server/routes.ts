@@ -3,7 +3,13 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
-import { insertCampaignSchema, insertDonationSchema, insertBusinessProfileSchema } from "@shared/schema";
+import { 
+  insertCampaignSchema, 
+  insertDonationSchema, 
+  insertBusinessProfileSchema,
+  insertContentCreatorSchema,
+  insertSponsorshipApplicationSchema
+} from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
 import multer from "multer";
@@ -511,6 +517,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating subscription:", error);
       res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  // Content Creator routes
+  app.get("/api/content-creators", async (req, res) => {
+    try {
+      const sponsoredOnly = req.query.sponsored === 'true';
+      const creators = await storage.listContentCreators(sponsoredOnly);
+      res.json(creators);
+    } catch (error) {
+      console.error("Error fetching content creators:", error);
+      res.status(500).json({ message: "Failed to fetch content creators" });
+    }
+  });
+  
+  app.get("/api/content-creators/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const creator = await storage.getContentCreator(id);
+      
+      if (!creator) {
+        return res.status(404).json({ message: "Content creator not found" });
+      }
+      
+      res.json(creator);
+    } catch (error) {
+      console.error("Error fetching content creator:", error);
+      res.status(500).json({ message: "Failed to fetch content creator" });
+    }
+  });
+  
+  app.get("/api/user/content-creator", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const creator = await storage.getUserContentCreator(userId);
+      res.json(creator || null);
+    } catch (error) {
+      console.error("Error fetching user's content creator profile:", error);
+      res.status(500).json({ message: "Failed to fetch content creator profile" });
+    }
+  });
+  
+  app.post("/api/content-creators", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user already has a content creator profile
+      const existingCreator = await storage.getUserContentCreator(userId);
+      if (existingCreator) {
+        return res.status(400).json({ message: "You already have a content creator profile" });
+      }
+      
+      const validatedData = insertContentCreatorSchema.parse(req.body);
+      const creator = await storage.createContentCreator({
+        ...validatedData,
+        userId
+      });
+      
+      res.status(201).json(creator);
+    } catch (error) {
+      console.error("Error creating content creator:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create content creator profile" });
+    }
+  });
+  
+  // Sponsorship Application routes
+  app.get("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const applications = await storage.getUserSponsorshipApplications(userId);
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching sponsorship applications:", error);
+      res.status(500).json({ message: "Failed to fetch sponsorship applications" });
+    }
+  });
+  
+  app.post("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user already has a pending application
+      const existingApplications = await storage.getUserSponsorshipApplications(userId);
+      const hasPendingApplication = existingApplications.some(app => app.status === "pending");
+      
+      if (hasPendingApplication) {
+        return res.status(400).json({ message: "You already have a pending sponsorship application" });
+      }
+      
+      const validatedData = insertSponsorshipApplicationSchema.parse(req.body);
+      const application = await storage.createSponsorshipApplication({
+        ...validatedData,
+        userId
+      });
+      
+      res.status(201).json(application);
+    } catch (error) {
+      console.error("Error creating sponsorship application:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to submit sponsorship application" });
     }
   });
 
