@@ -84,7 +84,7 @@
 }
 
 .hero-section {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1545424273-4321e21b1e13?q=80&w=1920&auto=format&fit=crop');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/attached_assets/mountain-majesty-artistic-silhouette-of-crucifix-cross-against-sunset-sky-photo.jpg');
   background-size: cover;
   background-position: center;
 }
