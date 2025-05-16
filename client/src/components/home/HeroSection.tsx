@@ -6,8 +6,16 @@ export default function HeroSection() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section className="hero-section h-[600px] flex items-center justify-center">
-      <div className="container mx-auto px-4 text-center text-white">
+    <section 
+      className="h-[600px] flex items-center justify-center relative bg-cover bg-center"
+      style={{ 
+        backgroundImage: 'url("/images/mountain-cross-background.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div className="container mx-auto px-4 text-center text-white relative z-10">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Uniting Christians Worldwide</h1>
         <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
           Join our global community dedicated to faith, service, and fellowship across all denominations.
