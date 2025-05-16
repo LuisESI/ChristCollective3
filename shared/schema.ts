@@ -146,7 +146,11 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 export const insertCampaignSchema = createInsertSchema(campaigns)
-  .omit({ id: true, userId: true, currentAmount: true, createdAt: true, updatedAt: true, slug: true });
+  .omit({ id: true, userId: true, currentAmount: true, createdAt: true, updatedAt: true, slug: true })
+  .extend({
+    additionalImages: z.array(z.string()).optional(),
+    video: z.string().optional()
+  });
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Campaign = typeof campaigns.$inferSelect;
 

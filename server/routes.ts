@@ -135,6 +135,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Ensure additionalImages is an array or set to empty array if undefined
+      if (req.body.additionalImages && !Array.isArray(req.body.additionalImages)) {
+        req.body.additionalImages = [req.body.additionalImages];
+      } else if (!req.body.additionalImages) {
+        req.body.additionalImages = [];
+      }
+      
+      // Generate a slug for the campaign
+      const slug = await generateSlug(req.body.title);
+      req.body.slug = slug;
+      
       const campaignData = insertCampaignSchema.parse(req.body);
       
       const campaign = await storage.createCampaign({

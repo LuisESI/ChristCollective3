@@ -275,7 +275,7 @@ export default function CreateCampaignPage() {
       let videoUrl = values.video;
       if (selectedVideo) {
         const formData = new FormData();
-        formData.append("video", selectedVideo);
+        formData.append("image", selectedVideo);
         
         const uploadResponse = await fetch("/api/upload", {
           method: "POST",
