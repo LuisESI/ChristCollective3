@@ -358,7 +358,7 @@ export default function CreateCampaignPage() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Campaign Title</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Campaign Title</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Give your campaign a clear title" 
@@ -378,7 +378,7 @@ export default function CreateCampaignPage() {
                     name="goal"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Fundraising Goal</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Fundraising Goal</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
@@ -407,7 +407,7 @@ export default function CreateCampaignPage() {
                     name="endDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End Date (Optional)</FormLabel>
+                        <FormLabel className="text-black dark:text-white">End Date (Optional)</FormLabel>
                         <FormControl>
                           <Input 
                             type="date"
@@ -427,7 +427,7 @@ export default function CreateCampaignPage() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Campaign Description</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Campaign Description</FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="Tell your story and explain the impact of donations"
@@ -448,7 +448,7 @@ export default function CreateCampaignPage() {
                     name="image"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Main Campaign Image</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Main Campaign Image</FormLabel>
                         <FormControl>
                           <div 
                             className={`border-2 border-dashed ${imagePreview ? 'border-primary' : 'border-gray-300'} rounded-md p-6 text-center relative`}
@@ -528,7 +528,7 @@ export default function CreateCampaignPage() {
                     name="additionalImages"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Additional Images (Optional)</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Additional Images (Optional)</FormLabel>
                         <FormControl>
                           <div>
                             {/* Display uploaded images */}
@@ -597,7 +597,7 @@ export default function CreateCampaignPage() {
                     name="video"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Campaign Video (Optional)</FormLabel>
+                        <FormLabel className="text-black dark:text-white">Campaign Video (Optional)</FormLabel>
                         <FormControl>
                           <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                             {selectedVideo ? (
