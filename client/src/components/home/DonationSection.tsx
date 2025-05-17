@@ -72,12 +72,12 @@ export default function DonationSection() {
   }
 
   return (
-    <section id="donate" className="py-16 bg-black">
+    <section id="donate" className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Make a Difference</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">Make a Difference</h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-700 max-w-3xl mx-auto">
             Support our community initiatives or create your own charitable campaign to help those in need.
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function DonationSection() {
             ) : campaigns.length > 0 ? (
               <div className="space-y-6">
                 {campaigns.map((campaign: Campaign) => (
-                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow bg-gray-800 border-gray-700">
+                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow border border-gray-200">
                     {campaign.image ? (
                       <img 
                         src={campaign.image} 
@@ -111,20 +111,20 @@ export default function DonationSection() {
                         className="w-full h-48 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
                         <ImageIcon size={48} className="text-gray-400" />
                       </div>
                     )}
                     <CardContent className="p-6">
-                      <h4 className="text-xl font-semibold mb-2 text-white">{campaign.title}</h4>
-                      <p className="text-gray-200 mb-4">
+                      <h4 className="text-xl font-semibold mb-2 text-black">{campaign.title}</h4>
+                      <p className="text-gray-700 mb-4">
                         {campaign.description.length > 100
                           ? campaign.description.substring(0, 100) + '...'
                           : campaign.description}
                       </p>
                       <div className="mb-4">
                         <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                        <div className="flex justify-between mt-2 text-sm text-gray-300">
+                        <div className="flex justify-between mt-2 text-sm text-gray-600">
                           <span>{formatCurrency(campaign.currentAmount)} raised</span>
                           <span>{formatCurrency(campaign.goal)} goal</span>
                         </div>
