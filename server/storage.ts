@@ -41,6 +41,7 @@ export interface IStorage {
   listCampaigns(limit?: number): Promise<Campaign[]>;
   searchCampaigns(query: string): Promise<Campaign[]>;
   updateCampaign(id: string, data: Partial<Campaign>): Promise<Campaign>;
+  deleteCampaign(id: string): Promise<void>;
   getUserCampaigns(userId: string): Promise<Campaign[]>;
   
   // Donation operations
@@ -180,6 +181,12 @@ export class DatabaseStorage implements IStorage {
       .from(campaigns)
       .where(eq(campaigns.userId, userId))
       .orderBy(desc(campaigns.createdAt));
+  }
+  
+  async deleteCampaign(id: string): Promise<void> {
+    await db
+      .delete(campaigns)
+      .where(eq(campaigns.id, id));
   }
 
   // Donation operations

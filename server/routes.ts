@@ -225,6 +225,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch campaigns" });
     }
   });
+  
+  // Update campaign route
+  app.put('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Check if the campaign exists
+      const campaign = await storage.getCampaign(id);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Verify that the user owns this campaign
+      if (campaign.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to update this campaign" });
+      }
+      
+      // Update campaign data
+      const updateData = req.body;
+      const updatedCampaign = await storage.updateCampaign(id, updateData);
+      
+      res.json(updatedCampaign);
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ message: "Failed to update campaign" });
+    }
+  });
+  
+  // Delete campaign route
+  app.delete('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Check if the campaign exists
+      const campaign = await storage.getCampaign(id);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Verify that the user owns this campaign
+      if (campaign.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this campaign" });
+      }
+      
+      // Delete the campaign
+      await storage.deleteCampaign(id);
+      
+      res.status(200).json({ message: "Campaign deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      res.status(500).json({ message: "Failed to delete campaign" });
+    }
+  });
 
   app.get('/api/user/donations', isAuthenticated, async (req: any, res) => {
     try {

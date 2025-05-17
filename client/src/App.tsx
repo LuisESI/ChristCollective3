@@ -11,6 +11,8 @@ import HomePage from "@/pages/HomePage";
 import DonationsPage from "@/pages/DonationsPage";
 import CampaignDetailsPage from "@/pages/CampaignDetailsPage";
 import CreateCampaignPage from "@/pages/CreateCampaignPage";
+import EditCampaignPage from "@/pages/EditCampaignPage";
+import ManageCampaignsPage from "@/pages/ManageCampaignsPage";
 import BusinessNetworkPage from "@/pages/BusinessNetworkPage";
 import MembershipCheckoutPage from "@/pages/MembershipCheckoutPage";
 import DonateCheckoutPage from "@/pages/DonateCheckoutPage";
