@@ -153,15 +153,15 @@ export default function DonationSection() {
             </div>
           </div>
           
-          <div className="bg-gray-200 rounded-xl p-8">
-            <h3 className="text-2xl font-semibold mb-6 text-gray-800">Start Your Own Campaign</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-[#1E1E1E] rounded-xl p-8 border border-gray-700 hover:border-primary transition-colors">
+            <h3 className="text-2xl font-semibold mb-6 text-white">Start Your Own Campaign</h3>
+            <p className="text-gray-400 mb-6">
               Creating a fundraising campaign is simple. Share your story, set a goal, and start receiving support from our community.
             </p>
             
             <form onSubmit={handleCreateCampaign} className="space-y-6">
               <div>
-                <label htmlFor="title" className="block text-gray-800 font-medium mb-2">Campaign Title</label>
+                <label htmlFor="title" className="block text-white font-medium mb-2">Campaign Title</label>
                 <Input
                   id="title"
                   name="title"
@@ -172,9 +172,9 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="goal" className="block text-gray-800 font-medium mb-2">Fundraising Goal</label>
+                <label htmlFor="goal" className="block text-white font-medium mb-2">Fundraising Goal</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     $
                   </span>
                   <Input
@@ -190,7 +190,7 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label htmlFor="description" className="block text-gray-800 font-medium mb-2">Campaign Description</label>
+                <label htmlFor="description" className="block text-white font-medium mb-2">Campaign Description</label>
                 <Textarea
                   id="description"
                   name="description"
@@ -202,13 +202,13 @@ export default function DonationSection() {
               </div>
               
               <div>
-                <label className="block text-gray-800 font-medium mb-2">Campaign Image</label>
-                <div className="border-2 border-dashed border-gray-400 rounded-md p-6 text-center">
-                  <ImageIcon className="mx-auto text-gray-500 text-3xl mb-3" size={32} />
-                  <p className="text-gray-700 mb-2">
+                <label className="block text-white font-medium mb-2">Campaign Image</label>
+                <div className="border-2 border-dashed border-gray-600 rounded-md p-6 text-center">
+                  <ImageIcon className="mx-auto text-gray-400 text-3xl mb-3" size={32} />
+                  <p className="text-gray-400 mb-2">
                     Drag and drop an image here, or click to select a file
                   </p>
-                  <p className="text-xs text-gray-600">Recommended size: 1200 x 675 pixels</p>
+                  <p className="text-xs text-gray-500">Recommended size: 1200 x 675 pixels</p>
                   <input type="file" className="hidden" />
                   <Button type="button" variant="outline" className="mt-4">
                     Select Image
