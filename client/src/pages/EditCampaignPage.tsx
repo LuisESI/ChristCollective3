@@ -57,10 +57,25 @@ export default function EditCampaignPage() {
   
   // Fetch campaign data
   const { data: campaign, isLoading: campaignLoading } = useQuery({
-    queryKey: ["/api/campaign", id],
+    queryKey: ["/api/campaigns", id],
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/campaigns/${id}`);
-      return res.json();
+      try {
+        // First try to get by ID directly
+        const res = await apiRequest("GET", `/api/user/campaigns`);
+        const campaigns = await res.json();
+        const thisCampaign = campaigns.find((c: any) => c.id === id);
+        
+        if (thisCampaign) {
+          return thisCampaign;
+        }
+        
+        // If not found, try the slug route as fallback
+        const slugRes = await apiRequest("GET", `/api/campaigns/${id}`);
+        return slugRes.json();
+      } catch (error) {
+        console.error("Error fetching campaign:", error);
+        throw new Error("Failed to fetch campaign");
+      }
     },
     enabled: !!id && isAuthenticated,
   });
@@ -93,6 +108,8 @@ export default function EditCampaignPage() {
       if (campaign.image) {
         setPreviewImage(campaign.image);
       }
+      
+      console.log("Campaign loaded successfully:", campaign);
     }
   }, [campaign, form]);
   
@@ -148,18 +165,25 @@ export default function EditCampaignPage() {
   // Update campaign mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      return await apiRequest("PUT", `/api/campaigns/${id}`, data);
+      const response = await apiRequest("PUT", `/api/campaigns/${id}`, data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update campaign");
+      }
+      return response;
     },
     onSuccess: () => {
       toast({
         title: "Campaign Updated",
         description: "Your campaign has been updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/campaign", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/campaigns", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
       navigate("/manage-campaigns");
     },
     onError: (error: any) => {
+      console.error("Update error:", error);
       toast({
         title: "Update Failed",
         description: error.message || "Could not update campaign",

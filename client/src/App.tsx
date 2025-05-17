@@ -26,12 +26,12 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
+      <Route path="/donate/edit/:id" component={EditCampaignPage} />
+      <Route path="/donate/checkout/:campaignId" component={DonateCheckoutPage} />
       <Route path="/donate/:slug" component={CampaignDetailsPage} />
       <Route path="/manage-campaigns" component={ManageCampaignsPage} />
-      <Route path="/donate/edit/:id" component={EditCampaignPage} />
       <Route path="/business" component={BusinessNetworkPage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
-      <Route path="/donate/checkout/:campaignId" component={DonateCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
