@@ -25,8 +25,10 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/donate" component={DonationsPage} />
-      <Route path="/campaigns/create" component={CreateCampaignPage} />
-      <Route path="/campaigns/:slug" component={CampaignDetailsPage} />
+      <Route path="/donate/create" component={CreateCampaignPage} />
+      <Route path="/donate/:slug" component={CampaignDetailsPage} />
+      <Route path="/manage-campaigns" component={ManageCampaignsPage} />
+      <Route path="/donate/edit/:id" component={EditCampaignPage} />
       <Route path="/business" component={BusinessNetworkPage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/donate/checkout/:campaignId" component={DonateCheckoutPage} />

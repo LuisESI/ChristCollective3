@@ -73,6 +73,11 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link href="/manage-campaigns">
+                    <div className="cursor-pointer w-full">Manage Campaigns</div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <a href="/api/logout" className="cursor-pointer w-full">Log Out</a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -127,6 +132,11 @@ export default function Header() {
                 <Link href="/profile">
                   <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
                     Profile
+                  </div>
+                </Link>
+                <Link href="/manage-campaigns">
+                  <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
+                    Manage Campaigns
                   </div>
                 </Link>
                 <a 
