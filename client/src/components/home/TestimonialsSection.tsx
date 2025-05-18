@@ -60,10 +60,10 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">What Our Community Says</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">What Our Community Says</h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
         </div>
 
