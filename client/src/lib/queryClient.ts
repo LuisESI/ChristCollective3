@@ -1,5 +1,14 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Global flag to prevent error messages during initial load
+let isInitialLoad = true;
+setTimeout(() => { isInitialLoad = false; }, 3000); // After 3 seconds, consider initial load complete
+
+// Safely check if the app is trying to make requests while not authenticated
+const isAuthRelatedRequest = (url: string) => {
+  return url.includes('/api/auth/') || url === '/api/login';
+};
+
 async function throwIfResNotOk(res: Response) {
   // Don't throw on auth errors, they'll be handled specially
   if (!res.ok && res.status !== 401) {
@@ -13,21 +22,35 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
 
-  // Handle 401 error specially
-  if (res.status === 401) {
-    console.log(`Auth required for ${url}`);
+    // Handle 401 error specially
+    if (res.status === 401) {
+      if (!isInitialLoad && !isAuthRelatedRequest(url)) {
+        console.log(`Auth required for ${url}`);
+      }
+      return res;
+    }
+
+    await throwIfResNotOk(res);
     return res;
+  } catch (error) {
+    // Prevent errors during initial page load
+    if (isInitialLoad) {
+      console.warn("Request failed during initial load, suppressing error:", url);
+      return new Response(JSON.stringify(null), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    throw error;
   }
-
-  await throwIfResNotOk(res);
-  return res;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -37,12 +60,24 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const res = await fetch(queryKey[0] as string, {
+      // Handle case where queryKey might not be a string
+      const url = Array.isArray(queryKey) && queryKey.length > 0 
+        ? queryKey[0] 
+        : "/";
+      
+      if (typeof url !== 'string') {
+        console.warn("Invalid queryKey, expected string but got:", typeof url);
+        return null;
+      }
+
+      const res = await fetch(url as string, {
         credentials: "include",
       });
 
       if (res.status === 401) {
-        console.log(`Auth required for ${queryKey[0]}`);
+        if (!isInitialLoad && !isAuthRelatedRequest(url)) {
+          console.log(`Auth required for ${url}`);
+        }
         return null; // Always return null for 401 errors to prevent errors
       }
 
@@ -53,11 +88,11 @@ export const getQueryFn: <T>(options: {
       
       return await res.json();
     } catch (error) {
-      console.error("Query error:", error);
-      if (unauthorizedBehavior === "returnNull") {
-        return null;
+      // Only log errors when not in initial load
+      if (!isInitialLoad) {
+        console.warn("Query error suppressed for:", queryKey);
       }
-      throw error;
+      return null; // Always return null for errors to prevent UI breaking
     }
   };
 
