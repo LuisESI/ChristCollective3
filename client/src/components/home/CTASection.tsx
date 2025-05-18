@@ -19,7 +19,7 @@ export default function CTASection() {
       <div className="absolute inset-0 bg-black/30"></div>
       <div className="container mx-auto px-4 text-center relative z-10">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Join Our Growing Community Today</h2>
-        <p className="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
+        <p className="text-lg text-white max-w-3xl mx-auto mb-8">
           Together, we can make a difference through faith, service, and fellowship.
         </p>
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
