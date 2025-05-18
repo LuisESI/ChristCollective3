@@ -69,7 +69,7 @@ export default function TestimonialsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <Card key={index} className="bg-white p-8 rounded-xl shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:shadow-[0_0_20px_rgba(255,215,0,0.4)] transition-shadow">
               <CardContent className="p-0">
                 <div className="flex items-center mb-4">
                   <div className="flex text-primary">
