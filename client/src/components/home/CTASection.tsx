@@ -12,6 +12,7 @@ export default function CTASection() {
         backgroundImage: 'url(/assets/cta-clouds-background.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundColor: '#121212', // Fallback color
       }}
     >
       <div className="absolute inset-0 bg-black/30"></div>
