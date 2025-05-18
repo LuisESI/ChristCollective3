@@ -85,7 +85,7 @@ export default function BusinessSection() {
               <Card 
                 key={tier.id}
                 className={`
-                  bg-[#1E1E1E] rounded-xl p-8 
+                  bg-white rounded-xl p-8 text-black
                   ${isPopular 
                     ? 'border-2 border-primary relative transform hover:scale-105 transition-transform duration-300' 
                     : 'border border-gray-700 hover:border-primary transition-colors'
