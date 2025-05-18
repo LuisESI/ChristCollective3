@@ -6,8 +6,16 @@ export default function CTASection() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section className="py-20 bg-[#121212] text-white cta-section">
-      <div className="container mx-auto px-4 text-center">
+    <section 
+      className="py-20 text-white relative"
+      style={{
+        backgroundImage: 'url(/assets/cta-clouds-background.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/30"></div>
+      <div className="container mx-auto px-4 text-center relative z-10">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Join Our Growing Community Today</h2>
         <p className="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
           Together, we can make a difference through faith, service, and fellowship.
