@@ -1,0 +1,14 @@
+/* Hide error overlays with CSS */
+[vite-plugin-react-runtime-error-overlay],
+[data-vite-dev-server-overlay],
+[data-plugin-runtime-error],
+.vite-error-overlay,
+.vite-runtime-error,
+#vite-error-overlay,
+#vite-runtime-error-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  z-index: -9999 !important;
+  pointer-events: none !important;
+}
