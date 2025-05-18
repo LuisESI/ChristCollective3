@@ -1,7 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
+  // Don't throw on auth errors, they'll be handled specially
+  if (!res.ok && res.status !== 401) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
@@ -19,6 +20,12 @@ export async function apiRequest(
     credentials: "include",
   });
 
+  // Handle 401 error specially
+  if (res.status === 401) {
+    console.log(`Auth required for ${url}`);
+    return res;
+  }
+
   await throwIfResNotOk(res);
   return res;
 }
@@ -29,16 +36,29 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (res.status === 401) {
+        console.log(`Auth required for ${queryKey[0]}`);
+        return null; // Always return null for 401 errors to prevent errors
+      }
+
+      if (!res.ok) {
+        const text = (await res.text()) || res.statusText;
+        throw new Error(`${res.status}: ${text}`);
+      }
+      
+      return await res.json();
+    } catch (error) {
+      console.error("Query error:", error);
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
