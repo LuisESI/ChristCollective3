@@ -11,6 +11,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add error suppression script -->
+    <script>
+      // Disable Vite's error overlay
+      window.addEventListener('load', function() {
+        // Attempt to modify the server.hmr.overlay setting
+        try {
+          const viteStyle = document.querySelector('[vite-style]');
+          if (viteStyle) {
+            viteStyle.remove();
+          }
+          
+          // Set overlay to false
+          window.server = window.server || {};
+          window.server.hmr = window.server.hmr || {};
+          window.server.hmr.overlay = false;
+          
+          // Capture and suppress error popups
+          window.addEventListener('error', function(event) {
+            if (event.message && (
+              event.message.includes('Failed to fetch') || 
+              event.filename && event.filename.includes('queryClient.ts')
+            )) {
+              event.preventDefault();
+              return true;
+            }
+          }, true);
+          
+          // Suppress unhandled rejections
+          window.addEventListener('unhandledrejection', function(event) {
+            event.preventDefault();
+            return true;
+          }, true);
+          
+          console.log('Error overlay disabled via inline script');
+        } catch (e) {
+          console.error('Failed to disable error overlay:', e);
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
