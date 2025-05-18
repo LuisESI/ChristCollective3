@@ -29,20 +29,40 @@ export default function HeroSection() {
       image: mountainBackground,
       heading: "Uniting Christians Worldwide",
       subheading: "Join our global community dedicated to faith, service, and fellowship across all denominations.",
-      primaryButtonText: "Donate Now",
-      primaryButtonLink: "/donate",
-      secondaryButtonText: isAuthenticated ? "My Account" : "Join Our Community",
-      secondaryButtonLink: isAuthenticated ? "/profile" : "/api/login",
+      primaryButtonText: "Join the Collective",
+      primaryButtonLink: "/api/login",
+      secondaryButtonText: "Learn More",
+      secondaryButtonLink: "/#about",
     },
     {
       id: 2,
       image: blueSkyBg,
-      heading: "Supporting Christian Ministries",
-      subheading: "Help us spread the good news by supporting important missions and community programs.",
-      primaryButtonText: "Our Mission",
-      primaryButtonLink: "/#mission",
+      heading: "Create for Christ",
+      subheading: "Join our team of creators to receive compensation through sponsorships.",
+      primaryButtonText: "Apply Now",
+      primaryButtonLink: "/creators/apply",
       secondaryButtonText: "Learn More",
-      secondaryButtonLink: "/#about",
+      secondaryButtonLink: "/creators",
+    },
+    {
+      id: 3,
+      image: mountainBackground,
+      heading: "Christian Business Network",
+      subheading: "Join our network of Christian Business Owners.",
+      primaryButtonText: "Join Now",
+      primaryButtonLink: "/business",
+      secondaryButtonText: "Learn More",
+      secondaryButtonLink: "/business",
+    },
+    {
+      id: 4,
+      image: blueSkyBg,
+      heading: "Supporting Christian Ministries",
+      subheading: "Help us spread the good news by supporting important missions & community programs.",
+      primaryButtonText: "Our Missions",
+      primaryButtonLink: "/donate",
+      secondaryButtonText: "Learn More",
+      secondaryButtonLink: "/#mission",
     },
   ]);
 
@@ -95,11 +115,15 @@ export default function HeroSection() {
                     <Button 
                       asChild
                       size="lg"
-                      className="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                      className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
                     >
-                      <Link href={slide.primaryButtonLink}>
-                        <span className="text-black">{slide.primaryButtonText}</span>
-                      </Link>
+                      {slide.primaryButtonLink === "/api/login" ? (
+                        <a href={slide.primaryButtonLink}>{slide.primaryButtonText}</a>
+                      ) : (
+                        <Link href={slide.primaryButtonLink}>
+                          <span>{slide.primaryButtonText}</span>
+                        </Link>
+                      )}
                     </Button>
                     <Button 
                       asChild
