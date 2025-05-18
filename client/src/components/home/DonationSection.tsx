@@ -103,7 +103,7 @@ export default function DonationSection() {
             ) : campaigns.length > 0 ? (
               <div className="space-y-6">
                 {campaigns.map((campaign: Campaign) => (
-                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow border border-gray-200">
+                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow border border-gray-700 bg-[#1E1E1E]">
                     {campaign.image ? (
                       <img 
                         src={campaign.image} 
@@ -111,20 +111,20 @@ export default function DonationSection() {
                         className="w-full h-48 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                        <ImageIcon size={48} className="text-gray-400" />
+                      <div className="w-full h-48 bg-black flex items-center justify-center">
+                        <ImageIcon size={48} className="text-gray-600" />
                       </div>
                     )}
                     <CardContent className="p-6">
-                      <h4 className="text-xl font-semibold mb-2 text-black">{campaign.title}</h4>
-                      <p className="text-gray-700 mb-4">
+                      <h4 className="text-xl font-semibold mb-2 text-white">{campaign.title}</h4>
+                      <p className="text-gray-400 mb-4">
                         {campaign.description.length > 100
                           ? campaign.description.substring(0, 100) + '...'
                           : campaign.description}
                       </p>
                       <div className="mb-4">
                         <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                        <div className="flex justify-between mt-2 text-sm text-gray-600">
+                        <div className="flex justify-between mt-2 text-sm text-gray-400">
                           <span>{formatCurrency(campaign.currentAmount)} raised</span>
                           <span>{formatCurrency(campaign.goal)} goal</span>
                         </div>
