@@ -29,9 +29,25 @@ export default function DonationSection() {
     goal: "",
   });
 
-  // Fetch featured campaigns
+  // Fetch featured campaigns with error handling
   const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
     queryKey: ["/api/campaigns"],
+    queryFn: async ({ queryKey }) => {
+      try {
+        const res = await fetch(queryKey[0] as string, { credentials: "include" });
+        if (!res.ok) {
+          if (res.status === 401) {
+            // Return empty array for unauthorized users
+            return [];
+          }
+          throw new Error('Failed to fetch campaigns');
+        }
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching campaigns:", error);
+        return [];
+      }
+    },
     select: (data: Campaign[]) => data.slice(0, 2), // Only take first 2 for featured section
   });
 
