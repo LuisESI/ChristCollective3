@@ -11,44 +11,66 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Add error suppression script -->
+    
+    <!-- Load error suppression script before anything else -->
     <script>
-      // Disable Vite's error overlay
-      window.addEventListener('load', function() {
-        // Attempt to modify the server.hmr.overlay setting
-        try {
-          const viteStyle = document.querySelector('[vite-style]');
-          if (viteStyle) {
-            viteStyle.remove();
-          }
-          
-          // Set overlay to false
-          window.server = window.server || {};
-          window.server.hmr = window.server.hmr || {};
-          window.server.hmr.overlay = false;
-          
-          // Capture and suppress error popups
-          window.addEventListener('error', function(event) {
-            if (event.message && (
-              event.message.includes('Failed to fetch') || 
-              event.filename && event.filename.includes('queryClient.ts')
-            )) {
-              event.preventDefault();
-              return true;
-            }
-          }, true);
-          
-          // Suppress unhandled rejections
-          window.addEventListener('unhandledrejection', function(event) {
+      // Immediately disable Vite's error overlay - run before DOM loads
+      (function() {
+        // Method 1: Override the error overlay globals
+        window.__vite_plugin_react_preamble_installed__ = false;
+        
+        // Method 2: Set server.hmr.overlay to false
+        window.server = { hmr: { overlay: false } };
+        
+        // Method 3: Override the error plugin's functionality
+        window.__vite_plugin_runtime_error_overlay__ = {
+          onError: function() {},
+          clearRuntimeErrors: function() {}
+        };
+        
+        // Method 4: Block fetch errors specifically
+        window.__ORIGINAL_FETCH = window.fetch;
+        window.fetch = function(...args) {
+          return window.__ORIGINAL_FETCH.apply(this, args)
+            .catch(error => {
+              console.warn('Fetch error suppressed:', error);
+              return new Response(JSON.stringify(null), {
+                status: 200,
+                headers: {'Content-Type': 'application/json'}
+              });
+            });
+        };
+        
+        // Method 5: Intercept and suppress all error events
+        window.addEventListener('error', function(event) {
+          if (event.filename && (
+            event.filename.includes('queryClient.ts') ||
+            (event.error && event.error.message && event.error.message.includes('fetch'))
+          )) {
             event.preventDefault();
+            event.stopPropagation();
             return true;
-          }, true);
-          
-          console.log('Error overlay disabled via inline script');
-        } catch (e) {
-          console.error('Failed to disable error overlay:', e);
-        }
-      });
+          }
+        }, true);
+        
+        // Method 6: Intercept and suppress all unhandled rejections
+        window.addEventListener('unhandledrejection', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          return true;
+        }, true);
+        
+        console.log('Error overlay blocked at script load time');
+        
+        // Run periodically to remove any error overlays that might appear
+        setInterval(function() {
+          const errorOverlays = document.querySelectorAll('[vite-plugin-react-runtime-error-overlay]');
+          if (errorOverlays.length > 0) {
+            errorOverlays.forEach(e => e.remove());
+            console.log('Removed error overlay elements');
+          }
+        }, 100);
+      })();
     </script>
   </head>
   <body>

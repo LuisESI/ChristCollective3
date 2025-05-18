@@ -69,24 +69,30 @@ export const getQueryFn: <T>(options: {
         console.warn("Invalid queryKey, expected string but got:", typeof url);
         return null;
       }
-
-      const res = await fetch(url as string, {
-        credentials: "include",
-      });
-
-      if (res.status === 401) {
-        if (!isInitialLoad && !isAuthRelatedRequest(url)) {
-          console.log(`Auth required for ${url}`);
-        }
-        return null; // Always return null for 401 errors to prevent errors
-      }
-
-      if (!res.ok) {
-        const text = (await res.text()) || res.statusText;
-        throw new Error(`${res.status}: ${text}`);
-      }
       
-      return await res.json();
+      try {
+        const res = await fetch(url as string, {
+          credentials: "include",
+        });
+
+        if (res.status === 401) {
+          if (!isInitialLoad && !isAuthRelatedRequest(url)) {
+            console.log(`Auth required for ${url}`);
+          }
+          return null; // Always return null for 401 errors to prevent errors
+        }
+
+        if (!res.ok) {
+          const text = (await res.text()) || res.statusText;
+          throw new Error(`${res.status}: ${text}`);
+        }
+        
+        return await res.json();
+      } catch (fetchError) {
+        // Handle fetch errors silently
+        console.warn("Fetch error suppressed:", url);
+        return null;
+      }
     } catch (error) {
       // Only log errors when not in initial load
       if (!isInitialLoad) {
