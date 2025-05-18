@@ -103,7 +103,7 @@ export default function DonationSection() {
             ) : campaigns.length > 0 ? (
               <div className="space-y-6">
                 {campaigns.map((campaign: Campaign) => (
-                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow border border-gray-700 bg-[#1E1E1E]">
+                  <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow border border-gray-700 bg-black">
                     {campaign.image ? (
                       <img 
                         src={campaign.image} 
@@ -153,7 +153,7 @@ export default function DonationSection() {
             </div>
           </div>
           
-          <div className="bg-[#1E1E1E] rounded-xl p-8 border border-gray-700 hover:border-primary transition-colors">
+          <div className="bg-black rounded-xl p-8 border border-gray-700 hover:border-primary transition-colors">
             <h3 className="text-2xl font-semibold mb-6 text-white">Start Your Own Campaign</h3>
             <p className="text-gray-400 mb-6">
               Creating a fundraising campaign is simple. Share your story, set a goal, and start receiving support from our community.
