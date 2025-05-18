@@ -29,7 +29,11 @@ export default function DonationsPage() {
       const url = searchQuery 
         ? `/api/campaigns?search=${encodeURIComponent(searchQuery)}` 
         : "/api/campaigns";
-      const res = await fetch(url);
+      const res = await fetch(url, { credentials: "include" });
+      // Don't throw error for 401, just return empty array
+      if (res.status === 401) {
+        return [];
+      }
       if (!res.ok) throw new Error("Failed to fetch campaigns");
       return res.json();
     }

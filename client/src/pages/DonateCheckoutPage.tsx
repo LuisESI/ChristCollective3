@@ -237,24 +237,42 @@ export default function DonateCheckoutPage() {
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
 
-  // Redirect if not authenticated
+  // Handle authentication more gracefully
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
+      // We'll navigate to login but set a better handler
+      // to avoid the runtime error modal
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 100);
     }
   }, [isAuthLoading, isAuthenticated]);
 
-  // Fetch campaign
+  // Fetch campaign with better error handling
   const { data: campaign, isLoading: isCampaignLoading } = useQuery({
     queryKey: [`/api/campaigns/${campaignId}`],
     enabled: !!campaignId && isAuthenticated,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Unable to load campaign information. Please try again.",
-        variant: "destructive",
-      });
-      navigate("/donate");
+    queryFn: async ({ queryKey }) => {
+      try {
+        const res = await fetch(queryKey[0] as string, { credentials: "include" });
+        if (!res.ok) {
+          if (res.status === 401) {
+            // Handle unauthorized gracefully
+            return null;
+          }
+          throw new Error('Failed to fetch campaign');
+        }
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching campaign:", error);
+        toast({
+          title: "Error",
+          description: "Unable to load campaign information. Please try again.",
+          variant: "destructive",
+        });
+        navigate("/donate");
+        return null;
+      }
     }
   });
 
