@@ -64,15 +64,15 @@ export const getQueryFn: <T>(options: {
       const url = Array.isArray(queryKey) && queryKey.length > 0 
         ? queryKey[0] 
         : "/";
-      
+
       if (typeof url !== 'string') {
         console.warn("Invalid queryKey, expected string but got:", typeof url);
         return null;
       }
-      
+
       try {
         const res = await fetch(url as string, {
-          credentials: "include",
+          credentials: "same-origin",
         });
 
         if (res.status === 401) {
@@ -86,7 +86,7 @@ export const getQueryFn: <T>(options: {
           const text = (await res.text()) || res.statusText;
           throw new Error(`${res.status}: ${text}`);
         }
-        
+
         return await res.json();
       } catch (fetchError) {
         // Handle fetch errors silently
