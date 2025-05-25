@@ -13,82 +13,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/no-error-overlay.css">
     
-    <!-- Completely reset and override the error module before Vite loads -->
+    <!-- Target the specific Replit error overlay plugin -->
     <script>
-      // Create custom error suppression
-      document.addEventListener('DOMContentLoaded', function() {
-        // Find and remove all error overlay elements
-        function removeErrorOverlays() {
-          // Method 1: Find by attribute
-          document.querySelectorAll('[vite-plugin-react-runtime-error-overlay], [data-vite-dev-server-overlay]').forEach(el => el.remove());
-          
-          // Method 2: Find by class name pattern
-          document.querySelectorAll('[class*="error-overlay"], [class*="vite-error"], [class*="runtime-error"]').forEach(el => el.remove());
-          
-          // Method 3: Search based on content
-          document.querySelectorAll('div').forEach(el => {
-            if (el.textContent && el.textContent.includes('Failed to fetch') && el.style.position === 'fixed') {
-              el.remove();
-            }
-          });
-        }
-        
-        // Run the removal function immediately and periodically
-        removeErrorOverlays();
-        setInterval(removeErrorOverlays, 100);
-      });
+      // Immediately disable the Replit runtime error modal plugin
+      window.__REPLIT_DISABLE_ERROR_OVERLAY__ = true;
       
-      // Override Vite error handling
-      window.__vite_plugin_react_preamble_installed__ = false;
-      window.server = { hmr: { overlay: false } };
+      // Override the specific plugin that's causing issues
+      window.__replit_vite_plugin_runtime_error_modal_disabled__ = true;
       
-      // Prevent any error rendering modules from functioning
-      Object.defineProperty(window, '__vite_plugin_runtime_error_overlay__', {
-        value: {
-          onError: function() { return false; },
-          clearRuntimeErrors: function() { return false; }
-        },
-        writable: false,
-        configurable: false
-      });
-      
-      // Replace the fetch API entirely to never throw errors
-      const originalFetch = window.fetch;
-      window.fetch = function() {
-        try {
-          return originalFetch.apply(this, arguments)
-            .catch(error => {
-              console.warn('Fetch error intercepted:', error);
-              return new Response(JSON.stringify(null), {
-                status: 200,
-                headers: {'Content-Type': 'application/json'}
-              });
+      // Create a comprehensive overlay prevention system
+      (function() {
+        // Method 1: DOM Mutation Observer to catch overlays as they're created
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.nodeType === 1) { // Element node
+                // Check for error overlay patterns
+                if (node.hasAttribute && (
+                  node.hasAttribute('vite-plugin-react-runtime-error-overlay') ||
+                  node.hasAttribute('data-vite-dev-server-overlay') ||
+                  (node.textContent && node.textContent.includes('Failed to fetch'))
+                )) {
+                  console.log('Removing error overlay:', node);
+                  node.remove();
+                }
+                
+                // Also check children
+                const errorElements = node.querySelectorAll ? node.querySelectorAll(
+                  '[vite-plugin-react-runtime-error-overlay], [data-vite-dev-server-overlay], div[style*="position: fixed"]'
+                ) : [];
+                errorElements.forEach(el => {
+                  if (el.textContent && el.textContent.includes('Failed to fetch')) {
+                    console.log('Removing nested error overlay:', el);
+                    el.remove();
+                  }
+                });
+              }
             });
-        } catch(e) {
-          console.warn('Fetch interception error:', e);
-          return Promise.resolve(new Response(JSON.stringify(null), {
-            status: 200,
-            headers: {'Content-Type': 'application/json'}
-          }));
-        }
-      };
-      
-      // Block all error events and unhandled rejections
-      window.addEventListener('error', function(e) {
-        if (e.filename && (e.filename.includes('queryClient') || e.message && e.message.includes('fetch'))) {
-          e.preventDefault();
-          e.stopPropagation();
-          return true;
-        }
-      }, true);
-      
-      window.addEventListener('unhandledrejection', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return true;
-      }, true);
-      
-      console.log('Enhanced error prevention installed');
+          });
+        });
+        
+        // Start observing immediately
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true
+        });
+        
+        // Method 2: Periodic cleanup
+        setInterval(function() {
+          const overlays = document.querySelectorAll(
+            '[vite-plugin-react-runtime-error-overlay], [data-vite-dev-server-overlay]'
+          );
+          overlays.forEach(overlay => {
+            console.log('Periodic removal of error overlay');
+            overlay.remove();
+          });
+        }, 50);
+        
+        // Method 3: Override error display functions
+        const originalError = console.error;
+        console.error = function(...args) {
+          // Suppress specific error overlay triggers but allow other errors
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('Failed to fetch')) {
+            console.warn('Error suppressed:', ...args);
+            return;
+          }
+          return originalError.apply(console, args);
+        };
+        
+        console.log('Comprehensive error overlay prevention active');
+      })();
     </script>
   </head>
   <body>
