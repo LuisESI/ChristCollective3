@@ -117,13 +117,7 @@ export default function HeroSection() {
                       size="lg"
                       className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
                     >
-                      {slide.primaryButtonLink === "/api/login" ? (
-                        <a href={slide.primaryButtonLink}>{slide.primaryButtonText}</a>
-                      ) : (
-                        <Link href={slide.primaryButtonLink}>
-                          <span>{slide.primaryButtonText}</span>
-                        </Link>
-                      )}
+                      <a href="/api/login">{slide.primaryButtonText}</a>
                     </Button>
                     <Button 
                       asChild
