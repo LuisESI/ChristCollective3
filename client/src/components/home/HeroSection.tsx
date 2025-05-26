@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Video, Building2, Heart } from "lucide-react";
 import mountainBackground from "@assets/mountain-majesty-artistic-silhouette-of-crucifix-cross-against-sunset-sky-photo.jpg";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
 
@@ -141,18 +141,32 @@ export default function HeroSection() {
         </div>
       </div>
       
-      {/* Slider Controls */}
-      <div className="absolute z-20 bottom-8 left-0 right-0 flex justify-center gap-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              index === selectedIndex ? "bg-primary" : "bg-white bg-opacity-50"
-            }`}
-            onClick={() => emblaApi?.scrollTo(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+      {/* Slider Controls with Icons */}
+      <div className="absolute z-20 bottom-8 left-0 right-0 flex justify-center gap-4">
+        {slides.map((_, index) => {
+          // Define icons for each slide
+          const icons = [
+            <Users className="w-4 h-4" />, // Community/Fellowship
+            <Video className="w-4 h-4" />, // Content Creators
+            <Building2 className="w-4 h-4" />, // Business Network
+            <Heart className="w-4 h-4" /> // Donations/Missions
+          ];
+          
+          return (
+            <button
+              key={index}
+              className={`w-12 h-12 rounded-full transition-all duration-300 flex items-center justify-center ${
+                index === selectedIndex 
+                  ? "bg-primary text-white shadow-lg scale-110" 
+                  : "bg-white bg-opacity-60 text-gray-700 hover:bg-opacity-80"
+              }`}
+              onClick={() => emblaApi?.scrollTo(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            >
+              {icons[index]}
+            </button>
+          );
+        })}
       </div>
       
       <button
