@@ -5,9 +5,9 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Youtube, Instagram, Twitter, Twitch, Facebook, Globe } from "lucide-react";
+import { User, Youtube, Instagram, Twitter, Twitch, Facebook, Globe, Heart, MessageCircle, Share2, Play, ExternalLink, Star } from "lucide-react";
 
 // Define the ContentCreator type
 type ContentCreator = {
@@ -84,116 +84,205 @@ export default function SponsoredCreatorsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-gray-50">
       <Helmet>
-        <title>Sponsored Content Creators | Christ Collective</title>
-        <meta name="description" content="Discover content creators sponsored by Christ Collective sharing faith-based content across various platforms." />
+        <title>Sponsored Content Feed | Christ Collective</title>
+        <meta name="description" content="Discover sponsored faith-based content from our community of creators sharing their testimonies and Christian messages." />
       </Helmet>
       
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Our Sponsored Content Creators</h1>
-        <p className="text-lg max-w-3xl mx-auto">
-          Christ Collective proudly sponsors these creators who share faith-based content across various platforms. 
-          Their work helps spread the message and mission of our community.
-        </p>
-        
-        {isAuthenticated && (
-          <div className="mt-6">
-            <Link href="/sponsorship-application">
-              <Button className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                Apply for Sponsorship
-              </Button>
-            </Link>
+      {/* Header Section */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Sponsored Content Feed</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+              Discover inspiring faith-based content from our sponsored creators sharing testimonies, teachings, and Christian messages.
+            </p>
+            
+            {/* Apply Now CTA */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/sponsorship-application">
+                <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold px-8 py-3">
+                  <Star className="w-5 h-5 mr-2" />
+                  Apply for Sponsorship
+                </Button>
+              </Link>
+              <p className="text-sm text-gray-500">Join our community of faith-based content creators</p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
       
-      {isLoading ? (
-        <div className="flex justify-center">
-          <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : creators.length === 0 ? (
-        <div className="text-center p-12 border rounded-lg">
-          <User className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-4 text-xl font-semibold">No Sponsored Creators Yet</h3>
-          <p className="mt-2 text-gray-500">
-            We're currently reviewing applications. Check back soon for our sponsored content creators.
-          </p>
-        </div>
-      ) : (
-        <>
-          <Tabs defaultValue="all" className="mb-8">
-            <div className="flex justify-center">
-              <TabsList>
-                {platforms.map((platform) => (
-                  <TabsTrigger 
-                    key={platform} 
-                    value={platform}
-                    onClick={() => setFilter(platform)}
-                  >
-                    {platform === "all" ? "All Platforms" : platform}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+      {/* Main Content Feed */}
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : creators.length === 0 ? (
+          <>
+            {/* Empty State with Sample Content */}
+            <div className="text-center py-12 mb-8">
+              <User className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+              <h3 className="text-2xl font-semibold mb-2">Building Our Creator Community</h3>
+              <p className="text-gray-600 mb-6">
+                We're looking for passionate creators to join our sponsorship program and share faith-based content.
+              </p>
+              <Link href="/sponsorship-application">
+                <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold">
+                  <Star className="w-5 h-5 mr-2" />
+                  Be Our First Creator
+                </Button>
+              </Link>
             </div>
-          </Tabs>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            {/* Sample Feed Posts to Show What's Coming */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center mb-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>CC</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="font-semibold">Christ Collective</p>
+                    <p className="text-sm text-gray-500">Sample sponsored post</p>
+                  </div>
+                  <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
+                </div>
+                
+                <div className="mb-4">
+                  <h3 className="font-semibold text-lg mb-2">Coming Soon: Faith-Based Content</h3>
+                  <p className="text-gray-700">
+                    We're excited to feature inspiring testimonies, biblical teachings, and uplifting content from our sponsored creators. 
+                    Join our program to share your faith journey with the world.
+                  </p>
+                </div>
+                
+                <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center mb-4">
+                  <div className="text-center">
+                    <Play className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Sample content placeholder</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-gray-500">
+                  <div className="flex items-center space-x-4">
+                    <button className="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                      <Heart className="w-5 h-5" />
+                      <span>0</span>
+                    </button>
+                    <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                      <MessageCircle className="w-5 h-5" />
+                      <span>0</span>
+                    </button>
+                    <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
+                      <Share2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                    <span className="text-sm">View on Platform</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Actual Content Feed */
+          <div className="space-y-6">
             {filteredCreators.map((creator) => (
-              <Card key={creator.id} className="overflow-hidden">
+              <Card key={creator.id} className="bg-white shadow-sm">
                 <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-xl">{creator.name}</CardTitle>
-                      <CardDescription className="flex items-center mt-1">
-                        {renderPlatformIcon(creator.platform)}
-                        <span className="ml-1">{creator.platform}</span>
-                        {creator.subscriberCount && (
-                          <Badge variant="outline" className="ml-2">
-                            {formatSubscriberCount(creator.subscriberCount)} followers
-                          </Badge>
-                        )}
-                      </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={creator.user?.profileImageUrl} />
+                        <AvatarFallback>
+                          {creator.user?.firstName?.[0] || creator.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-semibold">{creator.name}</h3>
+                          {renderPlatformIcon(creator.platform)}
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {creator.platform} • {formatSubscriberCount(creator.subscriberCount)} followers
+                        </p>
+                      </div>
                     </div>
+                    <Badge className="bg-[#D4AF37] text-black">Sponsored</Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold text-sm">Content Focus</h4>
-                      <p>{creator.content}</p>
-                    </div>
-                    {creator.audience && (
-                      <div>
-                        <h4 className="font-semibold text-sm">Target Audience</h4>
-                        <p>{creator.audience}</p>
-                      </div>
-                    )}
+                
+                <CardContent className="pt-0">
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2">{creator.content}</h4>
                     {creator.bio && (
-                      <div>
-                        <h4 className="font-semibold text-sm">Bio</h4>
-                        <p className="line-clamp-3">{creator.bio}</p>
-                      </div>
+                      <p className="text-gray-700">{creator.bio}</p>
                     )}
                   </div>
+                  
+                  {creator.audience && (
+                    <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Target Audience:</span> {creator.audience}
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
-                <CardFooter>
-                  <a 
-                    href={creator.profileUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full"
-                  >
-                    <Button variant="outline" className="w-full">
-                      Visit {creator.platform} Profile
-                    </Button>
-                  </a>
+                
+                <CardFooter className="pt-0">
+                  <div className="w-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4 text-gray-500">
+                        <button className="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                          <Heart className="w-5 h-5" />
+                          <span>0</span>
+                        </button>
+                        <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                          <MessageCircle className="w-5 h-5" />
+                          <span>0</span>
+                        </button>
+                        <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
+                          <Share2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <a 
+                      href={creator.profileUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full"
+                    >
+                      <Button variant="outline" className="w-full">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Visit {creator.platform} Profile
+                      </Button>
+                    </a>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
           </div>
-        </>
-      )}
+        )}
+        
+        {/* Bottom CTA */}
+        <div className="mt-12 text-center bg-white rounded-lg shadow-sm border p-8">
+          <h3 className="text-2xl font-semibold mb-4">Ready to Share Your Faith?</h3>
+          <p className="text-gray-600 mb-6">
+            Join our sponsorship program and get compensated for creating inspiring faith-based content.
+          </p>
+          <Link href="/sponsorship-application">
+            <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold">
+              <Star className="w-5 h-5 mr-2" />
+              Apply for Sponsorship Now
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
