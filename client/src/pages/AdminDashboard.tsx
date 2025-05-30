@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={application.user.profileImageUrl} />
+                            <AvatarImage src={application.user?.profileImageUrl || ''} />
                             <AvatarFallback>{application.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
