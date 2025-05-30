@@ -370,7 +370,7 @@ export default function BusinessNetworkPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h4 className="font-semibold mb-2">What's included in the membership?</h4>
+                    <h4 className="font-semibold mb-2 text-black">What's included in the membership?</h4>
                     <p className="text-gray-600">
                       Each membership tier includes access to our business directory, networking events, and resources. Higher tiers offer enhanced visibility, priority access, and dedicated support.
                     </p>
