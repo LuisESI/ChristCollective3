@@ -101,7 +101,7 @@ export default function SponsoredCreatorsPage() {
             
             {/* Apply Now CTA */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/sponsorship-application">
+              <Link to="/sponsorship-application">
                 <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold px-8 py-3">
                   <Star className="w-5 h-5 mr-2" />
                   Apply for Sponsorship
@@ -128,7 +128,7 @@ export default function SponsoredCreatorsPage() {
               <p className="text-gray-600 mb-6">
                 We're looking for passionate creators to join our sponsorship program and share faith-based content.
               </p>
-              <Link href="/sponsorship-application">
+              <Link to="/sponsorship-application">
                 <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold">
                   <Star className="w-5 h-5 mr-2" />
                   Be Our First Creator
