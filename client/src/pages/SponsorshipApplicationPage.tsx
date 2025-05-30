@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,9 +100,26 @@ export default function SponsorshipApplicationPage() {
     mutate(data);
   };
 
-  // Redirect to login if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    navigate("/api/login");
+  // Redirect to login if not authenticated using useEffect
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/api/login");
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex justify-center">
+          <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (redirect will happen)
+  if (!isAuthenticated) {
     return null;
   }
 
