@@ -19,6 +19,7 @@ import DonateCheckoutPage from "@/pages/DonateCheckoutPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
+import AdminDashboard from "@/pages/AdminDashboard";
 
 function Router() {
   return (

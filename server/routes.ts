@@ -81,6 +81,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+
+  // Admin middleware to check if user is admin
+  const isAdmin = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      if (!user || !user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ message: "Failed to verify admin status" });
+    }
+  };
+
+  // Admin routes
+  app.get('/api/admin/sponsorship-applications', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const applications = await storage.listSponsorshipApplications();
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching sponsorship applications:", error);
+      res.status(500).json({ message: "Failed to fetch applications" });
+    }
+  });
+
+  app.get('/api/admin/campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaigns = await storage.listCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.get('/api/admin/business-profiles', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const profiles = await storage.listBusinessProfiles();
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error fetching business profiles:", error);
+      res.status(500).json({ message: "Failed to fetch business profiles" });
+    }
+  });
   
   // File upload route - supports both images and videos
   app.post('/api/upload', isAuthenticated, (req, res, next) => {
