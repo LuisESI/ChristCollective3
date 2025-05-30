@@ -39,7 +39,7 @@ const applicationSchema = z.object({
 
 type ApplicationValues = z.infer<typeof applicationSchema>;
 
-export default function SponsorshipApplicationPage() {
+function SponsorshipApplicationPage() {
   const { toast } = useToast();
   const { isAuthenticated, user, isLoading } = useAuth();
   const [, navigate] = useLocation();
@@ -339,3 +339,5 @@ export default function SponsorshipApplicationPage() {
     </div>
   );
 }
+
+export default SponsorshipApplicationPage;
