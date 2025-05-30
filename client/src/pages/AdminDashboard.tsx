@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Users, 
   DollarSign, 
@@ -18,7 +19,8 @@ import {
   Clock,
   Mail,
   Phone,
-  Globe
+  Globe,
+  X
 } from "lucide-react";
 
 type SponsorshipApplication = {
@@ -351,6 +353,119 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Application Detail Modal */}
+      <Dialog open={!!selectedApplication} onOpenChange={() => setSelectedApplication(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={selectedApplication?.user?.profileImageUrl || ''} />
+                <AvatarFallback>{selectedApplication?.name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              {selectedApplication?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Sponsorship Application Details
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedApplication && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                {getStatusBadge(selectedApplication.status)}
+                <span className="text-sm text-gray-500">
+                  Applied: {formatDate(selectedApplication.createdAt)}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Contact Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <span>{selectedApplication.email}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Platform & Audience</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-gray-400" />
+                      <span>{selectedApplication.platform}</span>
+                    </div>
+                    {selectedApplication.subscriberCount && (
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-gray-400" />
+                        <span>{selectedApplication.subscriberCount.toLocaleString()} subscribers</span>
+                      </div>
+                    )}
+                    <div>
+                      <a 
+                        href={selectedApplication.profileUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View Profile →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Content Description</h4>
+                <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                  {selectedApplication.content}
+                </p>
+              </div>
+
+              {selectedApplication.audience && (
+                <div>
+                  <h4 className="font-semibold mb-2">Target Audience</h4>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                    {selectedApplication.audience}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-semibold mb-2">Application Message</h4>
+                <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                  {selectedApplication.message}
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-4 border-t">
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  Approve Application
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                  size="sm"
+                >
+                  Reject Application
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setSelectedApplication(null)}
+                  size="sm"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
