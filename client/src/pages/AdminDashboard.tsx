@@ -289,7 +289,7 @@ export default function AdminDashboard() {
                         <span>Created: {formatDate(campaign.createdAt)}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        By: {campaign.user.firstName} {campaign.user.lastName} ({campaign.user.email})
+                        By: {campaign.user?.firstName || ''} {campaign.user?.lastName || ''} ({campaign.user?.email || 'No email'})
                       </p>
                     </div>
                   ))}
@@ -326,7 +326,7 @@ export default function AdminDashboard() {
                           <p className="text-sm text-gray-600">{profile.industry}</p>
                           <p className="text-sm text-gray-500 mt-1">{profile.location}</p>
                           <p className="text-xs text-gray-500 mt-2">
-                            Contact: {profile.user.firstName} {profile.user.lastName} ({profile.user.email})
+                            Contact: {profile.user?.firstName || ''} {profile.user?.lastName || ''} ({profile.user?.email || 'No email'})
                           </p>
                         </div>
                       </div>
