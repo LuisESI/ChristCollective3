@@ -91,7 +91,7 @@ export default function DonationsPage() {
             
             <Button asChild variant="default" className="w-full md:w-auto">
               {isAuthenticated ? (
-                <Link href="/campaigns/create">
+                <Link href="/donate/create">
                   <span className="inline-flex items-center cursor-pointer">
                     <Plus className="mr-2" size={16} />
                     Create New Campaign
