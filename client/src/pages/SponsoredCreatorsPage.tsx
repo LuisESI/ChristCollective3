@@ -145,7 +145,7 @@ export default function SponsoredCreatorsPage() {
                     <AvatarFallback>CC</AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
-                    <p className="font-semibold">Christ Collective</p>
+                    <p className="font-semibold text-black">Christ Collective</p>
                     <p className="text-sm text-gray-500">Sample sponsored post</p>
                   </div>
                   <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
