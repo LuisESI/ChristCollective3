@@ -77,6 +77,13 @@ export default function Header() {
                     <div className="cursor-pointer w-full">Manage Campaigns</div>
                   </Link>
                 </DropdownMenuItem>
+                {user?.isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">
+                      <div className="cursor-pointer w-full">Admin Dashboard</div>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <a href="/api/logout" className="cursor-pointer w-full">Log Out</a>
                 </DropdownMenuItem>

@@ -83,17 +83,17 @@ export default function AdminDashboard() {
   }
 
   // Fetch sponsorship applications
-  const { data: applications = [], isLoading: applicationsLoading } = useQuery({
+  const { data: applications = [], isLoading: applicationsLoading } = useQuery<SponsorshipApplication[]>({
     queryKey: ["/api/admin/sponsorship-applications"],
   });
 
   // Fetch campaigns for admin review
-  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<Campaign[]>({
     queryKey: ["/api/admin/campaigns"],
   });
 
   // Fetch business profiles
-  const { data: businessProfiles = [], isLoading: businessLoading } = useQuery({
+  const { data: businessProfiles = [], isLoading: businessLoading } = useQuery<BusinessProfile[]>({
     queryKey: ["/api/admin/business-profiles"],
   });
 

@@ -36,6 +36,7 @@ function Router() {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
