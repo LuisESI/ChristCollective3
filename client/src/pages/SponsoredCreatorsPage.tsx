@@ -271,7 +271,7 @@ export default function SponsoredCreatorsPage() {
         
         {/* Bottom CTA */}
         <div className="mt-12 text-center bg-white rounded-lg shadow-sm border p-8">
-          <h3 className="text-2xl font-semibold mb-4">Ready to Share Your Faith?</h3>
+          <h3 className="text-2xl font-semibold mb-4 text-black">Ready to Share Your Faith?</h3>
           <p className="text-gray-600 mb-6">
             Join our sponsorship program and get compensated for creating inspiring faith-based content.
           </p>
