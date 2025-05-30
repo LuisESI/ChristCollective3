@@ -108,6 +108,10 @@ export default function AdminDashboard() {
   };
 
   const getStatusBadge = (status: string) => {
+    if (!status) {
+      return <Badge variant="outline">No Status</Badge>;
+    }
+    
     switch (status.toLowerCase()) {
       case 'pending':
         return <Badge variant="outline" className="border-yellow-500 text-yellow-600"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
