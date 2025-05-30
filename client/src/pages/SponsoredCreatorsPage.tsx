@@ -152,7 +152,7 @@ export default function SponsoredCreatorsPage() {
                 </div>
                 
                 <div className="mb-4">
-                  <h3 className="font-semibold text-lg mb-2">Coming Soon: Faith-Based Content</h3>
+                  <h3 className="font-semibold text-lg mb-2 text-black">Coming Soon: Faith-Based Content</h3>
                   <p className="text-gray-700">
                     We're excited to feature inspiring testimonies, biblical teachings, and uplifting content from our sponsored creators. 
                     Join our program to share your faith journey with the world.
