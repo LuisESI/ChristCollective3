@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
+import communityGroupImg from "@assets/pexels-bertellifotografia-3752600.jpg";
 
 export default function CTASection() {
   const { isAuthenticated } = useAuth();
@@ -10,7 +11,7 @@ export default function CTASection() {
     <section 
       className="py-20 text-white relative"
       style={{
-        backgroundImage: `url(${blueSkyBg})`,
+        backgroundImage: `url(${communityGroupImg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundColor: '#121212', // Fallback color
