@@ -71,9 +71,19 @@ export const getQueryFn: <T>(options: {
       }
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
         const res = await fetch(url as string, {
           credentials: "same-origin",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache',
+          signal: controller.signal,
         });
+        
+        clearTimeout(timeoutId);
 
         if (res.status === 401) {
           if (!isInitialLoad && !isAuthRelatedRequest(url)) {
