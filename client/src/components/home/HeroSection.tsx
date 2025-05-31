@@ -8,6 +8,7 @@ import mountainBackground from "@assets/mountain-majesty-artistic-silhouette-of-
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
 import businessNetworkImg from "@assets/pexels-fauxels-3184325.jpg";
 import contentCreationImg from "@assets/pexels-cottonbro-6883807.jpg";
+import charityVolunteerImg from "@assets/pexels-julia-m-cameron-6994855.jpg";
 
 // Define slider content type
 type SlideContent = {
@@ -58,7 +59,7 @@ export default function HeroSection() {
     },
     {
       id: 4,
-      image: blueSkyBg,
+      image: charityVolunteerImg,
       heading: "Supporting Christian Ministries",
       subheading: "Help us spread the good news by supporting important missions & community programs.",
       primaryButtonText: "Our Missions",
