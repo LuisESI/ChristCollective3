@@ -100,7 +100,7 @@ export default function DonationSection() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12">
           <div>
-            <h3 className="text-2xl font-semibold mb-6">Featured Campaigns</h3>
+            <h3 className="text-2xl font-semibold mb-6 text-black">Featured Campaigns</h3>
             
             {isLoading ? (
               <div className="space-y-6">
