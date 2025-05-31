@@ -123,7 +123,7 @@ export default function DonationsPage() {
           ) : campaigns.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns.map((campaign: Campaign) => (
-                <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow bg-gray-800 border-gray-700">
+                <Card key={campaign.id} className="overflow-hidden hover:shadow-md transition-shadow bg-black border-gray-700">
                   {campaign.image ? (
                     <img 
                       src={campaign.image} 
