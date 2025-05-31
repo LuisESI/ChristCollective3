@@ -160,13 +160,6 @@ export default function DonationSection() {
               </Card>
             )}
             
-            <div className="text-center mt-8">
-              <Link href="/donate">
-                <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
-                  View All Campaigns <span className="ml-2">→</span>
-                </span>
-              </Link>
-            </div>
           </div>
           
           <div className="bg-black rounded-xl p-8 border border-gray-700 hover:border-primary transition-colors">
@@ -239,7 +232,13 @@ export default function DonationSection() {
           </div>
         </div>
         
-
+        <div className="text-center mt-12">
+          <Link href="/donate">
+            <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
+              View All Campaigns <span className="ml-2">→</span>
+            </span>
+          </Link>
+        </div>
       </div>
     </section>
   );
