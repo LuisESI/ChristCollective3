@@ -68,7 +68,7 @@ export default function DonationsPage() {
         <meta property="og:description" content="Support meaningful charitable initiatives that reflect Christian values. Make a difference today." />
       </Helmet>
       
-      <section className="py-16 bg-gray-900">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 text-white">Support Our Causes</h1>
