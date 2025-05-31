@@ -6,6 +6,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Users, Video, Building2, Heart } from "lucide-react";
 import mountainBackground from "@assets/mountain-majesty-artistic-silhouette-of-crucifix-cross-against-sunset-sky-photo.jpg";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
+import businessNetworkImg from "@assets/pexels-fauxels-3184325.jpg";
 
 // Define slider content type
 type SlideContent = {
@@ -46,7 +47,7 @@ export default function HeroSection() {
     },
     {
       id: 3,
-      image: mountainBackground,
+      image: businessNetworkImg,
       heading: "Christian Business Network",
       subheading: "Join our network of Christian Business Owners.",
       primaryButtonText: "Join Now",
@@ -112,27 +113,44 @@ export default function HeroSection() {
                     {slide.subheading}
                   </p>
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                    <Button 
-                      asChild
-                      size="lg"
-                      className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                    >
-                      <a href="/api/login">{slide.primaryButtonText}</a>
-                    </Button>
-                    <Button 
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                    >
-                      {slide.secondaryButtonLink === "/api/login" ? (
+                    {slide.primaryButtonLink === "/api/login" ? (
+                      <Button 
+                        asChild
+                        size="lg"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                      >
+                        <a href={slide.primaryButtonLink}>{slide.primaryButtonText}</a>
+                      </Button>
+                    ) : (
+                      <Button 
+                        asChild
+                        size="lg"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                      >
+                        <Link href={slide.primaryButtonLink}>{slide.primaryButtonText}</Link>
+                      </Button>
+                    )}
+                    {slide.secondaryButtonLink === "/api/login" ? (
+                      <Button 
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                      >
                         <a href={slide.secondaryButtonLink}>{slide.secondaryButtonText}</a>
-                      ) : (
+                      </Button>
+                    ) : (
+                      <Button 
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                      >
                         <Link href={slide.secondaryButtonLink}>
                           <span className="text-black">{slide.secondaryButtonText}</span>
                         </Link>
-                      )}
-                    </Button>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
