@@ -71,19 +71,13 @@ export const getQueryFn: <T>(options: {
       }
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
         const res = await fetch(url as string, {
           credentials: "same-origin",
           headers: {
             'Content-Type': 'application/json',
           },
           cache: 'no-cache',
-          signal: controller.signal,
         });
-        
-        clearTimeout(timeoutId);
 
         if (res.status === 401) {
           if (!isInitialLoad && !isAuthRelatedRequest(url)) {
@@ -99,8 +93,10 @@ export const getQueryFn: <T>(options: {
 
         return await res.json();
       } catch (fetchError) {
-        // Handle fetch errors silently
-        console.warn("Fetch error suppressed:", url);
+        // Handle fetch errors silently - this is expected during initial load
+        if (!isInitialLoad && !isAuthRelatedRequest(url)) {
+          console.warn("Fetch error suppressed:", url);
+        }
         return null;
       }
     } catch (error) {
