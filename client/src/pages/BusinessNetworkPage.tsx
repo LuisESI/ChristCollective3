@@ -119,7 +119,7 @@ export default function BusinessNetworkPage() {
         <meta property="og:description" content="Connect with other Christian business owners and professionals who share your values." />
       </Helmet>
       
-      <section className="hero-section h-[400px] flex items-center justify-center">
+      <section className="hero-section h-[280px] flex items-center justify-center">
         <div className="container mx-auto px-4 text-center text-white">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Christian Business Network</h1>
           <p className="text-lg md:text-xl max-w-5xl mx-auto mb-8">
