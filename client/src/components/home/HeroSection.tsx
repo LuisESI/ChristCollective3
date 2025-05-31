@@ -43,9 +43,9 @@ export default function HeroSection() {
       heading: "Create for Christ",
       subheading: "Join our team of creators to receive compensation through sponsorships.",
       primaryButtonText: "Apply Now",
-      primaryButtonLink: "/creators/apply",
+      primaryButtonLink: "/sponsorship-application",
       secondaryButtonText: "Learn More",
-      secondaryButtonLink: "/creators",
+      secondaryButtonLink: "/sponsored-creators",
     },
     {
       id: 3,
