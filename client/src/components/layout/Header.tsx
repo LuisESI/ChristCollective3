@@ -25,10 +25,10 @@ export default function Header() {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "About", path: "/#about" },
     { name: "Donate", path: "/donate" },
     { name: "Business", path: "/business" },
     { name: "Creators", path: "/sponsored-creators" },
+    { name: "About", path: "/#about" },
   ];
 
   return (
