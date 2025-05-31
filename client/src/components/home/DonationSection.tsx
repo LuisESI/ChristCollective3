@@ -228,16 +228,16 @@ export default function DonationSection() {
               <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
                 Create Campaign
               </Button>
+              
+              <div className="text-center mt-6">
+                <Link href="/donate">
+                  <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
+                    View All Campaigns <span className="ml-2">→</span>
+                  </span>
+                </Link>
+              </div>
             </form>
           </div>
-        </div>
-        
-        <div className="text-center mt-12">
-          <Link href="/donate">
-            <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
-              View All Campaigns <span className="ml-2">→</span>
-            </span>
-          </Link>
         </div>
       </div>
     </section>
