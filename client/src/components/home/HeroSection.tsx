@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Users, Video, Building2, Heart } from "lucid
 import mountainBackground from "@assets/mountain-majesty-artistic-silhouette-of-crucifix-cross-against-sunset-sky-photo.jpg";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
 import businessNetworkImg from "@assets/pexels-fauxels-3184325.jpg";
+import contentCreationImg from "@assets/pexels-cottonbro-6883807.jpg";
 
 // Define slider content type
 type SlideContent = {
@@ -37,7 +38,7 @@ export default function HeroSection() {
     },
     {
       id: 2,
-      image: blueSkyBg,
+      image: contentCreationImg,
       heading: "Create for Christ",
       subheading: "Join our team of creators to receive compensation through sponsorships.",
       primaryButtonText: "Apply Now",
