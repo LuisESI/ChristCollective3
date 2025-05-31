@@ -229,7 +229,7 @@ export default function DonationSection() {
                 Create Campaign
               </Button>
               
-              <div className="text-center mt-10">
+              <div className="text-center mt-14">
                 <Link href="/donate">
                   <span className="inline-block text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer">
                     View All Campaigns <span className="ml-2">→</span>
