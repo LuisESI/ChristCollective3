@@ -72,7 +72,7 @@ export default function DonationsPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 text-black">Support Our Causes</h1>
-            <p className="text-lg text-black max-w-4xl mx-auto">
+            <p className="text-lg text-black max-w-6xl mx-auto">
               Browse our collection of charitable campaigns and support the causes that align with your values.
             </p>
           </div>
