@@ -423,19 +423,17 @@ export default function BusinessNetworkPage() {
           <p className="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
             Join our growing network of Christian business owners and professionals today.
           </p>
-          <Button 
-            asChild
-            size="lg"
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
-            {isAuthenticated ? (
-              <Link href="/profile">
+          {isAuthenticated ? (
+            <Link href="/profile">
+              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-white hover:bg-primary/90 h-11 px-8">
                 Create Your Business Profile
-              </Link>
-            ) : (
-              <a href="/api/login">Join Our Network</a>
-            )}
-          </Button>
+              </button>
+            </Link>
+          ) : (
+            <a href="/api/login" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-white hover:bg-primary/90 h-11 px-8">
+              Join Our Network
+            </a>
+          )}
           
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
@@ -447,12 +445,12 @@ export default function BusinessNetworkPage() {
               <p className="text-gray-300">Industries</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">50+</div>
-              <p className="text-gray-300">Monthly Events</p>
+              <div className="text-3xl font-bold text-primary mb-2">95%</div>
+              <p className="text-gray-300">Success Rate</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">85%</div>
-              <p className="text-gray-300">Connection Rate</p>
+              <div className="text-3xl font-bold text-primary mb-2">24/7</div>
+              <p className="text-gray-300">Support Available</p>
             </div>
           </div>
         </div>

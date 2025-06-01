@@ -116,42 +116,32 @@ export default function HeroSection() {
                   </p>
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
                     {slide.primaryButtonLink === "/api/login" ? (
-                      <Button 
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                        onClick={() => window.location.href = slide.primaryButtonLink}
+                      <a 
+                        href={slide.primaryButtonLink}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-black hover:bg-primary/90 h-11 px-8 font-semibold py-3 text-lg"
                       >
                         {slide.primaryButtonText}
-                      </Button>
+                      </a>
                     ) : (
-                      <Button 
-                        asChild
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                      >
-                        <Link href={slide.primaryButtonLink}>{slide.primaryButtonText}</Link>
-                      </Button>
+                      <Link href={slide.primaryButtonLink}>
+                        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-black hover:bg-primary/90 h-11 px-8 font-semibold py-3 text-lg">
+                          {slide.primaryButtonText}
+                        </button>
+                      </Link>
                     )}
                     {slide.secondaryButtonLink === "/api/login" ? (
-                      <Button 
-                        size="lg"
-                        variant="outline"
-                        className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                        onClick={() => window.location.href = slide.secondaryButtonLink}
+                      <a 
+                        href={slide.secondaryButtonLink}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-100 text-black h-11 px-8 font-semibold py-3 text-lg"
                       >
                         {slide.secondaryButtonText}
-                      </Button>
+                      </a>
                     ) : (
-                      <Button 
-                        asChild
-                        size="lg"
-                        variant="outline"
-                        className="bg-white hover:bg-gray-100 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
-                      >
-                        <Link href={slide.secondaryButtonLink} className="text-black">
+                      <Link href={slide.secondaryButtonLink}>
+                        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-100 text-black h-11 px-8 font-semibold py-3 text-lg">
                           {slide.secondaryButtonText}
-                        </Link>
-                      </Button>
+                        </button>
+                      </Link>
                     )}
                   </div>
                 </div>
