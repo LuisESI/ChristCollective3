@@ -62,13 +62,18 @@ export default function CampaignDetailsPage() {
   const generateVideoThumbnail = (videoUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement('video');
-      video.crossOrigin = 'anonymous';
-      video.currentTime = 1; // Capture frame at 1 second
+      video.muted = true;
+      video.playsInline = true;
+      video.currentTime = 0.5; // Capture frame at 0.5 seconds
       
-      video.onloadeddata = () => {
+      video.onloadedmetadata = () => {
+        video.currentTime = 0.5;
+      };
+      
+      video.onseeked = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
         
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -81,6 +86,7 @@ export default function CampaignDetailsPage() {
       };
       
       video.onerror = () => reject(new Error('Video load error'));
+      video.onabort = () => reject(new Error('Video load aborted'));
       video.src = videoUrl;
       video.load();
     });
@@ -89,10 +95,17 @@ export default function CampaignDetailsPage() {
   useEffect(() => {
     if (campaign.video) {
       generateVideoThumbnail(campaign.video)
-        .then(thumbnail => setVideoThumbnail(thumbnail))
+        .then(thumbnail => {
+          setVideoThumbnail(thumbnail);
+          // If there's no image, default to showing video
+          if (!campaign.image) {
+            setMediaType('video');
+            setSelectedMedia(campaign.video);
+          }
+        })
         .catch(error => console.error('Error generating video thumbnail:', error));
     }
-  }, [campaign.video]);
+  }, [campaign.video, campaign.image]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -185,15 +198,29 @@ export default function CampaignDetailsPage() {
             <div className="md:col-span-2">
               {/* Main media display (image or video) */}
               <div className="mb-4">
-                {(campaign.image || (campaign.video && videoThumbnail)) ? (
+                {(campaign.image || campaign.video) ? (
                   <Dialog>
                     <DialogTrigger asChild>
                       <div className="cursor-pointer relative">
-                        <img 
-                          src={selectedMedia || (campaign.video && videoThumbnail && mediaType === 'video' ? videoThumbnail : campaign.image)} 
-                          alt={campaign.title} 
-                          className="w-full h-auto rounded-lg object-cover aspect-video"
-                        />
+                        {/* Show video thumbnail if video exists and no image, or if video is selected */}
+                        {campaign.video && (!campaign.image || mediaType === 'video') && videoThumbnail ? (
+                          <img 
+                            src={mediaType === 'video' && selectedMedia === campaign.video ? videoThumbnail : (videoThumbnail || campaign.image)} 
+                            alt={campaign.title} 
+                            className="w-full h-auto rounded-lg object-cover aspect-video"
+                          />
+                        ) : campaign.image ? (
+                          <img 
+                            src={selectedMedia || campaign.image} 
+                            alt={campaign.title} 
+                            className="w-full h-auto rounded-lg object-cover aspect-video"
+                          />
+                        ) : (
+                          <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
+                            <PlayIcon size={64} className="text-gray-400" />
+                          </div>
+                        )}
+                        
                         {(mediaType === 'video' || (campaign.video && !campaign.image)) && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
                             <PlayIcon size={64} className="text-white" />
