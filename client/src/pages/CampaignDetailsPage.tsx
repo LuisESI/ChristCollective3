@@ -382,7 +382,7 @@ export default function CampaignDetailsPage() {
                 <CardHeader className="bg-black">
                   <CardTitle>Creator</CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center">
+                <CardContent className="flex items-center bg-black">
                   <Avatar className="h-10 w-10 mr-4">
                     <AvatarImage 
                       src={campaign.user?.profileImageUrl} 
