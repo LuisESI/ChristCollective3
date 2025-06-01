@@ -1,11 +1,17 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
 import communityGroupImg from "@assets/pexels-bertellifotografia-3752600.jpg";
 
 export default function CTASection() {
   const { isAuthenticated } = useAuth();
+  
+  // Fetch live statistics
+  const { data: statistics, isLoading } = useQuery({
+    queryKey: ["/api/statistics"],
+  });
 
   return (
     <section 

@@ -21,7 +21,7 @@ import {
   type InsertSponsorshipApplication,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, ilike, like } from "drizzle-orm";
+import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -107,6 +107,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
+  }
+
+  async getUsersCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return Number(result[0].count);
   }
 
   async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {

@@ -630,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const campaigns = await storage.listCampaigns();
       const businessProfiles = await storage.listBusinessProfiles();
-      const users = await storage.getUsersCount?.() || 0;
+      const users = await storage.getUsersCount();
       
       // Calculate total donations raised from campaigns
       const totalDonations = campaigns.reduce((sum, campaign) => {
