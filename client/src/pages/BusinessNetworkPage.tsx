@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Users, Briefcase, Filter } from "lucide-react";
+import { Search, Users, Briefcase, Filter, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet";
 
