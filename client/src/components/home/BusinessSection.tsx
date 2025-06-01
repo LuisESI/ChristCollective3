@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Users, Calendar, Lightbulb } from "lucide-react";
+import { Check, Users, Calendar, Lightbulb, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface MembershipTier {
@@ -16,55 +16,10 @@ interface MembershipTier {
 export default function BusinessSection() {
   const { isAuthenticated } = useAuth();
   
-  // Fetch membership tiers from API
-  const { data: membershipTiers = [], isLoading } = useQuery({
-    queryKey: ["/api/membership-tiers"],
+  // Fetch business profiles to get current member count
+  const { data: profiles = [], isLoading } = useQuery({
+    queryKey: ["/api/business-profiles"],
   });
-
-  // Default membership tiers if API fails or while loading
-  const defaultTiers: MembershipTier[] = [
-    {
-      id: 1,
-      name: "Basic Membership",
-      price: "9",
-      description: "Perfect for startups and small businesses",
-      features: [
-        "Basic profile in our business directory",
-        "Access to monthly virtual networking events",
-        "Join industry-specific groups",
-        "Email support"
-      ]
-    },
-    {
-      id: 2,
-      name: "Professional Membership",
-      price: "29",
-      description: "For established businesses and professionals",
-      features: [
-        "Enhanced profile with portfolio showcase",
-        "Priority access to all networking events",
-        "1:1 business matchmaking service",
-        "Access to exclusive resources and training",
-        "Priority support"
-      ]
-    },
-    {
-      id: 3,
-      name: "Executive Membership",
-      price: "99",
-      description: "For industry leaders and executives",
-      features: [
-        "Premium featured profile with brand spotlight",
-        "VIP access to all events including exclusive executive roundtables",
-        "Dedicated business advisor",
-        "Opportunity to host and speak at events",
-        "All Professional benefits plus executive coaching sessions"
-      ]
-    }
-  ];
-
-  // Use API data if available, otherwise use default tiers
-  const tiers = membershipTiers.length > 0 ? membershipTiers : defaultTiers;
 
   return (
     <section id="business" className="py-16 bg-black text-white">
@@ -77,63 +32,108 @@ export default function BusinessSection() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
-          {tiers.map((tier, index) => {
-            const isPopular = index === 1;
-            
-            return (
-              <Card 
-                key={tier.id}
-                className={`
-                  bg-white rounded-xl p-8 text-black
-                  ${isPopular 
-                    ? 'border-2 border-primary relative transform hover:scale-105 transition-transform duration-300' 
-                    : 'border border-gray-700 hover:border-primary transition-colors'
-                  }
-                `}
-              >
-                {isPopular && (
-                  <div className="absolute top-0 right-0 bg-primary text-[#121212] font-medium py-1 px-4 rounded-bl-lg rounded-tr-lg">
-                    Popular
-                  </div>
-                )}
-                
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">{tier.name}</h3>
-                  <div className="text-3xl font-bold mb-1">
-                    ${tier.price}<span className="text-lg font-normal text-gray-400">/month</span>
-                  </div>
-                  <p className="text-gray-400">{tier.description}</p>
+        {/* Progress Bar and Founding Member Program */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-white rounded-lg p-6 shadow-lg mb-8">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-gray-700">Founding Members</span>
+              <span className="text-sm font-medium text-gray-700">{profiles.length}/100</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div 
+                className="bg-primary h-3 rounded-full transition-all duration-300" 
+                style={{ width: `${Math.min((profiles.length / 100) * 100, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              {100 - profiles.length > 0 
+                ? `${100 - profiles.length} spots remaining for free lifetime membership`
+                : "Founding member program complete!"}
+            </p>
+          </div>
+
+          <Card className="bg-white border-2 border-primary/20 rounded-xl shadow-lg">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                  <Users className="w-8 h-8 text-primary" />
                 </div>
-                
-                <ul className="space-y-3 mb-8">
-                  {tier.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <Check className="text-primary mt-1 mr-3 flex-shrink-0" size={18} />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Button
+                <h3 className="text-2xl font-bold mb-2 text-black">Founding Member Benefits</h3>
+                <p className="text-gray-600">Join the first 100 members and get lifetime access for FREE</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Business Directory Access</span>
+                      <p className="text-sm text-gray-600">Connect with Christian business owners nationwide</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Monthly Newsletter</span>
+                      <p className="text-sm text-gray-600">Stay updated with industry insights and opportunities</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Online Prayer Group</span>
+                      <p className="text-sm text-gray-600">Join fellowship with like-minded professionals</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Networking Events</span>
+                      <p className="text-sm text-gray-600">Exclusive access to member-only events</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Business Spotlight</span>
+                      <p className="text-sm text-gray-600">Get featured in our community showcase</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-black">Lifetime Access</span>
+                      <p className="text-sm text-gray-600">No recurring fees, ever</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Button 
+                  size="lg" 
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                  disabled={profiles.length >= 100}
                   asChild
-                  className={`w-full ${
-                    isPopular
-                      ? "bg-primary hover:bg-primary/90 text-white"
-                      : "bg-transparent border border-primary text-primary hover:bg-primary hover:text-white"
-                  }`}
                 >
                   {isAuthenticated ? (
-                    <Link href={`/membership/checkout/${tier.id}`}>
-                      <a>Get Started</a>
+                    <Link href="/profile">
+                      <a>{profiles.length >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
                     </Link>
                   ) : (
-                    <a href="/api/login">Get Started</a>
+                    <a href="/api/login">{profiles.length >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
                   )}
                 </Button>
-              </Card>
-            );
-          })}
+                <p className="text-xs text-gray-500 mt-3">
+                  {profiles.length < 100 
+                    ? "Limited time offer - join now while spots are available"
+                    : "Thank you to all our founding members!"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         {/* Business Networking Features */}
