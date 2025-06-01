@@ -338,11 +338,11 @@ export default function ProfilePage() {
                   
                   <div className="w-full mt-6">
                     <Button 
-                      asChild
                       variant="outline" 
                       className="w-full"
+                      onClick={() => window.location.href = "/api/logout"}
                     >
-                      <a href="/api/logout">Sign Out</a>
+                      Sign Out
                     </Button>
                   </div>
                 </div>
