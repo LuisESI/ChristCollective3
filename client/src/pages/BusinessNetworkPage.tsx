@@ -175,12 +175,12 @@ export default function BusinessNetworkPage() {
                 </div>
                 
                 {isAuthenticated && (
-                  <Button asChild className="w-full md:w-auto">
-                    <Link href="/profile">
+                  <Link href="/profile">
+                    <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                       <Briefcase className="mr-2" size={16} />
                       Manage Your Profile
-                    </Link>
-                  </Button>
+                    </button>
+                  </Link>
                 )}
               </div>
               
@@ -239,11 +239,11 @@ export default function BusinessNetworkPage() {
                               📍 {profile.location}
                             </span>
                           )}
-                          <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                            <Link href={`/business/profile/${profile.id}`}>
+                          <Link href={`/business/profile/${profile.id}`}>
+                            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-3 text-primary hover:text-primary/80">
                               View Profile
-                            </Link>
-                          </Button>
+                            </button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>
@@ -259,15 +259,15 @@ export default function BusinessNetworkPage() {
                       : "There are no business profiles yet. Be the first to join our network!"}
                   </p>
                   {isAuthenticated ? (
-                    <Button asChild>
-                      <Link href="/profile">
+                    <Link href="/profile">
+                      <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                         Create Your Business Profile
-                      </Link>
-                    </Button>
+                      </button>
+                    </Link>
                   ) : (
-                    <Button asChild>
-                      <a href="/api/login">Join Our Network</a>
-                    </Button>
+                    <a href="/api/login" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                      Join Our Network
+                    </a>
                   )}
                 </div>
               )}
@@ -435,7 +435,7 @@ export default function BusinessNetworkPage() {
             </a>
           )}
           
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold text-primary mb-2">2,500+</div>
               <p className="text-gray-300">Business Members</p>
@@ -443,10 +443,6 @@ export default function BusinessNetworkPage() {
             <div>
               <div className="text-3xl font-bold text-primary mb-2">120+</div>
               <p className="text-gray-300">Industries</p>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <p className="text-gray-300">Success Rate</p>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">24/7</div>
