@@ -47,35 +47,35 @@ export default function AboutPage() {
             </div>
             
             <div className="grid grid-cols-2 gap-6">
-              <Card className="bg-gray-100 border-primary/20">
+              <Card className="bg-black border-primary/20">
                 <CardContent className="p-6 text-center">
                   <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <h4 className="font-semibold mb-2 text-black">Unity</h4>
-                  <p className="text-sm text-gray-700">Bringing believers together across denominations</p>
+                  <h4 className="font-semibold mb-2 text-white">Unity</h4>
+                  <p className="text-sm text-gray-300">Bringing believers together across denominations</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gray-100 border-primary/20">
+              <Card className="bg-black border-primary/20">
                 <CardContent className="p-6 text-center">
                   <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <h4 className="font-semibold mb-2 text-black">Community</h4>
-                  <p className="text-sm text-gray-700">Creating meaningful connections and relationships</p>
+                  <h4 className="font-semibold mb-2 text-white">Community</h4>
+                  <p className="text-sm text-gray-300">Creating meaningful connections and relationships</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gray-100 border-primary/20">
+              <Card className="bg-black border-primary/20">
                 <CardContent className="p-6 text-center">
                   <Globe className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <h4 className="font-semibold mb-2 text-black">Global Impact</h4>
-                  <p className="text-sm text-gray-700">Making a difference in communities worldwide</p>
+                  <h4 className="font-semibold mb-2 text-white">Global Impact</h4>
+                  <p className="text-sm text-gray-300">Making a difference in communities worldwide</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gray-100 border-primary/20">
+              <Card className="bg-black border-primary/20">
                 <CardContent className="p-6 text-center">
                   <Target className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <h4 className="font-semibold mb-2 text-black">Purpose</h4>
-                  <p className="text-sm text-gray-700">Empowering kingdom-building initiatives</p>
+                  <h4 className="font-semibold mb-2 text-white">Purpose</h4>
+                  <p className="text-sm text-gray-300">Empowering kingdom-building initiatives</p>
                 </CardContent>
               </Card>
             </div>
