@@ -138,7 +138,33 @@ export default function BusinessSection() {
         
         {/* Business Networking Features */}
         <div className="mt-16 grid grid-cols-1 lg:grid-cols-5 gap-12">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3 lg:order-2">
+            <img 
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
+              alt="Business networking event" 
+              className="w-full h-auto rounded-xl"
+            />
+            
+            <div className="mt-8">
+              <h3 className="text-2xl font-semibold mb-4">Join Our Growing Network</h3>
+              <p className="text-gray-400 mb-6">Connect with over 2,500+ Christian business owners and professionals across 120+ industries worldwide.</p>
+              
+              <Button 
+                asChild
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                {isAuthenticated ? (
+                  <Link href="/profile">
+                    <a>Create Your Business Profile</a>
+                  </Link>
+                ) : (
+                  <a href="/api/login">Create Your Business Profile</a>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 lg:order-1">
             <h3 className="text-2xl font-semibold mb-6">Business Community Features</h3>
             <div className="space-y-8">
               <div className="flex">
@@ -176,32 +202,6 @@ export default function BusinessSection() {
                   <p className="text-gray-400">Access faith-based business resources, guides, and tools to help you run your business with integrity.</p>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="lg:col-span-3">
-            <img 
-              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-              alt="Business networking event" 
-              className="w-full h-auto rounded-xl"
-            />
-            
-            <div className="mt-8">
-              <h3 className="text-2xl font-semibold mb-4">Join Our Growing Network</h3>
-              <p className="text-gray-400 mb-6">Connect with over 2,500+ Christian business owners and professionals across 120+ industries worldwide.</p>
-              
-              <Button 
-                asChild
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                {isAuthenticated ? (
-                  <Link href="/profile">
-                    <a>Create Your Business Profile</a>
-                  </Link>
-                ) : (
-                  <a href="/api/login">Create Your Business Profile</a>
-                )}
-              </Button>
             </div>
           </div>
         </div>
