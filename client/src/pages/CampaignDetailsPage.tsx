@@ -65,16 +65,16 @@ export default function CampaignDetailsPage() {
       video.muted = true;
       video.playsInline = true;
       video.currentTime = 0.5; // Capture frame at 0.5 seconds
-      
+
       video.onloadedmetadata = () => {
         video.currentTime = 0.5;
       };
-      
+
       video.onseeked = () => {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth || 320;
         canvas.height = video.videoHeight || 240;
-        
+
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -84,7 +84,7 @@ export default function CampaignDetailsPage() {
           reject(new Error('Could not get canvas context'));
         }
       };
-      
+
       video.onerror = () => reject(new Error('Video load error'));
       video.onabort = () => reject(new Error('Video load aborted'));
       video.src = videoUrl;
@@ -109,7 +109,7 @@ export default function CampaignDetailsPage() {
 
   const handleShare = async () => {
     const url = window.location.href;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -182,7 +182,7 @@ export default function CampaignDetailsPage() {
         <meta property="og:description" content={campaign.description.substring(0, 160)} />
         <meta property="og:type" content="website" />
       </Helmet>
-      
+
       <section className="bg-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
@@ -191,9 +191,9 @@ export default function CampaignDetailsPage() {
                 ← Back to All Campaigns
               </a>
             </Link>
-            
+
             <h1 className="text-3xl md:text-4xl font-bold mb-6 text-black">{campaign.title}</h1>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div className="md:col-span-2">
               {/* Main media display (image or video) */}
@@ -220,7 +220,7 @@ export default function CampaignDetailsPage() {
                             <PlayIcon size={64} className="text-gray-400" />
                           </div>
                         )}
-                        
+
                         {(mediaType === 'video' || (campaign.video && !campaign.image)) && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
                             <PlayIcon size={64} className="text-white" />
@@ -256,7 +256,7 @@ export default function CampaignDetailsPage() {
                   </div>
                 )}
               </div>
-              
+
               {/* Media gallery (additional images and video) */}
               <div className="grid grid-cols-6 gap-2 mb-6">
                 {/* Main image thumbnail */}
@@ -275,7 +275,7 @@ export default function CampaignDetailsPage() {
                     />
                   </div>
                 )}
-                
+
                 {/* Additional images thumbnails */}
                 {campaign.additionalImages && campaign.additionalImages.length > 0 && campaign.additionalImages.map((img: string, idx: number) => (
                   <div 
@@ -293,7 +293,7 @@ export default function CampaignDetailsPage() {
                     />
                   </div>
                 ))}
-                
+
                 {/* Video thumbnail (if available) */}
                 {campaign.video && (
                   <div 
@@ -323,13 +323,13 @@ export default function CampaignDetailsPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="prose max-w-none">
                 <h2 className="text-2xl font-semibold mb-4 text-black">About this campaign</h2>
                 <p className="whitespace-pre-line text-gray-200">{campaign.description}</p>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <Card>
                 <CardHeader className="pb-2">
@@ -345,7 +345,7 @@ export default function CampaignDetailsPage() {
                     value={calculateProgress(campaign.currentAmount, campaign.goal)} 
                     className="h-2.5 mb-4" 
                   />
-                  
+
                   <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300 mb-6">
                     <div className="flex items-center">
                       <Users className="mr-1" size={16} />
@@ -358,13 +358,13 @@ export default function CampaignDetailsPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <Button asChild className="w-full mb-3">
                     <Link href={`/donate/checkout/${campaign.id}`}>
                       <a>Donate Now</a>
                     </Link>
                   </Button>
-                  
+
                   <div className="flex space-x-2">
                     <Button variant="outline" className="flex-1 flex items-center justify-center">
                       <Heart className="mr-2" size={16} />
@@ -377,7 +377,7 @@ export default function CampaignDetailsPage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Creator</CardTitle>
@@ -406,10 +406,10 @@ export default function CampaignDetailsPage() {
               </Card>
             </div>
           </div>
-          
+
           <div className="mb-10">
-            <h2 className="text-2xl font-semibold mb-6">Recent Donations</h2>
-            
+            <h2 className="text-2xl font-semibold mb-6 text-black">Recent Donations</h2>
+
             {isLoadingDonations ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
