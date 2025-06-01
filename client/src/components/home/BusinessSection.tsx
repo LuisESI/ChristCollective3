@@ -137,8 +137,8 @@ export default function BusinessSection() {
         </div>
         
         {/* Business Networking Features */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
+        <div className="mt-16 grid grid-cols-1 lg:grid-cols-5 gap-12">
+          <div className="lg:col-span-2">
             <h3 className="text-2xl font-semibold mb-6">Business Community Features</h3>
             <div className="space-y-8">
               <div className="flex">
@@ -179,7 +179,7 @@ export default function BusinessSection() {
             </div>
           </div>
           
-          <div>
+          <div className="lg:col-span-3">
             <img 
               src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
               alt="Business networking event" 
