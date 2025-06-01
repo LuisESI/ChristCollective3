@@ -49,6 +49,11 @@ export default function BusinessNetworkPage() {
     queryKey: ["/api/membership-tiers"],
   });
   
+  // Fetch live statistics
+  const { data: statistics, isLoading: isLoadingStats } = useQuery({
+    queryKey: ["/api/statistics"],
+  });
+  
   // Default membership tiers if API fails or while loading
   const defaultTiers: MembershipTier[] = [
     {
@@ -437,15 +442,33 @@ export default function BusinessNetworkPage() {
           
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">2,500+</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {isLoadingStats ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mx-auto max-w-20"></div>
+                ) : (
+                  `${statistics?.businessMembers || 0}+`
+                )}
+              </div>
               <p className="text-gray-300">Business Members</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">120+</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {isLoadingStats ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mx-auto max-w-16"></div>
+                ) : (
+                  `${statistics?.industries || 0}+`
+                )}
+              </div>
               <p className="text-gray-300">Industries</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {isLoadingStats ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mx-auto max-w-16"></div>
+                ) : (
+                  statistics?.supportAvailable || "24/7"
+                )}
+              </div>
               <p className="text-gray-300">Support Available</p>
             </div>
           </div>

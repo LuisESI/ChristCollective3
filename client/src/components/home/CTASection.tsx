@@ -57,20 +57,44 @@ export default function CTASection() {
         
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
-            <div className="text-4xl font-bold text-primary mb-2">5,000+</div>
+            <div className="text-4xl font-bold text-primary mb-2">
+              {isLoading ? (
+                <div className="h-10 bg-gray-300 rounded animate-pulse"></div>
+              ) : (
+                `${statistics?.communityMembers || 0}+`
+              )}
+            </div>
             <p className="text-gray-300">Community Members</p>
           </div>
           <div>
-            <div className="text-4xl font-bold text-primary mb-2">$820K+</div>
+            <div className="text-4xl font-bold text-primary mb-2">
+              {isLoading ? (
+                <div className="h-10 bg-gray-300 rounded animate-pulse"></div>
+              ) : (
+                `$${Math.round(statistics?.donationsRaised || 0).toLocaleString()}+`
+              )}
+            </div>
             <p className="text-gray-300">Donations Raised</p>
           </div>
           <div>
-            <div className="text-4xl font-bold text-primary mb-2">2,500+</div>
+            <div className="text-4xl font-bold text-primary mb-2">
+              {isLoading ? (
+                <div className="h-10 bg-gray-300 rounded animate-pulse"></div>
+              ) : (
+                `${statistics?.businessMembers || 0}+`
+              )}
+            </div>
             <p className="text-gray-300">Business Members</p>
           </div>
           <div>
-            <div className="text-4xl font-bold text-primary mb-2">120+</div>
-            <p className="text-gray-300">Countries Represented</p>
+            <div className="text-4xl font-bold text-primary mb-2">
+              {isLoading ? (
+                <div className="h-10 bg-gray-300 rounded animate-pulse"></div>
+              ) : (
+                `${statistics?.industries || 0}+`
+              )}
+            </div>
+            <p className="text-gray-300">Industries</p>
           </div>
         </div>
       </div>
