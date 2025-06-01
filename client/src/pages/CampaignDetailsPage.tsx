@@ -340,7 +340,7 @@ export default function CampaignDetailsPage() {
                     raised of {formatCurrency(campaign.goal)} goal
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="bg-black">
                   <Progress 
                     value={calculateProgress(campaign.currentAmount, campaign.goal)} 
                     className="h-2.5 mb-4" 
