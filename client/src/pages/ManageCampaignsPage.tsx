@@ -158,9 +158,9 @@ export default function ManageCampaignsPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
           <p className="mb-6">You need to be logged in to manage your campaigns.</p>
-          <Button asChild>
-            <Link href="/api/login">Log In</Link>
-          </Button>
+          <a href="/api/login" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            Log In
+          </a>
         </div>
       </div>
     );
@@ -181,11 +181,11 @@ export default function ManageCampaignsPage() {
               Create, edit and track your fundraising campaigns
             </p>
           </div>
-          <Button asChild className="mt-4 md:mt-0">
-            <Link href="/donate/create">
+          <Link href="/donate/create">
+            <button className="mt-4 md:mt-0 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
               Create New Campaign
-            </Link>
-          </Button>
+            </button>
+          </Link>
         </div>
         
         <Tabs defaultValue="active" className="w-full">
@@ -225,9 +225,11 @@ export default function ManageCampaignsPage() {
               <div className="text-center py-16 bg-gray-50 rounded-lg">
                 <h3 className="text-xl font-semibold mb-2">No Active Campaigns</h3>
                 <p className="text-gray-500 mb-6">You don't have any active campaigns at the moment.</p>
-                <Button asChild>
-                  <Link href="/donate/create">Create Your First Campaign</Link>
-                </Button>
+                <Link href="/donate/create">
+                  <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    Create Your First Campaign
+                  </button>
+                </Link>
               </div>
             )}
           </TabsContent>

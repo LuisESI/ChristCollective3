@@ -625,6 +625,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Statistics endpoint
+  app.get("/api/statistics", async (req, res) => {
+    try {
+      const campaigns = await storage.listCampaigns();
+      const businessProfiles = await storage.listBusinessProfiles();
+      const users = await storage.getUsersCount?.() || 0;
+      
+      // Calculate total donations raised from campaigns
+      const totalDonations = campaigns.reduce((sum, campaign) => {
+        const amount = parseFloat(campaign.currentAmount || '0');
+        return sum + amount;
+      }, 0);
+      
+      // Get unique industries from business profiles
+      const industries = new Set(businessProfiles.map(profile => profile.industry).filter(Boolean));
+      
+      res.json({
+        communityMembers: users,
+        donationsRaised: totalDonations,
+        businessMembers: businessProfiles.length,
+        industries: industries.size,
+        supportAvailable: "24/7"
+      });
+    } catch (error) {
+      console.error("Error fetching statistics:", error);
+      res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
+
   // Content Creator routes
   app.get("/api/content-creators", async (req, res) => {
     try {

@@ -30,6 +30,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User>;
+  getUsersCount(): Promise<number>;
   
   // Stripe related user updates
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
