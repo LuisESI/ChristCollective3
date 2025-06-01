@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Share2, Heart, Users, ImageIcon, PlayIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import type { Campaign, Donation } from "@shared/schema";
 import {
@@ -31,6 +32,7 @@ export default function CampaignDetailsPage() {
   const { slug } = useParams();
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const { toast } = useToast();
 
   const { data: campaign = {} as Campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${slug}`],
@@ -55,6 +57,37 @@ export default function CampaignDetailsPage() {
       currency: 'USD',
     }).format(value);
   }
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: campaign.title,
+          text: campaign.description,
+          url: url,
+        });
+      } catch (error) {
+        // User cancelled sharing, do nothing
+      }
+    } else {
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "Link copied!",
+          description: "Campaign link has been copied to your clipboard.",
+        });
+      } catch (error) {
+        toast({
+          title: "Unable to copy link",
+          description: "Please copy the URL from your browser's address bar.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   if (isLoadingCampaign) {
     return (
@@ -264,7 +297,7 @@ export default function CampaignDetailsPage() {
                       <Heart className="mr-2" size={16} />
                       Save
                     </Button>
-                    <Button variant="outline" className="flex-1 flex items-center justify-center">
+                    <Button variant="outline" className="flex-1 flex items-center justify-center" onClick={handleShare}>
                       <Share2 className="mr-2" size={16} />
                       Share
                     </Button>
