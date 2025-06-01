@@ -91,11 +91,11 @@ export default function SponsoredCreatorsPage() {
       </Helmet>
       
       {/* Header Section */}
-      <div className="bg-white border-b">
+      <div className="bg-black border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4 text-black">Sponsored Content Feed</h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+            <h1 className="text-4xl font-bold mb-4 text-white">Sponsored Content Feed</h1>
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-6">
               Discover inspiring faith-based content from our sponsored creators sharing testimonies, teachings, and Christian messages.
             </p>
             
@@ -107,7 +107,7 @@ export default function SponsoredCreatorsPage() {
                   Apply for Sponsorship
                 </Button>
               </Link>
-              <p className="text-sm text-gray-500">Join our community of faith-based content creators</p>
+              <p className="text-sm text-gray-400">Join our community of faith-based content creators</p>
             </div>
           </div>
         </div>
