@@ -379,7 +379,7 @@ export default function CampaignDetailsPage() {
               </Card>
 
               <Card>
-                <CardHeader>
+                <CardHeader className="bg-black">
                   <CardTitle>Creator</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center">
