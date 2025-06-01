@@ -183,16 +183,16 @@ export default function CampaignDetailsPage() {
         <meta property="og:type" content="website" />
       </Helmet>
       
-      <section className="bg-white">
+      <section className="bg-black">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link href="/donate">
-              <a className="text-black hover:text-black/80 inline-flex items-center mb-6 font-medium">
+              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6 font-medium">
                 ← Back to All Campaigns
               </a>
             </Link>
             
-            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-black">{campaign.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-white">{campaign.title}</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div className="md:col-span-2">
@@ -325,8 +325,8 @@ export default function CampaignDetailsPage() {
               </div>
               
               <div className="prose max-w-none">
-                <h2 className="text-2xl font-semibold mb-4 text-black">About this campaign</h2>
-                <p className="whitespace-pre-line text-black">{campaign.description}</p>
+                <h2 className="text-2xl font-semibold mb-4 text-white">About this campaign</h2>
+                <p className="whitespace-pre-line text-gray-300">{campaign.description}</p>
               </div>
             </div>
             
