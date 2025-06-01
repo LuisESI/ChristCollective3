@@ -148,8 +148,8 @@ export default function HeroSection() {
                         variant="outline"
                         className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
                       >
-                        <Link href={slide.secondaryButtonLink}>
-                          <span className="text-black">{slide.secondaryButtonText}</span>
+                        <Link href={slide.secondaryButtonLink} className="text-black">
+                          {slide.secondaryButtonText}
                         </Link>
                       </Button>
                     )}
