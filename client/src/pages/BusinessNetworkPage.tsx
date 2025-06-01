@@ -212,8 +212,8 @@ export default function BusinessNetworkPage() {
               ) : filteredProfiles.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredProfiles.map((profile: BusinessProfile) => (
-                    <Card key={profile.id} className="hover:shadow-md transition-shadow bg-gray-800 border-gray-700">
-                      <CardContent className="p-6 bg-black rounded-md">
+                    <Card key={profile.id} className="hover:shadow-md transition-shadow bg-black border-gray-700">
+                      <CardContent className="p-6">
                         <div className="flex items-center mb-4">
                           {profile.logo ? (
                             <Avatar className="h-12 w-12 mr-4">
