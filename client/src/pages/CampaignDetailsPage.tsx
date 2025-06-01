@@ -460,7 +460,7 @@ export default function CampaignDetailsPage() {
               </div>
             ) : (
               <Card>
-                <CardContent className="p-6 text-center">
+                <CardContent className="p-6 text-center bg-black">
                   <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
                   <Button asChild>
                     <Link href={`/donate/checkout/${campaign.id}`}>
