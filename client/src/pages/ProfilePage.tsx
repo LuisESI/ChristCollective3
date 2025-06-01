@@ -820,9 +820,7 @@ export default function ProfilePage() {
                         
                         <div className="text-center pt-4">
                           <Button asChild>
-                            <Link href="/campaigns/create">
-                              <a>Create New Campaign</a>
-                            </Link>
+                            <Link href="/campaigns/create">Create New Campaign</Link>
                           </Button>
                         </div>
                       </div>
@@ -834,9 +832,7 @@ export default function ProfilePage() {
                           Share your story and start raising funds for causes you care about.
                         </p>
                         <Button asChild>
-                          <Link href="/campaigns/create">
-                            <a>Create Your First Campaign</a>
-                          </Link>
+                          <Link href="/campaigns/create">Create Your First Campaign</Link>
                         </Button>
                       </div>
                     )}
@@ -880,9 +876,7 @@ export default function ProfilePage() {
                                     size="sm"
                                     className="mt-2"
                                   >
-                                    <Link href={`/campaigns/${donation.campaign?.slug || "#"}`}>
-                                      <a>View Campaign</a>
-                                    </Link>
+                                    <Link href={`/campaigns/${donation.campaign?.slug || "#"}`}>View Campaign</Link>
                                   </Button>
                                 </div>
                               </div>
@@ -892,9 +886,7 @@ export default function ProfilePage() {
                         
                         <div className="text-center pt-4">
                           <Button asChild>
-                            <Link href="/donate">
-                              <a>Browse More Campaigns</a>
-                            </Link>
+                            <Link href="/donate">Browse More Campaigns</Link>
                           </Button>
                         </div>
                       </div>
@@ -906,9 +898,7 @@ export default function ProfilePage() {
                           When you make donations, they will appear here.
                         </p>
                         <Button asChild>
-                          <Link href="/donate">
-                            <a>Browse Campaigns</a>
-                          </Link>
+                          <Link href="/donate">Browse Campaigns</Link>
                         </Button>
                       </div>
                     )}
