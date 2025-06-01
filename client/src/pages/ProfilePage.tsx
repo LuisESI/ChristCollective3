@@ -819,9 +819,11 @@ export default function ProfilePage() {
                         ))}
                         
                         <div className="text-center pt-4">
-                          <Button asChild>
-                            <Link href="/campaigns/create">Create New Campaign</Link>
-                          </Button>
+                          <Link href="/campaigns/create">
+                            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                              Create New Campaign
+                            </button>
+                          </Link>
                         </div>
                       </div>
                     ) : (
@@ -831,9 +833,11 @@ export default function ProfilePage() {
                         <p className="text-gray-500 mb-6">
                           Share your story and start raising funds for causes you care about.
                         </p>
-                        <Button asChild>
-                          <Link href="/campaigns/create">Create Your First Campaign</Link>
-                        </Button>
+                        <Link href="/campaigns/create">
+                          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                            Create Your First Campaign
+                          </button>
+                        </Link>
                       </div>
                     )}
                   </TabsContent>
@@ -885,9 +889,11 @@ export default function ProfilePage() {
                         ))}
                         
                         <div className="text-center pt-4">
-                          <Button asChild>
-                            <Link href="/donate">Browse More Campaigns</Link>
-                          </Button>
+                          <Link href="/donate">
+                            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                              Browse More Campaigns
+                            </button>
+                          </Link>
                         </div>
                       </div>
                     ) : (
@@ -897,9 +903,11 @@ export default function ProfilePage() {
                         <p className="text-gray-500 mb-6">
                           When you make donations, they will appear here.
                         </p>
-                        <Button asChild>
-                          <Link href="/donate">Browse Campaigns</Link>
-                        </Button>
+                        <Link href="/donate">
+                          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                            Browse Campaigns
+                          </button>
+                        </Link>
                       </div>
                     )}
                   </TabsContent>

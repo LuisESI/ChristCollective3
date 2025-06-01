@@ -163,9 +163,11 @@ export default function CampaignDetailsPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Campaign Not Found</h1>
           <p className="text-gray-300 mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
-          <Button asChild>
-            <Link href="/donate">Browse Campaigns</Link>
-          </Button>
+          <Link href="/donate">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+              Browse Campaigns
+            </button>
+          </Link>
         </div>
       </div>
     );
@@ -355,9 +357,11 @@ export default function CampaignDetailsPage() {
                     </div>
                   </div>
 
-                  <Button asChild className="w-full mb-3">
-                    <Link href={`/donate/checkout/${campaign.id}`}>Donate Now</Link>
-                  </Button>
+                  <Link href={`/donate/checkout/${campaign.id}`}>
+                    <button className="w-full mb-3 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                      Donate Now
+                    </button>
+                  </Link>
 
                   <div className="flex space-x-2">
                     <Button variant="outline" className="flex-1 flex items-center justify-center">
@@ -456,9 +460,11 @@ export default function CampaignDetailsPage() {
               <Card className="rounded-2xl">
                 <CardContent className="p-6 text-center bg-black rounded-2xl">
                   <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
-                  <Button asChild>
-                    <Link href={`/donate/checkout/${campaign.id}`}>Make a Donation</Link>
-                  </Button>
+                  <Link href={`/donate/checkout/${campaign.id}`}>
+                    <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                      Make a Donation
+                    </button>
+                  </Link>
                 </CardContent>
               </Card>
             )}
