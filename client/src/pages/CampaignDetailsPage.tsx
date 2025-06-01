@@ -332,7 +332,7 @@ export default function CampaignDetailsPage() {
 
             <div className="space-y-6">
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 bg-black">
                   <CardTitle className="text-2xl text-black dark:text-white">
                     {formatCurrency(campaign.currentAmount)}
                   </CardTitle>
