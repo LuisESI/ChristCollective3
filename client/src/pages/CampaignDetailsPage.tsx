@@ -408,7 +408,7 @@ export default function CampaignDetailsPage() {
           </div>
           
           <div className="mb-10">
-            <h2 className="text-2xl font-semibold mb-6">Recent Donations</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-black">Recent Donations</h2>
             
             {isLoadingDonations ? (
               <div className="space-y-4">
