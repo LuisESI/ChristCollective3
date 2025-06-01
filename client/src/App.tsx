@@ -20,11 +20,13 @@ import ProfilePage from "@/pages/ProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AuthPage from "@/pages/AuthPage";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/auth" component={AuthPage} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />

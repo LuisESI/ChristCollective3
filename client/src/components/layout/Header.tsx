@@ -91,18 +91,16 @@ export default function Header() {
             </DropdownMenu>
           ) : (
             <>
-              <a 
-                href="/api/login" 
-                className="hidden md:block text-foreground hover:text-primary transition-colors font-medium"
-              >
-                Log In
-              </a>
-              <a 
-                href="/api/login" 
-                className="hidden md:block bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
-              >
-                Sign Up
-              </a>
+              <Link href="/auth">
+                <div className="hidden md:block text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
+                  Log In
+                </div>
+              </Link>
+              <Link href="/auth">
+                <div className="hidden md:block bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer">
+                  Sign Up
+                </div>
+              </Link>
             </>
           )}
           
@@ -155,18 +153,16 @@ export default function Header() {
               </>
             ) : (
               <div className="flex space-x-4">
-                <a 
-                  href="/api/login" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                >
-                  Log In
-                </a>
-                <a 
-                  href="/api/login" 
-                  className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                >
-                  Sign Up
-                </a>
+                <Link href="/auth">
+                  <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
+                    Log In
+                  </div>
+                </Link>
+                <Link href="/auth">
+                  <div className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer">
+                    Sign Up
+                  </div>
+                </Link>
               </div>
             )}
           </div>
