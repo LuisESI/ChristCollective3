@@ -326,7 +326,7 @@ export default function CampaignDetailsPage() {
               
               <div className="prose max-w-none">
                 <h2 className="text-2xl font-semibold mb-4 text-black">About this campaign</h2>
-                <p className="whitespace-pre-line text-gray-200">{campaign.description}</p>
+                <p className="whitespace-pre-line text-black">{campaign.description}</p>
               </div>
             </div>
             
