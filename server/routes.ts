@@ -726,6 +726,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload routes
+  app.post('/api/upload/profile-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+
+      const userId = req.user.claims.sub;
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      // Update user's profile image
+      await storage.updateUser(userId, { profileImageUrl: imageUrl });
+      
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      res.status(500).json({ message: 'Failed to upload profile image' });
+    }
+  });
+
+  app.post('/api/upload/business-logo', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No logo file provided' });
+      }
+
+      const userId = req.user.claims.sub;
+      const logoUrl = `/uploads/${req.file.filename}`;
+      
+      // Get user's business profile
+      const profile = await storage.getUserBusinessProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: 'Business profile not found' });
+      }
+      
+      // Update business profile logo
+      await storage.updateBusinessProfile(profile.id, { logo: logoUrl });
+      
+      res.json({ logoUrl });
+    } catch (error) {
+      console.error('Error uploading business logo:', error);
+      res.status(500).json({ message: 'Failed to upload business logo' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

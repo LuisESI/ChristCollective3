@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageUpload } from "@/components/ui/image-upload";
 import {
   User,
   Briefcase,
@@ -474,6 +475,22 @@ export default function ProfilePage() {
                           )}
                         />
                         
+                        <div className="space-y-2">
+                          <ImageUpload
+                            currentImage={user?.profileImageUrl || ""}
+                            onImageChange={(imageUrl) => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                              toast({
+                                title: "Profile picture updated",
+                                description: "Your profile picture has been successfully updated.",
+                              });
+                            }}
+                            uploadEndpoint="/api/upload/profile-image"
+                            fieldName="image"
+                            label="Profile Picture"
+                          />
+                        </div>
+                        
                         <Button 
                           type="submit" 
                           disabled={updateUserProfileMutation.isPending || !userProfileForm.formState.isDirty}
@@ -589,22 +606,22 @@ export default function ProfilePage() {
                             )}
                           />
                           
-                          <FormField
-                            control={businessProfileForm.control}
-                            name="logo"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Logo URL</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="https://example.com/logo.png" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Enter a URL to your company logo.
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          <div className="space-y-2">
+                            <ImageUpload
+                              currentImage={businessProfile?.logo || ""}
+                              onImageChange={(logoUrl) => {
+                                businessProfileForm.setValue("logo", logoUrl);
+                                queryClient.invalidateQueries({ queryKey: ["/api/user/business-profile"] });
+                                toast({
+                                  title: "Business logo updated",
+                                  description: "Your business logo has been successfully updated.",
+                                });
+                              }}
+                              uploadEndpoint="/api/upload/business-logo"
+                              fieldName="logo"
+                              label="Business Logo"
+                            />
+                          </div>
                           
                           <FormField
                             control={businessProfileForm.control}
