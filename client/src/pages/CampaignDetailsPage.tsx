@@ -19,7 +19,7 @@ import { CalendarDays, Share2, Heart, Users, ImageIcon, PlayIcon, X } from "luci
 import { format } from "date-fns";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Campaign, Donation } from "@shared/schema";
 import {
   Dialog,
@@ -32,6 +32,7 @@ export default function CampaignDetailsPage() {
   const { slug } = useParams();
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { data: campaign = {} as Campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
@@ -57,6 +58,41 @@ export default function CampaignDetailsPage() {
       currency: 'USD',
     }).format(value);
   }
+
+  const generateVideoThumbnail = (videoUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.currentTime = 1; // Capture frame at 1 second
+      
+      video.onloadeddata = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(thumbnail);
+        } else {
+          reject(new Error('Could not get canvas context'));
+        }
+      };
+      
+      video.onerror = () => reject(new Error('Video load error'));
+      video.src = videoUrl;
+      video.load();
+    });
+  };
+
+  useEffect(() => {
+    if (campaign.video) {
+      generateVideoThumbnail(campaign.video)
+        .then(thumbnail => setVideoThumbnail(thumbnail))
+        .catch(error => console.error('Error generating video thumbnail:', error));
+    }
+  }, [campaign.video]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -149,16 +185,16 @@ export default function CampaignDetailsPage() {
             <div className="md:col-span-2">
               {/* Main media display (image or video) */}
               <div className="mb-4">
-                {campaign.image ? (
+                {(campaign.image || (campaign.video && videoThumbnail)) ? (
                   <Dialog>
                     <DialogTrigger asChild>
                       <div className="cursor-pointer relative">
                         <img 
-                          src={selectedMedia || campaign.image} 
+                          src={selectedMedia || (campaign.video && videoThumbnail && mediaType === 'video' ? videoThumbnail : campaign.image)} 
                           alt={campaign.title} 
                           className="w-full h-auto rounded-lg object-cover aspect-video"
                         />
-                        {mediaType === 'video' && (
+                        {(mediaType === 'video' || (campaign.video && !campaign.image)) && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
                             <PlayIcon size={64} className="text-white" />
                           </div>
@@ -240,10 +276,20 @@ export default function CampaignDetailsPage() {
                       setMediaType('video');
                     }}
                   >
-                    <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                      <PlayIcon className="text-gray-400" size={24} />
+                    {videoThumbnail ? (
+                      <img 
+                        src={videoThumbnail} 
+                        alt={`${campaign.title} - video`} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                        <PlayIcon className="text-gray-400" size={24} />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <PlayIcon size={32} className="text-white drop-shadow-lg" />
                     </div>
-                    <div className="absolute inset-0 bg-black/30"></div>
                     <div className="absolute bottom-1 right-1 bg-primary text-primary-foreground text-xs p-1 rounded">
                       Video
                     </div>
