@@ -137,7 +137,7 @@ export default function DonationsPage() {
                   )}
                   <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-2 text-white">
-                      <Link href={`/campaigns/${campaign.slug}`}>
+                      <Link href={`/donate/${campaign.slug}`}>
                         <span className="hover:text-primary transition-colors cursor-pointer">
                           {campaign.title}
                         </span>
@@ -162,7 +162,7 @@ export default function DonationsPage() {
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="flex-1">
-                        <Link href={`/campaigns/${campaign.slug}`}>
+                        <Link href={`/donate/${campaign.slug}`}>
                           <span className="cursor-pointer">View Details</span>
                         </Link>
                       </Button>
