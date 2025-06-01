@@ -1,4 +1,5 @@
 import type { Express, RequestHandler, Request } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -66,6 +67,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fileSize: 50 * 1024 * 1024, // 50MB file size limit for videos
     } 
   });
+  
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(uploadDir));
   
   // Auth middleware
   await setupAuth(app);
