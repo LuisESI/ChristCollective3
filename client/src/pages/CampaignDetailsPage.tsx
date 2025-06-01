@@ -331,8 +331,8 @@ export default function CampaignDetailsPage() {
             </div>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader className="pb-2 bg-black">
+              <Card className="rounded-2xl">
+                <CardHeader className="pb-2 bg-black rounded-t-2xl">
                   <CardTitle className="text-2xl text-black dark:text-white">
                     {formatCurrency(campaign.currentAmount)}
                   </CardTitle>
@@ -340,7 +340,7 @@ export default function CampaignDetailsPage() {
                     raised of {formatCurrency(campaign.goal)} goal
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="bg-black">
+                <CardContent className="bg-black rounded-b-2xl">
                   <Progress 
                     value={calculateProgress(campaign.currentAmount, campaign.goal)} 
                     className="h-2.5 mb-4" 
@@ -378,11 +378,11 @@ export default function CampaignDetailsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="bg-black">
+              <Card className="rounded-2xl">
+                <CardHeader className="bg-black rounded-t-2xl">
                   <CardTitle>Creator</CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center bg-black">
+                <CardContent className="flex items-center bg-black rounded-b-2xl">
                   <Avatar className="h-10 w-10 mr-4">
                     <AvatarImage 
                       src={campaign.user?.profileImageUrl} 
@@ -459,8 +459,8 @@ export default function CampaignDetailsPage() {
                 ))}
               </div>
             ) : (
-              <Card>
-                <CardContent className="p-6 text-center bg-black">
+              <Card className="rounded-2xl">
+                <CardContent className="p-6 text-center bg-black rounded-2xl">
                   <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
                   <Button asChild>
                     <Link href={`/donate/checkout/${campaign.id}`}>
