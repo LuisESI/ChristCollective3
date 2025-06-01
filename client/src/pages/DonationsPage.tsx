@@ -89,21 +89,19 @@ export default function DonationsPage() {
               />
             </form>
             
-            <Button asChild variant="default" className="w-full md:w-auto">
-              {isAuthenticated ? (
-                <Link href="/donate/create">
-                  <span className="inline-flex items-center cursor-pointer">
-                    <Plus className="mr-2" size={16} />
-                    Create New Campaign
-                  </span>
-                </Link>
-              ) : (
-                <a href="/api/login" className="inline-flex items-center">
+            {isAuthenticated ? (
+              <Link href="/donate/create">
+                <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                   <Plus className="mr-2" size={16} />
                   Create New Campaign
-                </a>
-              )}
-            </Button>
+                </button>
+              </Link>
+            ) : (
+              <a href="/api/login" className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                <Plus className="mr-2" size={16} />
+                Create New Campaign
+              </a>
+            )}
           </div>
           
           {isLoading ? (
@@ -156,16 +154,16 @@ export default function DonationsPage() {
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button asChild variant="default" className="flex-1">
-                        <Link href={`/donate/checkout/${campaign.id}`}>
+                      <Link href={`/donate/checkout/${campaign.id}`} className="flex-1">
+                        <button className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                           Donate Now
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" className="flex-1">
-                        <Link href={`/donate/${campaign.slug}`}>
+                        </button>
+                      </Link>
+                      <Link href={`/donate/${campaign.slug}`} className="flex-1">
+                        <button className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
                           View Details
-                        </Link>
-                      </Button>
+                        </button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -177,15 +175,17 @@ export default function DonationsPage() {
               <p className="text-gray-500 mb-6">
                 {searchQuery ? `No results for "${searchQuery}"` : "There are no active campaigns at the moment."}
               </p>
-              <Button asChild variant="default">
-                {isAuthenticated ? (
-                  <Link href="/campaigns/create">
-                    <span className="cursor-pointer">Create a Campaign</span>
-                  </Link>
-                ) : (
-                  <a href="/api/login">Sign in to Create a Campaign</a>
-                )}
-              </Button>
+              {isAuthenticated ? (
+                <Link href="/campaigns/create">
+                  <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    Create a Campaign
+                  </button>
+                </Link>
+              ) : (
+                <a href="/api/login" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                  Sign in to Create a Campaign
+                </a>
+              )}
             </div>
           )}
         </div>
