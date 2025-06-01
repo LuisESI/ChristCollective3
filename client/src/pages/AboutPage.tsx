@@ -245,9 +245,7 @@ export default function AboutPage() {
               className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/50 hover:shadow-primary/70 transition-all duration-300"
             >
               {isAuthenticated ? (
-                <Link href="/profile">
-                  <a>Complete Your Profile</a>
-                </Link>
+                <Link href="/profile">Complete Your Profile</Link>
               ) : (
                 <a href="/api/login">Get Started Today</a>
               )}
@@ -259,9 +257,7 @@ export default function AboutPage() {
               variant="outline"
               className="border-primary text-primary hover:bg-primary hover:text-white"
             >
-              <Link href="/donate">
-                <a>Explore Campaigns</a>
-              </Link>
+              <Link href="/donate">Explore Campaigns</Link>
             </Button>
           </div>
         </div>
