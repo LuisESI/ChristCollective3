@@ -177,10 +177,8 @@ export default function BusinessNetworkPage() {
                 {isAuthenticated && (
                   <Button asChild className="w-full md:w-auto">
                     <Link href="/profile">
-                      <a>
-                        <Briefcase className="mr-2" size={16} />
-                        Manage Your Profile
-                      </a>
+                      <Briefcase className="mr-2" size={16} />
+                      Manage Your Profile
                     </Link>
                   </Button>
                 )}
@@ -243,7 +241,7 @@ export default function BusinessNetworkPage() {
                           )}
                           <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
                             <Link href={`/business/profile/${profile.id}`}>
-                              <a>View Profile</a>
+                              View Profile
                             </Link>
                           </Button>
                         </div>
@@ -263,7 +261,7 @@ export default function BusinessNetworkPage() {
                   {isAuthenticated ? (
                     <Button asChild>
                       <Link href="/profile">
-                        <a>Create Your Business Profile</a>
+                        Create Your Business Profile
                       </Link>
                     </Button>
                   ) : (
@@ -432,7 +430,7 @@ export default function BusinessNetworkPage() {
           >
             {isAuthenticated ? (
               <Link href="/profile">
-                <a>Create Your Business Profile</a>
+                Create Your Business Profile
               </Link>
             ) : (
               <a href="/api/login">Join Our Network</a>
