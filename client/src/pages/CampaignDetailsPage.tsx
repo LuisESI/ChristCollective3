@@ -356,9 +356,7 @@ export default function CampaignDetailsPage() {
                   </div>
 
                   <Button asChild className="w-full mb-3">
-                    <Link href={`/donate/checkout/${campaign.id}`}>
-                      <a>Donate Now</a>
-                    </Link>
+                    <Link href={`/donate/checkout/${campaign.id}`}>Donate Now</Link>
                   </Button>
 
                   <div className="flex space-x-2">
@@ -459,9 +457,7 @@ export default function CampaignDetailsPage() {
                 <CardContent className="p-6 text-center bg-black rounded-2xl">
                   <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
                   <Button asChild>
-                    <Link href={`/donate/checkout/${campaign.id}`}>
-                      <a>Make a Donation</a>
-                    </Link>
+                    <Link href={`/donate/checkout/${campaign.id}`}>Make a Donation</Link>
                   </Button>
                 </CardContent>
               </Card>
