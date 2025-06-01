@@ -183,7 +183,7 @@ export default function CampaignDetailsPage() {
         <meta property="og:type" content="website" />
       </Helmet>
       
-      <section className="bg-gray-900">
+      <section className="bg-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link href="/donate">
