@@ -41,7 +41,7 @@ export default function BusinessSection() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div 
-                className="bg-primary h-3 rounded-full transition-all duration-300" 
+                className="bg-primary h-3 rounded-full transition-all duration-300 shadow-lg shadow-primary/50" 
                 style={{ width: `${Math.min((profiles.length / 100) * 100, 100)}%` }}
               />
             </div>
