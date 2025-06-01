@@ -158,12 +158,12 @@ export default function DonationsPage() {
                     <div className="flex space-x-2">
                       <Button asChild variant="default" className="flex-1">
                         <Link href={`/donate/checkout/${campaign.id}`}>
-                          <span className="cursor-pointer">Donate Now</span>
+                          Donate Now
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="flex-1">
                         <Link href={`/donate/${campaign.slug}`}>
-                          <span className="cursor-pointer">View Details</span>
+                          View Details
                         </Link>
                       </Button>
                     </div>

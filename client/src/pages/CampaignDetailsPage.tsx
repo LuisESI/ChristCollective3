@@ -164,9 +164,7 @@ export default function CampaignDetailsPage() {
           <h1 className="text-2xl font-bold mb-4">Campaign Not Found</h1>
           <p className="text-gray-300 mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
           <Button asChild>
-            <Link href="/donate">
-              <a>Browse Campaigns</a>
-            </Link>
+            <Link href="/donate">Browse Campaigns</Link>
           </Button>
         </div>
       </div>
@@ -186,10 +184,8 @@ export default function CampaignDetailsPage() {
       <section className="bg-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
-            <Link href="/donate">
-              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6 font-medium">
-                ← Back to All Campaigns
-              </a>
+            <Link href="/donate" className="text-primary hover:text-primary/80 inline-flex items-center mb-6 font-medium">
+              ← Back to All Campaigns
             </Link>
 
             <h1 className="text-3xl md:text-4xl font-bold mb-6 text-black">{campaign.title}</h1>

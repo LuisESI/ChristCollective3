@@ -810,10 +810,8 @@ export default function ProfilePage() {
                                 variant="ghost" 
                                 size="sm"
                               >
-                                <Link href={`/campaigns/${campaign.slug}`}>
-                                  <a className="flex items-center">
-                                    View <ArrowRight className="ml-1 h-4 w-4" />
-                                  </a>
+                                <Link href={`/campaigns/${campaign.slug}`} className="flex items-center">
+                                  View <ArrowRight className="ml-1 h-4 w-4" />
                                 </Link>
                               </Button>
                             </CardContent>
