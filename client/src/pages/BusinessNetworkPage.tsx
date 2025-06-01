@@ -276,93 +276,109 @@ export default function BusinessNetworkPage() {
             </TabsContent>
             
             <TabsContent value="membership" className="space-y-10">
-              <div className="max-w-3xl mx-auto text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Choose Your Membership</h2>
-                <p className="text-lg text-gray-600">
-                  Select the membership tier that best fits your business needs and networking goals.
+              <div className="max-w-4xl mx-auto text-center mb-12">
+                <h2 className="text-3xl font-bold mb-4">Founding Member Program</h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  Join our exclusive founding member program! The first 100 members get lifetime access for FREE.
                 </p>
+                
+                {/* Progress Bar */}
+                <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-medium text-gray-700">Founding Members</span>
+                    <span className="text-sm font-medium text-gray-700">{filteredProfiles.length}/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-primary h-3 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((filteredProfiles.length / 100) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {100 - filteredProfiles.length > 0 
+                      ? `${100 - filteredProfiles.length} spots remaining for free lifetime membership`
+                      : "Founding member program complete!"}
+                  </p>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {isLoadingTiers ? (
-                  [1, 2, 3].map((i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="p-8">
-                        <div className="h-6 bg-gray-200 rounded mb-2 w-1/2 mx-auto" />
-                        <div className="h-8 bg-gray-200 rounded mb-2 w-1/3 mx-auto" />
-                        <div className="h-4 bg-gray-100 rounded mb-6 w-2/3 mx-auto" />
-                        <div className="space-y-3 mb-8">
-                          {[1, 2, 3, 4].map((j) => (
-                            <div key={j} className="flex items-start">
-                              <div className="w-4 h-4 bg-gray-200 rounded-full mt-1 mr-3" />
-                              <div className="h-4 bg-gray-100 rounded w-full" />
-                            </div>
-                          ))}
+              {/* Founding Member Benefits */}
+              <div className="max-w-4xl mx-auto">
+                <Card className="bg-white border-2 border-primary/20 rounded-xl shadow-lg">
+                  <CardContent className="p-8">
+                    <div className="text-center mb-8">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                        <Users className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">Founding Member Benefits</h3>
+                      <p className="text-gray-600">Everything you need to grow your business network</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="space-y-4">
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Business Directory Access</span>
+                            <p className="text-sm text-gray-600">Connect with Christian business owners nationwide</p>
+                          </div>
                         </div>
-                        <div className="h-10 bg-gray-200 rounded w-full" />
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  tiers.map((tier, index) => {
-                    const isPopular = index === 1;
-                    
-                    return (
-                      <Card 
-                        key={tier.id}
-                        className={`
-                          rounded-xl p-8 
-                          ${isPopular 
-                            ? 'border-2 border-primary relative transform hover:scale-105 transition-transform duration-300' 
-                            : 'border hover:border-primary transition-colors'
-                          }
-                        `}
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Monthly Newsletter</span>
+                            <p className="text-sm text-gray-600">Stay updated with industry insights and opportunities</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Online Prayer Group</span>
+                            <p className="text-sm text-gray-600">Join fellowship with like-minded professionals</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Networking Events</span>
+                            <p className="text-sm text-gray-600">Exclusive access to member-only events</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Business Spotlight</span>
+                            <p className="text-sm text-gray-600">Get featured in our community showcase</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-primary mt-1 mr-3 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">Lifetime Access</span>
+                            <p className="text-sm text-gray-600">No recurring fees, ever</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center">
+                      <Button 
+                        size="lg" 
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                        disabled={filteredProfiles.length >= 100}
                       >
-                        {isPopular && (
-                          <div className="absolute top-0 right-0 bg-primary text-white font-medium py-1 px-4 rounded-bl-lg rounded-tr-lg">
-                            Popular
-                          </div>
-                        )}
-                        
-                        <div className="text-center mb-6">
-                          <h3 className="text-xl font-semibold mb-2 text-white">{tier.name}</h3>
-                          <div className="text-3xl font-bold mb-1 text-white">
-                            ${tier.price}<span className="text-lg font-normal text-gray-400">/month</span>
-                          </div>
-                          <p className="text-gray-300">{tier.description}</p>
-                        </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                          {tier.features.map((feature, i) => (
-                            <li key={i} className="flex items-start">
-                              <svg className="text-primary mt-1 mr-3 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                              <span className="text-gray-300">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        
-                        <Button
-                          asChild
-                          className={`w-full ${
-                            isPopular
-                              ? "bg-primary hover:bg-primary/90 text-white"
-                              : "bg-transparent border border-primary text-primary hover:bg-primary hover:text-white"
-                          }`}
-                        >
-                          {isAuthenticated ? (
-                            <Link href={`/membership/checkout/${tier.id}`}>
-                              <a>Get Started</a>
-                            </Link>
-                          ) : (
-                            <a href="/api/login">Get Started</a>
-                          )}
-                        </Button>
-                      </Card>
-                    );
-                  })
-                )}
+                        {filteredProfiles.length >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-3">
+                        {filteredProfiles.length < 100 
+                          ? "Limited time offer - join now while spots are available"
+                          : "Thank you to all our founding members!"}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
               
               <div className="mt-16 max-w-4xl mx-auto">
@@ -370,30 +386,30 @@ export default function BusinessNetworkPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h4 className="font-semibold mb-2 text-black">What's included in the membership?</h4>
+                    <h4 className="font-semibold mb-2 text-black">What's included in founding membership?</h4>
                     <p className="text-gray-600">
-                      Each membership tier includes access to our business directory, networking events, and resources. Higher tiers offer enhanced visibility, priority access, and dedicated support.
+                      Founding members get lifetime access to our business directory, monthly newsletters, online prayer groups, networking events, business spotlight opportunities, and all future features - completely free.
                     </p>
                   </div>
                   
                   <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h4 className="font-semibold mb-2">Can I upgrade my membership later?</h4>
+                    <h4 className="font-semibold mb-2 text-black">How many spots are left?</h4>
                     <p className="text-gray-600">
-                      Yes, you can upgrade your membership at any time. Your new benefits will begin immediately, and your billing will be adjusted accordingly.
+                      We're offering free lifetime membership to our first 100 members. Currently {100 - filteredProfiles.length} spots remain. Once we reach 100 members, we'll introduce paid membership tiers.
                     </p>
                   </div>
                   
                   <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h4 className="font-semibold mb-2">How do I connect with other businesses?</h4>
+                    <h4 className="font-semibold mb-2 text-black">How do I connect with other businesses?</h4>
                     <p className="text-gray-600">
-                      Once you join, you'll have access to our business directory where you can browse profiles and connect directly with other members. We also host regular virtual networking events.
+                      Once you join, you'll have access to our business directory where you can browse profiles and connect directly with other Christian business owners. We also host regular virtual networking events.
                     </p>
                   </div>
                   
                   <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h4 className="font-semibold mb-2">Is there a refund policy?</h4>
+                    <h4 className="font-semibold mb-2 text-black">What happens after 100 members?</h4>
                     <p className="text-gray-600">
-                      We offer a 14-day satisfaction guarantee. If you're not satisfied with your membership within the first two weeks, contact us for a full refund.
+                      Founding members keep their lifetime access forever. New members after the first 100 will be offered paid membership plans, but founding members will always have free access to all features.
                     </p>
                   </div>
                 </div>
