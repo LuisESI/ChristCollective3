@@ -117,11 +117,11 @@ export default function HeroSection() {
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
                     {slide.primaryButtonLink === "/api/login" ? (
                       <Button 
-                        asChild
                         size="lg"
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                        onClick={() => window.location.href = slide.primaryButtonLink}
                       >
-                        <a href={slide.primaryButtonLink}>{slide.primaryButtonText}</a>
+                        {slide.primaryButtonText}
                       </Button>
                     ) : (
                       <Button 
@@ -134,12 +134,12 @@ export default function HeroSection() {
                     )}
                     {slide.secondaryButtonLink === "/api/login" ? (
                       <Button 
-                        asChild
                         size="lg"
                         variant="outline"
                         className="bg-white hover:bg-gray-100 text-foreground font-semibold py-3 px-8 rounded-md transition-colors text-lg"
+                        onClick={() => window.location.href = slide.secondaryButtonLink}
                       >
-                        <a href={slide.secondaryButtonLink}>{slide.secondaryButtonText}</a>
+                        {slide.secondaryButtonText}
                       </Button>
                     ) : (
                       <Button 
