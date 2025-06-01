@@ -151,10 +151,10 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 bg-gray-900">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Values</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">Our Values</h2>
             <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
           </div>
 
@@ -163,8 +163,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Faith-Centered</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Faith-Centered</h3>
+                  <p className="text-gray-700">
                     Christ is at the center of everything we do. Our platform exists to serve 
                     His kingdom and advance His purposes.
                   </p>
@@ -174,8 +174,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Inclusive Community</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Inclusive Community</h3>
+                  <p className="text-gray-700">
                     We welcome Christians from all denominations and backgrounds, believing 
                     unity strengthens the body of Christ.
                   </p>
@@ -185,8 +185,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Integrity</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Integrity</h3>
+                  <p className="text-gray-700">
                     We operate with transparency, honesty, and accountability in all our 
                     interactions and business practices.
                   </p>
@@ -196,8 +196,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Stewardship</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Stewardship</h3>
+                  <p className="text-gray-700">
                     We believe in using our resources, talents, and platform responsibly 
                     to serve others and honor God.
                   </p>
@@ -207,8 +207,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Innovation</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Innovation</h3>
+                  <p className="text-gray-700">
                     We embrace technology and creative solutions to better serve the 
                     Christian community and reach more people.
                   </p>
@@ -218,8 +218,8 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Global Vision</h3>
-                  <p className="text-gray-300">
+                  <h3 className="text-xl font-semibold mb-2 text-black">Global Vision</h3>
+                  <p className="text-gray-700">
                     Our mission extends beyond borders, seeking to unite Christians 
                     worldwide in service and fellowship.
                   </p>
