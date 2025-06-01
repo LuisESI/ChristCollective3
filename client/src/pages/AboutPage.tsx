@@ -95,52 +95,52 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="bg-yellow-500 border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-gray-900 border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
-                <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center mb-4">
-                  <Heart className="w-6 h-6 text-black" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Heart className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Donations & Campaigns</h3>
-                <p className="text-black/80 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-white">Donations & Campaigns</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
                   Support meaningful causes and create fundraising campaigns for ministries, 
                   missions, and community projects.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-yellow-500 border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-gray-900 border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
-                <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6 text-black" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Business Network</h3>
-                <p className="text-black/80 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-white">Business Network</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
                   Connect with Christian business owners and professionals to grow your network 
                   with those who share your values.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-yellow-500 border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-gray-900 border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
-                <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center mb-4">
-                  <Star className="w-6 h-6 text-black" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Star className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Creator Sponsorship</h3>
-                <p className="text-black/80 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-white">Creator Sponsorship</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
                   Support Christian content creators and influencers who are making a positive 
                   impact through their platforms.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-yellow-500 border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-gray-900 border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
-                <div className="w-12 h-12 bg-black/10 rounded-lg flex items-center justify-center mb-4">
-                  <Target className="w-6 h-6 text-black" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Target className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Community Building</h3>
-                <p className="text-black/80 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-white">Community Building</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
                   Join groups, attend events, and participate in discussions that strengthen 
                   the global Christian community.
                 </p>
