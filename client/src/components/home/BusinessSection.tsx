@@ -114,7 +114,7 @@ export default function BusinessSection() {
               <div className="text-center">
                 <Button 
                   size="lg" 
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 shadow-lg shadow-primary/50 hover:shadow-primary/70 transition-all duration-300 animate-pulse"
                   disabled={profiles.length >= 100}
                   asChild
                 >
