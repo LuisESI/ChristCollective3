@@ -183,7 +183,7 @@ export default function CampaignDetailsPage() {
         <meta property="og:type" content="website" />
       </Helmet>
       
-      <section className="bg-black">
+      <section className="bg-gray-900">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link href="/donate">
@@ -326,7 +326,7 @@ export default function CampaignDetailsPage() {
               
               <div className="prose max-w-none">
                 <h2 className="text-2xl font-semibold mb-4 text-white">About this campaign</h2>
-                <p className="whitespace-pre-line text-gray-300">{campaign.description}</p>
+                <p className="whitespace-pre-line text-gray-200">{campaign.description}</p>
               </div>
             </div>
             
@@ -408,7 +408,7 @@ export default function CampaignDetailsPage() {
           </div>
           
           <div className="mb-10">
-            <h2 className="text-2xl font-semibold mb-6 text-black">Recent Donations</h2>
+            <h2 className="text-2xl font-semibold mb-6">Recent Donations</h2>
             
             {isLoadingDonations ? (
               <div className="space-y-4">
