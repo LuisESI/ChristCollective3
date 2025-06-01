@@ -187,7 +187,7 @@ export default function CampaignDetailsPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link href="/donate">
-              <a className="text-primary hover:text-primary/80 inline-flex items-center mb-6 font-medium">
+              <a className="text-black hover:text-black/80 inline-flex items-center mb-6 font-medium">
                 ← Back to All Campaigns
               </a>
             </Link>
