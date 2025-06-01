@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-black via-white to-black">
+      <section className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             About <span className="text-primary">Christ Collective</span>
