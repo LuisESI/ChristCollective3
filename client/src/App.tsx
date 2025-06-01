@@ -21,6 +21,7 @@ import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
+import AboutPage from "@/pages/AboutPage";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/about" component={AboutPage} />
       <Route component={NotFound} />
     </Switch>
   );
