@@ -30,10 +30,8 @@ export const sessions = pgTable(
 
 // User storage table.
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: varchar("username", { length: 50 }).unique().notNull(),
+  id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
-  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -44,6 +42,8 @@ export const users = pgTable("users", {
   bio: text("bio"),
   location: varchar("location"),
   phone: varchar("phone"),
+  username: varchar("username", { length: 50 }),
+  password: varchar("password"),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables
