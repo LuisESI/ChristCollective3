@@ -14,24 +14,24 @@ export default function MissionSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
           <div className="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <HandHelping className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <HandHelping className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold mb-3 text-black">Community Service</h3>
             <p className="text-gray-600">Supporting each other through challenging times and celebrating our shared faith through service.</p>
           </div>
 
           <div className="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Heart className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold mb-3 text-black">Charitable Giving</h3>
             <p className="text-gray-600">Creating and supporting meaningful charitable initiatives that reflect our Christian values.</p>
           </div>
 
           <div className="bg-white p-8 rounded-xl shadow-sm text-center hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Handshake className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <Handshake className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold mb-3 text-black">Business Networking</h3>
             <p className="text-gray-600">Connecting Christian business owners to build relationships that honor our faith and values.</p>
