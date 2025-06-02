@@ -40,8 +40,11 @@ export interface IStorage {
   getCampaign(id: string): Promise<Campaign | undefined>;
   getCampaignBySlug(slug: string): Promise<Campaign | undefined>;
   listCampaigns(limit?: number): Promise<Campaign[]>;
+  listPendingCampaigns(): Promise<Campaign[]>;
   searchCampaigns(query: string): Promise<Campaign[]>;
   updateCampaign(id: string, data: Partial<Campaign>): Promise<Campaign>;
+  approveCampaign(id: string): Promise<Campaign>;
+  rejectCampaign(id: string): Promise<Campaign>;
   deleteCampaign(id: string): Promise<void>;
   getUserCampaigns(userId: string): Promise<Campaign[]>;
   
@@ -154,9 +157,17 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(campaigns)
-      .where(eq(campaigns.isActive, true))
+      .where(and(eq(campaigns.isActive, true), eq(campaigns.status, "approved")))
       .orderBy(desc(campaigns.createdAt))
       .limit(limit);
+  }
+
+  async listPendingCampaigns(): Promise<Campaign[]> {
+    return await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.status, "pending"))
+      .orderBy(desc(campaigns.createdAt));
   }
 
   async searchCampaigns(query: string): Promise<Campaign[]> {
@@ -189,6 +200,24 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(campaigns.createdAt));
   }
   
+  async approveCampaign(id: string): Promise<Campaign> {
+    const [approvedCampaign] = await db
+      .update(campaigns)
+      .set({ status: "approved", updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return approvedCampaign;
+  }
+
+  async rejectCampaign(id: string): Promise<Campaign> {
+    const [rejectedCampaign] = await db
+      .update(campaigns)
+      .set({ status: "rejected", updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return rejectedCampaign;
+  }
+
   async deleteCampaign(id: string): Promise<void> {
     await db
       .delete(campaigns)

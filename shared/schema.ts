@@ -99,6 +99,7 @@ export const campaigns = pgTable("campaigns", {
   additionalImages: text("additional_images").array(),
   video: varchar("video"),
   isActive: boolean("is_active").default(true),
+  status: varchar("status", { enum: ["pending", "approved", "rejected"] }).default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   endDate: timestamp("end_date"),

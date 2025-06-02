@@ -86,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin middleware to check if user is admin
+  // Admin middleware
   const isAdmin = async (req: any, res: any, next: any) => {
     try {
       const userId = req.user.claims.sub;
@@ -96,8 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       next();
     } catch (error) {
-      console.error("Error checking admin status:", error);
-      res.status(500).json({ message: "Failed to verify admin status" });
+      res.status(500).json({ message: "Error checking admin status" });
     }
   };
 
