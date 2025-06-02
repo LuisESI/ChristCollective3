@@ -90,11 +90,12 @@ export function setupAuth(app: Express) {
       }
 
       const user = await storage.createUser({
+        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         username,
-        email,
+        email: email || null,
         password: await hashPassword(password),
-        firstName,
-        lastName,
+        firstName: firstName || null,
+        lastName: lastName || null,
       });
 
       req.login(user, (err) => {
