@@ -121,6 +121,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/campaigns/pending', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const pendingCampaigns = await storage.listPendingCampaigns();
+      res.json(pendingCampaigns);
+    } catch (error) {
+      console.error("Error fetching pending campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch pending campaigns" });
+    }
+  });
+
+  app.post('/api/admin/campaigns/:id/approve', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const approvedCampaign = await storage.approveCampaign(id);
+      res.json(approvedCampaign);
+    } catch (error) {
+      console.error("Error approving campaign:", error);
+      res.status(500).json({ message: "Failed to approve campaign" });
+    }
+  });
+
+  app.post('/api/admin/campaigns/:id/reject', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const rejectedCampaign = await storage.rejectCampaign(id);
+      res.json(rejectedCampaign);
+    } catch (error) {
+      console.error("Error rejecting campaign:", error);
+      res.status(500).json({ message: "Failed to reject campaign" });
+    }
+  });
+
+  app.delete('/api/admin/campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteCampaign(id);
+      res.json({ message: "Campaign deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      res.status(500).json({ message: "Failed to delete campaign" });
+    }
+  });
+
   app.get('/api/admin/business-profiles', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const profiles = await storage.listBusinessProfiles();
