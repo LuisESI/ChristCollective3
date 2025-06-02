@@ -138,6 +138,9 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...campaignData,
         slug,
+        currentAmount: "0",
+        isActive: true,
+        status: "pending",
       })
       .returning();
     return campaign;

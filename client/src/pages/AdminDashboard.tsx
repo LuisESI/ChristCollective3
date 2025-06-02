@@ -29,12 +29,12 @@ export default function AdminDashboard() {
     }
   }, [authLoading, isAuthenticated, user, toast]);
 
-  const { data: pendingCampaigns, isLoading: pendingLoading } = useQuery({
+  const { data: pendingCampaigns = [], isLoading: pendingLoading } = useQuery({
     queryKey: ["/api/admin/campaigns/pending"],
     enabled: user?.isAdmin === true,
   });
 
-  const { data: allCampaigns, isLoading: campaignsLoading } = useQuery({
+  const { data: allCampaigns = [], isLoading: campaignsLoading } = useQuery({
     queryKey: ["/api/admin/campaigns"],
     enabled: user?.isAdmin === true,
   });
@@ -256,8 +256,8 @@ export default function AdminDashboard() {
                       <div>
                         <CardTitle className="text-white">{campaign.title}</CardTitle>
                         <CardDescription className="text-gray-400 mt-2">
-                          Goal: {formatCurrency(Number(campaign.goalAmount))} • 
-                          Created: {new Date(campaign.createdAt).toLocaleDateString()}
+                          Goal: {formatCurrency(Number(campaign.goal))} • 
+                          Created: {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : 'Unknown'}
                         </CardDescription>
                       </div>
                       <Badge variant="secondary" className="bg-yellow-900 text-yellow-300">
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
                       <div>
                         <CardTitle className="text-white">{campaign.title}</CardTitle>
                         <CardDescription className="text-gray-400 mt-2">
-                          {formatCurrency(Number(campaign.currentAmount))} of {formatCurrency(Number(campaign.goalAmount))} raised • 
+                          {formatCurrency(Number(campaign.currentAmount))} of {formatCurrency(Number(campaign.goal))} raised • 
                           Status: {campaign.status}
                         </CardDescription>
                       </div>
@@ -354,14 +354,14 @@ export default function AdminDashboard() {
                             className="bg-primary h-2 rounded-full shadow-lg shadow-primary/50"
                             style={{
                               width: `${Math.min(
-                                (Number(campaign.currentAmount) / Number(campaign.goalAmount)) * 100,
+                                (Number(campaign.currentAmount) / Number(campaign.goal)) * 100,
                                 100
                               )}%`,
                             }}
                           ></div>
                         </div>
                         <p className="text-sm text-gray-400">
-                          {Math.round((Number(campaign.currentAmount) / Number(campaign.goalAmount)) * 100)}% funded
+                          {Math.round((Number(campaign.currentAmount) / Number(campaign.goal)) * 100)}% funded
                         </p>
                       </div>
                       <Button
