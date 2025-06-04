@@ -57,6 +57,28 @@ export default function AuthPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!registerData.username || !registerData.password || !registerData.phone) {
+      toast({
+        title: "Missing Information",
+        description: "Username, password, and phone number are required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Basic phone number validation
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    if (!phoneRegex.test(registerData.phone.replace(/[\s\-\(\)]/g, ''))) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       await registerMutation.mutateAsync(registerData);
       setLocation("/");
