@@ -73,10 +73,10 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, email, password, firstName, lastName } = req.body;
+      const { username, email, password, firstName, lastName, phone } = req.body;
       
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
+      if (!username || !password || !phone) {
+        return res.status(400).json({ message: "Username, password, and phone number are required" });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -98,6 +98,7 @@ export function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName: firstName || null,
         lastName: lastName || null,
+        phone: phone,
       });
 
       req.login(user, (err) => {
@@ -108,6 +109,7 @@ export function setupAuth(app: Express) {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          phone: user.phone,
           isAdmin: user.isAdmin 
         });
       });
@@ -125,6 +127,7 @@ export function setupAuth(app: Express) {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      phone: user.phone,
       isAdmin: user.isAdmin 
     });
   });
@@ -145,6 +148,7 @@ export function setupAuth(app: Express) {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      phone: user.phone,
       isAdmin: user.isAdmin 
     });
   });

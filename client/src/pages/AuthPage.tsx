@@ -24,7 +24,8 @@ export default function AuthPage() {
     email: "",
     password: "",
     firstName: "",
-    lastName: ""
+    lastName: "",
+    phone: ""
   });
 
   // Redirect if already logged in
@@ -176,6 +177,17 @@ export default function AuthPage() {
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                         placeholder="your@email.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={registerData.phone}
+                        onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                        placeholder="(555) 123-4567"
+                        required
                       />
                     </div>
                     <div>
