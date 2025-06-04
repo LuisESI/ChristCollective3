@@ -83,9 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin middleware
   const isAdmin = async (req: any, res: any, next: any) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      if (!user || !user.isAdmin) {
+      if (!req.user || !req.user.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
       next();
@@ -213,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updateData = req.body;
       const user = await storage.updateUser(userId, updateData);
       res.json(user);
@@ -226,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Campaign routes
   app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Ensure additionalImages is an array or set to empty array if undefined
       if (req.body.additionalImages && !Array.isArray(req.body.additionalImages)) {
@@ -303,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user/campaigns', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const campaigns = await storage.getUserCampaigns(userId);
       res.json(campaigns);
     } catch (error) {
@@ -316,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if the campaign exists
       const campaign = await storage.getCampaign(id);
@@ -344,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if the campaign exists
       const campaign = await storage.getCampaign(id);
@@ -369,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user/donations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const donations = await storage.getUserDonations(userId);
       res.json(donations);
     } catch (error) {
@@ -396,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       // Create or retrieve customer
@@ -472,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a donation directly (for testing)
   app.post('/api/donations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const donationData = insertDonationSchema.parse({
         ...req.body,
@@ -504,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Business profile routes
   app.post('/api/business-profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user already has a business profile
       const existingProfile = await storage.getUserBusinessProfile(userId);
@@ -541,7 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user/business-profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getUserBusinessProfile(userId);
       
       if (!profile) {
@@ -571,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the user owns this profile
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       if (profile.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to update this profile" });
       }
@@ -615,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Membership tier not found" });
       }
       
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.email) {
@@ -720,7 +718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/user/content-creator", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const creator = await storage.getUserContentCreator(userId);
       res.json(creator || null);
     } catch (error) {
@@ -731,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/content-creators", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user already has a content creator profile
       const existingCreator = await storage.getUserContentCreator(userId);
@@ -758,7 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sponsorship Application routes
   app.get("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const applications = await storage.getUserSponsorshipApplications(userId);
       res.json(applications);
     } catch (error) {
@@ -769,7 +767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user already has a pending application
       const existingApplications = await storage.getUserSponsorshipApplications(userId);
@@ -802,7 +800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No image file provided' });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const imageUrl = `/uploads/${req.file.filename}`;
       
       // Update user's profile image
@@ -821,7 +819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No logo file provided' });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const logoUrl = `/uploads/${req.file.filename}`;
       
       // Get user's business profile
