@@ -12,12 +12,12 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign } from "@shared/schema";
 
 export default function AdminDashboard() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || !user?.isAdmin)) {
+    if (!authLoading && user && !user.isAdmin) {
       toast({
         title: "Unauthorized",
         description: "Admin access required. Redirecting...",
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
         window.location.href = "/";
       }, 1000);
     }
-  }, [authLoading, isAuthenticated, user, toast]);
+  }, [authLoading, user, toast]);
 
   const { data: pendingCampaigns = [], isLoading: pendingLoading } = useQuery({
     queryKey: ["/api/admin/campaigns/pending"],
