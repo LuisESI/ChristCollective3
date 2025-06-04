@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +28,11 @@ export default function AuthPage() {
   });
 
   // Redirect if already logged in
-  if (!isLoading && user) {
-    setLocation("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoading && user) {
+      setLocation("/");
+    }
+  }, [isLoading, user, setLocation]);
 
   if (isLoading) {
     return (
