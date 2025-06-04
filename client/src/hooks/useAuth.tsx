@@ -51,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const loginMutation = useMutation({
@@ -61,9 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return await res.json();
     },
-    onSuccess: async (user: User) => {
+    onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
-      await refetch();
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      window.location.reload(); // Force page reload to ensure state consistency
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
