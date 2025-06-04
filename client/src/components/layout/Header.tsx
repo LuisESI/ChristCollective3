@@ -16,7 +16,7 @@ import { User } from "@shared/schema";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [path] = useLocation();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -54,12 +54,12 @@ export default function Header() {
         <div className="flex items-center space-x-4">
           {isLoading ? (
             <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-          ) : isAuthenticated ? (
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
+                    <AvatarImage src={undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>
@@ -132,7 +132,7 @@ export default function Header() {
               </Link>
             ))}
             <hr className="border-gray-200" />
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <Link href="/profile">
                   <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
