@@ -46,25 +46,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
+    refetch,
   } = useQuery<User | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
+      if (!res.ok) {
+        throw new Error(`Login failed: ${res.status}`);
+      }
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: async (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      await refetch();
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Sign in failed",
         description: "Please check your username and password.",

@@ -43,12 +43,14 @@ export default function AuthPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await loginMutation.mutateAsync(loginData);
-      setLocation("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
+    loginMutation.mutate(loginData, {
+      onSuccess: () => {
+        setLocation("/");
+      },
+      onError: (error) => {
+        console.error("Login failed:", error);
+      }
+    });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
