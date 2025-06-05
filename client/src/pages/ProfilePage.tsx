@@ -68,9 +68,9 @@ const businessProfileSchema = z.object({
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
   industry: z.string().min(1, "Please select an industry"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  website: z.string().url().optional().or(z.literal("")),
+  website: z.string().optional().or(z.literal("")),
   location: z.string().optional(),
-  logo: z.string().url().optional().or(z.literal("")),
+  logo: z.string().optional().or(z.literal("")),
   networkingGoals: z.string().optional(),
 });
 
