@@ -23,17 +23,19 @@ type SlideContent = {
 };
 
 export default function HeroSection() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [slides, setSlides] = useState<SlideContent[]>([
+  
+  const slides: SlideContent[] = [
     {
       id: 1,
       image: mountainBackground,
       heading: "Uniting Christians Worldwide",
       subheading: "Join our global community dedicated to faith, service, and fellowship across all denominations.",
       primaryButtonText: "Join the Collective",
-      primaryButtonLink: "/api/login",
+      primaryButtonLink: isAuthenticated ? "/profile" : "/api/login",
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/#about",
     },
@@ -43,7 +45,7 @@ export default function HeroSection() {
       heading: "Create for Christ",
       subheading: "Join our team of creators to receive compensation through sponsorships.",
       primaryButtonText: "Apply Now",
-      primaryButtonLink: "/sponsorship-application",
+      primaryButtonLink: isAuthenticated ? "/sponsorship-application" : "/api/login",
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/sponsored-creators",
     },
@@ -53,7 +55,7 @@ export default function HeroSection() {
       heading: "Christian Business Network",
       subheading: "Join our network of Christian Business Owners.",
       primaryButtonText: "Join Now",
-      primaryButtonLink: "/business",
+      primaryButtonLink: isAuthenticated ? "/business" : "/api/login",
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/business",
     },
@@ -67,7 +69,7 @@ export default function HeroSection() {
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/#mission",
     },
-  ]);
+  ];
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
