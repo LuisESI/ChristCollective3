@@ -14,12 +14,15 @@ interface MembershipTier {
 }
 
 export default function BusinessSection() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   
-  // Fetch business profiles to get current member count
-  const { data: profiles = [], isLoading } = useQuery({
-    queryKey: ["/api/business-profiles"],
+  // Fetch statistics to get current user count for founding members
+  const { data: statistics, isLoading } = useQuery({
+    queryKey: ["/api/statistics"],
   });
+  
+  const totalUsers = (statistics as any)?.communityMembers || 0;
 
   return (
     <section id="business" className="py-16 bg-black text-white">
@@ -37,17 +40,17 @@ export default function BusinessSection() {
           <div className="bg-white rounded-lg p-6 shadow-lg mb-8">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-medium text-gray-700">Founding Members</span>
-              <span className="text-sm font-medium text-gray-700">{profiles.length}/100</span>
+              <span className="text-sm font-medium text-gray-700">{totalUsers}/100</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div 
                 className="bg-primary h-3 rounded-full transition-all duration-300 shadow-lg shadow-primary/50" 
-                style={{ width: `${Math.min((profiles.length / 100) * 100, 100)}%` }}
+                style={{ width: `${Math.min((totalUsers / 100) * 100, 100)}%` }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              {100 - profiles.length > 0 
-                ? `${100 - profiles.length} spots remaining for free lifetime membership`
+              {100 - totalUsers > 0 
+                ? `${100 - totalUsers} spots remaining for free lifetime membership`
                 : "Founding member program complete!"}
             </p>
           </div>
@@ -115,19 +118,21 @@ export default function BusinessSection() {
                 <Button 
                   size="lg" 
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 shadow-lg shadow-primary/50 hover:shadow-primary/70 transition-all duration-300"
-                  disabled={profiles.length >= 100}
+                  disabled={totalUsers >= 100}
                   asChild
                 >
                   {isAuthenticated ? (
                     <Link href="/profile">
-                      <a>{profiles.length >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
+                      <a>{totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
                     </Link>
                   ) : (
-                    <a href="/api/login">{profiles.length >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
+                    <Link href="/auth">
+                      <a>{totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
+                    </Link>
                   )}
                 </Button>
                 <p className="text-xs text-gray-500 mt-3">
-                  {profiles.length < 100 
+                  {totalUsers < 100 
                     ? "Limited time offer - join now while spots are available"
                     : "Thank you to all our founding members!"}
                 </p>
@@ -181,7 +186,7 @@ export default function BusinessSection() {
             {/* Join Our Growing Network section moved below features */}
             <div className="mt-12">
               <h3 className="text-2xl font-semibold mb-4">Join Our Growing Network</h3>
-              <p className="text-gray-400 mb-6">Connect with over 2,500+ Christian business owners and professionals across 120+ industries worldwide.</p>
+              <p className="text-gray-400 mb-6">Connect with Christian business owners and professionals across multiple industries worldwide.</p>
               
               <Button 
                 asChild
@@ -192,7 +197,9 @@ export default function BusinessSection() {
                     <a>Create Your Business Profile</a>
                   </Link>
                 ) : (
-                  <a href="/api/login">Create Your Business Profile</a>
+                  <Link href="/auth">
+                    <a>Create Your Business Profile</a>
+                  </Link>
                 )}
               </Button>
             </div>
