@@ -92,10 +92,10 @@ export default function BusinessProfilePage() {
                         <Users className="w-3 h-3 mr-1" />
                         Active Member
                       </Badge>
-                      {profile.membershipTier && (
+                      {(profile as any)?.membershipTier && (
                         <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
                           <Star className="w-3 h-3 mr-1" />
-                          {profile.membershipTier.name}
+                          {(profile as any).membershipTier.name}
                         </Badge>
                       )}
                     </div>
@@ -138,7 +138,7 @@ export default function BusinessProfilePage() {
                   </div>
                 )}
                 
-                {profile.phone && (
+                {profile?.phone && (
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-slate-500" />
                     <a href={`tel:${profile.phone}`} className="text-slate-700 hover:text-slate-900 transition-colors">
@@ -147,7 +147,7 @@ export default function BusinessProfilePage() {
                   </div>
                 )}
                 
-                {profile.email && (
+                {profile?.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-slate-500" />
                     <a href={`mailto:${profile.email}`} className="text-slate-700 hover:text-slate-900 transition-colors">
@@ -176,14 +176,14 @@ export default function BusinessProfilePage() {
           </Card>
 
           {/* Services */}
-          {profile.services && profile.services.length > 0 && (
+          {profile?.services && profile.services.length > 0 && (
             <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-slate-900">Services</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {profile.services.map((service, index) => (
+                  {profile.services.map((service: string, index: number) => (
                     <Badge key={index} variant="outline" className="bg-slate-50 text-slate-700 border-slate-300">
                       {service}
                     </Badge>

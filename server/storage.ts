@@ -308,8 +308,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBusinessProfile(id: number): Promise<BusinessProfile | undefined> {
-    const [profile] = await db.select().from(businessProfiles).where(eq(businessProfiles.id, id));
-    return profile;
+    const [profile] = await db
+      .select()
+      .from(businessProfiles)
+      .leftJoin(membershipTiers, eq(businessProfiles.membershipTierId, membershipTiers.id))
+      .where(eq(businessProfiles.id, id));
+    
+    if (!profile) return undefined;
+    
+    return {
+      ...profile.business_profiles,
+      membershipTier: profile.membership_tiers || null,
+    } as any;
   }
 
   async getUserBusinessProfile(userId: string): Promise<BusinessProfile | undefined> {
