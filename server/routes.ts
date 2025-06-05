@@ -537,6 +537,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single business profile by ID
+  app.get('/api/business-profiles/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const profile = await storage.getBusinessProfile(parseInt(id));
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching business profile:", error);
+      res.status(500).json({ message: "Failed to fetch business profile" });
+    }
+  });
+
   app.get('/api/user/business-profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;

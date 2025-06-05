@@ -15,6 +15,14 @@ export default function BusinessProfilePage() {
 
   const { data: profile, isLoading, error } = useQuery<BusinessProfile>({
     queryKey: ["/api/business-profiles", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/business-profiles/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch business profile');
+      }
+      return response.json();
+    },
+    enabled: !!id,
   });
 
   if (isLoading) {
@@ -66,17 +74,17 @@ export default function BusinessProfilePage() {
             <CardHeader className="pb-6">
               <div className="flex flex-col md:flex-row gap-6 items-start">
                 <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                  <AvatarImage src={profile.logo || undefined} alt={profile.companyName} />
+                  <AvatarImage src={profile?.logo || undefined} alt={profile?.companyName} />
                   <AvatarFallback className="bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xl font-bold">
-                    {profile.companyName.charAt(0)}
+                    {profile?.companyName?.charAt(0) || "B"}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                      <CardTitle className="text-3xl font-bold text-slate-900 mb-2">{profile.companyName}</CardTitle>
-                      <CardDescription className="text-lg text-slate-600">{profile.industry}</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-slate-900 mb-2">{profile?.companyName || "Business Name"}</CardTitle>
+                      <CardDescription className="text-lg text-slate-600">{profile?.industry || "Industry"}</CardDescription>
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
