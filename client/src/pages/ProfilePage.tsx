@@ -69,7 +69,16 @@ const businessProfileSchema = z.object({
   industry: z.string().min(1, "Please select an industry"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   website: z.string().optional().or(z.literal("")),
-  location: z.string().optional(),
+  location: z.string().min(1, "Please enter location in format: City, State, Country").refine(
+    (val) => {
+      if (!val) return false;
+      const parts = val.split(',').map(part => part.trim());
+      return parts.length >= 3 && parts.every(part => part.length > 0);
+    },
+    { message: "Location must include City, State, Country (e.g., Los Angeles, CA, USA)" }
+  ),
+  phone: z.string().optional().or(z.literal("")),
+  email: z.string().email("Please enter a valid email address").optional().or(z.literal("")),
   logo: z.string().optional().or(z.literal("")),
   networkingGoals: z.string().optional(),
 });
@@ -141,6 +150,8 @@ export default function ProfilePage() {
       description: businessProfile?.description || "",
       website: businessProfile?.website || "",
       location: businessProfile?.location || "",
+      phone: businessProfile?.phone || "",
+      email: businessProfile?.email || "",
       logo: businessProfile?.logo || "",
       networkingGoals: businessProfile?.networkingGoals || "",
     },
@@ -169,6 +180,8 @@ export default function ProfilePage() {
         description: businessProfile.description || "",
         website: businessProfile.website || "",
         location: businessProfile.location || "",
+        phone: businessProfile.phone || "",
+        email: businessProfile.email || "",
         logo: businessProfile.logo || "",
         networkingGoals: businessProfile.networkingGoals || "",
       });
@@ -580,6 +593,36 @@ export default function ProfilePage() {
                             />
                           </div>
                           
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={businessProfileForm.control}
+                              name="email"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Business Email</FormLabel>
+                                  <FormControl>
+                                    <Input type="email" placeholder="business@example.com" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={businessProfileForm.control}
+                              name="phone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Business Phone</FormLabel>
+                                  <FormControl>
+                                    <Input type="tel" placeholder="(555) 123-4567" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          
                           <FormField
                             control={businessProfileForm.control}
                             name="location"
@@ -587,8 +630,11 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>Business Location</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="City, State, Country" {...field} />
+                                  <Input placeholder="Los Angeles, CA, USA" {...field} />
                                 </FormControl>
+                                <FormDescription>
+                                  Please include City, State, Country format
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
