@@ -820,10 +820,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const imageUrl = `/uploads/${req.file.filename}`;
       
-      // Update user's profile image
-      await storage.updateUser(userId, { profileImageUrl: imageUrl });
+      console.log(`Updating user ${userId} profile image to: ${imageUrl}`);
       
-      res.json({ imageUrl });
+      // Update user's profile image
+      const updatedUser = await storage.updateUser(userId, { profileImageUrl: imageUrl });
+      
+      console.log('Updated user:', JSON.stringify(updatedUser, null, 2));
+      
+      res.json({ imageUrl, profileImageUrl: updatedUser.profileImageUrl });
     } catch (error) {
       console.error('Error uploading profile image:', error);
       res.status(500).json({ message: 'Failed to upload profile image' });

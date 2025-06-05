@@ -479,8 +479,13 @@ export default function ProfilePage() {
                           <ImageUpload
                             currentImage={user?.profileImageUrl || ""}
                             onImageChange={async (imageUrl) => {
-                              // Refresh user data to get the updated profile image
+                              // Force refresh user data to get the updated profile image
                               await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                              await queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                              // Small delay to ensure the update is visible
+                              setTimeout(() => {
+                                queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                              }, 1000);
                               toast({
                                 title: "Profile picture saved",
                                 description: "Your profile picture has been updated and saved automatically.",
