@@ -481,16 +481,14 @@ export default function ProfilePage() {
                             onImageChange={async (imageUrl) => {
                               // Refresh user data to get the updated profile image
                               await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-                              // Reset form to clean state since image is already saved
-                              userProfileForm.reset(userProfileForm.getValues());
                               toast({
-                                title: "Profile picture updated",
-                                description: "Your profile picture has been saved successfully.",
+                                title: "Profile picture saved",
+                                description: "Your profile picture has been updated and saved automatically.",
                               });
                             }}
                             uploadEndpoint="/api/upload/profile-image"
                             fieldName="image"
-                            label="Profile Picture"
+                            label="Profile Picture (saves automatically)"
                           />
                         </div>
                         
