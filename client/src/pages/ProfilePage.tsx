@@ -186,7 +186,7 @@ export default function ProfilePage() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
