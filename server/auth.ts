@@ -139,18 +139,46 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const user = req.user as SelectUser;
-    res.json({ 
-      id: user.id, 
-      username: user.username, 
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      isAdmin: user.isAdmin 
-    });
+    const sessionUser = req.user as SelectUser;
+    
+    // Fetch fresh user data from database to ensure we have the latest updates
+    try {
+      const freshUser = await storage.getUser(sessionUser.id);
+      if (!freshUser) {
+        return res.sendStatus(404);
+      }
+      
+      res.json({
+        id: freshUser.id,
+        username: freshUser.username,
+        email: freshUser.email,
+        firstName: freshUser.firstName,
+        lastName: freshUser.lastName,
+        phone: freshUser.phone,
+        location: freshUser.location,
+        bio: freshUser.bio,
+        profileImageUrl: freshUser.profileImageUrl,
+        isAdmin: freshUser.isAdmin,
+        stripeCustomerId: freshUser.stripeCustomerId,
+        createdAt: freshUser.createdAt,
+        updatedAt: freshUser.updatedAt
+      });
+    } catch (error) {
+      console.error('Error fetching fresh user data:', error);
+      // Fallback to session data if database fetch fails
+      const user = req.user as SelectUser;
+      res.json({ 
+        id: user.id, 
+        username: user.username, 
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        isAdmin: user.isAdmin 
+      });
+    }
   });
 }
 
