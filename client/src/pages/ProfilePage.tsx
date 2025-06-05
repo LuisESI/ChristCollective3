@@ -79,17 +79,17 @@ type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
 
 export default function ProfilePage() {
   const [, navigate] = useLocation();
-  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("profile");
   
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
+    if (!isAuthLoading && !user) {
+      navigate("/auth");
     }
-  }, [isAuthLoading, isAuthenticated]);
+  }, [isAuthLoading, user, navigate]);
 
   // Fetch user's business profile if exists
   const { 
@@ -97,7 +97,7 @@ export default function ProfilePage() {
     isLoading: isBusinessProfileLoading 
   } = useQuery({
     queryKey: ["/api/user/business-profile"],
-    enabled: isAuthenticated,
+    enabled: !!user,
     retry: false,
   });
 
@@ -107,7 +107,7 @@ export default function ProfilePage() {
     isLoading: isCampaignsLoading 
   } = useQuery({
     queryKey: ["/api/user/campaigns"],
-    enabled: isAuthenticated,
+    enabled: !!user,
   });
 
   // Fetch user's donations
@@ -116,7 +116,7 @@ export default function ProfilePage() {
     isLoading: isDonationsLoading 
   } = useQuery({
     queryKey: ["/api/user/donations"],
-    enabled: isAuthenticated,
+    enabled: !!user,
   });
 
   // User profile form
@@ -242,7 +242,7 @@ export default function ProfilePage() {
     updateBusinessProfileMutation.mutate(data);
   };
 
-  if (isAuthLoading || !isAuthenticated) {
+  if (isAuthLoading || !user) {
     return (
       <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

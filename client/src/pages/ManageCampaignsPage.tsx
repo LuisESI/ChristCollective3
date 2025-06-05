@@ -55,14 +55,14 @@ type Campaign = {
 };
 
 export default function ManageCampaignsPage() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
   
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ["/api/user/campaigns"],
-    enabled: isAuthenticated,
+    enabled: !!user,
   });
   
   const deleteMutation = useMutation({
@@ -152,15 +152,15 @@ export default function ManageCampaignsPage() {
     );
   }
   
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
           <p className="mb-6">You need to be logged in to manage your campaigns.</p>
-          <a href="/api/login" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <Link href="/auth" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
             Log In
-          </a>
+          </Link>
         </div>
       </div>
     );
