@@ -188,6 +188,24 @@ export const contentCreators = pgTable("content_creators", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Social media posts from content creators
+export const socialMediaPosts = pgTable("social_media_posts", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => contentCreators.id),
+  postUrl: varchar("post_url").notNull(),
+  postTitle: varchar("post_title"),
+  postDescription: text("post_description"),
+  thumbnailUrl: varchar("thumbnail_url"),
+  videoUrl: varchar("video_url"),
+  platform: varchar("platform").notNull(),
+  viewCount: integer("view_count"),
+  likeCount: integer("like_count"),
+  commentCount: integer("comment_count"),
+  postedAt: timestamp("posted_at"),
+  isSponsored: boolean("is_sponsored").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Sponsorship applications
 export const sponsorshipApplications = pgTable("sponsorship_applications", {
   id: serial("id").primaryKey(),
@@ -207,10 +225,18 @@ export const sponsorshipApplications = pgTable("sponsorship_applications", {
 });
 
 // Relations
-export const contentCreatorsRelations = relations(contentCreators, ({ one }) => ({
+export const contentCreatorsRelations = relations(contentCreators, ({ one, many }) => ({
   user: one(users, {
     fields: [contentCreators.userId],
     references: [users.id],
+  }),
+  posts: many(socialMediaPosts),
+}));
+
+export const socialMediaPostsRelations = relations(socialMediaPosts, ({ one }) => ({
+  creator: one(contentCreators, {
+    fields: [socialMediaPosts.creatorId],
+    references: [contentCreators.id],
   }),
 }));
 
@@ -244,9 +270,16 @@ export const insertContentCreatorSchema = createInsertSchema(contentCreators)
 export const insertSponsorshipApplicationSchema = createInsertSchema(sponsorshipApplications)
   .omit({ id: true, userId: true, status: true, reviewedAt: true, createdAt: true, updatedAt: true });
 
+// Schema for creating social media posts
+export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts)
+  .omit({ id: true, creatorId: true, createdAt: true });
+
 // Types
 export type InsertContentCreator = z.infer<typeof insertContentCreatorSchema>;
 export type ContentCreator = typeof contentCreators.$inferSelect;
+
+export type InsertSocialMediaPost = z.infer<typeof insertSocialMediaPostSchema>;
+export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
 
 export type InsertSponsorshipApplication = z.infer<typeof insertSponsorshipApplicationSchema>;
 export type SponsorshipApplication = typeof sponsorshipApplications.$inferSelect;

@@ -6,6 +6,7 @@ import {
   membershipTiers,
   contentCreators,
   sponsorshipApplications,
+  socialMediaPosts,
   type User,
   type UpsertUser,
   type Campaign,
@@ -19,6 +20,8 @@ import {
   type InsertContentCreator,
   type SponsorshipApplication,
   type InsertSponsorshipApplication,
+  type SocialMediaPost,
+  type InsertSocialMediaPost,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -82,6 +85,13 @@ export interface IStorage {
   getUserSponsorshipApplications(userId: string): Promise<SponsorshipApplication[]>;
   listSponsorshipApplications(status?: string): Promise<SponsorshipApplication[]>;
   updateSponsorshipApplication(id: number, data: Partial<SponsorshipApplication>): Promise<SponsorshipApplication>;
+  
+  // Social media post operations
+  createSocialMediaPost(postData: InsertSocialMediaPost & { creatorId: number }): Promise<SocialMediaPost>;
+  getSocialMediaPost(id: number): Promise<SocialMediaPost | undefined>;
+  getSocialMediaPostsByCreator(creatorId: number): Promise<SocialMediaPost[]>;
+  listSponsoredSocialMediaPosts(): Promise<SocialMediaPost[]>;
+  updateSocialMediaPost(id: number, data: Partial<SocialMediaPost>): Promise<SocialMediaPost>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -461,6 +471,48 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sponsorshipApplications.id, id))
       .returning();
     return application;
+  }
+
+  // Social media post operations
+  async createSocialMediaPost(postData: InsertSocialMediaPost & { creatorId: number }): Promise<SocialMediaPost> {
+    const [post] = await db
+      .insert(socialMediaPosts)
+      .values(postData)
+      .returning();
+    return post;
+  }
+
+  async getSocialMediaPost(id: number): Promise<SocialMediaPost | undefined> {
+    const [post] = await db
+      .select()
+      .from(socialMediaPosts)
+      .where(eq(socialMediaPosts.id, id));
+    return post;
+  }
+
+  async getSocialMediaPostsByCreator(creatorId: number): Promise<SocialMediaPost[]> {
+    return await db
+      .select()
+      .from(socialMediaPosts)
+      .where(eq(socialMediaPosts.creatorId, creatorId))
+      .orderBy(desc(socialMediaPosts.postedAt));
+  }
+
+  async listSponsoredSocialMediaPosts(): Promise<SocialMediaPost[]> {
+    return await db
+      .select()
+      .from(socialMediaPosts)
+      .where(eq(socialMediaPosts.isSponsored, true))
+      .orderBy(desc(socialMediaPosts.postedAt));
+  }
+
+  async updateSocialMediaPost(id: number, data: Partial<SocialMediaPost>): Promise<SocialMediaPost> {
+    const [post] = await db
+      .update(socialMediaPosts)
+      .set(data)
+      .where(eq(socialMediaPosts.id, id))
+      .returning();
+    return post;
   }
 }
 
