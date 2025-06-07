@@ -146,58 +146,65 @@ export default function SponsoredCreatorsPage() {
             {/* Sample Social Media Post Previews */}
             <div className="space-y-6">
               
-              {/* YouTube Video Preview */}
+              {/* Real YouTube Video Preview */}
               <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                 <div className="flex items-center p-4">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>FC</AvatarFallback>
+                    <AvatarFallback>CC</AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
-                    <p className="font-semibold text-black">Faith Creator</p>
+                    <p className="font-semibold text-black">Christ Collective Creator</p>
                     <div className="flex items-center space-x-2">
                       <Youtube className="h-4 w-4 text-red-600" />
-                      <p className="text-sm text-gray-500">Sample YouTube Video</p>
+                      <p className="text-sm text-gray-500">YouTube • Sponsored Content</p>
                     </div>
                   </div>
                   <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
                 </div>
                 
                 <div className="px-4 pb-2">
-                  <h3 className="font-semibold text-black mb-2">Finding Hope in Difficult Times</h3>
+                  <h3 className="font-semibold text-black mb-2">Real Faith-Based Content Example</h3>
                   <p className="text-gray-700 text-sm mb-4">
-                    Join me as I share how my faith helped me through the darkest moments of my life...
+                    Check out this authentic faith-based content that could be featured in our sponsorship program...
                   </p>
                 </div>
                 
-                <div className="relative bg-black h-48 flex items-center justify-center cursor-pointer group">
+                <a 
+                  href="https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block relative bg-black h-48 cursor-pointer group"
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-black/80" />
-                  <div className="relative text-center text-white">
+                  <div className="relative text-center text-white h-full flex items-center justify-center">
                     <div className="bg-red-600 rounded-full p-3 mb-2 mx-auto w-16 h-16 flex items-center justify-center group-hover:bg-red-500 transition-colors">
                       <Play className="w-8 h-8 ml-1" />
                     </div>
-                    <p className="text-sm">Watch on YouTube</p>
                   </div>
-                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
-                    8:42
+                  <div className="absolute bottom-2 left-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
+                    Click to watch on YouTube
                   </div>
-                </div>
+                  <div className="absolute top-2 right-2">
+                    <ExternalLink className="w-4 h-4 text-white" />
+                  </div>
+                </a>
                 
                 <div className="flex items-center justify-between p-4 text-gray-500">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1">
                       <Heart className="w-5 h-5" />
-                      <span>1.2K</span>
+                      <span>Example</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <MessageCircle className="w-5 h-5" />
-                      <span>89</span>
+                      <span>Preview</span>
                     </div>
                     <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
                       <Share2 className="w-5 h-5" />
                     </button>
                   </div>
-                  <div className="text-sm text-gray-400">2 days ago</div>
+                  <div className="text-sm text-gray-400">Live Content</div>
                 </div>
               </div>
 
