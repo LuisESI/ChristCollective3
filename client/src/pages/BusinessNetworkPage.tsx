@@ -102,7 +102,7 @@ export default function BusinessNetworkPage() {
   
   // Industry options (derived from profiles)
   const industries = Array.isArray(profiles) && profiles.length > 0 
-    ? ["all", ...new Set(profiles.map((p: BusinessProfile) => p.industry).filter(Boolean))]
+    ? ["all", ...Array.from(new Set(profiles.map((p: BusinessProfile) => p.industry).filter(Boolean)))]
     : ["all", "Technology", "Healthcare", "Education", "Retail", "Construction", "Finance", "Marketing"];
   
   // Filter and search profiles
