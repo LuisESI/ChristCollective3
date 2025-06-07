@@ -35,7 +35,8 @@ type MembershipTier = {
 };
 
 export default function BusinessNetworkPage() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const [searchQuery, setSearchQuery] = useState("");
   const [industryFilter, setIndustryFilter] = useState("all");
   
@@ -151,45 +152,60 @@ export default function BusinessNetworkPage() {
             </TabsList>
             
             <TabsContent value="directory" className="space-y-6">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div className="w-full md:w-auto flex flex-1 gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 dark:text-gray-400" size={18} />
-                    <Input
-                      type="text"
-                      placeholder="Search businesses..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-full"
-                    />
-                  </div>
-                  
-                  <Select value={industryFilter} onValueChange={setIndustryFilter}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                      <Filter size={16} className="mr-2" />
-                      <SelectValue placeholder="Industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {industries.map((industry) => (
-                        <SelectItem key={industry} value={industry}>
-                          {industry === "all" ? "All Industries" : industry}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {!isAuthenticated ? (
+                <div className="text-center py-20 bg-white rounded-lg shadow-sm">
+                  <Users size={64} className="mx-auto text-gray-400 mb-6" />
+                  <h3 className="text-2xl font-semibold mb-4">Business Directory Access</h3>
+                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                    Join our community to access our business directory and connect with Christian business owners who share your values.
+                  </p>
+                  <Button 
+                    asChild
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90 text-white"
+                  >
+                    <a href="/auth">Join Our Network</a>
+                  </Button>
                 </div>
-                
-                {isAuthenticated && (
-                  <Link href="/profile">
-                    <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                      <Briefcase className="mr-2" size={16} />
-                      Manage Your Profile
-                    </button>
-                  </Link>
-                )}
-              </div>
+              ) : (
+                <>
+                  <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <div className="w-full md:w-auto flex flex-1 gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 dark:text-gray-400" size={18} />
+                        <Input
+                          type="text"
+                          placeholder="Search businesses..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 w-full"
+                        />
+                      </div>
+                      
+                      <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                          <Filter size={16} className="mr-2" />
+                          <SelectValue placeholder="Industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {industries.map((industry) => (
+                            <SelectItem key={industry} value={industry}>
+                              {industry === "all" ? "All Industries" : industry}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Link href="/profile">
+                      <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                        <Briefcase className="mr-2" size={16} />
+                        Manage Your Profile
+                      </button>
+                    </Link>
+                  </div>
               
-              {isLoadingProfiles ? (
+                  {isLoadingProfiles ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <Card key={i} className="animate-pulse">
@@ -275,6 +291,8 @@ export default function BusinessNetworkPage() {
                     </a>
                   )}
                 </div>
+              )}
+                </>
               )}
             </TabsContent>
             
