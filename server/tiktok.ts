@@ -27,16 +27,15 @@ interface TikTokUserData {
 }
 
 export class TikTokService {
-  private apiKey: string;
-  private baseUrl = 'https://api.tikapi.io/public/check';
+  private apifyToken: string;
+  private apifyActorId = 'clockworks~free-tiktok-scraper';
 
   constructor() {
-    // TikTok API requires a third-party service since official API is limited
-    // Using TikAPI.io as an example - user would need to provide API key
+    // Using Apify TikTok Profile Scraper for authentic data
     if (!process.env.TIKTOK_API_KEY) {
       console.warn('TIKTOK_API_KEY environment variable not provided - TikTok features will use sample data');
     }
-    this.apiKey = process.env.TIKTOK_API_KEY || '';
+    this.apifyToken = process.env.TIKTOK_API_KEY || '';
   }
 
   extractUsername(url: string): string | null {
@@ -55,45 +54,87 @@ export class TikTokService {
   }
 
   async getUserData(username: string): Promise<TikTokUserData | null> {
-    if (!this.apiKey) {
-      // Return sample data when API key is not available
+    if (!this.apifyToken) {
       return this.getSampleUserData(username);
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/user?username=${username}`, {
+      // Start Apify actor run with TikTok profile URL
+      const runResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs`, {
+        method: 'POST',
         headers: {
-          'X-API-KEY': this.apiKey,
+          'Authorization': `Bearer ${this.apifyToken}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          startUrls: [{ url: `https://www.tiktok.com/@${username}` }],
+          resultsType: 'profiles',
+          resultsLimit: 1,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`TikTok API error: ${response.status}`);
+      if (!runResponse.ok) {
+        throw new Error(`Apify API error: ${runResponse.status}`);
       }
 
-      const data = await response.json();
-      
-      if (!data.user) {
-        return null;
+      const runData = await runResponse.json();
+      const runId = runData.data.id;
+
+      // Wait for the run to complete and get results
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds timeout
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+        
+        const statusResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}`, {
+          headers: {
+            'Authorization': `Bearer ${this.apifyToken}`,
+          },
+        });
+
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          
+          if (statusData.data.status === 'SUCCEEDED') {
+            // Get the dataset results
+            const resultsResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}/dataset/items`, {
+              headers: {
+                'Authorization': `Bearer ${this.apifyToken}`,
+              },
+            });
+
+            if (resultsResponse.ok) {
+              const results = await resultsResponse.json();
+              
+              if (results.length > 0) {
+                const profile = results[0];
+                return {
+                  id: profile.id || username,
+                  username: profile.uniqueId || username,
+                  displayName: profile.nickname || username,
+                  description: profile.signature || '',
+                  avatar: profile.avatarLarger || '/placeholder-avatar.jpg',
+                  followerCount: profile.followerCount?.toString() || '0',
+                  followingCount: profile.followingCount?.toString() || '0',
+                  videoCount: profile.videoCount?.toString() || '0',
+                  likeCount: profile.heartCount?.toString() || '0',
+                  verified: profile.verified || false,
+                };
+              }
+            }
+            break;
+          } else if (statusData.data.status === 'FAILED') {
+            throw new Error('Apify scraping failed');
+          }
+        }
+        
+        attempts++;
       }
 
-      const user = data.user;
-      
-      return {
-        id: user.id,
-        username: user.uniqueId,
-        displayName: user.nickname,
-        description: user.signature || '',
-        avatar: user.avatarMedium || user.avatarThumb,
-        followerCount: user.followerCount?.toString() || '0',
-        followingCount: user.followingCount?.toString() || '0',
-        videoCount: user.videoCount?.toString() || '0',
-        likeCount: user.heartCount?.toString() || '0',
-        verified: user.verified || false,
-      };
+      throw new Error('Timeout waiting for Apify results');
     } catch (error) {
-      console.error('Error fetching TikTok user data:', error);
-      // Fallback to sample data on error
+      console.error('Error fetching TikTok user data from Apify:', error);
       return this.getSampleUserData(username);
     }
   }
