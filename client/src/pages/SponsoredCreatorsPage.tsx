@@ -130,34 +130,38 @@ export default function SponsoredCreatorsPage() {
           {/* Creator Profiles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* Sample Creator 1 */}
+            {/* The Matrix Unlocked 369 */}
             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="text-center">
                   <Avatar className="h-16 w-16 mx-auto mb-4">
                     <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>FC</AvatarFallback>
+                    <AvatarFallback>MU</AvatarFallback>
                   </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Faith Creator</h3>
-                  <p className="text-sm text-gray-600 mb-3">YouTube • 1.2K subscribers</p>
+                  <h3 className="font-semibold text-lg text-black mb-2">The Matrix Unlocked 369</h3>
+                  <p className="text-sm text-gray-600 mb-3">YouTube • Spiritual Awakening</p>
                   <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Sharing inspiring testimonies and biblical teachings to encourage believers worldwide.
+                    Unveiling hidden truths through spiritual insight, biblical prophecy, and divine revelation for those seeking deeper understanding.
                   </p>
                   <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
                     <div className="flex items-center space-x-1">
                       <Youtube className="w-4 h-4 text-red-600" />
-                      <span>12 videos</span>
+                      <span>Latest videos</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
-                      <span>2.1K</span>
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      <span>Featured</span>
                     </div>
                   </div>
-                  <Link href="/creator/1">
+                  <a 
+                    href="https://www.youtube.com/@theMatrixunlocked369" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
                     <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
+                      Visit Channel
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </CardContent>
             </Card>
