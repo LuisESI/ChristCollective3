@@ -31,11 +31,18 @@ export class TikTokService {
   private apifyActorId = 'clockworks~free-tiktok-scraper';
 
   constructor() {
-    // Using Apify TikTok Profile Scraper for authentic data
-    if (!process.env.TIKTOK_API_KEY) {
-      console.warn('TIKTOK_API_KEY environment variable not provided - TikTok features will use sample data');
+    // Check for API key dynamically to support runtime configuration
+    this.apifyToken = '';
+  }
+
+  private getApiToken(): string {
+    if (!this.apifyToken) {
+      this.apifyToken = process.env.TIKTOK_API_KEY || '';
+      if (!this.apifyToken) {
+        console.warn('TIKTOK_API_KEY environment variable not provided - TikTok features will use sample data');
+      }
     }
-    this.apifyToken = process.env.TIKTOK_API_KEY || '';
+    return this.apifyToken;
   }
 
   extractUsername(url: string): string | null {
@@ -54,7 +61,8 @@ export class TikTokService {
   }
 
   async getUserData(username: string): Promise<TikTokUserData | null> {
-    if (!this.apifyToken) {
+    const token = this.getApiToken();
+    if (!token) {
       return this.getSampleUserData(username);
     }
 
@@ -63,7 +71,7 @@ export class TikTokService {
       const runResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apifyToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -88,7 +96,7 @@ export class TikTokService {
         
         const statusResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}`, {
           headers: {
-            'Authorization': `Bearer ${this.apifyToken}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
