@@ -118,6 +118,116 @@ export default function SponsoredCreatorsPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         
+        {/* Featured Creators Section */}
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4 text-black">Featured Creators</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Meet our sponsored content creators sharing faith-based content with the community.
+            </p>
+          </div>
+
+          {/* Creator Profiles Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Sample Creator 1 */}
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <Avatar className="h-16 w-16 mx-auto mb-4">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>FC</AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-semibold text-lg text-black mb-2">Faith Creator</h3>
+                  <p className="text-sm text-gray-600 mb-3">YouTube • 1.2K subscribers</p>
+                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                    Sharing inspiring testimonies and biblical teachings to encourage believers worldwide.
+                  </p>
+                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center space-x-1">
+                      <Youtube className="w-4 h-4 text-red-600" />
+                      <span>12 videos</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="w-4 h-4" />
+                      <span>2.1K</span>
+                    </div>
+                  </div>
+                  <Link href="/creator/1">
+                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
+                      View Profile
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sample Creator 2 */}
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <Avatar className="h-16 w-16 mx-auto mb-4">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>GS</AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-semibold text-lg text-black mb-2">Grace Stories</h3>
+                  <p className="text-sm text-gray-600 mb-3">Instagram • 3.5K followers</p>
+                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                    Creating beautiful visual content with scripture and daily encouragement.
+                  </p>
+                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center space-x-1">
+                      <Instagram className="w-4 h-4 text-pink-600" />
+                      <span>28 posts</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="w-4 h-4" />
+                      <span>1.8K</span>
+                    </div>
+                  </div>
+                  <Link href="/creator/2">
+                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
+                      View Profile
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sample Creator 3 */}
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <Avatar className="h-16 w-16 mx-auto mb-4">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>YF</AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-semibold text-lg text-black mb-2">Young Faith</h3>
+                  <p className="text-sm text-gray-600 mb-3">TikTok • 8.9K followers</p>
+                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                    Quick Bible verses and faith-based content for the younger generation.
+                  </p>
+                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center space-x-1">
+                      <Globe className="w-4 h-4 text-black" />
+                      <span>45 videos</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="w-4 h-4" />
+                      <span>15.2K</span>
+                    </div>
+                  </div>
+                  <Link href="/creator/3">
+                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
+                      View Profile
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         {/* Featured Content Section */}
         <div className="mb-16">
           <div className="text-center mb-8">
@@ -316,116 +426,6 @@ export default function SponsoredCreatorsPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Featured Creators Section */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4 text-black">Featured Creators</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Meet our sponsored content creators sharing faith-based content with the community.
-            </p>
-          </div>
-
-          {/* Creator Profiles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            {/* Sample Creator 1 */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>FC</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Faith Creator</h3>
-                  <p className="text-sm text-gray-600 mb-3">YouTube • 1.2K subscribers</p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Sharing inspiring testimonies and biblical teachings to encourage believers worldwide.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <Youtube className="w-4 h-4 text-red-600" />
-                      <span>12 videos</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
-                      <span>2.1K</span>
-                    </div>
-                  </div>
-                  <Link href="/creator/1">
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Sample Creator 2 */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>GS</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Grace Stories</h3>
-                  <p className="text-sm text-gray-600 mb-3">Instagram • 3.5K followers</p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Creating beautiful visual content with scripture and daily encouragement.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <Instagram className="w-4 h-4 text-pink-600" />
-                      <span>28 posts</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
-                      <span>1.8K</span>
-                    </div>
-                  </div>
-                  <Link href="/creator/2">
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Sample Creator 3 */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>YF</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Young Faith</h3>
-                  <p className="text-sm text-gray-600 mb-3">TikTok • 8.9K followers</p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Quick Bible verses and faith-based content for the younger generation.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <Globe className="w-4 h-4 text-black" />
-                      <span>45 videos</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
-                      <span>15.2K</span>
-                    </div>
-                  </div>
-                  <Link href="/creator/3">
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
