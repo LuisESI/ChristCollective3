@@ -67,8 +67,7 @@ export class TikTokService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          startUrls: [{ url: `https://www.tiktok.com/@${username}` }],
-          resultsType: 'profiles',
+          profiles: [`https://www.tiktok.com/@${username}`],
           resultsLimit: 1,
         }),
       });
