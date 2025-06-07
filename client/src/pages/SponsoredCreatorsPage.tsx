@@ -61,11 +61,11 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
-  // Fetch authentic TikTok user data
+  // Fetch authentic TikTok user data from Luis Lucero
   const { data: tiktokData, isLoading: isTikTokLoading } = useQuery({
-    queryKey: ["/api/tiktok/user", "youngfaith"],
+    queryKey: ["/api/tiktok/user", "luislucero369"],
     queryFn: async () => {
-      const response = await fetch("/api/tiktok/user?username=" + encodeURIComponent("youngfaith"));
+      const response = await fetch("/api/tiktok/user?username=" + encodeURIComponent("luislucero369"));
       if (!response.ok) throw new Error("Failed to fetch TikTok user data");
       return response.json();
     },
