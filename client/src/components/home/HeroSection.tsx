@@ -34,7 +34,7 @@ export default function HeroSection() {
       image: mountainBackground,
       heading: "Uniting Christians Worldwide",
       subheading: "Join our global community dedicated to faith, service, and fellowship across all denominations.",
-      primaryButtonText: "Join the Collective",
+      primaryButtonText: isAuthenticated ? "My Account" : "Join the Collective",
       primaryButtonLink: isAuthenticated ? "/profile" : "/auth",
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/#about",
