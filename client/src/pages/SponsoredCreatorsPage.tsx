@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, MessageCircle, Share2, Play, ExternalLink, Youtube, Instagram, Globe, Users, TrendingUp, DollarSign, User, Star } from "lucide-react";
-import { Link } from "wouter";
+import { Heart, MessageCircle, Share2, Play, ExternalLink, Youtube, Instagram, Globe, Users, TrendingUp, DollarSign, Star, Eye, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet";
@@ -33,7 +31,6 @@ type ContentCreator = {
 
 export default function SponsoredCreatorsPage() {
   const { user } = useAuth();
-  const isAuthenticated = !!user;
   const [filter, setFilter] = useState("all");
 
   // Fetch sponsored content creators
@@ -42,13 +39,7 @@ export default function SponsoredCreatorsPage() {
     select: (data) => data as ContentCreator[],
   });
 
-  // Fetch social media posts for the feed
-  const { data: socialPosts = [], isLoading: isLoadingPosts } = useQuery({
-    queryKey: ["/api/social-media-posts"],
-    select: (data) => data as any[],
-  });
-
-  // Fetch real YouTube video data
+  // Fetch real YouTube video data for featured content
   const { data: youtubeVideo, isLoading: isYouTubeLoading } = useQuery({
     queryKey: ["/api/youtube/video", "https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"],
     queryFn: async () => {
@@ -59,14 +50,6 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
-  // Get platforms for filtering
-  const platformsSet = new Set(creators.map((creator) => creator.platform));
-  const platforms = ["all", ...(creators.length > 0 ? Array.from(platformsSet) : [])];
-
-  const filteredCreators = filter === "all" 
-    ? creators 
-    : creators.filter((creator) => creator.platform.toLowerCase() === filter.toLowerCase());
-
   // Sample stats for the hero section
   const stats = [
     { icon: Users, label: "Active Creators", value: "12+" },
@@ -75,14 +58,24 @@ export default function SponsoredCreatorsPage() {
   ];
 
   // Helper function to format numbers
-  const formatCount = (count: number) => {
-    if (count >= 1000000) {
-      return (count / 1000000).toFixed(1) + 'M';
+  const formatCount = (count: number | string) => {
+    const num = typeof count === 'string' ? parseInt(count) : count;
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
     }
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'K';
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
     }
-    return count.toString();
+    return num.toString();
+  };
+
+  // Helper function to navigate without nested links
+  const navigateToCreator = (id: number) => {
+    window.location.href = `/creator/${id}`;
+  };
+
+  const openExternalLink = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -93,7 +86,7 @@ export default function SponsoredCreatorsPage() {
       </Helmet>
       
       {/* Hero Section */}
-      <div className="bg-black text-white py-16">
+      <div className="bg-gradient-to-br from-black via-gray-900 to-black text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             Sponsored <span className="text-[#D4AF37]">Content</span> Hub
@@ -130,102 +123,152 @@ export default function SponsoredCreatorsPage() {
           {/* Creator Profiles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* The Matrix Unlocked 369 */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>MU</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">The Matrix Unlocked 369</h3>
-                  <p className="text-sm text-gray-600 mb-3">YouTube • Spiritual Awakening</p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Unveiling hidden truths through spiritual insight, biblical prophecy, and divine revelation for those seeking deeper understanding.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
+            {/* Real YouTube Creator from API data */}
+            {isYouTubeLoading ? (
+              <Card className="bg-white shadow-sm animate-pulse">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24 mx-auto mb-3"></div>
+                    <div className="h-3 bg-gray-200 rounded w-40 mx-auto mb-4"></div>
+                    <div className="h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : youtubeVideo ? (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-2 border-[#D4AF37]/20">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-[#D4AF37]/30">
+                      <AvatarImage src={youtubeVideo.thumbnail} />
+                      <AvatarFallback className="bg-red-100 text-red-700">
+                        {youtubeVideo.channelTitle?.substring(0, 2) || "YT"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-semibold text-lg text-black mb-2">{youtubeVideo.channelTitle}</h3>
+                    <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
                       <Youtube className="w-4 h-4 text-red-600" />
-                      <span>Latest videos</span>
+                      YouTube • {formatCount(youtubeVideo.viewCount)} views
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                      Featured video: {youtubeVideo.title?.substring(0, 60)}...
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <ThumbsUp className="w-4 h-4 text-blue-600" />
+                        <span>{formatCount(youtubeVideo.likeCount)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <MessageCircle className="w-4 h-4 text-green-600" />
+                        <span>{formatCount(youtubeVideo.commentCount)}</span>
+                      </div>
+                      <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      <span>Featured</span>
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm" 
+                        className="bg-red-600 hover:bg-red-700 text-white w-full"
+                        onClick={() => openExternalLink(`https://youtu.be/${youtubeVideo.id}`)}
+                      >
+                        <Youtube className="w-4 h-4 mr-2" />
+                        Watch Video
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black w-full"
+                        onClick={() => navigateToCreator(1)}
+                      >
+                        View Profile
+                      </Button>
                     </div>
                   </div>
-                  <a 
-                    href="https://www.youtube.com/@theMatrixunlocked369" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      Visit Channel
-                    </Button>
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="text-center text-gray-500">
+                    <Youtube className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Unable to load creator data</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Sample Creator 2 */}
+            {/* Sample Creator 2 - Instagram */}
             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="text-center">
                   <Avatar className="h-16 w-16 mx-auto mb-4">
                     <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>GS</AvatarFallback>
+                    <AvatarFallback className="bg-pink-100 text-pink-700">GS</AvatarFallback>
                   </Avatar>
                   <h3 className="font-semibold text-lg text-black mb-2">Grace Stories</h3>
-                  <p className="text-sm text-gray-600 mb-3">Instagram • 3.5K followers</p>
+                  <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
+                    <Instagram className="w-4 h-4 text-pink-600" />
+                    Instagram • 3.5K followers
+                  </p>
                   <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Creating beautiful visual content with scripture and daily encouragement.
+                    Creating beautiful visual content with scripture and daily encouragement for believers.
                   </p>
                   <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
                     <div className="flex items-center space-x-1">
-                      <Instagram className="w-4 h-4 text-pink-600" />
+                      <Eye className="w-4 h-4" />
                       <span>28 posts</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
+                      <Heart className="w-4 h-4 text-red-500" />
                       <span>1.8K</span>
                     </div>
+                    <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
                   </div>
-                  <Link href="/creator/2">
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="sm" 
+                    className="bg-[#D4AF37] hover:bg-[#B8860B] text-black w-full"
+                    onClick={() => navigateToCreator(2)}
+                  >
+                    View Profile
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Sample Creator 3 */}
+            {/* Sample Creator 3 - TikTok */}
             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="text-center">
                   <Avatar className="h-16 w-16 mx-auto mb-4">
                     <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>YF</AvatarFallback>
+                    <AvatarFallback className="bg-purple-100 text-purple-700">YF</AvatarFallback>
                   </Avatar>
                   <h3 className="font-semibold text-lg text-black mb-2">Young Faith</h3>
-                  <p className="text-sm text-gray-600 mb-3">TikTok • 8.9K followers</p>
+                  <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
+                    <Globe className="w-4 h-4 text-black" />
+                    TikTok • 8.9K followers
+                  </p>
                   <p className="text-sm text-gray-700 mb-4 line-clamp-2">
                     Quick Bible verses and faith-based content for the younger generation.
                   </p>
                   <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
                     <div className="flex items-center space-x-1">
-                      <Globe className="w-4 h-4 text-black" />
+                      <Play className="w-4 h-4" />
                       <span>45 videos</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
+                      <Heart className="w-4 h-4 text-red-500" />
                       <span>15.2K</span>
                     </div>
+                    <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
                   </div>
-                  <Link href="/creator/3">
-                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black">
-                      View Profile
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="sm" 
+                    className="bg-[#D4AF37] hover:bg-[#B8860B] text-black w-full"
+                    onClick={() => navigateToCreator(3)}
+                  >
+                    View Profile
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -264,14 +307,14 @@ export default function SponsoredCreatorsPage() {
               <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                 <div className="flex items-center p-4">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>YT</AvatarFallback>
+                    <AvatarImage src={youtubeVideo.thumbnail} />
+                    <AvatarFallback className="bg-red-100 text-red-700">YT</AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
                     <p className="font-semibold text-black">{youtubeVideo.channelTitle}</p>
                     <div className="flex items-center space-x-2">
                       <Youtube className="h-4 w-4 text-red-600" />
-                      <p className="text-sm text-gray-500">YouTube • {youtubeVideo.viewCount} views</p>
+                      <p className="text-sm text-gray-500">YouTube • {formatCount(youtubeVideo.viewCount)} views</p>
                     </div>
                   </div>
                   <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
@@ -280,20 +323,18 @@ export default function SponsoredCreatorsPage() {
                 <div className="px-4 pb-2">
                   <h3 className="font-semibold text-black mb-2 line-clamp-2">{youtubeVideo.title}</h3>
                   <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                    {youtubeVideo.description.substring(0, 150)}...
+                    {youtubeVideo.description?.substring(0, 150)}...
                   </p>
                 </div>
                 
-                <a 
-                  href={youtubeVideo.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block relative h-48 cursor-pointer group overflow-hidden"
+                <div 
+                  className="relative h-48 cursor-pointer group overflow-hidden"
                   style={{
                     backgroundImage: `url(${youtubeVideo.thumbnail})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
+                  onClick={() => openExternalLink(`https://youtu.be/${youtubeVideo.id}`)}
                 >
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
                   <div className="relative text-center text-white h-full flex items-center justify-center">
@@ -307,17 +348,17 @@ export default function SponsoredCreatorsPage() {
                   <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100 transition-opacity">
                     <ExternalLink className="w-4 h-4 text-white" />
                   </div>
-                </a>
+                </div>
                 
                 <div className="flex items-center justify-between p-4 text-gray-500">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1 hover:text-red-500 transition-colors cursor-pointer">
                       <Heart className="w-5 h-5" />
-                      <span>{youtubeVideo.likeCount}</span>
+                      <span>{formatCount(youtubeVideo.likeCount)}</span>
                     </div>
                     <div className="flex items-center space-x-1 hover:text-blue-500 transition-colors cursor-pointer">
                       <MessageCircle className="w-5 h-5" />
-                      <span>{youtubeVideo.commentCount}</span>
+                      <span>{formatCount(youtubeVideo.commentCount)}</span>
                     </div>
                     <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
                       <Share2 className="w-5 h-5" />
@@ -342,13 +383,13 @@ export default function SponsoredCreatorsPage() {
               <div className="flex items-center p-4">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder-avatar.jpg" />
-                  <AvatarFallback>IG</AvatarFallback>
+                  <AvatarFallback className="bg-pink-100 text-pink-700">GS</AvatarFallback>
                 </Avatar>
                 <div className="ml-3">
                   <p className="font-semibold text-black">Grace Stories</p>
                   <div className="flex items-center space-x-2">
                     <Instagram className="h-4 w-4 text-pink-600" />
-                    <p className="text-sm text-gray-500">Sample Instagram Post</p>
+                    <p className="text-sm text-gray-500">Instagram</p>
                   </div>
                 </div>
                 <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
@@ -389,13 +430,13 @@ export default function SponsoredCreatorsPage() {
               <div className="flex items-center p-4">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder-avatar.jpg" />
-                  <AvatarFallback>TK</AvatarFallback>
+                  <AvatarFallback className="bg-purple-100 text-purple-700">YF</AvatarFallback>
                 </Avatar>
                 <div className="ml-3">
                   <p className="font-semibold text-black">Young Faith</p>
                   <div className="flex items-center space-x-2">
                     <Globe className="h-4 w-4 text-black" />
-                    <p className="text-sm text-gray-500">Sample TikTok Video</p>
+                    <p className="text-sm text-gray-500">TikTok</p>
                   </div>
                 </div>
                 <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
