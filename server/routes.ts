@@ -859,6 +859,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Social media posts endpoints
+  app.get('/api/social-media-posts', async (req, res) => {
+    try {
+      const posts = await storage.listSponsoredSocialMediaPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching social media posts:", error);
+      res.status(500).json({ message: "Failed to fetch social media posts" });
+    }
+  });
+
+  app.get('/api/content-creators/:id/posts', async (req, res) => {
+    try {
+      const creatorId = parseInt(req.params.id);
+      const posts = await storage.getSocialMediaPostsByCreator(creatorId);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching creator posts:", error);
+      res.status(500).json({ message: "Failed to fetch creator posts" });
+    }
+  });
+
+  app.post('/api/content-creators/:id/posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = parseInt(req.params.id);
+      const postData = req.body;
+      
+      // Verify the creator belongs to the authenticated user
+      const creator = await storage.getContentCreator(creatorId);
+      if (!creator || creator.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const post = await storage.createSocialMediaPost({
+        ...postData,
+        creatorId
+      });
+      
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating social media post:", error);
+      res.status(500).json({ message: "Failed to create social media post" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

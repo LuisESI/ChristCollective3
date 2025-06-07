@@ -32,13 +32,20 @@ type ContentCreator = {
 };
 
 export default function SponsoredCreatorsPage() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const [filter, setFilter] = useState("all");
 
   // Fetch sponsored content creators
   const { data: creators = [], isLoading } = useQuery({
     queryKey: ["/api/content-creators", { sponsored: true }],
     select: (data) => data as ContentCreator[],
+  });
+
+  // Fetch social media posts for the feed
+  const { data: socialPosts = [], isLoading: isLoadingPosts } = useQuery({
+    queryKey: ["/api/social-media-posts"],
+    select: (data) => data as any[],
   });
 
   // Get platforms for filtering
@@ -136,54 +143,155 @@ export default function SponsoredCreatorsPage() {
               </Link>
             </div>
 
-            {/* Sample Feed Posts to Show What's Coming */}
+            {/* Sample Social Media Post Previews */}
             <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-center mb-4">
+              
+              {/* YouTube Video Preview */}
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="flex items-center p-4">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>CC</AvatarFallback>
+                    <AvatarFallback>FC</AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
-                    <p className="font-semibold text-black">Christ Collective</p>
-                    <p className="text-sm text-gray-500">Sample sponsored post</p>
+                    <p className="font-semibold text-black">Faith Creator</p>
+                    <div className="flex items-center space-x-2">
+                      <Youtube className="h-4 w-4 text-red-600" />
+                      <p className="text-sm text-gray-500">Sample YouTube Video</p>
+                    </div>
                   </div>
                   <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
                 </div>
                 
-                <div className="mb-4">
-                  <h3 className="font-semibold text-lg mb-2 text-black">Coming Soon: Faith-Based Content</h3>
-                  <p className="text-gray-700">
-                    We're excited to feature inspiring testimonies, biblical teachings, and uplifting content from our sponsored creators. 
-                    Join our program to share your faith journey with the world.
+                <div className="px-4 pb-2">
+                  <h3 className="font-semibold text-black mb-2">Finding Hope in Difficult Times</h3>
+                  <p className="text-gray-700 text-sm mb-4">
+                    Join me as I share how my faith helped me through the darkest moments of my life...
                   </p>
                 </div>
                 
-                <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center mb-4">
-                  <div className="text-center">
-                    <Play className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">Sample content placeholder</p>
+                <div className="relative bg-black h-48 flex items-center justify-center cursor-pointer group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-black/80" />
+                  <div className="relative text-center text-white">
+                    <div className="bg-red-600 rounded-full p-3 mb-2 mx-auto w-16 h-16 flex items-center justify-center group-hover:bg-red-500 transition-colors">
+                      <Play className="w-8 h-8 ml-1" />
+                    </div>
+                    <p className="text-sm">Watch on YouTube</p>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
+                    8:42
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between text-gray-500">
+                <div className="flex items-center justify-between p-4 text-gray-500">
                   <div className="flex items-center space-x-4">
-                    <button className="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                    <div className="flex items-center space-x-1">
                       <Heart className="w-5 h-5" />
-                      <span>0</span>
-                    </button>
-                    <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                      <span>1.2K</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
                       <MessageCircle className="w-5 h-5" />
-                      <span>0</span>
-                    </button>
+                      <span>89</span>
+                    </div>
                     <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
                       <Share2 className="w-5 h-5" />
                     </button>
                   </div>
-                  <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
-                    <ExternalLink className="w-4 h-4" />
-                    <span className="text-sm">View on Platform</span>
-                  </button>
+                  <div className="text-sm text-gray-400">2 days ago</div>
+                </div>
+              </div>
+
+              {/* Instagram Post Preview */}
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="flex items-center p-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>IG</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="font-semibold text-black">Grace Stories</p>
+                    <div className="flex items-center space-x-2">
+                      <Instagram className="h-4 w-4 text-pink-600" />
+                      <p className="text-sm text-gray-500">Sample Instagram Post</p>
+                    </div>
+                  </div>
+                  <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
+                </div>
+                
+                <div className="bg-gradient-to-br from-pink-100 to-purple-100 h-64 flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">"Be still and know that I am God"</h3>
+                    <p className="text-gray-600">- Psalm 46:10</p>
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  <p className="text-gray-700 text-sm mb-3">
+                    Sometimes we need to pause and remember that God is in control. What verse brings you peace today? 🙏 #Faith #Peace #God
+                  </p>
+                  <div className="flex items-center justify-between text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-5 h-5" />
+                        <span>543</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <MessageCircle className="w-5 h-5" />
+                        <span>42</span>
+                      </div>
+                      <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
+                        <Share2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-400">1 week ago</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* TikTok Video Preview */}
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="flex items-center p-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>TK</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="font-semibold text-black">Young Faith</p>
+                    <div className="flex items-center space-x-2">
+                      <Globe className="h-4 w-4 text-black" />
+                      <p className="text-sm text-gray-500">Sample TikTok Video</p>
+                    </div>
+                  </div>
+                  <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
+                </div>
+                
+                <div className="relative bg-gradient-to-br from-purple-900 to-pink-900 h-80 flex items-center justify-center cursor-pointer group">
+                  <div className="text-center text-white">
+                    <div className="bg-white/20 rounded-full p-4 mb-3 mx-auto w-16 h-16 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <Play className="w-8 h-8 ml-1" />
+                    </div>
+                    <h4 className="font-semibold mb-2">3 Bible Verses for Tough Days</h4>
+                    <p className="text-sm opacity-80">Quick encouragement for your day</p>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center justify-between text-white text-sm">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-1">
+                          <Heart className="w-4 h-4" />
+                          <span>8.9K</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>234</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Share2 className="w-4 h-4" />
+                          <span>156</span>
+                        </div>
+                      </div>
+                      <div className="bg-black/50 px-2 py-1 rounded text-xs">0:45</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
