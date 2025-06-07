@@ -139,19 +139,12 @@ export default function SponsoredCreatorsPage() {
           </div>
         ) : creators.length === 0 ? (
           <>
-            {/* Empty State with Sample Content */}
-            <div className="text-center py-12 mb-8">
-              <User className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-2xl font-semibold mb-2 text-black">Building Our Creator Community</h3>
+            {/* Content Preview Section */}
+            <div className="text-center py-8 mb-8">
+              <h3 className="text-2xl font-semibold mb-4 text-black">Featured Sponsored Content</h3>
               <p className="text-gray-600 mb-6">
-                We're looking for passionate creators to join our sponsorship program and share faith-based content.
+                Discover inspiring faith-based content from our community creators.
               </p>
-              <Link to="/sponsorship-application">
-                <Button size="lg" className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold">
-                  <Star className="w-5 h-5 mr-2" />
-                  Be Our First Creator
-                </Button>
-              </Link>
             </div>
 
             {/* Sample Social Media Post Previews */}
