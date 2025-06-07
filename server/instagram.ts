@@ -53,7 +53,7 @@ export class InstagramService {
       const runResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apifyToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -79,7 +79,7 @@ export class InstagramService {
         
         const statusResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}`, {
           headers: {
-            'Authorization': `Bearer ${this.apifyToken}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
