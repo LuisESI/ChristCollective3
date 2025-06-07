@@ -50,6 +50,17 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
+  // Fetch authentic channel data from The Matrix Unlocked
+  const { data: channelData, isLoading: isChannelLoading } = useQuery({
+    queryKey: ["/api/youtube/channel", "theMatrixunlocked369"],
+    queryFn: async () => {
+      const response = await fetch("/api/youtube/channel?handle=" + encodeURIComponent("theMatrixunlocked369"));
+      if (!response.ok) throw new Error("Failed to fetch channel data");
+      return response.json();
+    },
+    enabled: true,
+  });
+
   // Sample stats for the hero section
   const stats = [
     { icon: Users, label: "Active Creators", value: "12+" },
@@ -142,26 +153,24 @@ export default function SponsoredCreatorsPage() {
                   <div className="text-center">
                     <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-[#D4AF37]/30">
                       <AvatarImage src={youtubeVideo.thumbnail} />
-                      <AvatarFallback className="bg-red-100 text-red-700">
-                        {youtubeVideo.channelTitle?.substring(0, 2) || "YT"}
-                      </AvatarFallback>
+                      <AvatarFallback className="bg-red-100 text-red-700">TM</AvatarFallback>
                     </Avatar>
-                    <h3 className="font-semibold text-lg text-black mb-2">{youtubeVideo.channelTitle}</h3>
+                    <h3 className="font-semibold text-lg text-black mb-2">The Matrix Unlocked</h3>
                     <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
                       <Youtube className="w-4 h-4 text-red-600" />
-                      YouTube • {formatCount(youtubeVideo.viewCount)} views
+                      YouTube Channel
                     </p>
                     <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                      Featured video: {youtubeVideo.title?.substring(0, 60)}...
+                      Awakening minds to spiritual truth and biblical revelations through deep scriptural analysis.
                     </p>
                     <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
                       <div className="flex items-center space-x-1">
-                        <ThumbsUp className="w-4 h-4 text-blue-600" />
-                        <span>{formatCount(youtubeVideo.likeCount)}</span>
+                        <Star className="w-4 h-4 text-yellow-500" />
+                        <span>Featured</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <MessageCircle className="w-4 h-4 text-green-600" />
-                        <span>{formatCount(youtubeVideo.commentCount)}</span>
+                        <Play className="w-4 h-4 text-blue-600" />
+                        <span>Videos</span>
                       </div>
                       <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
                     </div>
@@ -169,10 +178,10 @@ export default function SponsoredCreatorsPage() {
                       <Button 
                         size="sm" 
                         className="bg-red-600 hover:bg-red-700 text-white w-full"
-                        onClick={() => openExternalLink(`https://youtu.be/${youtubeVideo.id}`)}
+                        onClick={() => openExternalLink("https://www.youtube.com/@theMatrixunlocked369")}
                       >
                         <Youtube className="w-4 h-4 mr-2" />
-                        Watch Video
+                        Visit Channel
                       </Button>
                       <Button 
                         size="sm" 

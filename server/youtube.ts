@@ -11,6 +11,18 @@ interface YouTubeVideoData {
   duration: string;
 }
 
+interface YouTubeChannelData {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  subscriberCount: string;
+  videoCount: string;
+  viewCount: string;
+  customUrl: string;
+  publishedAt: string;
+}
+
 export class YouTubeService {
   private apiKey: string;
   private baseUrl = 'https://www.googleapis.com/youtube/v3';
@@ -84,6 +96,59 @@ export class YouTubeService {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  async getChannelData(channelHandle: string): Promise<YouTubeChannelData | null> {
+    try {
+      // First, get channel ID from handle
+      const searchResponse = await fetch(
+        `${this.baseUrl}/search?part=snippet&type=channel&q=${channelHandle}&key=${this.apiKey}`
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      }
+
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.items || searchData.items.length === 0) {
+        return null;
+      }
+
+      const channelId = searchData.items[0].id.channelId;
+
+      // Get detailed channel information
+      const channelResponse = await fetch(
+        `${this.baseUrl}/channels?part=snippet,statistics&id=${channelId}&key=${this.apiKey}`
+      );
+
+      if (!channelResponse.ok) {
+        throw new Error(`YouTube API error: ${channelResponse.status}`);
+      }
+
+      const channelData = await channelResponse.json();
+      
+      if (!channelData.items || channelData.items.length === 0) {
+        return null;
+      }
+
+      const channel = channelData.items[0];
+      
+      return {
+        id: channel.id,
+        title: channel.snippet.title,
+        description: channel.snippet.description,
+        thumbnail: channel.snippet.thumbnails.high?.url || channel.snippet.thumbnails.default?.url,
+        subscriberCount: channel.statistics.subscriberCount || '0',
+        videoCount: channel.statistics.videoCount || '0',
+        viewCount: channel.statistics.viewCount || '0',
+        customUrl: channel.snippet.customUrl || '',
+        publishedAt: channel.snippet.publishedAt,
+      };
+    } catch (error) {
+      console.error('Error fetching YouTube channel data:', error);
+      throw error;
+    }
   }
 
   formatCount(count: string): string {

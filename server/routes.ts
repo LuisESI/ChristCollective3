@@ -942,6 +942,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // YouTube API endpoint to fetch channel data
+  app.get('/api/youtube/channel', async (req, res) => {
+    try {
+      const { handle } = req.query;
+      
+      if (!handle || typeof handle !== 'string') {
+        return res.status(400).json({ message: "Channel handle is required" });
+      }
+      
+      const channelData = await youtubeService.getChannelData(handle);
+      
+      if (!channelData) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+      
+      // Format the data for frontend consumption
+      const formattedData = {
+        id: channelData.id,
+        title: channelData.title,
+        description: channelData.description,
+        thumbnail: channelData.thumbnail,
+        subscriberCount: youtubeService.formatCount(channelData.subscriberCount),
+        videoCount: youtubeService.formatCount(channelData.videoCount),
+        viewCount: youtubeService.formatCount(channelData.viewCount),
+        customUrl: channelData.customUrl,
+        publishedAt: channelData.publishedAt,
+      };
+      
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching YouTube channel data:", error);
+      res.status(500).json({ message: "Failed to fetch YouTube channel data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
