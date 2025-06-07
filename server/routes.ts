@@ -18,6 +18,7 @@ import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { youtubeService } from "./youtube";
+import { tiktokService } from "./tiktok";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
@@ -974,6 +975,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching YouTube channel data:", error);
       res.status(500).json({ message: "Failed to fetch YouTube channel data" });
+    }
+  });
+
+  // TikTok API endpoint to fetch user data
+  app.get('/api/tiktok/user', async (req, res) => {
+    try {
+      const { username } = req.query;
+      
+      if (!username || typeof username !== 'string') {
+        return res.status(400).json({ message: "Username is required" });
+      }
+      
+      const userData = await tiktokService.getUserData(username);
+      
+      if (!userData) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Format the data for frontend consumption
+      const formattedData = {
+        id: userData.id,
+        username: userData.username,
+        displayName: userData.displayName,
+        description: userData.description,
+        avatar: userData.avatar,
+        followerCount: tiktokService.formatCount(userData.followerCount),
+        followingCount: tiktokService.formatCount(userData.followingCount),
+        videoCount: tiktokService.formatCount(userData.videoCount),
+        likeCount: tiktokService.formatCount(userData.likeCount),
+        verified: userData.verified,
+      };
+      
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching TikTok user data:", error);
+      res.status(500).json({ message: "Failed to fetch TikTok user data" });
     }
   });
 

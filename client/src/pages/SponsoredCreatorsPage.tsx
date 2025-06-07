@@ -61,6 +61,17 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
+  // Fetch authentic TikTok user data
+  const { data: tiktokData, isLoading: isTikTokLoading } = useQuery({
+    queryKey: ["/api/tiktok/user", "youngfaith"],
+    queryFn: async () => {
+      const response = await fetch("/api/tiktok/user?username=" + encodeURIComponent("youngfaith"));
+      if (!response.ok) throw new Error("Failed to fetch TikTok user data");
+      return response.json();
+    },
+    enabled: true,
+  });
+
   // Sample stats for the hero section
   const stats = [
     { icon: Users, label: "Active Creators", value: "12+" },
@@ -246,43 +257,109 @@ export default function SponsoredCreatorsPage() {
               </CardContent>
             </Card>
 
-            {/* Sample Creator 3 - TikTok */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback className="bg-purple-100 text-purple-700">YF</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Young Faith</h3>
-                  <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
-                    <Globe className="w-4 h-4 text-black" />
-                    TikTok • 8.9K followers
-                  </p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Quick Bible verses and faith-based content for the younger generation.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <Play className="w-4 h-4" />
-                      <span>45 videos</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4 text-red-500" />
-                      <span>15.2K</span>
-                    </div>
-                    <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
+            {/* Authentic TikTok Creator */}
+            {isTikTokLoading ? (
+              <Card className="bg-white shadow-sm animate-pulse">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24 mx-auto mb-3"></div>
+                    <div className="h-3 bg-gray-200 rounded w-40 mx-auto mb-4"></div>
+                    <div className="h-8 bg-gray-200 rounded w-20 mx-auto"></div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="bg-[#D4AF37] hover:bg-[#B8860B] text-black w-full"
-                    onClick={() => navigateToCreator(3)}
-                  >
-                    View Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : tiktokData ? (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-2 border-purple-200">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-purple-300">
+                      <AvatarImage src={tiktokData.avatar} />
+                      <AvatarFallback className="bg-purple-100 text-purple-700">
+                        {tiktokData.displayName?.substring(0, 2) || "YF"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-semibold text-lg text-black mb-2 flex items-center justify-center gap-1">
+                      {tiktokData.displayName}
+                      {tiktokData.verified && <Star className="w-4 h-4 text-blue-500" />}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
+                      <Globe className="w-4 h-4 text-black" />
+                      TikTok • {tiktokData.followerCount} followers
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                      {tiktokData.description?.substring(0, 100) || "Faith-based content creator"}...
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <Play className="w-4 h-4 text-purple-600" />
+                        <span>{tiktokData.videoCount} videos</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-4 h-4 text-red-500" />
+                        <span>{tiktokData.likeCount}</span>
+                      </div>
+                      <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm" 
+                        className="bg-black hover:bg-gray-800 text-white w-full"
+                        onClick={() => openExternalLink(`https://tiktok.com/@${tiktokData.username}`)}
+                      >
+                        <Globe className="w-4 h-4 mr-2" />
+                        Visit TikTok
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black w-full"
+                        onClick={() => navigateToCreator(3)}
+                      >
+                        View Profile
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <Avatar className="h-16 w-16 mx-auto mb-4">
+                      <AvatarImage src="/placeholder-avatar.jpg" />
+                      <AvatarFallback className="bg-purple-100 text-purple-700">YF</AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-semibold text-lg text-black mb-2">Young Faith</h3>
+                    <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
+                      <Globe className="w-4 h-4 text-black" />
+                      TikTok Creator
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                      Quick Bible verses and faith-based content for the younger generation.
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <Play className="w-4 h-4" />
+                        <span>Featured</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 text-yellow-500" />
+                        <span>Sponsored</span>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="bg-[#D4AF37] hover:bg-[#B8860B] text-black w-full"
+                      onClick={() => navigateToCreator(3)}
+                    >
+                      View Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
