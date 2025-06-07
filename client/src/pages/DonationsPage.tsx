@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Search, ImageIcon, Plus } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/hooks/useAuth";
+import CTASection from "@/components/home/CTASection";
 
 type Campaign = {
   id: string;
@@ -190,6 +191,8 @@ export default function DonationsPage() {
           )}
         </div>
       </section>
+      
+      <CTASection />
     </>
   );
 }
