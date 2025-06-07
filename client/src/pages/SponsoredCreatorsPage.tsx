@@ -147,30 +147,32 @@ export default function SponsoredCreatorsPage() {
                   </div>
                 </CardContent>
               </Card>
-            ) : youtubeVideo ? (
+            ) : channelData ? (
               <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-2 border-[#D4AF37]/20">
                 <CardContent className="p-6">
                   <div className="text-center">
                     <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-[#D4AF37]/30">
-                      <AvatarImage src={youtubeVideo.thumbnail} />
-                      <AvatarFallback className="bg-red-100 text-red-700">TM</AvatarFallback>
+                      <AvatarImage src={channelData.thumbnail} />
+                      <AvatarFallback className="bg-red-100 text-red-700">
+                        {channelData.title?.substring(0, 2) || "TM"}
+                      </AvatarFallback>
                     </Avatar>
-                    <h3 className="font-semibold text-lg text-black mb-2">The Matrix Unlocked</h3>
+                    <h3 className="font-semibold text-lg text-black mb-2">{channelData.title}</h3>
                     <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
                       <Youtube className="w-4 h-4 text-red-600" />
-                      YouTube Channel
+                      YouTube • {channelData.subscriberCount} subscribers
                     </p>
                     <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                      Awakening minds to spiritual truth and biblical revelations through deep scriptural analysis.
+                      {channelData.description?.substring(0, 100) || "Spiritual teachings and biblical revelations"}...
                     </p>
                     <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
                       <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-500" />
-                        <span>Featured</span>
+                        <Play className="w-4 h-4 text-blue-600" />
+                        <span>{channelData.videoCount} videos</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Play className="w-4 h-4 text-blue-600" />
-                        <span>Videos</span>
+                        <Eye className="w-4 h-4 text-green-600" />
+                        <span>{channelData.viewCount} views</span>
                       </div>
                       <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
                     </div>
