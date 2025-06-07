@@ -7,8 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Globe, Phone, Mail, Calendar, Users, Star } from "lucide-react";
 import { BusinessProfile } from "@shared/schema";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 
 export default function BusinessProfilePage() {
   const { id } = useParams();
@@ -28,7 +26,6 @@ export default function BusinessProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <Header />
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
             <div className="animate-pulse space-y-8">
@@ -41,7 +38,6 @@ export default function BusinessProfilePage() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -49,7 +45,6 @@ export default function BusinessProfilePage() {
   if (error || !profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <Header />
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-2xl font-bold text-slate-900 mb-4">Business Profile Not Found</h1>
@@ -57,14 +52,12 @@ export default function BusinessProfilePage() {
             <Button onClick={() => window.history.back()}>Go Back</Button>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <Header />
       
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -219,8 +212,6 @@ export default function BusinessProfilePage() {
 
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }
