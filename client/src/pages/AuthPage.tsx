@@ -247,15 +247,15 @@ export default function AuthPage() {
               Join a community where faith meets action. Support causes you believe in, connect with like-minded businesses, and make a lasting impact.
             </p>
             <div className="grid grid-cols-1 gap-4 max-w-md mx-auto mt-8">
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 <h3 className="font-semibold text-gray-900 mb-2">Support Causes</h3>
                 <p className="text-gray-600 text-sm">Donate to verified campaigns and see your impact grow</p>
               </div>
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 <h3 className="font-semibold text-gray-900 mb-2">Network & Connect</h3>
                 <p className="text-gray-600 text-sm">Build meaningful relationships with Christian businesses</p>
               </div>
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 <h3 className="font-semibold text-gray-900 mb-2">Create Content</h3>
                 <p className="text-gray-600 text-sm">Share your faith journey and get sponsored</p>
               </div>
