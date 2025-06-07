@@ -22,7 +22,8 @@ type Campaign = {
 
 export default function DonationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ["/api/campaigns", searchQuery],

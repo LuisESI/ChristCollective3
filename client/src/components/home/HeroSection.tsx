@@ -35,7 +35,7 @@ export default function HeroSection() {
       heading: "Uniting Christians Worldwide",
       subheading: "Join our global community dedicated to faith, service, and fellowship across all denominations.",
       primaryButtonText: "Join the Collective",
-      primaryButtonLink: isAuthenticated ? "/profile" : "/api/login",
+      primaryButtonLink: isAuthenticated ? "/profile" : "/auth",
       secondaryButtonText: "Learn More",
       secondaryButtonLink: "/#about",
     },
@@ -117,34 +117,16 @@ export default function HeroSection() {
                     {slide.subheading}
                   </p>
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                    {slide.primaryButtonLink === "/api/login" ? (
-                      <a 
-                        href={slide.primaryButtonLink}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-black hover:bg-primary/90 h-11 px-8 font-semibold py-3 text-lg"
-                      >
+                    <Link href={slide.primaryButtonLink}>
+                      <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-black hover:bg-primary/90 h-11 px-8 font-semibold py-3 text-lg">
                         {slide.primaryButtonText}
-                      </a>
-                    ) : (
-                      <Link href={slide.primaryButtonLink}>
-                        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-black hover:bg-primary/90 h-11 px-8 font-semibold py-3 text-lg">
-                          {slide.primaryButtonText}
-                        </button>
-                      </Link>
-                    )}
-                    {slide.secondaryButtonLink === "/api/login" ? (
-                      <a 
-                        href={slide.secondaryButtonLink}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-100 text-black h-11 px-8 font-semibold py-3 text-lg"
-                      >
+                      </button>
+                    </Link>
+                    <Link href={slide.secondaryButtonLink}>
+                      <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-100 text-black h-11 px-8 font-semibold py-3 text-lg">
                         {slide.secondaryButtonText}
-                      </a>
-                    ) : (
-                      <Link href={slide.secondaryButtonLink}>
-                        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-100 text-black h-11 px-8 font-semibold py-3 text-lg">
-                          {slide.secondaryButtonText}
-                        </button>
-                      </Link>
-                    )}
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
