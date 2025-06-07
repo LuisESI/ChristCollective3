@@ -124,7 +124,7 @@ export default function SponsoredCreatorsPage() {
             {/* Empty State with Sample Content */}
             <div className="text-center py-12 mb-8">
               <User className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-2xl font-semibold mb-2">Building Our Creator Community</h3>
+              <h3 className="text-2xl font-semibold mb-2 text-black">Building Our Creator Community</h3>
               <p className="text-gray-600 mb-6">
                 We're looking for passionate creators to join our sponsorship program and share faith-based content.
               </p>
