@@ -72,6 +72,17 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
+  // Fetch authentic Instagram user data from Luis Lucero
+  const { data: instagramData, isLoading: isInstagramLoading } = useQuery({
+    queryKey: ["/api/instagram/user", "luislucero.03"],
+    queryFn: async () => {
+      const response = await fetch("/api/instagram/user?username=" + encodeURIComponent("luislucero.03"));
+      if (!response.ok) throw new Error("Failed to fetch Instagram user data");
+      return response.json();
+    },
+    enabled: true,
+  });
+
   // Sample stats for the hero section
   const stats = [
     { icon: Users, label: "Active Creators", value: "12+" },
@@ -219,43 +230,89 @@ export default function SponsoredCreatorsPage() {
               </Card>
             )}
 
-            {/* Sample Creator 2 - Instagram */}
-            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Avatar className="h-16 w-16 mx-auto mb-4">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback className="bg-pink-100 text-pink-700">GS</AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-semibold text-lg text-black mb-2">Grace Stories</h3>
-                  <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
-                    <Instagram className="w-4 h-4 text-pink-600" />
-                    Instagram • 3.5K followers
-                  </p>
-                  <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-                    Creating beautiful visual content with scripture and daily encouragement for believers.
-                  </p>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <Eye className="w-4 h-4" />
-                      <span>28 posts</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4 text-red-500" />
-                      <span>1.8K</span>
-                    </div>
-                    <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
+            {/* Authentic Instagram Creator */}
+            {isInstagramLoading ? (
+              <Card className="bg-white shadow-sm animate-pulse">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24 mx-auto mb-3"></div>
+                    <div className="h-3 bg-gray-200 rounded w-40 mx-auto mb-4"></div>
+                    <div className="h-8 bg-gray-200 rounded w-20 mx-auto"></div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="bg-[#D4AF37] hover:bg-[#B8860B] text-black w-full"
-                    onClick={() => navigateToCreator(2)}
-                  >
-                    View Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : instagramData ? (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-2 border-pink-200">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-pink-300">
+                      <AvatarImage 
+                        src={instagramData.avatar !== '/placeholder-avatar.jpg' ? `/api/proxy-image?url=${encodeURIComponent(instagramData.avatar)}` : '/placeholder-avatar.jpg'}
+                        onError={(e) => {
+                          console.log('Instagram avatar failed to load, using fallback');
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <AvatarFallback className="bg-pink-100 text-pink-700">
+                        {instagramData.displayName?.substring(0, 2) || "LL"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-semibold text-lg text-black mb-2 flex items-center justify-center gap-1">
+                      {instagramData.displayName}
+                      {instagramData.verified && <Star className="w-4 h-4 text-blue-500" />}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 flex items-center justify-center gap-1">
+                      <Instagram className="w-4 h-4 text-pink-600" />
+                      Instagram • {instagramData.followerCount} followers
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                      {instagramData.description?.substring(0, 80) || "Christian content creator"}
+                      {instagramData.description && instagramData.description.length > 80 ? "..." : ""}
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <Eye className="w-4 h-4" />
+                        <span>{instagramData.postCount} posts</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-4 h-4 text-red-500" />
+                        <span>{instagramData.followerCount}</span>
+                      </div>
+                      <Badge className="bg-[#D4AF37] text-black text-xs">Sponsored</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm" 
+                        className="bg-pink-600 hover:bg-pink-700 text-white w-full"
+                        onClick={() => openExternalLink(`https://instagram.com/${instagramData.username}`)}
+                      >
+                        <Instagram className="w-4 h-4 mr-2" />
+                        Visit Instagram
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black w-full"
+                        onClick={() => navigateToCreator(2)}
+                      >
+                        View Profile
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="text-center text-gray-500">
+                    <Instagram className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Unable to load creator data</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Authentic TikTok Creator */}
             {isTikTokLoading ? (

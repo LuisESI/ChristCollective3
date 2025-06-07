@@ -19,6 +19,7 @@ import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { youtubeService } from "./youtube";
 import { tiktokService } from "./tiktok";
+import { instagramService } from "./instagram";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
@@ -1014,7 +1015,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Image proxy endpoint for TikTok profile pictures
+  // Instagram API endpoint to fetch user data
+  app.get('/api/instagram/user', async (req, res) => {
+    try {
+      const { username } = req.query;
+      
+      if (!username || typeof username !== 'string') {
+        return res.status(400).json({ message: "Username is required" });
+      }
+      
+      const userData = await instagramService.getUserData(username);
+      
+      if (!userData) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const formattedData = {
+        id: userData.id,
+        username: userData.username,
+        displayName: userData.displayName,
+        description: userData.description,
+        avatar: userData.avatar,
+        followerCount: instagramService.formatCount(userData.followerCount),
+        followingCount: instagramService.formatCount(userData.followingCount),
+        postCount: instagramService.formatCount(userData.postCount),
+        verified: userData.verified,
+        isPrivate: userData.isPrivate,
+      };
+      
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching Instagram user data:", error);
+      res.status(500).json({ message: "Failed to fetch Instagram user data" });
+    }
+  });
+
+  // Image proxy endpoint for social media profile pictures
   app.get('/api/proxy-image', async (req, res) => {
     try {
       const imageUrl = req.query.url as string;
@@ -1025,7 +1061,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await fetch(imageUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Referer': 'https://www.tiktok.com/',
+          'Referer': imageUrl.includes('instagram') ? 'https://www.instagram.com/' : 'https://www.tiktok.com/',
         },
       });
 
@@ -1041,7 +1077,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Access-Control-Allow-Origin', '*');
 
-      response.body?.pipe(res);
+      const buffer = await response.arrayBuffer();
+      res.send(Buffer.from(buffer));
     } catch (error) {
       console.error('Error proxying image:', error);
       res.status(500).json({ error: 'Failed to proxy image' });
