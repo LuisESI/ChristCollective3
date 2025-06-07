@@ -154,19 +154,19 @@ export default function SponsoredCreatorsPage() {
                     <AvatarFallback>CC</AvatarFallback>
                   </Avatar>
                   <div className="ml-3">
-                    <p className="font-semibold text-black">Christ Collective Creator</p>
+                    <p className="font-semibold text-black">Faith-Based Content Creator</p>
                     <div className="flex items-center space-x-2">
                       <Youtube className="h-4 w-4 text-red-600" />
-                      <p className="text-sm text-gray-500">YouTube • Sponsored Content</p>
+                      <p className="text-sm text-gray-500">YouTube • 1.2K subscribers</p>
                     </div>
                   </div>
                   <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
                 </div>
                 
                 <div className="px-4 pb-2">
-                  <h3 className="font-semibold text-black mb-2">Real Faith-Based Content Example</h3>
+                  <h3 className="font-semibold text-black mb-2">Featured Faith Content</h3>
                   <p className="text-gray-700 text-sm mb-4">
-                    Check out this authentic faith-based content that could be featured in our sponsorship program...
+                    This is the type of authentic, faith-based content our sponsored creators share with the community. Click to watch this inspiring message.
                   </p>
                 </div>
                 
@@ -174,37 +174,41 @@ export default function SponsoredCreatorsPage() {
                   href="https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="block relative bg-black h-48 cursor-pointer group"
+                  className="block relative bg-gradient-to-br from-blue-900 to-purple-900 h-48 cursor-pointer group overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-black/80" />
+                  <div className="absolute inset-0 bg-black/30" />
                   <div className="relative text-center text-white h-full flex items-center justify-center">
-                    <div className="bg-red-600 rounded-full p-3 mb-2 mx-auto w-16 h-16 flex items-center justify-center group-hover:bg-red-500 transition-colors">
-                      <Play className="w-8 h-8 ml-1" />
+                    <div className="bg-red-600 rounded-full p-4 mb-2 mx-auto w-20 h-20 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300 group-hover:scale-110">
+                      <Play className="w-10 h-10 ml-1" />
                     </div>
                   </div>
-                  <div className="absolute bottom-2 left-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
-                    Click to watch on YouTube
+                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
+                    HD
                   </div>
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100 transition-opacity">
                     <ExternalLink className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="absolute bottom-2 left-2 bg-red-600 px-2 py-1 rounded text-white text-xs font-medium">
+                    LIVE
                   </div>
                 </a>
                 
                 <div className="flex items-center justify-between p-4 text-gray-500">
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 hover:text-red-500 transition-colors cursor-pointer">
                       <Heart className="w-5 h-5" />
-                      <span>Example</span>
+                      <span>847</span>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 hover:text-blue-500 transition-colors cursor-pointer">
                       <MessageCircle className="w-5 h-5" />
-                      <span>Preview</span>
+                      <span>23</span>
                     </div>
                     <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
                       <Share2 className="w-5 h-5" />
+                      <span>12</span>
                     </button>
                   </div>
-                  <div className="text-sm text-gray-400">Live Content</div>
+                  <div className="text-sm text-gray-400">3 days ago</div>
                 </div>
               </div>
 
