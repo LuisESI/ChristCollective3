@@ -275,7 +275,13 @@ export default function SponsoredCreatorsPage() {
                 <CardContent className="p-6">
                   <div className="text-center">
                     <Avatar className="h-16 w-16 mx-auto mb-4 border-2 border-purple-300">
-                      <AvatarImage src={tiktokData.avatar} />
+                      <AvatarImage 
+                        src={`/api/proxy-image?url=${encodeURIComponent(tiktokData.avatar)}`}
+                        onError={(e) => {
+                          console.log('TikTok avatar failed to load, using fallback');
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
                       <AvatarFallback className="bg-purple-100 text-purple-700">
                         {tiktokData.displayName?.substring(0, 2) || "YF"}
                       </AvatarFallback>
