@@ -48,6 +48,17 @@ export default function SponsoredCreatorsPage() {
     select: (data) => data as any[],
   });
 
+  // Fetch real YouTube video data
+  const { data: youtubeVideo, isLoading: isYouTubeLoading } = useQuery({
+    queryKey: ["/api/youtube/video", "https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"],
+    queryFn: async () => {
+      const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"));
+      if (!response.ok) throw new Error("Failed to fetch video data");
+      return response.json();
+    },
+    enabled: true,
+  });
+
   // Get platforms for filtering
   const platformsSet = new Set(creators.map((creator) => creator.platform));
   const platforms = ["all", ...(creators.length > 0 ? Array.from(platformsSet) : [])];
@@ -147,70 +158,97 @@ export default function SponsoredCreatorsPage() {
             <div className="space-y-6">
               
               {/* Real YouTube Video Preview */}
-              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                <div className="flex items-center p-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>CC</AvatarFallback>
-                  </Avatar>
-                  <div className="ml-3">
-                    <p className="font-semibold text-black">Faith-Based Content Creator</p>
-                    <div className="flex items-center space-x-2">
-                      <Youtube className="h-4 w-4 text-red-600" />
-                      <p className="text-sm text-gray-500">YouTube • 1.2K subscribers</p>
+              {isYouTubeLoading ? (
+                <div className="bg-white rounded-lg shadow-sm border overflow-hidden animate-pulse">
+                  <div className="flex items-center p-4">
+                    <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                    <div className="ml-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
                     </div>
                   </div>
-                  <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
+                  <div className="h-48 bg-gray-200"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
                 </div>
-                
-                <div className="px-4 pb-2">
-                  <h3 className="font-semibold text-black mb-2">Featured Faith Content</h3>
-                  <p className="text-gray-700 text-sm mb-4">
-                    This is the type of authentic, faith-based content our sponsored creators share with the community. Click to watch this inspiring message.
-                  </p>
+              ) : youtubeVideo ? (
+                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                  <div className="flex items-center p-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="/placeholder-avatar.jpg" />
+                      <AvatarFallback>YT</AvatarFallback>
+                    </Avatar>
+                    <div className="ml-3">
+                      <p className="font-semibold text-black">{youtubeVideo.channelTitle}</p>
+                      <div className="flex items-center space-x-2">
+                        <Youtube className="h-4 w-4 text-red-600" />
+                        <p className="text-sm text-gray-500">YouTube • {youtubeVideo.viewCount} views</p>
+                      </div>
+                    </div>
+                    <Badge className="ml-auto bg-[#D4AF37] text-black">Sponsored</Badge>
+                  </div>
+                  
+                  <div className="px-4 pb-2">
+                    <h3 className="font-semibold text-black mb-2 line-clamp-2">{youtubeVideo.title}</h3>
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                      {youtubeVideo.description.substring(0, 150)}...
+                    </p>
+                  </div>
+                  
+                  <a 
+                    href={youtubeVideo.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block relative h-48 cursor-pointer group overflow-hidden"
+                    style={{
+                      backgroundImage: `url(${youtubeVideo.thumbnail})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
+                    <div className="relative text-center text-white h-full flex items-center justify-center">
+                      <div className="bg-red-600 rounded-full p-4 mb-2 mx-auto w-20 h-20 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300 group-hover:scale-110">
+                        <Play className="w-10 h-10 ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
+                      {youtubeVideo.duration}
+                    </div>
+                    <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                      <ExternalLink className="w-4 h-4 text-white" />
+                    </div>
+                  </a>
+                  
+                  <div className="flex items-center justify-between p-4 text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1 hover:text-red-500 transition-colors cursor-pointer">
+                        <Heart className="w-5 h-5" />
+                        <span>{youtubeVideo.likeCount}</span>
+                      </div>
+                      <div className="flex items-center space-x-1 hover:text-blue-500 transition-colors cursor-pointer">
+                        <MessageCircle className="w-5 h-5" />
+                        <span>{youtubeVideo.commentCount}</span>
+                      </div>
+                      <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
+                        <Share2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {new Date(youtubeVideo.publishedAt).toLocaleDateString()}
+                    </div>
+                  </div>
                 </div>
-                
-                <a 
-                  href="https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block relative bg-gradient-to-br from-blue-900 to-purple-900 h-48 cursor-pointer group overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-black/30" />
-                  <div className="relative text-center text-white h-full flex items-center justify-center">
-                    <div className="bg-red-600 rounded-full p-4 mb-2 mx-auto w-20 h-20 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300 group-hover:scale-110">
-                      <Play className="w-10 h-10 ml-1" />
-                    </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                  <div className="p-4 text-center text-gray-500">
+                    <Youtube className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Unable to load video data</p>
                   </div>
-                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs">
-                    HD
-                  </div>
-                  <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <ExternalLink className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-red-600 px-2 py-1 rounded text-white text-xs font-medium">
-                    LIVE
-                  </div>
-                </a>
-                
-                <div className="flex items-center justify-between p-4 text-gray-500">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-1 hover:text-red-500 transition-colors cursor-pointer">
-                      <Heart className="w-5 h-5" />
-                      <span>847</span>
-                    </div>
-                    <div className="flex items-center space-x-1 hover:text-blue-500 transition-colors cursor-pointer">
-                      <MessageCircle className="w-5 h-5" />
-                      <span>23</span>
-                    </div>
-                    <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
-                      <Share2 className="w-5 h-5" />
-                      <span>12</span>
-                    </button>
-                  </div>
-                  <div className="text-sm text-gray-400">3 days ago</div>
                 </div>
-              </div>
+              )}
 
               {/* Instagram Post Preview */}
               <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
