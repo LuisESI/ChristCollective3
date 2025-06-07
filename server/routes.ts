@@ -17,6 +17,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { youtubeService } from "./youtube";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
@@ -901,6 +902,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating social media post:", error);
       res.status(500).json({ message: "Failed to create social media post" });
+    }
+  });
+
+  // YouTube API endpoint to fetch real video data
+  app.get('/api/youtube/video', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ message: "YouTube URL is required" });
+      }
+      
+      const videoData = await youtubeService.getVideoData(url);
+      
+      if (!videoData) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+      
+      // Format the data for frontend consumption
+      const formattedData = {
+        id: videoData.id,
+        title: videoData.title,
+        description: videoData.description,
+        thumbnail: videoData.thumbnail,
+        channelTitle: videoData.channelTitle,
+        publishedAt: videoData.publishedAt,
+        viewCount: youtubeService.formatCount(videoData.viewCount),
+        likeCount: youtubeService.formatCount(videoData.likeCount),
+        commentCount: youtubeService.formatCount(videoData.commentCount),
+        duration: youtubeService.formatDuration(videoData.duration),
+        url: url
+      };
+      
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching YouTube data:", error);
+      res.status(500).json({ message: "Failed to fetch YouTube video data" });
     }
   });
 
