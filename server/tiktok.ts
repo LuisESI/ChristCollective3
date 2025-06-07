@@ -87,9 +87,9 @@ export class TikTokService {
       const runData = await runResponse.json();
       const runId = runData.data.id;
 
-      // Wait for the run to complete and get results
+      // Wait for the run to complete and get results  
       let attempts = 0;
-      const maxAttempts = 30; // 30 seconds timeout
+      const maxAttempts = 10; // 10 seconds timeout for faster response
 
       while (attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second

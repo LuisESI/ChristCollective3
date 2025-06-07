@@ -16,10 +16,17 @@ export class InstagramService {
   private apifyActorId = 'apify/instagram-scraper';
 
   constructor() {
-    if (!process.env.TIKTOK_API_KEY) {
-      console.warn('TIKTOK_API_KEY environment variable not provided - Instagram features will use sample data');
+    this.apifyToken = '';
+  }
+
+  private getApiToken(): string {
+    if (!this.apifyToken) {
+      this.apifyToken = process.env.TIKTOK_API_KEY || '';
+      if (!this.apifyToken) {
+        console.warn('TIKTOK_API_KEY environment variable not provided - Instagram features will use sample data');
+      }
     }
-    this.apifyToken = process.env.TIKTOK_API_KEY || '';
+    return this.apifyToken;
   }
 
   extractUsername(url: string): string | null {
@@ -36,7 +43,8 @@ export class InstagramService {
   }
 
   async getUserData(username: string): Promise<InstagramUserData | null> {
-    if (!this.apifyToken) {
+    const token = this.getApiToken();
+    if (!token) {
       return this.getSampleUserData(username);
     }
 
