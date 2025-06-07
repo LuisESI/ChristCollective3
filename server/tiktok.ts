@@ -139,18 +139,18 @@ export class TikTokService {
   }
 
   private getSampleUserData(username: string): TikTokUserData {
-    // Authentic data structure for Luis Lucero's profile
+    // Authentic data from Luis Lucero's profile via Apify scraper
     if (username === 'luislucero369') {
       return {
-        id: 'luislucero369_id',
+        id: '6924070655164253190',
         username: 'luislucero369',
-        displayName: 'Luis Lucero',
-        description: 'Faith-based content creator sharing spiritual insights and Christian messages through engaging short-form videos',
-        avatar: '/placeholder-avatar.jpg',
-        followerCount: '12500',
-        followingCount: '189',
-        videoCount: '78',
-        likeCount: '285000',
+        displayName: 'Luis Lucero ♱',
+        description: 'CHRIST IS KING & he reigns over this page ♱\nCheck out our YouTube channel⤵️',
+        avatar: 'https://p16-pu-sign-useast8.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/ef6f9359742cfc8fb9acf2442ddd17c6~tplv-tiktokx-cropcenter:720:720.jpeg',
+        followerCount: '56400',
+        followingCount: '363',
+        videoCount: '242',
+        likeCount: '873100',
         verified: false,
       };
     }
