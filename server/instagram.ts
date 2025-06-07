@@ -136,7 +136,7 @@ export class InstagramService {
         username: 'luislucero.03',
         displayName: 'Luis Lucero',
         description: 'Christian content creator 🙏 Spreading faith and inspiration through visual storytelling',
-        avatar: '/placeholder-avatar.jpg',
+        avatar: 'https://ui-avatars.com/api/?name=Luis+Lucero&background=d4a574&color=000&size=100',
         followerCount: '3800',
         followingCount: '156',
         postCount: '48',

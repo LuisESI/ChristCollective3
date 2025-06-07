@@ -154,7 +154,7 @@ export class TikTokService {
         username: 'luislucero369',
         displayName: 'Luis Lucero ♱',
         description: 'CHRIST IS KING & he reigns over this page ♱\nCheck out our YouTube channel⤵️',
-        avatar: 'https://p16-pu-sign-useast8.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/ef6f9359742cfc8fb9acf2442ddd17c6~tplv-tiktokx-cropcenter:720:720.jpeg',
+        avatar: 'https://ui-avatars.com/api/?name=Luis+Lucero&background=d4a574&color=000&size=100',
         followerCount: '56400',
         followingCount: '363',
         videoCount: '242',
