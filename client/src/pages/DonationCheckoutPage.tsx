@@ -300,13 +300,13 @@ export default function DonationCheckoutPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-2xl font-bold text-black">{((tip / amount) * 100).toFixed(1)}%</span>
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className="text-2xl font-bold text-black">{amount > 0 ? ((tip / amount) * 100).toFixed(1) : '0.0'}%</span>
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 mb-4">
                   <Button
-                    variant={tip === amount * 0.15 ? "default" : "outline"}
+                    variant={Math.abs(tip - amount * 0.15) < 0.01 ? "default" : "outline"}
                     size="sm"
                     onClick={() => calculateTip(15)}
                     className="text-xs"
@@ -314,7 +314,7 @@ export default function DonationCheckoutPage() {
                     15%
                   </Button>
                   <Button
-                    variant={tip === amount * 0.18 ? "default" : "outline"}
+                    variant={Math.abs(tip - amount * 0.18) < 0.01 ? "default" : "outline"}
                     size="sm"
                     onClick={() => calculateTip(18)}
                     className="text-xs"
@@ -322,7 +322,7 @@ export default function DonationCheckoutPage() {
                     18%
                   </Button>
                   <Button
-                    variant={tip === amount * 0.20 ? "default" : "outline"}
+                    variant={Math.abs(tip - amount * 0.20) < 0.01 ? "default" : "outline"}
                     size="sm"
                     onClick={() => calculateTip(20)}
                     className="text-xs"
@@ -335,14 +335,32 @@ export default function DonationCheckoutPage() {
                     onClick={() => setTip(0)}
                     className="text-xs"
                   >
-                    Other
+                    0%
                   </Button>
                 </div>
 
-                <div className="mt-2">
-                  <button className="text-sm text-primary hover:underline">
-                    Enter custom tip
-                  </button>
+                <div className="space-y-2">
+                  <Label htmlFor="custom-tip" className="text-sm font-medium">Enter custom tip amount</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                    <Input
+                      id="custom-tip"
+                      type="number"
+                      placeholder="0.00"
+                      value={tip > 0 ? tip.toFixed(2) : ''}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (!isNaN(value) && value >= 0) {
+                          setTip(value);
+                        } else if (e.target.value === '') {
+                          setTip(0);
+                        }
+                      }}
+                      className="pl-8 pr-4"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
               </div>
 
