@@ -292,7 +292,7 @@ export default function DonationCheckoutPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-3">
                   <div>
-                    <h4 className="font-semibold">Tip Christ Collective services</h4>
+                    <h4 className="font-semibold text-black">Tip Christ Collective services</h4>
                     <p className="text-sm text-gray-600">
                       Christ Collective has a 0% platform fee for organizers. Christ Collective will continue offering its 
                       services thanks to donors who will leave an optional amount here:
