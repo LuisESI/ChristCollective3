@@ -233,7 +233,7 @@ export default function DonationCheckoutPage() {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">You're supporting</p>
+                  <p className="text-sm text-[#D4AF37] mb-1">You're supporting</p>
                   <CardTitle className="text-xl">{campaign.title}</CardTitle>
                   <p className="text-sm text-gray-600">Your donation will benefit Christ Collective</p>
                 </div>
