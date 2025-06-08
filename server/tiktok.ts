@@ -190,7 +190,97 @@ export class TikTokService {
   }
 
   async getUserVideos(username: string, limit: number = 2): Promise<TikTokVideoData[]> {
-    // Return sample videos for Luis Lucero based on his authentic TikTok content
+    const token = this.getApiToken();
+    if (!token) {
+      console.warn('No TikTok API token available, returning sample data');
+      return this.getSampleVideos(username, limit);
+    }
+
+    try {
+      // Start the Apify actor to scrape TikTok videos
+      const runResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profiles: [`@${username}`],
+          resultsPerPage: limit,
+          shouldDownloadCovers: false,
+          shouldDownloadSlideshowImages: false,
+          shouldDownloadVideos: false,
+        }),
+      });
+
+      if (!runResponse.ok) {
+        throw new Error(`Failed to start Apify actor: ${runResponse.status}`);
+      }
+
+      const runData = await runResponse.json();
+      const runId = runData.data.id;
+
+      // Wait for the actor to complete and get results
+      let attempts = 0;
+      const maxAttempts = 30; // 5 minutes max wait time
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+
+        const statusResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          
+          if (statusData.data.status === 'SUCCEEDED') {
+            // Get the dataset results
+            const resultsResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}/dataset/items`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+
+            if (resultsResponse.ok) {
+              const results = await resultsResponse.json();
+              
+              if (results.length > 0) {
+                return results.slice(0, limit).map((video: any) => ({
+                  id: video.id || `video_${Date.now()}`,
+                  title: video.text || 'TikTok Video',
+                  description: video.text || '',
+                  thumbnail: video.videoMeta?.coverUrl || video.covers?.[0] || 'https://ui-avatars.com/api/?name=TT&background=000&color=fff&size=400',
+                  username: video.authorMeta?.uniqueId || username,
+                  displayName: video.authorMeta?.nickName || username,
+                  publishedAt: video.createTimeISO || new Date().toISOString(),
+                  viewCount: video.playCount?.toString() || '0',
+                  likeCount: video.diggCount?.toString() || '0',
+                  commentCount: video.commentCount?.toString() || '0',
+                  shareCount: video.shareCount?.toString() || '0',
+                  duration: this.formatDuration(video.videoMeta?.duration || 60)
+                }));
+              }
+            }
+            break;
+          } else if (statusData.data.status === 'FAILED') {
+            throw new Error('Apify TikTok scraping failed');
+          }
+        }
+        
+        attempts++;
+      }
+
+      throw new Error('Timeout waiting for TikTok video results');
+    } catch (error) {
+      console.error('Error fetching TikTok videos from Apify:', error);
+      return this.getSampleVideos(username, limit);
+    }
+  }
+
+  private getSampleVideos(username: string, limit: number): TikTokVideoData[] {
     if (username === 'luislucero369') {
       return [
         {
@@ -221,7 +311,7 @@ export class TikTokService {
           shareCount: '38',
           duration: '1:12'
         }
-      ];
+      ].slice(0, limit);
     }
 
     return [];

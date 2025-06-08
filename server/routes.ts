@@ -1050,6 +1050,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to verify TikTok API connection
+  app.get('/api/tiktok/test', async (req, res) => {
+    try {
+      const token = process.env.TIKTOK_API_KEY;
+      if (!token) {
+        return res.json({ status: 'missing_token', message: 'TIKTOK_API_KEY not configured' });
+      }
+
+      // Test basic Apify API connection
+      const testResponse = await fetch('https://api.apify.com/v2/acts/clockworks~free-tiktok-scraper', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (testResponse.ok) {
+        const actorInfo = await testResponse.json();
+        res.json({ 
+          status: 'success', 
+          message: 'TikTok API key is valid',
+          actor: actorInfo.data?.name || 'Unknown',
+          tokenPrefix: token.substring(0, 12) + '...'
+        });
+      } else {
+        res.json({ 
+          status: 'error', 
+          message: `API responded with status ${testResponse.status}`,
+          details: await testResponse.text()
+        });
+      }
+    } catch (error) {
+      res.json({ 
+        status: 'error', 
+        message: 'Failed to connect to TikTok API',
+        error: error.message 
+      });
+    }
+  });
+
   // Instagram API endpoint to fetch user data
   app.get('/api/instagram/user', async (req, res) => {
     try {
