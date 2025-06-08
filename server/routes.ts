@@ -421,6 +421,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tipAmount = parseFloat(tip) || 0;
       const totalAmount = donationAmount + tipAmount;
       
+      console.log(`Payment Intent Creation - Donation: $${donationAmount}, Tip: $${tipAmount}, Total: $${totalAmount}`);
+      
       // Create customer (optional for guest donations)
       let customerId: string | undefined = undefined;
       if (req.user?.id) {
@@ -503,6 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { paymentIntentId, campaignId } = req.body;
+      console.log(`Donation completion request - PaymentIntent: ${paymentIntentId}, Campaign: ${campaignId}`);
 
       if (!paymentIntentId || !campaignId) {
         return res.status(400).json({ message: "Missing required parameters" });
@@ -510,6 +513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Retrieve the payment intent from Stripe to get the details
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      console.log(`PaymentIntent status: ${paymentIntent.status}, Amount: ${paymentIntent.amount}`);
 
       if (paymentIntent.status !== 'succeeded') {
         return res.status(400).json({ message: "Payment not completed" });
@@ -518,6 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract metadata from payment intent
       const donationAmount = parseFloat(paymentIntent.metadata.donationAmount || '0');
       const tipAmount = parseFloat(paymentIntent.metadata.tipAmount || '0');
+      console.log(`Processing donation - Amount: $${donationAmount}, Tip: $${tipAmount}`);
 
       // Get campaign details
       const campaign = await storage.getCampaign(campaignId);
@@ -534,13 +539,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAnonymous: true,
       };
 
+      console.log('Creating donation record:', donationData);
       const donation = await storage.createDonation(donationData, paymentIntentId);
+      console.log('Donation created with ID:', donation.id);
 
       // Update campaign total
+      console.log(`Updating campaign total by $${donationAmount}`);
       await storage.updateDonationAmount(campaignId, donationAmount);
 
       // Return donation details for receipt
-      res.json({
+      const response = {
         id: donation.id,
         amount: donationAmount,
         tip: tipAmount,
@@ -548,7 +556,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAnonymous: true,
         createdAt: donation.createdAt,
         stripePaymentId: paymentIntentId,
-      });
+      };
+      
+      console.log('Donation completion successful:', response);
+      res.json(response);
 
     } catch (error: any) {
       console.error("Error completing donation:", error);
