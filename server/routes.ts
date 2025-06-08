@@ -398,14 +398,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Donation payment intent
-  app.post('/api/donations/create-payment-intent', isAuthenticated, async (req: any, res) => {
+  // Donation payment intent - no authentication required for donations
+  app.post('/api/donations/create-payment-intent', async (req: any, res) => {
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
     
     try {
-      const { amount, campaignId } = req.body;
+      const { amount, campaignId, tip = 0 } = req.body;
       
       if (!amount || !campaignId) {
         return res.status(400).json({ message: "Amount and campaign ID are required" });
@@ -416,31 +416,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
-      const userId = req.user.id;
-      const user = await storage.getUser(userId);
+      // Calculate total amount including tip
+      const donationAmount = parseFloat(amount);
+      const tipAmount = parseFloat(tip) || 0;
+      const totalAmount = donationAmount + tipAmount;
       
-      // Create or retrieve customer
-      let customerId = user?.stripeCustomerId;
-      
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user?.email || undefined,
-          name: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || undefined,
-        });
+      // Create customer (optional for guest donations)
+      let customerId = undefined;
+      if (req.user?.id) {
+        const user = await storage.getUser(req.user.id);
+        customerId = user?.stripeCustomerId;
         
-        customerId = customer.id;
-        if (user) {
-          await storage.updateStripeCustomerId(userId, customerId);
+        if (!customerId && user?.email) {
+          const customer = await stripe.customers.create({
+            email: user.email,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || undefined,
+          });
+          
+          customerId = customer.id;
+          await storage.updateStripeCustomerId(req.user.id, customerId);
         }
       }
       
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(parseFloat(amount) * 100), // Convert to cents
+        amount: Math.round(totalAmount * 100), // Convert to cents
         currency: "usd",
         customer: customerId,
         metadata: {
           campaignId,
-          userId
+          userId: req.user?.id || 'guest',
+          donationAmount: donationAmount.toString(),
+          tipAmount: tipAmount.toString()
         }
       });
       

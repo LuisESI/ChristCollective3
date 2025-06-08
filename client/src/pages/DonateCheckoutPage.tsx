@@ -3,9 +3,8 @@ import { useParams, useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +13,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { loadStripe } from "@stripe/stripe-js";
 import { ArrowLeft, Heart, Loader2 } from "lucide-react";
 import { Helmet } from "react-helmet";
+import type { Campaign } from "@shared/schema";
 
 // Make sure to call loadStripe outside of a component's render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -24,34 +24,39 @@ const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY
   ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
   : null;
 
-function CheckoutForm({ campaignId, amount, setAmount, message, setMessage, isAnonymous, setIsAnonymous }: { 
+function CheckoutForm({ 
+  campaignId, 
+  amount, 
+  tip, 
+  message, 
+  isAnonymous 
+}: { 
   campaignId: string;
-  amount: string;
-  setAmount: (amount: string) => void;
+  amount: number;
+  tip: number;
   message: string;
-  setMessage: (message: string) => void;
   isAnonymous: boolean;
-  setIsAnonymous: (isAnonymous: boolean) => void;
 }) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   
-  // Fetch payment intent when amount changes
+  // Calculate total amount
+  const totalAmount = amount + tip;
+  
+  // Fetch payment intent when amount or tip changes
   useEffect(() => {
-    if (!campaignId || !amount || parseFloat(amount) <= 0) return;
+    if (!campaignId || amount <= 0) return;
     
     const fetchPaymentIntent = async () => {
       try {
         const response = await apiRequest("POST", "/api/donations/create-payment-intent", {
-          amount: parseFloat(amount),
+          amount: amount,
+          tip: tip,
           campaignId,
-          message,
-          isAnonymous
         });
         
         const data = await response.json();
@@ -67,161 +72,101 @@ function CheckoutForm({ campaignId, amount, setAmount, message, setMessage, isAn
     };
     
     fetchPaymentIntent();
-  }, [campaignId, amount, toast]);
+  }, [campaignId, amount, tip, toast]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements || !clientSecret) {
-      return;
-    }
-
-    if (parseFloat(amount) <= 0) {
-      setErrorMessage("Please enter a valid donation amount");
+    if (!stripe || !elements) {
       return;
     }
 
     setIsProcessing(true);
-    setErrorMessage(undefined);
 
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/donate/thank-you?campaign=${campaignId}&amount=${amount}`,
-        },
-      });
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/donate/success?campaignId=${campaignId}`,
+      },
+    });
 
-      if (error) {
-        setErrorMessage(error.message);
-        toast({
-          title: "Payment failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message);
+    if (error) {
       toast({
-        title: "Unexpected error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Payment Failed",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
+    } else {
+      toast({
+        title: "Thank You!",
+        description: "Your donation has been processed successfully.",
+      });
+      navigate("/donate");
     }
+
+    setIsProcessing(false);
   };
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow numbers and decimal points
-    if (value === '' || /^\d+(\.\d{0,2})?$/.test(value)) {
-      setAmount(value);
-    }
-  };
-
-  const predefinedAmounts = ["10", "25", "50", "100", "250"];
+  if (!clientSecret) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2">Initializing payment...</span>
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement />
+      
+      <div className="space-y-4">
         <div>
-          <Label htmlFor="amount" className="text-lg font-medium">Donation Amount</Label>
-          <div className="mt-2 relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-              $
-            </span>
-            <Input
-              id="amount"
-              type="text"
-              value={amount}
-              onChange={handleAmountChange}
-              className="pl-8"
-              placeholder="0.00"
-              required
-            />
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mt-3">
-            {predefinedAmounts.map((presetAmount) => (
-              <Button
-                key={presetAmount}
-                type="button"
-                variant={amount === presetAmount ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setAmount(presetAmount)}
-              >
-                ${presetAmount}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        <div>
-          <Label htmlFor="message" className="text-lg font-medium">Message (Optional)</Label>
+          <Label htmlFor="message">Leave a message (optional)</Label>
           <Textarea
             id="message"
+            placeholder="Share why this cause is important to you..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="mt-2"
-            placeholder="Share a few words of encouragement..."
+            readOnly
+            className="mt-1"
           />
         </div>
         
         <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="anonymous" 
-            checked={isAnonymous}
-            onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
-          />
+          <Checkbox id="anonymous" checked={isAnonymous} disabled />
           <Label htmlFor="anonymous">Make my donation anonymous</Label>
         </div>
         
-        {amount && parseFloat(amount) > 0 && (
-          <div>
-            <Label className="text-lg font-medium">Payment Details</Label>
-            <div className="mt-2 bg-white border border-gray-200 rounded-md p-4">
-              <PaymentElement />
-            </div>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Donation:</span>
+            <span>${amount.toFixed(2)}</span>
           </div>
-        )}
-      
-        {errorMessage && (
-          <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm">
-            {errorMessage}
+          <div className="flex justify-between text-sm">
+            <span>Tip to Christ Collective:</span>
+            <span>${tip.toFixed(2)}</span>
           </div>
-        )}
-        
-        <div className="flex justify-between pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate("/donate")}
-            disabled={isProcessing}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          
-          <Button 
-            type="submit" 
-            disabled={!stripe || !elements || isProcessing || !amount || parseFloat(amount) <= 0}
-            className="min-w-[150px]"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Heart className="mr-2 h-4 w-4" />
-                Donate ${amount || "0"}
-              </>
-            )}
-          </Button>
+          <div className="flex justify-between font-semibold pt-2 border-t">
+            <span>Total:</span>
+            <span>${totalAmount.toFixed(2)}</span>
+          </div>
         </div>
       </div>
+      
+      <Button 
+        type="submit" 
+        disabled={isProcessing || !stripe || !elements}
+        className="w-full"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Processing...
+          </>
+        ) : (
+          `Donate $${totalAmount.toFixed(2)}`
+        )}
+      </Button>
     </form>
   );
 }
@@ -230,84 +175,70 @@ export default function DonateCheckoutPage() {
   const { campaignId } = useParams();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const [clientSecret, setClientSecret] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [amount, setAmount] = useState("25");
+  
+  // Donation state
+  const [amount, setAmount] = useState(0);
+  const [customAmount, setCustomAmount] = useState("");
+  const [tip, setTip] = useState(0); // Default tip to 0%
+  const [tipPercentage, setTipPercentage] = useState(0); // Default tip percentage to 0%
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
-
-  // Handle authentication more gracefully
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      // We'll navigate to login but set a better handler
-      // to avoid the runtime error modal
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 100);
-    }
-  }, [isAuthLoading, isAuthenticated]);
-
-  // Fetch campaign with better error handling
-  const { data: campaign, isLoading: isCampaignLoading } = useQuery({
+  
+  // Preset amounts
+  const presetAmounts = [100, 200, 300, 500, 1000, 1500];
+  const suggestedAmount = 200; // Suggested amount
+  
+  // Tip percentages
+  const tipPercentages = [0, 15, 18, 20];
+  
+  // Fetch campaign data
+  const { data: campaign, isLoading: isCampaignLoading, error: campaignError } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${campaignId}`],
-    enabled: !!campaignId && isAuthenticated,
-    queryFn: async ({ queryKey }) => {
-      try {
-        const res = await fetch(queryKey[0] as string, { credentials: "include" });
-        if (!res.ok) {
-          if (res.status === 401) {
-            // Handle unauthorized gracefully
-            return null;
-          }
-          throw new Error('Failed to fetch campaign');
-        }
-        return res.json();
-      } catch (error) {
-        console.error("Error fetching campaign:", error);
-        toast({
-          title: "Error",
-          description: "Unable to load campaign information. Please try again.",
-          variant: "destructive",
-        });
-        navigate("/donate");
-        return null;
-      }
-    }
+    enabled: !!campaignId,
   });
 
-  // Initialize payment intent
+  // Calculate tip amount based on percentage
   useEffect(() => {
-    if (!isAuthenticated || !campaignId || !amount || parseFloat(amount) <= 0) return;
-    
-    setIsLoading(true);
-    
-    apiRequest("POST", "/api/donations/create-payment-intent", {
-      amount: parseFloat(amount),
-      campaignId,
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else {
-          throw new Error("No client secret returned");
-        }
-      })
-      .catch(error => {
-        toast({
-          title: "Error",
-          description: "Unable to process donation. Please try again later.",
-          variant: "destructive",
-        });
-        console.error("Payment intent error:", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [isAuthenticated, campaignId, amount, toast]);
+    if (amount > 0) {
+      setTip((amount * tipPercentage) / 100);
+    }
+  }, [amount, tipPercentage]);
 
-  if (isAuthLoading || !isAuthenticated) {
+  // Handle preset amount selection
+  const handleAmountSelect = (selectedAmount: number) => {
+    setAmount(selectedAmount);
+    setCustomAmount(""); // Clear custom amount input
+  };
+
+  // Handle custom amount input
+  const handleCustomAmountChange = (value: string) => {
+    setCustomAmount(value);
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue > 0) {
+      setAmount(numValue);
+    } else {
+      setAmount(0);
+    }
+  };
+
+  // Handle tip percentage selection
+  const handleTipPercentageSelect = (percentage: number) => {
+    setTipPercentage(percentage);
+  };
+
+  // Handle custom tip input
+  const handleCustomTipChange = (value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setTip(numValue);
+      // Calculate percentage for display
+      if (amount > 0) {
+        setTipPercentage((numValue / amount) * 100);
+      }
+    }
+  };
+
+  if (isCampaignLoading) {
     return (
       <div className="container mx-auto px-4 py-16 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -315,290 +246,238 @@ export default function DonateCheckoutPage() {
     );
   }
 
-  if (isCampaignLoading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded mb-4 w-3/4" />
-            <div className="h-4 bg-gray-100 rounded mb-8 w-1/2" />
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              <div className="md:col-span-7">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="h-6 bg-gray-200 rounded mb-4 w-1/4" />
-                  <div className="h-10 bg-gray-200 rounded mb-6 w-full" />
-                  <div className="h-6 bg-gray-200 rounded mb-4 w-1/3" />
-                  <div className="h-24 bg-gray-200 rounded mb-6 w-full" />
-                  <div className="h-10 bg-gray-200 rounded w-full" />
-                </div>
-              </div>
-              <div className="md:col-span-5">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="h-6 bg-gray-200 rounded mb-4 w-2/3" />
-                  <div className="h-4 bg-gray-100 rounded mb-6 w-full" />
-                  <div className="h-4 bg-gray-100 rounded mb-2 w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded mb-2 w-4/5" />
-                  <div className="h-4 bg-gray-100 rounded mb-4 w-2/3" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!campaign) {
+  if (campaignError || !campaign) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Campaign not found</h1>
           <p className="text-gray-600 mb-6">The campaign you're trying to donate to doesn't exist or has ended.</p>
           <Button asChild>
-            <Link href="/donate">
-              <a>Browse Campaigns</a>
-            </Link>
+            <Link href="/donate">Browse Campaigns</Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  function formatCurrency(amount: string): string {
-    const value = parseFloat(amount) || 0;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+  if (!stripePromise) {
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto text-center">
+          <h1 className="text-2xl font-bold mb-4">Payment Not Available</h1>
+          <p className="text-gray-600 mb-6">Payment processing is currently unavailable. Please try again later.</p>
+          <Button asChild>
+            <Link href="/donate">Back to Campaigns</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <>
       <Helmet>
-        <title>Donate to {campaign.title} - Christ Collective</title>
-        <meta name="description" content={`Support ${campaign.title} with your donation. Every contribution makes a difference.`} />
+        <title>Donate to {campaign.title} | Christ Collective</title>
+        <meta name="description" content={`Support ${campaign.title} - ${campaign.description.substring(0, 160)}`} />
       </Helmet>
       
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <Button 
-              asChild
-              variant="ghost"
-              className="mb-4"
-            >
-              <Link href={`/campaigns/${campaign.slug}`}>
-                <a className="flex items-center">
-                  <ArrowLeft className="mr-2" size={16} />
-                  Back to Campaign
-                </a>
-              </Link>
-            </Button>
-            
-            <h1 className="text-3xl font-bold mb-2">Donate to {campaign.title}</h1>
-            <p className="text-gray-600">Your contribution helps make a difference.</p>
+      <div className="min-h-screen bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-4">
+          {/* Header */}
+          <div className="mb-6">
+            <Link href={`/donate/${campaign.slug}`} className="inline-flex items-center text-yellow-400 hover:text-yellow-300 font-medium mb-4">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Fundraiser
+            </Link>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            <div className="md:col-span-7">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Donation</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {!stripePromise ? (
-                    <div className="py-8 text-center text-gray-500">
-                      <p>Payment processing is currently unavailable. Please try again later.</p>
-                    </div>
-                  ) : clientSecret ? (
-                    <Elements 
-                      stripe={stripePromise} 
-                      options={{ clientSecret, appearance: { theme: 'stripe' } }}
-                    >
-                      <CheckoutForm 
-                        campaignId={campaignId} 
-                        amount={amount}
-                        setAmount={setAmount}
-                        message={message}
-                        setMessage={setMessage}
-                        isAnonymous={isAnonymous}
-                        setIsAnonymous={setIsAnonymous}
-                      />
-                    </Elements>
-                  ) : (
-                    <div className="py-4">
-                      <div className="space-y-6">
-                        <div>
-                          <Label htmlFor="amount" className="text-lg font-medium">Donation Amount</Label>
-                          <div className="mt-2 relative">
-                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                              $
-                            </span>
-                            <Input
-                              id="amount"
-                              type="text"
-                              value={amount}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '' || /^\d+(\.\d{0,2})?$/.test(value)) {
-                                  setAmount(value);
-                                }
-                              }}
-                              className="pl-8"
-                              placeholder="0.00"
-                              required
-                            />
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {["10", "25", "50", "100", "250"].map((presetAmount) => (
-                              <Button
-                                key={presetAmount}
-                                type="button"
-                                variant={amount === presetAmount ? "default" : "outline"}
-                                className="flex-1"
-                                onClick={() => setAmount(presetAmount)}
-                              >
-                                ${presetAmount}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="message" className="text-lg font-medium">Message (Optional)</Label>
-                          <Textarea
-                            id="message"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="mt-2"
-                            placeholder="Share a few words of encouragement..."
-                          />
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="anonymous" 
-                            checked={isAnonymous}
-                            onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
-                          />
-                          <Label htmlFor="anonymous">Make my donation anonymous</Label>
-                        </div>
-                        
-                        <div className="py-4">
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              if (!amount || parseFloat(amount) <= 0) {
-                                toast({
-                                  title: "Invalid amount",
-                                  description: "Please enter a valid donation amount",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                              
-                              apiRequest("POST", "/api/donations/create-payment-intent", {
-                                amount: parseFloat(amount),
-                                campaignId,
-                              })
-                                .then(res => res.json())
-                                .then(data => {
-                                  if (data.clientSecret) {
-                                    setClientSecret(data.clientSecret);
-                                  } else {
-                                    throw new Error("No client secret returned");
-                                  }
-                                })
-                                .catch(error => {
-                                  toast({
-                                    title: "Error",
-                                    description: "Unable to process donation. Please try again later.",
-                                    variant: "destructive",
-                                  });
-                                });
-                            }}
-                            disabled={!amount || parseFloat(amount) <= 0 || isLoading}
-                            className="w-full"
-                          >
-                            {isLoading ? (
-                              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                            ) : (
-                              <>Continue to Payment</>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+
+          <div className="max-w-2xl mx-auto">
+            {/* Campaign Info */}
+            <div className="mb-8 text-center">
+              <div className="inline-flex items-center bg-gray-800 rounded-full px-4 py-2 mb-4">
+                <Heart className="w-4 h-4 mr-2 text-yellow-400" />
+                <span className="text-sm text-gray-300">You're supporting</span>
+              </div>
+              <h1 className="text-2xl font-bold mb-2">{campaign.title}</h1>
+              <p className="text-yellow-400 text-sm">Your donation will benefit Christ Collective</p>
             </div>
-            
-            <div className="md:col-span-5">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <h3 className="font-semibold text-lg">{campaign.title}</h3>
-                  <p className="text-gray-600 line-clamp-4">{campaign.description}</p>
+
+            {/* Donation Form */}
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Enter your donation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Preset Amount Buttons */}
+                <div className="grid grid-cols-3 gap-3">
+                  {presetAmounts.map((presetAmount) => (
+                    <Button
+                      key={presetAmount}
+                      variant={amount === presetAmount ? "default" : "outline"}
+                      className={`relative ${
+                        amount === presetAmount 
+                          ? "bg-yellow-500 text-black hover:bg-yellow-600" 
+                          : "bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                      }`}
+                      onClick={() => handleAmountSelect(presetAmount)}
+                    >
+                      {presetAmount === suggestedAmount && (
+                        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          SUGGESTED
+                        </span>
+                      )}
+                      ${presetAmount}
+                    </Button>
+                  ))}
+                </div>
+
+                {/* Custom Amount Input */}
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">$</span>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={customAmount}
+                    onChange={(e) => handleCustomAmountChange(e.target.value)}
+                    className="pl-8 text-xl h-12 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    min="1"
+                    step="0.01"
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">USD</span>
+                </div>
+
+                {/* Tip Section */}
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-white mb-2">Tip Christ Collective services</h3>
+                    <p className="text-sm text-gray-300 mb-4">
+                      Christ Collective has a 0% platform fee for organizers. Christ Collective will continue offering its 
+                      services thanks to donors who will leave an optional amount here:
+                    </p>
+                  </div>
                   
-                  <div className="pt-2">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Current Progress</span>
-                      <span className="font-medium">{formatCurrency(campaign.currentAmount)} of {formatCurrency(campaign.goal)}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className="bg-primary h-2.5 rounded-full" 
-                        style={{ 
-                          width: `${Math.min(
-                            (parseFloat(campaign.currentAmount) / parseFloat(campaign.goal)) * 100, 
-                            100
-                          )}%` 
-                        }}
+                  {/* Tip Percentage Display */}
+                  <div className="text-center mb-4">
+                    <span className="text-3xl font-bold text-white">{tipPercentage.toFixed(1)}%</span>
+                  </div>
+                  
+                  {/* Tip Percentage Buttons */}
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {tipPercentages.map((percentage) => (
+                      <Button
+                        key={percentage}
+                        variant={tipPercentage === percentage ? "default" : "outline"}
+                        size="sm"
+                        className={
+                          tipPercentage === percentage 
+                            ? "bg-white text-black hover:bg-gray-200" 
+                            : "bg-gray-800 border-gray-600 text-white hover:bg-gray-600"
+                        }
+                        onClick={() => handleTipPercentageSelect(percentage)}
+                      >
+                        {percentage}%
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Custom Tip Input */}
+                  <div>
+                    <Label htmlFor="custom-tip" className="text-yellow-400 text-sm">Enter custom tip</Label>
+                    <div className="relative mt-1">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
+                      <Input
+                        id="custom-tip"
+                        type="number"
+                        placeholder="0.00"
+                        value={tip > 0 ? tip.toFixed(2) : ""}
+                        onChange={(e) => handleCustomTipChange(e.target.value)}
+                        className="pl-8 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                        min="0"
+                        step="0.01"
                       />
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter className="bg-gray-50 border-t">
-                  <p className="text-sm text-gray-500">
-                    Your donation supports this campaign and the mission of Christ Collective. Thank you for your generosity.
-                  </p>
-                </CardFooter>
-              </Card>
-              
-              <div className="mt-6 bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-medium mb-2">Why donate?</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <svg className="text-primary mt-1 mr-2 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="text-gray-600 text-sm">100% of your donation goes directly to the campaign</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="text-primary mt-1 mr-2 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="text-gray-600 text-sm">Secure and encrypted payment processing</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="text-primary mt-1 mr-2 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="text-gray-600 text-sm">Support Christian causes and community initiatives</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="text-primary mt-1 mr-2 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="text-gray-600 text-sm">Make a real impact in people's lives</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+                </div>
+
+                {/* Message Input */}
+                <div>
+                  <Label htmlFor="message" className="text-white">Leave a message (optional)</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Share why this cause is important to you..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="mt-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
+
+                {/* Anonymous Checkbox */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="anonymous" 
+                    checked={isAnonymous}
+                    onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
+                    className="border-gray-600"
+                  />
+                  <Label htmlFor="anonymous" className="text-white">Make my donation anonymous</Label>
+                </div>
+
+                {/* Payment Processing */}
+                {amount > 0 && (
+                  <div className="mt-6">
+                    <div className="mb-4 p-4 bg-gray-700 rounded-lg">
+                      <div className="flex justify-between text-sm text-gray-300 mb-2">
+                        <span>Donation:</span>
+                        <span>${amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-300 mb-2">
+                        <span>Tip to Christ Collective:</span>
+                        <span>${tip.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-white pt-2 border-t border-gray-600">
+                        <span>Total:</span>
+                        <span>${(amount + tip).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <Elements 
+                      stripe={stripePromise} 
+                      options={{
+                        mode: 'payment',
+                        amount: Math.round((amount + tip) * 100),
+                        currency: 'usd',
+                        appearance: {
+                          theme: 'night',
+                          variables: {
+                            colorPrimary: '#eab308',
+                            colorBackground: '#374151',
+                            colorText: '#ffffff',
+                            colorDanger: '#ef4444',
+                            fontFamily: 'system-ui, sans-serif',
+                            spacingUnit: '4px',
+                            borderRadius: '6px',
+                          },
+                        },
+                      }}
+                    >
+                      <CheckoutForm
+                        campaignId={campaignId!}
+                        amount={amount}
+                        tip={tip}
+                        message={message}
+                        isAnonymous={isAnonymous}
+                      />
+                    </Elements>
+                  </div>
+                )}
+
+                {amount === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">Please select or enter a donation amount to continue</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
