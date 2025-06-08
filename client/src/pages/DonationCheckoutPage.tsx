@@ -335,7 +335,7 @@ export default function DonationCheckoutPage() {
                     onClick={() => setTip(0)}
                     className="text-xs"
                   >
-                    0%
+                    No Tip
                   </Button>
                 </div>
 
