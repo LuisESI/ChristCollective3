@@ -18,6 +18,7 @@ import BusinessNetworkPage from "@/pages/BusinessNetworkPage";
 import BusinessProfilePage from "@/pages/BusinessProfilePage";
 import MembershipCheckoutPage from "@/pages/MembershipCheckoutPage";
 import DonationCheckoutPage from "@/pages/DonationCheckoutPage";
+import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />
       <Route path="/donate/checkout/:campaignId" component={DonationCheckoutPage} />
+      <Route path="/donate/success" component={DonationSuccessPage} />
       <Route path="/donate/:slug" component={CampaignDetailsPage} />
       <Route path="/manage-campaigns" component={ManageCampaignsPage} />
       <Route path="/business" component={BusinessNetworkPage} />

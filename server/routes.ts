@@ -495,6 +495,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete donation after successful payment
+  app.post('/api/donations/complete', async (req: any, res) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Stripe is not available" });
+    }
+
+    try {
+      const { paymentIntentId, campaignId } = req.body;
+
+      if (!paymentIntentId || !campaignId) {
+        return res.status(400).json({ message: "Missing required parameters" });
+      }
+
+      // Retrieve the payment intent from Stripe to get the details
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      // Extract metadata from payment intent
+      const donationAmount = parseFloat(paymentIntent.metadata.donationAmount || '0');
+      const tipAmount = parseFloat(paymentIntent.metadata.tipAmount || '0');
+
+      // Get campaign details
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      // Create donation record
+      const donationData = {
+        campaignId: campaignId,
+        amount: donationAmount.toString(),
+        stripePaymentId: paymentIntentId,
+        message: '',
+        isAnonymous: true,
+      };
+
+      const donation = await storage.createDonation(donationData, paymentIntentId);
+
+      // Update campaign total
+      await storage.updateDonationAmount(campaignId, donationAmount);
+
+      // Return donation details for receipt
+      res.json({
+        id: donation.id,
+        amount: donationAmount,
+        tip: tipAmount,
+        campaignTitle: campaign.title,
+        isAnonymous: true,
+        createdAt: donation.createdAt,
+        stripePaymentId: paymentIntentId,
+      });
+
+    } catch (error: any) {
+      console.error("Error completing donation:", error);
+      res.status(500).json({ message: "Error completing donation: " + error.message });
+    }
+  });
+
   // Create a donation directly (for testing)
   app.post('/api/donations', isAuthenticated, async (req: any, res) => {
     try {
