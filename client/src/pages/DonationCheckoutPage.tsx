@@ -71,7 +71,7 @@ function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: n
         {tip > 0 && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">Tip Christ Collective</span>
-            <span className="font-semibold">${tip.toFixed(2)}</span>
+            <span className="font-semibold text-black">${tip.toFixed(2)}</span>
           </div>
         )}
         <Separator className="my-2" />
