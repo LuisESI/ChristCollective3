@@ -145,7 +145,6 @@ export default function DonateCheckoutPage() {
   
   // Donation state
   const [amount, setAmount] = useState(0);
-  const [customAmount, setCustomAmount] = useState("");
   const [tip, setTip] = useState(0); // Default tip to 0%
   const [tipPercentage, setTipPercentage] = useState(0); // Default tip percentage to 0%
   const [message, setMessage] = useState("");
@@ -174,12 +173,10 @@ export default function DonateCheckoutPage() {
   // Handle preset amount selection
   const handleAmountSelect = (selectedAmount: number) => {
     setAmount(selectedAmount);
-    setCustomAmount(selectedAmount.toString()); // Show selected amount in input
   };
 
   // Handle custom amount input
   const handleCustomAmountChange = (value: string) => {
-    setCustomAmount(value);
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
       setAmount(numValue);
@@ -304,7 +301,7 @@ export default function DonateCheckoutPage() {
                   <Input
                     type="number"
                     placeholder="0.00"
-                    value={customAmount}
+                    value={amount > 0 ? amount.toString() : ""}
                     onChange={(e) => handleCustomAmountChange(e.target.value)}
                     className="pl-8 text-xl h-12 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     min="1"
