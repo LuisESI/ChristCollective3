@@ -282,7 +282,7 @@ export default function DonationCheckoutPage() {
                     min="1"
                     step="0.01"
                   />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-gray-500">
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-lg text-[#D4AF37]">
                     USD
                   </span>
                 </div>
