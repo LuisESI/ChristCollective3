@@ -16,7 +16,7 @@ import { Campaign } from '@shared/schema';
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
-const PRESET_AMOUNTS = [100, 200, 300, 500, 1000, 1500];
+const PRESET_AMOUNTS = [10, 20, 30, 50, 100, 150];
 
 function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: number; tip: number }) {
   const stripe = useStripe();
@@ -104,7 +104,7 @@ function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: n
 
 export default function DonationCheckoutPage() {
   const { campaignId } = useParams();
-  const [amount, setAmount] = useState(200);
+  const [amount, setAmount] = useState(30);
   const [customAmount, setCustomAmount] = useState('');
   const [tip, setTip] = useState(0);
   const [clientSecret, setClientSecret] = useState('');
@@ -259,7 +259,7 @@ export default function DonationCheckoutPage() {
                       onClick={() => handleAmountSelect(presetAmount)}
                     >
                       ${presetAmount}
-                      {presetAmount === 200 && (
+                      {presetAmount === 30 && (
                         <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                           SUGGESTED
                         </span>
