@@ -151,8 +151,8 @@ export default function DonateCheckoutPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   
   // Preset amounts in dollars
-  const presetAmounts = [10, 25, 50, 100, 250, 500];
-  const suggestedAmount = 25; // Suggested amount
+  const presetAmounts = [10, 20, 30, 50, 100, 150];
+  const suggestedAmount = 30; // Suggested amount
   
   // Tip percentages
   const tipPercentages = [0, 15, 18, 20];
