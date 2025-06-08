@@ -447,9 +447,6 @@ export default function CampaignDetailsPage() {
                               ? `${donation.user.firstName} ${donation.user.lastName || ''}`
                               : "Generous Donor")}
                         </h3>
-                        {donation.message && (
-                          <p className="text-sm text-gray-300">{donation.message}</p>
-                        )}
                       </div>
                       <div className="font-medium">{formatCurrency(donation.amount)}</div>
                     </CardContent>
