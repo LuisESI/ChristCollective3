@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { ArrowLeft, Heart, Users, Lock } from 'lucide-react';
 import { Campaign } from '@shared/schema';
@@ -108,7 +109,11 @@ export default function DonationCheckoutPage() {
   const [customAmount, setCustomAmount] = useState('');
   const [tip, setTip] = useState(0);
   const [clientSecret, setClientSecret] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   const { data: campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${campaignId}`],
@@ -119,6 +124,11 @@ export default function DonationCheckoutPage() {
       const response = await apiRequest('POST', '/api/donations/create-payment-intent', {
         campaignId,
         amount: donationAmount + tip,
+        guestInfo: {
+          firstName,
+          lastName,
+          email
+        }
       });
       return response.json();
     },
@@ -365,6 +375,59 @@ export default function DonationCheckoutPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Guest Information - Only show if not authenticated */}
+              {!isAuthenticated && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-black mb-3">Donor Information</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Please provide your information to receive a donation receipt.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label htmlFor="firstName" className="text-sm font-medium">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="Enter first name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="mt-1"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-sm font-medium">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Enter last name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="mt-1"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Your receipt will be sent to this email address.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Payment Form */}
               {clientSecret ? (
