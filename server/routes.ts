@@ -422,10 +422,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalAmount = donationAmount + tipAmount;
       
       // Create customer (optional for guest donations)
-      let customerId = undefined;
+      let customerId: string | undefined = undefined;
       if (req.user?.id) {
         const user = await storage.getUser(req.user.id);
-        customerId = user?.stripeCustomerId;
+        customerId = user?.stripeCustomerId || undefined;
         
         if (!customerId && user?.email) {
           const customer = await stripe.customers.create({
