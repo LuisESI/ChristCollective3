@@ -270,7 +270,7 @@ export default function DonationCheckoutPage() {
 
                 {/* Custom amount */}
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-2xl font-bold text-gray-700">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-2xl font-bold text-[#D4AF37]">
                     $
                   </span>
                   <Input
