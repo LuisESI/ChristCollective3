@@ -37,7 +37,7 @@ function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: n
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/donate/${campaign.slug}?success=true`,
+          return_url: `${window.location.origin}/donate/${campaign.slug}?success=true&campaignId=${campaign.id}`,
         },
       });
 

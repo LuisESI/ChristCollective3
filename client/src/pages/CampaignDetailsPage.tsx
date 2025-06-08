@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
@@ -27,13 +27,38 @@ import {
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog";
+import DonationSuccessPage from "./DonationSuccessPage";
 
 export default function CampaignDetailsPage() {
   const { slug } = useParams();
+  const [, navigate] = useLocation();
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Check for success parameter and redirect to success page
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success') === 'true';
+    const paymentIntent = urlParams.get('payment_intent');
+    const campaignId = urlParams.get('campaignId');
+    
+    if (isSuccess && paymentIntent && campaignId) {
+      // Render the success page instead of campaign details
+      return;
+    }
+  }, []);
+
+  // If this is a success redirect, render the success page
+  const urlParams = new URLSearchParams(window.location.search);
+  const isSuccess = urlParams.get('success') === 'true';
+  const paymentIntent = urlParams.get('payment_intent');
+  const campaignId = urlParams.get('campaignId');
+  
+  if (isSuccess && paymentIntent && campaignId) {
+    return <DonationSuccessPage />;
+  }
 
   const { data: campaign = {} as Campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${slug}`],
