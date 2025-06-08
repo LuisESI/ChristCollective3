@@ -150,11 +150,11 @@ export default function DonateCheckoutPage() {
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   
-  // Preset amounts in dollars - updated values
+  // Preset donation amounts
   const presetAmounts = [10, 20, 30, 50, 100, 150];
-  const suggestedAmount = 30; // Suggested amount
+  const suggestedAmount = 30;
   
-  // Tip percentages
+  // Available tip percentages
   const tipPercentages = [0, 15, 18, 20];
   
   // Fetch campaign data
