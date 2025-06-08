@@ -94,6 +94,17 @@ export default function SponsoredCreatorsPage() {
     enabled: true,
   });
 
+  // Fetch TikTok videos from Luis Lucero
+  const { data: tiktokVideos, isLoading: isTikTokVideosLoading } = useQuery({
+    queryKey: ["/api/tiktok/videos", "luislucero369"],
+    queryFn: async () => {
+      const response = await fetch("/api/tiktok/videos?username=" + encodeURIComponent("luislucero369") + "&limit=2");
+      if (!response.ok) throw new Error("Failed to fetch TikTok videos");
+      return response.json();
+    },
+    enabled: true,
+  });
+
   // Sample stats for the hero section
   const stats = [
     { icon: Users, label: "Active Creators", value: "12+" },
@@ -630,6 +641,94 @@ export default function SponsoredCreatorsPage() {
                 </div>
               </div>
             ) : null}
+
+            {/* TikTok Videos from Luis Lucero */}
+            {isTikTokVideosLoading ? (
+              <div className="space-y-6">
+                {[1, 2].map((i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden animate-pulse">
+                    <div className="flex items-center p-4">
+                      <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                      <div className="ml-3 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        <div className="h-3 bg-gray-200 rounded w-24"></div>
+                      </div>
+                    </div>
+                    <div className="h-80 bg-gray-200"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : tiktokVideos?.map((video: any) => (
+              <div key={video.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="flex items-center p-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={tiktokData?.avatar} />
+                    <AvatarFallback className="bg-black text-[#D4AF37]">LL</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="font-semibold text-black">{video.displayName}</p>
+                    <div className="flex items-center space-x-2">
+                      <Globe className="h-4 w-4 text-black" />
+                      <p className="text-sm text-gray-500">TikTok • {video.viewCount} views</p>
+                    </div>
+                  </div>
+                  <Badge className="ml-auto bg-black text-[#D4AF37]">Featured</Badge>
+                </div>
+                
+                <div className="px-4 pb-2">
+                  <h3 className="font-semibold text-black mb-2 line-clamp-2">{video.title}</h3>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                    {video.description}
+                  </p>
+                </div>
+                
+                <div 
+                  className="relative h-80 cursor-pointer group overflow-hidden bg-gradient-to-br from-purple-900 to-black"
+                  style={{
+                    backgroundImage: `url(${video.thumbnail})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                  onClick={() => window.open(`https://www.tiktok.com/@${video.username}`, '_blank')}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-white rounded-full p-3 group-hover:bg-gray-100 transition-colors shadow-lg">
+                      <Play className="w-6 h-6 text-black ml-0.5" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                    {video.duration}
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  <div className="flex items-center justify-between text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-5 h-5" />
+                        <span>{video.likeCount}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <MessageCircle className="w-5 h-5" />
+                        <span>{video.commentCount}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Share2 className="w-5 h-5" />
+                        <span>{video.shareCount}</span>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {new Date(video.publishedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

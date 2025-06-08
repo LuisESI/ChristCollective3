@@ -1015,6 +1015,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // TikTok API endpoint to fetch user videos
+  app.get('/api/tiktok/videos', async (req, res) => {
+    try {
+      const { username, limit } = req.query;
+      
+      if (!username || typeof username !== 'string') {
+        return res.status(400).json({ message: "Username is required" });
+      }
+      
+      const videoLimit = limit ? parseInt(limit as string) : 2;
+      const videos = await tiktokService.getUserVideos(username, videoLimit);
+      
+      // Format the data for frontend consumption
+      const formattedVideos = videos.map(video => ({
+        id: video.id,
+        title: video.title,
+        description: video.description,
+        thumbnail: video.thumbnail,
+        username: video.username,
+        displayName: video.displayName,
+        publishedAt: video.publishedAt,
+        viewCount: tiktokService.formatCount(video.viewCount),
+        likeCount: tiktokService.formatCount(video.likeCount),
+        commentCount: tiktokService.formatCount(video.commentCount),
+        shareCount: tiktokService.formatCount(video.shareCount),
+        duration: video.duration,
+      }));
+      
+      res.json(formattedVideos);
+    } catch (error) {
+      console.error("Error fetching TikTok videos:", error);
+      res.status(500).json({ message: "Failed to fetch TikTok videos" });
+    }
+  });
+
   // Instagram API endpoint to fetch user data
   app.get('/api/instagram/user', async (req, res) => {
     try {
