@@ -134,13 +134,19 @@ export default function DonationCheckoutPage() {
     },
   });
 
+  // Create payment intent when amount changes and is valid
   useEffect(() => {
     if (campaignId && amount > 0) {
-      createPaymentIntentMutation.mutate(amount);
+      // Add a small delay to ensure state has updated
+      const timer = setTimeout(() => {
+        createPaymentIntentMutation.mutate(amount);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [campaignId, amount, tip]);
 
   const handleAmountSelect = (selectedAmount: number) => {
+    console.log('Amount selected:', selectedAmount);
     setAmount(selectedAmount);
     setCustomAmount('');
   };
@@ -367,6 +373,7 @@ export default function DonationCheckoutPage() {
               {/* Payment Form */}
               {clientSecret && (
                 <Elements 
+                  key={clientSecret} // Force remount when clientSecret changes
                   stripe={stripePromise} 
                   options={{ 
                     clientSecret,
