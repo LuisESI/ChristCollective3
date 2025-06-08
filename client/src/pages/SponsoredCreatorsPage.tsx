@@ -39,12 +39,23 @@ export default function SponsoredCreatorsPage() {
     select: (data) => data as ContentCreator[],
   });
 
-  // Fetch real YouTube video data for featured content
+  // Fetch featured YouTube videos from The Matrix Unlocked
   const { data: youtubeVideo, isLoading: isYouTubeLoading } = useQuery({
     queryKey: ["/api/youtube/video", "https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"],
     queryFn: async () => {
       const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"));
       if (!response.ok) throw new Error("Failed to fetch video data");
+      return response.json();
+    },
+    enabled: true,
+  });
+
+  // Fetch new featured video - XXXTentacion exposé
+  const { data: featuredVideo, isLoading: isFeaturedLoading } = useQuery({
+    queryKey: ["/api/youtube/video", "https://youtu.be/PldxzQOwhC4?si=ew3-dxzsydPNLFlr"],
+    queryFn: async () => {
+      const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/PldxzQOwhC4?si=ew3-dxzsydPNLFlr"));
+      if (!response.ok) throw new Error("Failed to fetch featured video data");
       return response.json();
     },
     enabled: true,
