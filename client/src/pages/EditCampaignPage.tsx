@@ -139,7 +139,10 @@ export default function EditCampaignPage() {
   
   // Upload image to server
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return form.getValues("image") || null; // Return existing image if no new one
+    if (!imageFile) {
+      const currentImage = form.getValues("image");
+      return currentImage || null;
+    }
     
     try {
       setIsUploading(true);
@@ -246,6 +249,42 @@ export default function EditCampaignPage() {
             <a href="/api/login">Log In</a>
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // Show error state if campaign failed to load
+  if (campaignError) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Campaign Not Found</h2>
+          <p className="mb-6">
+            {campaignError.message === "Authentication required" 
+              ? "You need to be logged in to edit this campaign."
+              : "This campaign was not found or you don't have permission to edit it."
+            }
+          </p>
+          <div className="space-x-4">
+            <Button asChild variant="outline">
+              <Link to="/manage-campaigns">Back to My Campaigns</Link>
+            </Button>
+            {campaignError.message === "Authentication required" && (
+              <Button asChild>
+                <a href="/api/login">Log In</a>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render form until campaign data is loaded
+  if (!campaign) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
