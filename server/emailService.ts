@@ -56,6 +56,11 @@ class EmailService {
 
   async sendDonationConfirmation(data: DonationEmailData): Promise<boolean> {
     try {
+      if (!this.transporter) {
+        console.error('Email transporter not initialized');
+        return false;
+      }
+
       const mailOptions = {
         from: '"Christ Collective" <luis@christcollective.info>',
         to: data.recipientEmail,

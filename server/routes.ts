@@ -406,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const { amount, campaignId, tip = 0 } = req.body;
+      const { amount, campaignId, tip = 0, guestInfo } = req.body;
       
       if (!amount || !campaignId) {
         return res.status(400).json({ message: "Amount and campaign ID are required" });
@@ -441,16 +441,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      const metadata: any = {
+        campaignId,
+        userId: req.user?.id || 'guest',
+        donationAmount: donationAmount.toString(),
+        tipAmount: tipAmount.toString()
+      };
+
+      // Add guest information to metadata if provided
+      if (guestInfo && !req.user?.id) {
+        metadata.guestFirstName = guestInfo.firstName;
+        metadata.guestLastName = guestInfo.lastName;
+        metadata.guestEmail = guestInfo.email;
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(totalAmount * 100), // Convert to cents
         currency: "usd",
         customer: customerId,
-        metadata: {
-          campaignId,
-          userId: req.user?.id || 'guest',
-          donationAmount: donationAmount.toString(),
-          tipAmount: tipAmount.toString()
-        }
+        metadata
       });
       
       res.json({ clientSecret: paymentIntent.client_secret });
@@ -523,6 +532,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract metadata from payment intent
       const donationAmount = parseFloat(paymentIntent.metadata.donationAmount || '0');
       const tipAmount = parseFloat(paymentIntent.metadata.tipAmount || '0');
+      const guestFirstName = paymentIntent.metadata.guestFirstName;
+      const guestLastName = paymentIntent.metadata.guestLastName;
+      const guestEmail = paymentIntent.metadata.guestEmail;
+      
       console.log(`Processing donation - Amount: $${donationAmount}, Tip: $${tipAmount}`);
 
       // Get campaign details
@@ -537,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: donationAmount.toString(),
         stripePaymentId: paymentIntentId,
         message: '',
-        isAnonymous: true,
+        isAnonymous: !guestFirstName && !guestLastName, // Not anonymous if guest info provided
       };
 
       console.log('Creating donation record:', donationData);
@@ -548,13 +561,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Updating campaign total by $${donationAmount}`);
       await storage.updateDonationAmount(campaignId, donationAmount);
 
+      // Send confirmation email if guest information is available
+      if (guestEmail && guestFirstName && guestLastName) {
+        console.log(`Sending confirmation email to ${guestEmail}`);
+        try {
+          const emailData = {
+            recipientEmail: guestEmail,
+            recipientName: `${guestFirstName} ${guestLastName}`,
+            donation: {
+              amount: donationAmount,
+              tip: tipAmount,
+              total: donationAmount + tipAmount,
+              transactionId: paymentIntentId,
+              date: new Date(),
+            },
+            campaign: {
+              title: campaign.title,
+              description: campaign.description,
+            },
+          };
+
+          const emailSent = await emailService.sendDonationConfirmation(emailData);
+          if (emailSent) {
+            console.log('Confirmation email sent successfully');
+          } else {
+            console.warn('Failed to send confirmation email');
+          }
+        } catch (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+        }
+      }
+
       // Return donation details for receipt
       const response = {
         id: donation.id,
         amount: donationAmount,
         tip: tipAmount,
         campaignTitle: campaign.title,
-        isAnonymous: true,
+        donorName: guestFirstName && guestLastName ? `${guestFirstName} ${guestLastName}` : undefined,
+        isAnonymous: !guestFirstName && !guestLastName,
         createdAt: donation.createdAt,
         stripePaymentId: paymentIntentId,
       };
