@@ -340,7 +340,7 @@ export default function DonationCheckoutPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="custom-tip" className="text-sm font-medium">Enter custom tip amount</Label>
+                  <Label htmlFor="custom-tip" className="text-sm font-medium text-[#D4AF37]">Enter custom tip amount</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                     <Input
