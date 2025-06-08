@@ -63,9 +63,9 @@ export default function SponsoredCreatorsPage() {
 
   // Fetch authentic channel data from The Matrix Unlocked
   const { data: channelData, isLoading: isChannelLoading } = useQuery({
-    queryKey: ["/api/youtube/channel", "theMatrixunlocked369"],
+    queryKey: ["/api/youtube/channel", "The Matrix Unlocked"],
     queryFn: async () => {
-      const response = await fetch("/api/youtube/channel?handle=" + encodeURIComponent("theMatrixunlocked369"));
+      const response = await fetch("/api/youtube/channel?handle=" + encodeURIComponent("The Matrix Unlocked"));
       if (!response.ok) throw new Error("Failed to fetch channel data");
       return response.json();
     },
