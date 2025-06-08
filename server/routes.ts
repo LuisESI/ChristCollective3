@@ -1080,7 +1080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: await testResponse.text()
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       res.json({ 
         status: 'error', 
         message: 'Failed to connect to TikTok API',
