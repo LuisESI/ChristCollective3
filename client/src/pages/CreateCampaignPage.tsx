@@ -40,7 +40,8 @@ type FormValues = z.infer<typeof formSchema>;
 export default function CreateCampaignPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  const isAuthenticated = !!user;
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Main image
@@ -329,7 +330,7 @@ export default function CreateCampaignPage() {
       });
       
       // Redirect to the campaign page
-      navigate(`/campaigns/${campaign.slug}`);
+      navigate(`/donate/${campaign.slug}`);
     } catch (error: any) {
       toast({
         title: "Error creating campaign",
