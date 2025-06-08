@@ -172,6 +172,7 @@ export default function DonateCheckoutPage() {
 
   // Handle preset amount selection
   const handleAmountSelect = (selectedAmount: number) => {
+    console.log('Setting amount to:', selectedAmount);
     setAmount(selectedAmount);
   };
 
@@ -301,7 +302,7 @@ export default function DonateCheckoutPage() {
                   <Input
                     type="number"
                     placeholder="0.00"
-                    value={amount > 0 ? amount.toString() : ""}
+                    value={amount.toString()}
                     onChange={(e) => handleCustomAmountChange(e.target.value)}
                     className="pl-8 text-xl h-12 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     min="1"
