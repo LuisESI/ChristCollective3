@@ -388,31 +388,33 @@ export default function DonateCheckoutPage() {
                 </div>
 
                 {/* Donation Summary */}
-                {amount > 0 && (
-                  <div className="bg-gray-700 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-3">Your donation</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm text-gray-300">
-                        <span>Your donation</span>
-                        <span>${amount.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-300">
-                        <span>Tip</span>
-                        <span>${tip.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-300">
-                        <span>Processing fee</span>
-                        <span>$0.00</span>
-                      </div>
-                      <div className="border-t border-gray-600 pt-2">
-                        <div className="flex justify-between font-semibold text-white">
-                          <span>Total</span>
-                          <span>${(amount + tip).toFixed(2)}</span>
-                        </div>
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <h3 className="text-white font-semibold mb-3">Your donation</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-300">
+                      <span>Your donation</span>
+                      <span>${amount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-300">
+                      <span>Tip</span>
+                      <span>${tip.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-300">
+                      <span>Processing fee</span>
+                      <span>$0.00</span>
+                    </div>
+                    <div className="border-t border-gray-600 pt-2">
+                      <div className="flex justify-between font-semibold text-white">
+                        <span>Total</span>
+                        <span>${(amount + tip).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
-                )}
+                  {/* Debug info */}
+                  <div className="mt-2 text-xs text-gray-400">
+                    Debug: amount={amount}, tip={tip}
+                  </div>
+                </div>
 
                 {/* Payment Processing */}
                 {amount > 0 && (
