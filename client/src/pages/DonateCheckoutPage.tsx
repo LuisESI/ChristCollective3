@@ -150,7 +150,7 @@ export default function DonateCheckoutPage() {
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   
-  // Preset amounts in dollars
+  // Preset amounts in dollars - updated values
   const presetAmounts = [10, 20, 30, 50, 100, 150];
   const suggestedAmount = 30; // Suggested amount
   
