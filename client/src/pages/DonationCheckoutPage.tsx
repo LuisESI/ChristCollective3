@@ -134,16 +134,12 @@ export default function DonationCheckoutPage() {
     },
   });
 
-  // Create payment intent when amount changes and is valid
-  useEffect(() => {
+  // Only create payment intent when user initiates payment
+  const initializePayment = () => {
     if (campaignId && amount > 0) {
-      // Add a small delay to ensure state has updated
-      const timer = setTimeout(() => {
-        createPaymentIntentMutation.mutate(amount);
-      }, 100);
-      return () => clearTimeout(timer);
+      createPaymentIntentMutation.mutate(amount);
     }
-  }, [campaignId, amount, tip]);
+  };
 
   const handleAmountSelect = (selectedAmount: number) => {
     console.log('Amount selected:', selectedAmount);
@@ -371,7 +367,7 @@ export default function DonationCheckoutPage() {
               </div>
 
               {/* Payment Form */}
-              {clientSecret && (
+              {clientSecret ? (
                 <Elements 
                   key={clientSecret} // Force remount when clientSecret changes
                   stripe={stripePromise} 
@@ -384,12 +380,38 @@ export default function DonationCheckoutPage() {
                 >
                   <CheckoutForm campaign={campaign} amount={amount} tip={tip} />
                 </Elements>
-              )}
-
-              {!clientSecret && (
+              ) : createPaymentIntentMutation.isPending ? (
                 <div className="text-center py-8">
                   <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
                   <p className="text-gray-600 mt-2">Initializing payment...</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">Your donation</span>
+                      <span className="font-semibold text-black">${amount.toFixed(2)}</span>
+                    </div>
+                    {tip > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">Tip</span>
+                        <span className="text-sm text-gray-600">${tip.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <hr className="my-2" />
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-black">Total</span>
+                      <span className="font-bold text-black">${(amount + tip).toFixed(2)}</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={initializePayment}
+                    disabled={amount <= 0 || createPaymentIntentMutation.isPending}
+                    className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-semibold"
+                  >
+                    Proceed to Payment
+                  </Button>
                 </div>
               )}
             </CardContent>
