@@ -74,6 +74,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadDir));
   
+  // Serve favicon files
+  app.get('/favicon.png', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'public', 'favicon.png'));
+  });
+
+  app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'public', 'favicon.ico'));
+  });
+  
   // Auth middleware
   setupAuth(app);
 
