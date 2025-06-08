@@ -276,7 +276,7 @@ export default function DonationCheckoutPage() {
                   <Input
                     type="number"
                     placeholder="0.00"
-                    value={customAmount}
+                    value={customAmount || (amount > 0 ? amount.toString() : '')}
                     onChange={(e) => handleCustomAmountChange(e.target.value)}
                     className="pl-8 text-2xl font-bold h-14 text-right pr-16"
                     min="1"
