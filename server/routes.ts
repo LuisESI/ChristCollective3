@@ -284,10 +284,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/campaigns/:slug', async (req, res) => {
+  // Get campaign by ID or slug
+  app.get('/api/campaigns/:identifier', async (req, res) => {
     try {
-      const { slug } = req.params;
-      const campaign = await storage.getCampaignBySlug(slug);
+      const { identifier } = req.params;
+      let campaign;
+      
+      // Check if identifier looks like a UUID (for ID lookup) or slug
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+      
+      if (isUUID) {
+        campaign = await storage.getCampaign(identifier);
+      } else {
+        campaign = await storage.getCampaignBySlug(identifier);
+      }
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
