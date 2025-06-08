@@ -133,6 +133,16 @@ export default function SponsoredCreatorsPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleApplyForSponsorship = () => {
+    if (user) {
+      // User is authenticated, go to application page
+      window.location.href = '/apply-sponsorship';
+    } else {
+      // User is not authenticated, redirect to sign-up page
+      window.location.href = '/auth';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
@@ -155,7 +165,7 @@ export default function SponsoredCreatorsPage() {
             <Button 
               size="lg" 
               className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold px-8 py-3"
-              onClick={() => window.location.href = '/apply-sponsorship'}
+              onClick={handleApplyForSponsorship}
             >
               Apply for Sponsorship
             </Button>
