@@ -301,7 +301,7 @@ export default function DonationCheckoutPage() {
                 </div>
                 
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-2xl font-bold">{((tip / amount) * 100).toFixed(1)}%</span>
+                  <span className="text-2xl font-bold text-black">{((tip / amount) * 100).toFixed(1)}%</span>
                 </div>
                 
                 <div className="flex space-x-2">
