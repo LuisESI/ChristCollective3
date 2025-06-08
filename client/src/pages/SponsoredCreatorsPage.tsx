@@ -139,15 +139,23 @@ export default function SponsoredCreatorsPage() {
             Discover inspiring faith-based content from our sponsored creators sharing testimonies, teachings, and uplifting messages with the community.
           </p>
           
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <stat.icon className="w-8 h-8 text-[#D4AF37] mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{stat.value}</div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
-              </div>
-            ))}
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+            <Button 
+              size="lg" 
+              className="bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold px-8 py-3"
+              onClick={() => window.location.href = '/apply-sponsorship'}
+            >
+              Apply for Sponsorship
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-semibold px-8 py-3"
+              onClick={() => window.location.href = '/sponsorship-info'}
+            >
+              Learn More
+            </Button>
           </div>
         </div>
       </div>
