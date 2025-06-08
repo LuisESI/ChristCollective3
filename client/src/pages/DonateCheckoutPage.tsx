@@ -120,43 +120,10 @@ function CheckoutForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />
       
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="message">Leave a message (optional)</Label>
-          <Textarea
-            id="message"
-            placeholder="Share why this cause is important to you..."
-            value={message}
-            readOnly
-            className="mt-1"
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Checkbox id="anonymous" checked={isAnonymous} disabled />
-          <Label htmlFor="anonymous">Make my donation anonymous</Label>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Donation:</span>
-            <span>${amount.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Tip to Christ Collective:</span>
-            <span>${tip.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <span>Total:</span>
-            <span>${totalAmount.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-      
       <Button 
         type="submit" 
         disabled={isProcessing || !stripe || !elements}
-        className="w-full"
+        className="w-full bg-yellow-500 text-black hover:bg-yellow-600 font-semibold"
       >
         {isProcessing ? (
           <>
@@ -207,7 +174,7 @@ export default function DonateCheckoutPage() {
   // Handle preset amount selection
   const handleAmountSelect = (selectedAmount: number) => {
     setAmount(selectedAmount);
-    setCustomAmount(""); // Clear custom amount input
+    setCustomAmount(selectedAmount.toString()); // Show selected amount in input
   };
 
   // Handle custom amount input
@@ -422,30 +389,39 @@ export default function DonateCheckoutPage() {
                   <Label htmlFor="anonymous" className="text-white">Make my donation anonymous</Label>
                 </div>
 
+                {/* Donation Summary */}
+                {amount > 0 && (
+                  <div className="bg-gray-700 p-4 rounded-lg">
+                    <h3 className="text-white font-semibold mb-3">Your donation</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm text-gray-300">
+                        <span>Your donation</span>
+                        <span>${amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-300">
+                        <span>Tip</span>
+                        <span>${tip.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-300">
+                        <span>Processing fee</span>
+                        <span>$0.00</span>
+                      </div>
+                      <div className="border-t border-gray-600 pt-2">
+                        <div className="flex justify-between font-semibold text-white">
+                          <span>Total</span>
+                          <span>${(amount + tip).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Payment Processing */}
                 {amount > 0 && (
                   <div className="mt-6">
-                    <div className="mb-4 p-4 bg-gray-700 rounded-lg">
-                      <div className="flex justify-between text-sm text-gray-300 mb-2">
-                        <span>Donation:</span>
-                        <span>${amount.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-300 mb-2">
-                        <span>Tip to Christ Collective:</span>
-                        <span>${tip.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between font-semibold text-white pt-2 border-t border-gray-600">
-                        <span>Total:</span>
-                        <span>${(amount + tip).toFixed(2)}</span>
-                      </div>
-                    </div>
-
                     <Elements 
                       stripe={stripePromise} 
                       options={{
-                        mode: 'payment',
-                        amount: Math.round((amount + tip) * 100),
-                        currency: 'usd',
                         appearance: {
                           theme: 'night',
                           variables: {
