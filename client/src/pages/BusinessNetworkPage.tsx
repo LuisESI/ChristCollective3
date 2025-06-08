@@ -125,10 +125,10 @@ export default function BusinessNetworkPage() {
         <meta property="og:description" content="Connect with other Christian business owners and professionals who share your values." />
       </Helmet>
       
-      <section className="hero-section h-[280px] flex items-center justify-center bg-black">
+      <section className="hero-section min-h-[240px] md:h-[280px] flex items-center justify-center bg-black py-8 md:py-0">
         <div className="container mx-auto px-4 text-center text-white">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Christian Business Network</h1>
-          <p className="text-lg md:text-xl max-w-5xl mx-auto mb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Christian Business Network</h1>
+          <p className="text-base md:text-lg lg:text-xl max-w-5xl mx-auto mb-6 md:mb-8 px-2">
             Connect with Christian business owners and professionals who share your values and faith.
           </p>
           {!isAuthenticated && (
@@ -143,16 +143,16 @@ export default function BusinessNetworkPage() {
         </div>
       </section>
       
-      <section className="py-16 bg-gray-50">
+      <section className="py-8 md:py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="directory" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-10">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10">
               <TabsTrigger value="directory" className="text-lg">Directory</TabsTrigger>
               <TabsTrigger value="membership" className="text-lg">Membership</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="directory" className="space-y-6">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <TabsContent value="directory" className="space-y-4 md:space-y-6">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-3 md:gap-4">
                 <div className="w-full md:w-auto flex flex-1 gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 dark:text-gray-400" size={18} />
@@ -182,7 +182,7 @@ export default function BusinessNetworkPage() {
                 
                 {isAuthenticated ? (
                   <Link href="/profile">
-                    <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mt-3 md:mt-0">
                       <Briefcase className="mr-2" size={16} />
                       Manage Your Profile
                     </button>
@@ -190,7 +190,7 @@ export default function BusinessNetworkPage() {
                 ) : (
                   <Button 
                     asChild
-                    className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white"
+                    className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white mt-3 md:mt-0"
                   >
                     <a href="/auth">Join Our Network</a>
                   </Button>
