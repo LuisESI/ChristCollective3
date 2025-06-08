@@ -205,8 +205,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = files.image ? files.image[0] : files.video[0];
       
       // Create a public URL for the uploaded file
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const fileUrl = `${baseUrl}/uploads/${file.filename}`;
+      // Use relative path for flexibility across environments
+      const fileUrl = `/uploads/${file.filename}`;
       
       res.status(200).json({ 
         url: fileUrl,

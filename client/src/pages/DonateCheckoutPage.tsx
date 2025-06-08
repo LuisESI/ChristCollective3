@@ -410,10 +410,7 @@ export default function DonateCheckoutPage() {
                       </div>
                     </div>
                   </div>
-                  {/* Debug info */}
-                  <div className="mt-2 text-xs text-gray-400">
-                    Debug: amount={amount}, tip={tip}
-                  </div>
+
                 </div>
 
                 {/* Payment Processing */}
