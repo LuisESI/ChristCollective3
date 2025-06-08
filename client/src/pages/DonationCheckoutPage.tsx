@@ -66,7 +66,7 @@ function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: n
       <div className="bg-gray-50 p-4 rounded-lg">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">Your donation</span>
-          <span className="font-semibold">${amount.toFixed(2)}</span>
+          <span className="font-semibold text-black">${amount.toFixed(2)}</span>
         </div>
         {tip > 0 && (
           <div className="flex justify-between items-center mb-2">
