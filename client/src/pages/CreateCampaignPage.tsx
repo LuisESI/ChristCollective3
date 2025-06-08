@@ -60,8 +60,22 @@ export default function CreateCampaignPage() {
 
   // Check if user is authenticated
   if (!isLoading && !isAuthenticated) {
-    window.location.href = "/api/login";
-    return null;
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto text-center">
+          <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">
+            You need to be logged in to create a campaign.
+          </p>
+          <a 
+            href="/api/login"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Sign In to Continue
+          </a>
+        </div>
+      </div>
+    );
   }
 
   const form = useForm<FormValues>({
