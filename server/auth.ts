@@ -119,6 +119,11 @@ export function setupAuth(app: Express) {
     }
   });
 
+  app.get("/api/login", (req, res) => {
+    // Redirect to the auth page for login
+    res.redirect("/auth");
+  });
+
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     const user = req.user as SelectUser;
     res.status(200).json({ 
