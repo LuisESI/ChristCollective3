@@ -567,6 +567,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual donation recording for recovery purposes
+  app.post('/api/donations/manual', async (req: any, res) => {
+    try {
+      const { amount, campaignId, stripePaymentId, description } = req.body;
+      
+      if (!amount || !campaignId) {
+        return res.status(400).json({ message: "Amount and campaign ID are required" });
+      }
+
+      // Get campaign details
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      // Create donation record
+      const donationData = {
+        campaignId: campaignId,
+        amount: amount.toString(),
+        stripePaymentId: stripePaymentId || `manual_${Date.now()}`,
+        message: description || '',
+        isAnonymous: true,
+      };
+
+      console.log('Creating manual donation record:', donationData);
+      const donation = await storage.createDonation(donationData, donationData.stripePaymentId);
+
+      // Update campaign total
+      await storage.updateDonationAmount(campaignId, parseFloat(amount));
+
+      res.json({
+        success: true,
+        donation: donation,
+        message: `Donation of $${amount} recorded successfully`
+      });
+
+    } catch (error: any) {
+      console.error("Error creating manual donation:", error);
+      res.status(500).json({ message: "Error creating donation: " + error.message });
+    }
+  });
+
   // Create a donation directly (for testing)
   app.post('/api/donations', isAuthenticated, async (req: any, res) => {
     try {
