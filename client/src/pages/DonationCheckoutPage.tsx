@@ -306,6 +306,14 @@ export default function DonationCheckoutPage() {
                 
                 <div className="flex space-x-2 mb-4">
                   <Button
+                    variant={Math.abs(tip - amount * 0.05) < 0.01 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => calculateTip(5)}
+                    className="text-xs"
+                  >
+                    5%
+                  </Button>
+                  <Button
                     variant={Math.abs(tip - amount * 0.15) < 0.01 ? "default" : "outline"}
                     size="sm"
                     onClick={() => calculateTip(15)}
@@ -314,20 +322,12 @@ export default function DonationCheckoutPage() {
                     15%
                   </Button>
                   <Button
-                    variant={Math.abs(tip - amount * 0.18) < 0.01 ? "default" : "outline"}
+                    variant={Math.abs(tip - amount * 0.25) < 0.01 ? "default" : "outline"}
                     size="sm"
-                    onClick={() => calculateTip(18)}
+                    onClick={() => calculateTip(25)}
                     className="text-xs"
                   >
-                    18%
-                  </Button>
-                  <Button
-                    variant={Math.abs(tip - amount * 0.20) < 0.01 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => calculateTip(20)}
-                    className="text-xs"
-                  >
-                    20%
+                    25%
                   </Button>
                   <Button
                     variant={tip === 0 ? "default" : "outline"}
