@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ export default function DonationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
   const isAuthenticated = !!user;
+  const [, navigate] = useLocation();
   
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ["/api/campaigns", searchQuery],
@@ -61,6 +62,14 @@ export default function DonationsPage() {
     // Search is handled by the search state and query dependency
   };
 
+  const handleCreateCampaign = () => {
+    if (isAuthenticated) {
+      navigate("/donate/create");
+    } else {
+      window.location.href = "/api/login";
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -91,19 +100,13 @@ export default function DonationsPage() {
               />
             </form>
             
-            {isAuthenticated ? (
-              <Link href="/donate/create">
-                <button className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                  <Plus className="mr-2" size={16} />
-                  Create New Campaign
-                </button>
-              </Link>
-            ) : (
-              <a href="/api/login" className="w-full md:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                <Plus className="mr-2" size={16} />
-                Create New Campaign
-              </a>
-            )}
+            <Button 
+              onClick={handleCreateCampaign}
+              className="w-full md:w-auto"
+            >
+              <Plus className="mr-2" size={16} />
+              Create New Campaign
+            </Button>
           </div>
           
           {isLoading ? (
