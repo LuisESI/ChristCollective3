@@ -196,46 +196,11 @@ export class TikTokService {
       return [];
     }
 
-    // Return authentic Luis Lucero TikTok content based on his actual profile
-    if (username === 'luislucero369') {
-      console.log(`Returning Luis Lucero's authentic TikTok content`);
-      return [
-        {
-          id: '7421856734592724262',
-          title: 'Biblical Truth About Success',
-          description: 'The world defines success differently than God does. Let me share what Scripture says about true success 🙏 #Faith #Success #BibleVerse #ChristianTikTok',
-          thumbnail: 'https://p16-sign-sg.tiktokcdn.com/obj/tos-alisg-p-0037/oEgbeAKkgbfgJQCEIyQqmEEDyCDgKDgkAjEcf?x-expires=1683360000&x-signature=example',
-          username: 'luislucero369',
-          displayName: 'Luis Lucero ♱',
-          publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          viewCount: '24800',
-          likeCount: '1847',
-          commentCount: '94',
-          shareCount: '76',
-          duration: '0:58'
-        },
-        {
-          id: '7420634851736284454',
-          title: 'Prayer Changes Everything',
-          description: 'Never underestimate the power of prayer! Share this with someone who needs to hear it today ✝️ #Prayer #Faith #God #Motivation #ChristianContent',
-          thumbnail: 'https://p16-sign-sg.tiktokcdn.com/obj/tos-alisg-p-0037/example2?x-expires=1683360000&x-signature=example2',
-          username: 'luislucero369',
-          displayName: 'Luis Lucero ♱',
-          publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-          viewCount: '18200',
-          likeCount: '1256',
-          commentCount: '73',
-          shareCount: '82',
-          duration: '1:12'
-        }
-      ].slice(0, limit);
-    }
-
-    console.log(`Fetching TikTok videos for @${username} using Apify...`);
+    console.log(`Fetching live TikTok videos for @${username} using Apify API...`);
 
     try {
-      // Attempt quick fetch with reduced timeout for other users
-      const syncResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/run-sync-get-dataset-items`, {
+      // Start an Apify actor run to scrape TikTok videos
+      const runResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -247,33 +212,86 @@ export class TikTokService {
           shouldDownloadVideos: false,
           shouldDownloadCovers: true,
         }),
-        signal: AbortSignal.timeout(15000) // 15 second timeout for non-featured users
       });
 
-      if (syncResponse.ok) {
-        const results = await syncResponse.json();
-        if (results.length > 0) {
-          const liveVideos = results.slice(0, limit).map((video: any) => ({
-            id: video.id || `live_${username}_${Date.now()}`,
-            title: video.text || `TikTok Video by @${username}`,
-            description: video.text || '',
-            thumbnail: video.videoMeta?.coverUrl || video.covers?.[0] || `https://ui-avatars.com/api/?name=${username.charAt(0).toUpperCase()}&background=fe2c55&color=fff&size=400`,
-            username: video.authorMeta?.uniqueId || username,
-            displayName: video.authorMeta?.nickName || username,
-            publishedAt: video.createTimeISO || new Date().toISOString(),
-            viewCount: this.formatCount(video.playCount?.toString() || '0'),
-            likeCount: this.formatCount(video.diggCount?.toString() || '0'),
-            commentCount: this.formatCount(video.commentCount?.toString() || '0'),
-            shareCount: this.formatCount(video.shareCount?.toString() || '0'),
-            duration: this.formatDuration(video.videoMeta?.duration || 30)
-          }));
-          return liveVideos;
+      if (!runResponse.ok) {
+        const errorText = await runResponse.text();
+        console.error(`Failed to start Apify actor for @${username}: ${runResponse.status} - ${errorText}`);
+        return [];
+      }
+
+      const runData = await runResponse.json();
+      const runId = runData.data.id;
+      console.log(`Started TikTok scraping job ${runId} for @${username}`);
+
+      // Poll for results with timeout
+      const maxAttempts = 12; // 2 minutes total
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+
+        const statusResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          console.log(`TikTok job ${runId} status (attempt ${attempt}): ${statusData.data.status}`);
+          
+          if (statusData.data.status === 'SUCCEEDED') {
+            // Get the dataset results
+            const resultsResponse = await fetch(`https://api.apify.com/v2/acts/${this.apifyActorId}/runs/${runId}/dataset/items`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+
+            if (resultsResponse.ok) {
+              const results = await resultsResponse.json();
+              console.log(`Retrieved ${results.length} live TikTok videos for @${username}`);
+              
+              if (results.length > 0) {
+                const liveVideos = results.slice(0, limit).map((video: any, index: number) => {
+                  console.log(`Live TikTok video ${index + 1}:`, {
+                    id: video.id,
+                    text: video.text?.substring(0, 50),
+                    playCount: video.playCount,
+                    diggCount: video.diggCount
+                  });
+                  
+                  return {
+                    id: video.id || `tiktok_${username}_${Date.now()}_${index}`,
+                    title: video.text || `TikTok Video by @${username}`,
+                    description: video.text || '',
+                    thumbnail: video.videoMeta?.coverUrl || video.covers?.[0] || `https://ui-avatars.com/api/?name=${username.charAt(0).toUpperCase()}&background=fe2c55&color=fff&size=400`,
+                    username: video.authorMeta?.uniqueId || username,
+                    displayName: video.authorMeta?.nickName || `@${username}`,
+                    publishedAt: video.createTimeISO || new Date().toISOString(),
+                    viewCount: video.playCount?.toString() || '0',
+                    likeCount: video.diggCount?.toString() || '0',
+                    commentCount: video.commentCount?.toString() || '0',
+                    shareCount: video.shareCount?.toString() || '0',
+                    duration: this.formatDuration(video.videoMeta?.duration || 30)
+                  };
+                });
+
+                console.log(`Successfully fetched ${liveVideos.length} authentic TikTok videos from @${username}`);
+                return liveVideos;
+              }
+            }
+            break;
+          } else if (statusData.data.status === 'FAILED') {
+            console.error(`TikTok scraping job ${runId} failed for @${username}`);
+            break;
+          }
         }
       }
 
+      console.warn(`TikTok scraping timed out for @${username} after ${maxAttempts} attempts`);
       return [];
     } catch (error) {
-      console.error('Error fetching TikTok videos from Apify:', error);
+      console.error(`Error fetching TikTok videos for @${username}:`, error);
       return [];
     }
   }
