@@ -540,6 +540,89 @@ export default function SponsoredCreatorsPage() {
               </div>
             )}
 
+            {/* Featured XXXTentacion Video */}
+            {isFeaturedLoading ? (
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden animate-pulse">
+                <div className="flex items-center p-4">
+                  <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                  <div className="ml-3 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+                <div className="h-48 bg-gray-200"></div>
+                <div className="p-4">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            ) : featuredVideo ? (
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="flex items-center p-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={featuredVideo.thumbnail} />
+                    <AvatarFallback className="bg-red-100 text-red-700">TM</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="font-semibold text-black">{featuredVideo.channelTitle}</p>
+                    <div className="flex items-center space-x-2">
+                      <Youtube className="h-4 w-4 text-red-600" />
+                      <p className="text-sm text-gray-500">YouTube • {formatCount(featuredVideo.viewCount)} views</p>
+                    </div>
+                  </div>
+                  <Badge className="ml-auto bg-red-600 text-white">Featured</Badge>
+                </div>
+                
+                <div className="px-4 pb-2">
+                  <h3 className="font-semibold text-black mb-2 line-clamp-2">{featuredVideo.title}</h3>
+                  <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+                    {featuredVideo.description?.substring(0, 200)}...
+                  </p>
+                </div>
+                
+                <div 
+                  className="relative h-48 cursor-pointer group overflow-hidden"
+                  style={{
+                    backgroundImage: `url(${featuredVideo.thumbnail})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                  onClick={() => openExternalLink(`https://youtu.be/${featuredVideo.id}`)}
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-red-600 rounded-full p-3 group-hover:bg-red-700 transition-colors shadow-lg">
+                      <Play className="w-6 h-6 text-white ml-0.5" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                    {featuredVideo.duration}
+                  </div>
+                </div>
+                
+                <div className="p-4">
+                  <div className="flex items-center justify-between text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1">
+                        <ThumbsUp className="w-5 h-5" />
+                        <span>{formatCount(featuredVideo.likeCount)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <MessageCircle className="w-5 h-5" />
+                        <span>{formatCount(featuredVideo.commentCount)}</span>
+                      </div>
+                      <button className="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                        <Share2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {new Date(featuredVideo.publishedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             {/* Instagram Post Preview */}
             <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
               <div className="flex items-center p-4">
