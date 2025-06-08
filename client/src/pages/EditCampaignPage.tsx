@@ -48,7 +48,8 @@ type FormValues = z.infer<typeof formSchema>;
 export default function EditCampaignPage() {
   const { id } = useParams();
   const [, navigate] = useLocation();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const isAuthenticated = !!user;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -56,28 +57,35 @@ export default function EditCampaignPage() {
   const [isUploading, setIsUploading] = useState(false);
   
   // Fetch campaign data
-  const { data: campaign, isLoading: campaignLoading } = useQuery({
-    queryKey: ["/api/campaigns", id],
+  const { data: campaign, isLoading: campaignLoading, error: campaignError } = useQuery({
+    queryKey: ["/api/user/campaigns", id],
     queryFn: async () => {
       try {
-        // First try to get by ID directly
+        // Get user's campaigns and find the specific one
         const res = await apiRequest("GET", `/api/user/campaigns`);
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            throw new Error("Authentication required");
+          }
+          throw new Error("Failed to fetch campaigns");
+        }
+        
         const campaigns = await res.json();
         const thisCampaign = campaigns.find((c: any) => c.id === id);
         
-        if (thisCampaign) {
-          return thisCampaign;
+        if (!thisCampaign) {
+          throw new Error("Campaign not found or you don't have permission to edit it");
         }
         
-        // If not found, try the slug route as fallback
-        const slugRes = await apiRequest("GET", `/api/campaigns/${id}`);
-        return slugRes.json();
+        return thisCampaign;
       } catch (error) {
         console.error("Error fetching campaign:", error);
-        throw new Error("Failed to fetch campaign");
+        throw error;
       }
     },
     enabled: !!id && isAuthenticated,
+    retry: false,
   });
   
   // Set up form with validation
@@ -131,7 +139,7 @@ export default function EditCampaignPage() {
   
   // Upload image to server
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return form.getValues("image"); // Return existing image if no new one
+    if (!imageFile) return form.getValues("image") || null; // Return existing image if no new one
     
     try {
       setIsUploading(true);
