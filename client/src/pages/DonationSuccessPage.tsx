@@ -69,41 +69,69 @@ export default function DonationSuccessPage() {
   }, [navigate, toast]);
 
   const downloadReceipt = () => {
-    if (!donation) return;
+    console.log('Download receipt clicked');
+    if (!donation) {
+      console.log('No donation data available');
+      return;
+    }
 
-    // Generate PDF receipt content
-    const receiptContent = `
-      DONATION RECEIPT
-      
-      Thank you for your generous donation to Christ Collective!
-      
-      Donation Details:
-      - Campaign: ${donation.campaignTitle}
-      - Amount: $${donation.amount.toFixed(2)}
-      - Tip: $${donation.tip.toFixed(2)}
-      - Total: $${(donation.amount + donation.tip).toFixed(2)}
-      - Date: ${new Date(donation.createdAt).toLocaleDateString()}
-      - Transaction ID: ${donation.stripePaymentId}
-      ${donation.message ? `- Message: ${donation.message}` : ''}
-      
-      This serves as your official receipt for tax purposes.
-      
-      Christ Collective
-      Tax ID: [Tax ID Number]
-      
-      For questions about your donation, please contact us at support@christcollective.org
-    `;
+    try {
+      // Generate PDF receipt content
+      const receiptContent = `DONATION RECEIPT
 
-    // Create downloadable text file (in production, you'd generate a proper PDF)
-    const blob = new Blob([receiptContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `donation-receipt-${donation.id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+Thank you for your generous donation to Christ Collective!
+
+Donation Details:
+- Campaign: ${donation.campaignTitle}
+- Amount: $${donation.amount.toFixed(2)}
+- Tip: $${donation.tip.toFixed(2)}
+- Total: $${(donation.amount + donation.tip).toFixed(2)}
+- Date: ${new Date(donation.createdAt).toLocaleDateString()}
+- Transaction ID: ${donation.stripePaymentId}
+${donation.message ? `- Message: ${donation.message}` : ''}
+
+This serves as your official receipt for tax purposes.
+
+Christ Collective
+Tax ID: [Tax ID Number]
+
+For questions about your donation, please contact us at support@christcollective.org`;
+
+      console.log('Creating download for receipt content');
+      
+      // Create downloadable text file with better browser compatibility
+      const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create and trigger download
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `donation-receipt-${donation.id || 'unknown'}.txt`;
+      
+      document.body.appendChild(a);
+      console.log('Triggering download');
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast({
+        title: "Receipt Downloaded",
+        description: "Your donation receipt has been downloaded successfully.",
+      });
+      
+    } catch (error) {
+      console.error('Error downloading receipt:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download receipt. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
