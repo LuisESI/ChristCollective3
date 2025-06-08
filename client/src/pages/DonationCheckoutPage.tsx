@@ -113,7 +113,8 @@ export default function DonationCheckoutPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
   const { data: campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${campaignId}`],
@@ -146,6 +147,29 @@ export default function DonationCheckoutPage() {
 
   // Only create payment intent when user initiates payment
   const initializePayment = () => {
+    // Validate guest information if user is not authenticated
+    if (!isAuthenticated) {
+      if (!firstName.trim() || !lastName.trim() || !email.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in your name and email address to continue.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     if (campaignId && amount > 0) {
       createPaymentIntentMutation.mutate(amount);
     }

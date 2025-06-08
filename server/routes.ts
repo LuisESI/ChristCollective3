@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { youtubeService } from "./youtube";
 import { tiktokService } from "./tiktok";
 import { instagramService } from "./instagram";
+import { emailService } from "./emailService";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
