@@ -7,6 +7,7 @@ import { Heart, MessageCircle, Share2, Play, ExternalLink, Youtube, Instagram, G
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { navigateToSponsorshipOrAuth } from "@/utils/authCheck";
 import { Helmet } from "react-helmet";
 
 type ContentCreator = {
@@ -136,35 +137,7 @@ export default function SponsoredCreatorsPage() {
   };
 
   const handleApplyForSponsorship = async () => {
-    // Wait for auth to finish loading before making decisions
-    if (authLoading) {
-      return;
-    }
-    
-    // Double-check authentication status by making a direct API call
-    try {
-      const response = await fetch('/api/user', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        if (userData && userData.id) {
-          // User is authenticated, go to application page
-          navigate('/sponsorship-application');
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    }
-    
-    // User is not authenticated, redirect to sign-up page
-    navigate('/auth');
+    await navigateToSponsorshipOrAuth(navigate);
   };
 
   return (
