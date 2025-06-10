@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Play, ExternalLink, Youtube, Instagram, Globe, Users, TrendingUp, DollarSign, Star, Eye, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 
 type ContentCreator = {
@@ -31,6 +32,7 @@ type ContentCreator = {
 
 export default function SponsoredCreatorsPage() {
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const [filter, setFilter] = useState("all");
 
   // Fetch sponsored content creators
@@ -126,7 +128,7 @@ export default function SponsoredCreatorsPage() {
 
   // Helper function to navigate without nested links
   const navigateToCreator = (id: number) => {
-    window.location.href = `/creator/${id}`;
+    navigate(`/creator/${id}`);
   };
 
   const openExternalLink = (url: string) => {
@@ -136,10 +138,10 @@ export default function SponsoredCreatorsPage() {
   const handleApplyForSponsorship = () => {
     if (user) {
       // User is authenticated, go to application page
-      window.location.href = '/sponsorship-application';
+      navigate('/sponsorship-application');
     } else {
       // User is not authenticated, redirect to sign-up page
-      window.location.href = '/auth';
+      navigate('/auth');
     }
   };
 
@@ -173,7 +175,7 @@ export default function SponsoredCreatorsPage() {
               size="lg" 
               variant="outline"
               className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-semibold px-8 py-3"
-              onClick={() => window.location.href = '/sponsorship-info'}
+              onClick={() => navigate('/about')}
             >
               Learn More
             </Button>
