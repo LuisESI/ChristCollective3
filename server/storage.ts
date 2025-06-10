@@ -37,6 +37,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User>;
   getUsersCount(): Promise<number>;
+  getAllUsers(): Promise<User[]>;
   
   // Stripe related user updates
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
@@ -59,6 +60,7 @@ export interface IStorage {
   updateDonationAmount(campaignId: string, amount: number): Promise<Campaign>;
   getCampaignDonations(campaignId: string): Promise<Donation[]>;
   getUserDonations(userId: string): Promise<Donation[]>;
+  getAllDonations(): Promise<Donation[]>;
   
   // Business profile operations
   createBusinessProfile(profileData: InsertBusinessProfile & { userId: string }): Promise<BusinessProfile>;

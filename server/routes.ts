@@ -1372,6 +1372,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin API routes - require admin authentication
+  const isAdminAuth: RequestHandler = async (req: any, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const user = await storage.getUser(req.user.id);
+    if (!user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    
+    next();
+  };
+
+  // Admin: Get all users with account information
+  app.get('/api/admin/users', isAdminAuth, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin: Get user details by ID
+  app.get('/api/admin/users/:id', isAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's donations
+      const donations = await storage.getUserDonations(id);
+      
+      // Get user's campaigns
+      const campaigns = await storage.getUserCampaigns(id);
+      
+      // Get user's business profile
+      const businessProfile = await storage.getUserBusinessProfile(id);
+      
+      res.json({
+        user,
+        donations,
+        campaigns,
+        businessProfile
+      });
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      res.status(500).json({ message: "Failed to fetch user details" });
+    }
+  });
+
+  // Admin: Get all donations/transactions
+  app.get('/api/admin/transactions', isAdminAuth, async (req, res) => {
+    try {
+      const transactions = await storage.getAllDonations();
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Admin: Get transactions for a specific campaign
+  app.get('/api/admin/campaigns/:id/transactions', isAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const transactions = await storage.getCampaignDonations(id);
+      
+      // Get campaign details for context
+      const campaign = await storage.getCampaign(id);
+      
+      res.json({
+        campaign,
+        transactions
+      });
+    } catch (error) {
+      console.error("Error fetching campaign transactions:", error);
+      res.status(500).json({ message: "Failed to fetch campaign transactions" });
+    }
+  });
+
+  // Admin: Update user account status
+  app.put('/api/admin/users/:id', isAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      const updatedUser = await storage.updateUser(id, updateData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
