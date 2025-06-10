@@ -31,9 +31,11 @@ type ContentCreator = {
 };
 
 export default function SponsoredCreatorsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState("all");
+
+  console.log('Auth state:', { user, authLoading });
 
   // Fetch sponsored content creators
   const { data: creators = [], isLoading } = useQuery({
@@ -136,6 +138,8 @@ export default function SponsoredCreatorsPage() {
   };
 
   const handleApplyForSponsorship = () => {
+    console.log('Current user state:', user);
+    console.log('User exists:', !!user);
     if (user) {
       // User is authenticated, go to application page
       navigate('/sponsorship-application');
