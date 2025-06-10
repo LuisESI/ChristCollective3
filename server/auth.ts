@@ -56,7 +56,13 @@ export function setupAuth(app: Express) {
       if (!username) {
         return done(null, false);
       }
-      const user = await storage.getUserByUsername(username);
+      
+      // Try to find user by username first, then by email
+      let user = await storage.getUserByUsername(username);
+      if (!user) {
+        user = await storage.getUserByEmail(username);
+      }
+      
       if (!user || !user.password || !(await comparePasswords(password, user.password))) {
         return done(null, false);
       } else {
@@ -124,7 +130,13 @@ export function setupAuth(app: Express) {
     res.redirect("/auth");
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+  app.post("/api/login", (req, res, next) => {
+    // Transform usernameOrEmail to username for passport compatibility
+    if (req.body.usernameOrEmail) {
+      req.body.username = req.body.usernameOrEmail;
+    }
+    next();
+  }, passport.authenticate("local"), (req, res) => {
     const user = req.user as SelectUser;
     res.status(200).json({ 
       id: user.id, 

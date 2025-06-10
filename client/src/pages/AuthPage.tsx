@@ -15,7 +15,7 @@ export default function AuthPage() {
   const { toast } = useToast();
   
   const [loginData, setLoginData] = useState({
-    username: "",
+    usernameOrEmail: "",
     password: ""
   });
   
@@ -115,13 +115,13 @@ export default function AuthPage() {
                 <CardContent>
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                      <Label htmlFor="login-username">Username</Label>
+                      <Label htmlFor="login-username">Username or Email</Label>
                       <Input
                         id="login-username"
                         type="text"
-                        value={loginData.username}
-                        onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
-                        placeholder="Enter your username"
+                        value={loginData.usernameOrEmail}
+                        onChange={(e) => setLoginData({ ...loginData, usernameOrEmail: e.target.value })}
+                        placeholder="Enter your username or email"
                         required
                       />
                     </div>
