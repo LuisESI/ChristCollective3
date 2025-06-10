@@ -136,17 +136,33 @@ export function setupAuth(app: Express) {
       req.body.username = req.body.usernameOrEmail;
     }
     next();
-  }, passport.authenticate("local"), (req, res) => {
-    const user = req.user as SelectUser;
-    res.status(200).json({ 
-      id: user.id, 
-      username: user.username, 
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      isAdmin: user.isAdmin 
-    });
+  }, (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        console.error("Passport authentication error:", err);
+        return res.status(500).json({ message: "Authentication error" });
+      }
+      if (!user) {
+        console.log("Authentication failed for user:", req.body.username);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        const userData = user as SelectUser;
+        res.status(200).json({ 
+          id: userData.id, 
+          username: userData.username, 
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          phone: userData.phone,
+          isAdmin: userData.isAdmin 
+        });
+      });
+    })(req, res, next);
   });
 
   // Handle both GET and POST logout requests
