@@ -47,6 +47,7 @@ function Router() {
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route path="/apply-sponsorship" component={SponsorshipApplicationPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/about" component={AboutPage} />
       <Route component={NotFound} />
     </Switch>
