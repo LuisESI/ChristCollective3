@@ -24,6 +24,7 @@ import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
+import AuthTestPage from "@/pages/AuthTestPage";
 import AboutPage from "@/pages/AboutPage";
 
 function Router() {

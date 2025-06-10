@@ -23,11 +23,20 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   try {
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+    
+    if (data) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const res = await fetch(url, {
       method,
-      headers: data ? { "Content-Type": "application/json" } : {},
+      headers,
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include",
+      cache: "no-cache",
     });
 
     // Handle 401 error specially

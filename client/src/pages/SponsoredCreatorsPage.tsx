@@ -135,19 +135,36 @@ export default function SponsoredCreatorsPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const handleApplyForSponsorship = () => {
+  const handleApplyForSponsorship = async () => {
     // Wait for auth to finish loading before making decisions
     if (authLoading) {
       return;
     }
     
-    if (user && user.id) {
-      // User is authenticated, go to application page
-      navigate('/sponsorship-application');
-    } else {
-      // User is not authenticated, redirect to sign-up page
-      navigate('/auth');
+    // Double-check authentication status by making a direct API call
+    try {
+      const response = await fetch('/api/user', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData && userData.id) {
+          // User is authenticated, go to application page
+          navigate('/sponsorship-application');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
     }
+    
+    // User is not authenticated, redirect to sign-up page
+    navigate('/auth');
   };
 
   return (
