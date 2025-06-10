@@ -35,8 +35,6 @@ export default function SponsoredCreatorsPage() {
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState("all");
 
-  console.log('Auth state:', { user, authLoading });
-
   // Fetch sponsored content creators
   const { data: creators = [], isLoading } = useQuery({
     queryKey: ["/api/content-creators", { sponsored: true }],
@@ -138,23 +136,16 @@ export default function SponsoredCreatorsPage() {
   };
 
   const handleApplyForSponsorship = () => {
-    console.log('Current user state:', user);
-    console.log('User exists:', !!user);
-    console.log('Auth loading:', authLoading);
-    
     // Wait for auth to finish loading before making decisions
     if (authLoading) {
-      console.log('Still loading auth, waiting...');
       return;
     }
     
     if (user && user.id) {
       // User is authenticated, go to application page
-      console.log('User authenticated, navigating to sponsorship application');
       navigate('/sponsorship-application');
     } else {
       // User is not authenticated, redirect to sign-up page
-      console.log('User not authenticated, navigating to auth');
       navigate('/auth');
     }
   };

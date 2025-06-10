@@ -33,16 +33,19 @@ export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'christ-collective-secret-2024',
+    resave: true, // Force session save even if unmodified
+    saveUninitialized: true, // Save uninitialized sessions
+    rolling: true, // Reset expiration on each request
     store: new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     }),
     cookie: {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access for debugging
       secure: false, // Set to true in production with HTTPS
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
+      sameSite: 'lax', // Allow cross-site requests for better compatibility
+      path: '/', // Ensure cookie is available for all paths
     },
   };
 
