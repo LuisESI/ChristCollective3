@@ -42,7 +42,7 @@ export function setupAuth(app: Express) {
     cookie: {
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
     },
   };
 
@@ -140,7 +140,11 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      res.sendStatus(200);
+      req.session.destroy((err) => {
+        if (err) return next(err);
+        res.clearCookie('connect.sid');
+        res.status(200).json({ message: "Logged out successfully" });
+      });
     });
   });
 
