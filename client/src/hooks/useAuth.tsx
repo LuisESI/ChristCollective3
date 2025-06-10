@@ -49,72 +49,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch,
   } = useQuery<User | undefined, Error>({
     queryKey: ["/api/user"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/user", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        
-        if (response.status === 401) {
-          return null;
-        }
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const userData = await response.json();
-        return userData;
-      } catch (error) {
-        console.error("Auth query error:", error);
-        return null;
-      }
-    },
-    retry: 1,
-    retryDelay: 1000,
-    staleTime: 0, // Always refetch to ensure fresh auth state
-    gcTime: 0, // Don't cache auth data
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Garbage collect after 10 minutes
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Login failed: ${response.status}`);
-      }
-      
-      return await response.json();
+      const res = await apiRequest("POST", "/api/login", credentials);
+      return await res.json();
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      // Force a refetch to ensure auth state is updated
-      setTimeout(() => {
-        refetch();
-      }, 100);
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
-      });
+      refetch(); // Ensure fresh user data
     },
     onError: (error: Error) => {
-      console.error("Login error:", error);
       toast({
-        title: "Sign in failed",
-        description: "Please check your username and password.",
+        title: "Login failed",
+        description: error.message,
         variant: "destructive",
       });
     },

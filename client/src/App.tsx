@@ -64,7 +64,7 @@ function App() {
             </main>
             <Footer />
             <Toaster />
-          </SimpleAuthProvider>
+          </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
