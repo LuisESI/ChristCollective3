@@ -150,6 +150,10 @@ export class DatabaseStorage implements IStorage {
     return Number(result[0].count);
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
   async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {
     const [updatedUser] = await db
       .update(users)
@@ -307,6 +311,13 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(donations)
       .where(eq(donations.userId, userId))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getAllDonations(): Promise<Donation[]> {
+    return await db
+      .select()
+      .from(donations)
       .orderBy(desc(donations.createdAt));
   }
 
