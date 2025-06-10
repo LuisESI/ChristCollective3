@@ -173,7 +173,7 @@ export default function AuthPage() {
                   <form onSubmit={handleRegister} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           type="text"
@@ -184,7 +184,7 @@ export default function AuthPage() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">Last Name *</Label>
                         <Input
                           id="lastName"
                           type="text"
@@ -196,7 +196,7 @@ export default function AuthPage() {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="register-username">Username</Label>
+                      <Label htmlFor="register-username">Username *</Label>
                       <Input
                         id="register-username"
                         type="text"
@@ -207,7 +207,7 @@ export default function AuthPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Email *</Label>
                       <Input
                         id="email"
                         type="email"
@@ -229,7 +229,7 @@ export default function AuthPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="register-password">Password</Label>
+                      <Label htmlFor="register-password">Password *</Label>
                       <Input
                         id="register-password"
                         type="password"
@@ -240,7 +240,7 @@ export default function AuthPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Label htmlFor="confirm-password">Confirm Password *</Label>
                       <Input
                         id="confirm-password"
                         type="password"
