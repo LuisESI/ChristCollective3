@@ -140,11 +140,21 @@ export default function SponsoredCreatorsPage() {
   const handleApplyForSponsorship = () => {
     console.log('Current user state:', user);
     console.log('User exists:', !!user);
-    if (user) {
+    console.log('Auth loading:', authLoading);
+    
+    // Wait for auth to finish loading before making decisions
+    if (authLoading) {
+      console.log('Still loading auth, waiting...');
+      return;
+    }
+    
+    if (user && user.id) {
       // User is authenticated, go to application page
+      console.log('User authenticated, navigating to sponsorship application');
       navigate('/sponsorship-application');
     } else {
       // User is not authenticated, redirect to sign-up page
+      console.log('User not authenticated, navigating to auth');
       navigate('/auth');
     }
   };

@@ -49,10 +49,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch,
   } = useQuery<User | undefined, Error>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      const response = await fetch("/api/user", {
+        credentials: "include",
+      });
+      if (response.status === 401) {
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user: ${response.status}`);
+      }
+      return response.json();
+    },
     retry: false,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Garbage collect after 10 minutes
   });
 
   const loginMutation = useMutation({
