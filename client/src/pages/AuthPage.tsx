@@ -167,6 +167,7 @@ export default function AuthPage() {
                           value={registerData.firstName}
                           onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
                           placeholder="First name"
+                          required
                         />
                       </div>
                       <div>
@@ -177,6 +178,7 @@ export default function AuthPage() {
                           value={registerData.lastName}
                           onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
                           placeholder="Last name"
+                          required
                         />
                       </div>
                     </div>
@@ -199,6 +201,7 @@ export default function AuthPage() {
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                         placeholder="your@email.com"
+                        required
                       />
                     </div>
                     <div>
