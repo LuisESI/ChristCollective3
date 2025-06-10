@@ -50,34 +50,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/user", {
-        credentials: "include",
-      });
-      if (response.status === 401) {
+      try {
+        const response = await fetch("/api/user", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (response.status === 401) {
+          return null;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const userData = await response.json();
+        return userData;
+      } catch (error) {
+        console.error("Auth query error:", error);
         return null;
       }
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user: ${response.status}`);
-      }
-      return response.json();
     },
-    retry: false,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Garbage collect after 10 minutes
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 0, // Always refetch to ensure fresh auth state
+    gcTime: 0, // Don't cache auth data
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      if (!res.ok) {
-        throw new Error(`Login failed: ${res.status}`);
+      const response = await fetch("/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Login failed: ${response.status}`);
       }
-      return await res.json();
+      
+      return await response.json();
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      window.location.reload(); // Force page reload to ensure state consistency
+      // Force a refetch to ensure auth state is updated
+      setTimeout(() => {
+        refetch();
+      }, 100);
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -95,12 +122,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: RegisterData) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+      const response = await fetch("/api/register", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Registration failed: ${response.status}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setTimeout(() => {
+        refetch();
+      }, 100);
       toast({
         title: "Account created!",
         description: "Welcome to Christ Collective.",
