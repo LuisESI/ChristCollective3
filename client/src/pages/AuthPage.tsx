@@ -23,6 +23,7 @@ export default function AuthPage() {
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
     firstName: "",
     lastName: "",
     phone: ""
@@ -68,6 +69,16 @@ export default function AuthPage() {
       return;
     }
     
+    // Validate password confirmation
+    if (registerData.password !== registerData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Basic phone number validation
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     if (!phoneRegex.test(registerData.phone.replace(/[\s\-\(\)]/g, ''))) {
@@ -80,7 +91,9 @@ export default function AuthPage() {
     }
     
     try {
-      await registerMutation.mutateAsync(registerData);
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...registrationData } = registerData;
+      await registerMutation.mutateAsync(registrationData);
       setLocation("/");
     } catch (error) {
       console.error("Registration failed:", error);
@@ -223,6 +236,17 @@ export default function AuthPage() {
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         placeholder="Create a password"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={registerData.confirmPassword}
+                        onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                        placeholder="Confirm your password"
                         required
                       />
                     </div>
