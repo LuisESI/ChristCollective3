@@ -136,7 +136,7 @@ export default function SponsoredCreatorsPage() {
   const handleApplyForSponsorship = () => {
     if (user) {
       // User is authenticated, go to application page
-      window.location.href = '/apply-sponsorship';
+      window.location.href = '/sponsorship-application';
     } else {
       // User is not authenticated, redirect to sign-up page
       window.location.href = '/auth';
