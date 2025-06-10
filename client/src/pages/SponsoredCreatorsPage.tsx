@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Play, ExternalLink, Youtube, Instagram, Globe, Users, TrendingUp, DollarSign, Star, Eye, ThumbsUp } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useSimpleAuth } from "@/hooks/useSimpleAuth";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 
@@ -31,7 +31,7 @@ type ContentCreator = {
 };
 
 export default function SponsoredCreatorsPage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useSimpleAuth();
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState("all");
 
