@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
@@ -822,6 +823,170 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* User Details Modal */}
+        {selectedUser && (
+          <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+            <DialogContent className="max-w-4xl bg-gray-900 border-gray-800 text-white">
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={selectedUser.profileImageUrl || undefined} />
+                      <AvatarFallback className="bg-gray-700 text-gray-300 text-lg">
+                        {selectedUser.firstName?.[0]}{selectedUser.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <DialogTitle className="text-2xl font-bold text-white">
+                        {selectedUser.firstName} {selectedUser.lastName}
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-400">
+                        @{selectedUser.username} • {selectedUser.isAdmin ? 'Administrator' : 'User'}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedUser(null)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-6 mt-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-white flex items-center">
+                        <Mail className="h-5 w-5 mr-2 text-primary" />
+                        Contact Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <Mail className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-300">{selectedUser.email || 'No email provided'}</span>
+                      </div>
+                      {selectedUser.phone && (
+                        <div className="flex items-center space-x-3">
+                          <Phone className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-300">{selectedUser.phone}</span>
+                        </div>
+                      )}
+                      {selectedUser.location && (
+                        <div className="flex items-center space-x-3">
+                          <MapPin className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-300">{selectedUser.location}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-white flex items-center">
+                        <Calendar className="h-5 w-5 mr-2 text-primary" />
+                        Account Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">User ID:</span>
+                        <span className="text-gray-300 font-mono text-sm">{selectedUser.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Account Type:</span>
+                        <Badge className={selectedUser.isAdmin ? "bg-purple-900 text-purple-300" : "bg-green-900 text-green-300"}>
+                          {selectedUser.isAdmin ? "Administrator" : "Standard User"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Member Since:</span>
+                        <span className="text-gray-300">{formatDate(selectedUser.createdAt || new Date())}</span>
+                      </div>
+                      {selectedUser.updatedAt && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Last Updated:</span>
+                          <span className="text-gray-300">{formatDate(selectedUser.updatedAt)}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Bio Section */}
+                {selectedUser.bio && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-white">Biography</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-300 leading-relaxed">{selectedUser.bio}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Stripe Information */}
+                {selectedUser.stripeCustomerId && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-white flex items-center">
+                        <Receipt className="h-5 w-5 mr-2 text-primary" />
+                        Payment Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Stripe Customer ID:</span>
+                        <span className="text-gray-300 font-mono text-sm">{selectedUser.stripeCustomerId}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Quick Actions */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send Email
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
+                      >
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Toggle Admin
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-gray-600 text-gray-400 hover:bg-gray-600 hover:text-white"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Activity
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
