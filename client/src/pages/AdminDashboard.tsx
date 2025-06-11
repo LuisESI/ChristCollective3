@@ -680,7 +680,7 @@ export default function AdminDashboard() {
                             )}
 
                             <div className="mt-3 text-xs text-gray-500">
-                              Applied: {formatDate(application.createdAt)}
+                              Applied: {application.createdAt ? formatDate(application.createdAt) : 'Unknown'}
                             </div>
                           </div>
                           
