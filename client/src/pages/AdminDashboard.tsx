@@ -22,57 +22,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Function to open all social media links for review
-  const reviewSocialMediaLinks = (platforms: any) => {
-    console.log('Raw platforms data:', platforms);
-    
-    let platformArray: any[] = [];
-    
-    // Handle different data structures
-    if (Array.isArray(platforms)) {
-      platformArray = platforms;
-    } else if (platforms && typeof platforms === 'object') {
-      // If it's an object, try to extract array values
-      platformArray = Object.values(platforms);
-    }
-    
-    console.log('Platform array:', platformArray);
-    
-    if (platformArray.length === 0) {
-      toast({
-        title: "No Links Found",
-        description: "This application doesn't have any social media links to review.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    let openedLinks = 0;
-    
-    platformArray.forEach((platform: any) => {
-      const url = platform.profileUrl || platform.url;
-      if (url) {
-        console.log('Opening URL:', url);
-        window.open(url, '_blank');
-        openedLinks++;
-      } else {
-        console.log('No URL found for platform:', platform);
-      }
-    });
-    
-    if (openedLinks > 0) {
-      toast({
-        title: "Links Opened",
-        description: `Opened ${openedLinks} social media links for review.`,
-      });
-    } else {
-      toast({
-        title: "No Valid Links",
-        description: "No valid URLs found in the platform data.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -703,9 +653,18 @@ export default function AdminDashboard() {
                               <p className="text-sm font-medium text-gray-300 mb-2">Platforms:</p>
                               <div className="flex flex-wrap gap-2">
                                 {Array.isArray(application.platforms) && application.platforms.map((platform: any, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {platform.platform} ({platform.subscriberCount ? platform.subscriberCount.toLocaleString() : 'N/A'} followers)
-                                  </Badge>
+                                  <a
+                                    key={index}
+                                    href={platform.profileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block"
+                                  >
+                                    <Badge variant="outline" className="text-xs hover:bg-blue-900 hover:border-blue-600 transition-colors cursor-pointer">
+                                      <ExternalLink className="h-3 w-3 mr-1" />
+                                      {platform.platform} ({platform.subscriberCount ? platform.subscriberCount.toLocaleString() : 'N/A'} followers)
+                                    </Badge>
+                                  </a>
                                 ))}
                               </div>
                             </div>
@@ -754,41 +713,30 @@ export default function AdminDashboard() {
                         </div>
                       </CardHeader>
                       
-                      <CardContent>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
-                            onClick={() => reviewSocialMediaLinks(application.platforms as any)}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Review Links
-                          </Button>
-                          {application.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                className="bg-green-700 hover:bg-green-600 text-white"
-                                onClick={() => approveApplicationMutation.mutate(application.id)}
-                                disabled={approveApplicationMutation.isPending}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => rejectApplicationMutation.mutate(application.id)}
-                                disabled={rejectApplicationMutation.isPending}
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </CardContent>
+                      {application.status === 'pending' && (
+                        <CardContent>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="bg-green-700 hover:bg-green-600 text-white"
+                              onClick={() => approveApplicationMutation.mutate(application.id)}
+                              disabled={approveApplicationMutation.isPending}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => rejectApplicationMutation.mutate(application.id)}
+                              disabled={rejectApplicationMutation.isPending}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      )}
                     </Card>
                   ))}
                 </div>
