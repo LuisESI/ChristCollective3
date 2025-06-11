@@ -21,7 +21,7 @@ import DonationCheckoutPage from "@/pages/DonationCheckoutPage";
 import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
-import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPage";
+import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";

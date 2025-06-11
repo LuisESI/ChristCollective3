@@ -212,11 +212,9 @@ export const sponsorshipApplications = pgTable("sponsorship_applications", {
   userId: varchar("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
-  platform: varchar("platform").notNull(),
-  profileUrl: varchar("profile_url").notNull(),
+  platforms: jsonb("platforms").notNull(), // Array of platform objects: {platform, profileUrl, subscriberCount}
   content: text("content").notNull(),
   audience: varchar("audience"),
-  subscriberCount: integer("subscriber_count"),
   message: text("message"),
   status: varchar("status").default("pending").notNull(), // pending, approved, rejected
   reviewedAt: timestamp("reviewed_at"),
