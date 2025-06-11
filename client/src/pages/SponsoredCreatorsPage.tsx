@@ -137,7 +137,40 @@ export default function SponsoredCreatorsPage() {
   };
 
   const handleApplyForSponsorship = async () => {
-    await navigateToSponsorshipOrAuth(navigate);
+    console.log('Apply for Sponsorship button clicked');
+    
+    try {
+      // Direct fetch without utility to isolate the issue
+      const response = await fetch('/api/user', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (response.status === 200) {
+        const userData = await response.json();
+        console.log('User data:', userData);
+        
+        if (userData && userData.id) {
+          console.log('User is authenticated, navigating to application');
+          navigate('/sponsorship-application');
+        } else {
+          console.log('No user data, redirecting to auth');
+          navigate('/auth');
+        }
+      } else {
+        console.log('User not authenticated, redirecting to auth');
+        navigate('/auth');
+      }
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      navigate('/auth');
+    }
   };
 
   return (
