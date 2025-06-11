@@ -116,6 +116,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/admin/sponsorship-applications/:id/approve', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const applicationId = parseInt(id);
+      
+      if (isNaN(applicationId)) {
+        return res.status(400).json({ message: "Invalid application ID" });
+      }
+      
+      const approvedApplication = await storage.updateSponsorshipApplication(applicationId, {
+        status: 'approved',
+        reviewedAt: new Date()
+      });
+      
+      if (!approvedApplication) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+      
+      res.json(approvedApplication);
+    } catch (error) {
+      console.error("Error approving sponsorship application:", error);
+      res.status(500).json({ message: "Failed to approve application" });
+    }
+  });
+
+  app.post('/api/admin/sponsorship-applications/:id/reject', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const applicationId = parseInt(id);
+      
+      if (isNaN(applicationId)) {
+        return res.status(400).json({ message: "Invalid application ID" });
+      }
+      
+      const rejectedApplication = await storage.updateSponsorshipApplication(applicationId, {
+        status: 'rejected',
+        reviewedAt: new Date()
+      });
+      
+      if (!rejectedApplication) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+      
+      res.json(rejectedApplication);
+    } catch (error) {
+      console.error("Error rejecting sponsorship application:", error);
+      res.status(500).json({ message: "Failed to reject application" });
+    }
+  });
+
   app.get('/api/admin/campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const campaigns = await storage.listCampaigns();

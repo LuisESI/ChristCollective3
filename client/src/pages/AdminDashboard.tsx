@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Campaign, User, Donation } from "@shared/schema";
+import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -55,6 +55,12 @@ export default function AdminDashboard() {
   // Fetch all transactions
   const { data: allTransactions = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/admin/transactions"],
+    enabled: user?.isAdmin === true,
+  });
+
+  // Fetch sponsorship applications
+  const { data: sponsorshipApplications = [], isLoading: applicationsLoading } = useQuery({
+    queryKey: ["/api/admin/sponsorship-applications"],
     enabled: user?.isAdmin === true,
   });
 
@@ -132,6 +138,69 @@ export default function AdminDashboard() {
       toast({
         title: "Campaign Deleted",
         description: "The campaign has been permanently removed.",
+      });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Sponsorship application mutations
+  const approveApplicationMutation = useMutation({
+    mutationFn: async (applicationId: number) => {
+      await apiRequest("POST", `/api/admin/sponsorship-applications/${applicationId}/approve`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
+      toast({
+        title: "Application Approved",
+        description: "The sponsorship application has been approved.",
+      });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const rejectApplicationMutation = useMutation({
+    mutationFn: async (applicationId: number) => {
+      await apiRequest("POST", `/api/admin/sponsorship-applications/${applicationId}/reject`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
+      toast({
+        title: "Application Rejected",
+        description: "The sponsorship application has been rejected.",
       });
     },
     onError: (error: Error) => {
@@ -259,7 +328,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="campaigns" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-900 border-gray-800">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-900 border-gray-800">
             <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Campaigns
             </TabsTrigger>
@@ -268,6 +337,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Users
+            </TabsTrigger>
+            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
+              Sponsorships ({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})
             </TabsTrigger>
             <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Pending ({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})
@@ -530,6 +602,129 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="sponsorships" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-primary mb-4">Sponsorship Applications</h2>
+              {applicationsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="bg-gray-900 border-gray-800">
+                      <CardContent className="p-6">
+                        <div className="animate-pulse">
+                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                          <div className="h-8 bg-gray-700 rounded w-20"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : Array.isArray(sponsorshipApplications) && sponsorshipApplications.length === 0 ? (
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardContent className="p-6 text-center">
+                    <UserCheck className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No sponsorship applications yet.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {Array.isArray(sponsorshipApplications) && sponsorshipApplications.map((application: SponsorshipApplication) => (
+                    <Card key={application.id} className="bg-gray-900 border-gray-800">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <CardTitle className="text-white">{application.name}</CardTitle>
+                            <CardDescription className="text-gray-400 mt-1">
+                              {application.email}
+                            </CardDescription>
+                            
+                            {/* Platforms */}
+                            <div className="mt-3">
+                              <p className="text-sm font-medium text-gray-300 mb-2">Platforms:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {Array.isArray(application.platforms) && application.platforms.map((platform: any, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {platform.platform} ({platform.subscriberCount ? platform.subscriberCount.toLocaleString() : 'N/A'} followers)
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Content Description */}
+                            <div className="mt-3">
+                              <p className="text-sm font-medium text-gray-300">Content:</p>
+                              <p className="text-gray-400 text-sm mt-1 line-clamp-2">{application.content}</p>
+                            </div>
+
+                            {/* Target Audience */}
+                            {application.audience && (
+                              <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-300">Target Audience:</p>
+                                <p className="text-gray-400 text-sm">{application.audience}</p>
+                              </div>
+                            )}
+
+                            {/* Message */}
+                            {application.message && (
+                              <div className="mt-3">
+                                <p className="text-sm font-medium text-gray-300">Why they want to join:</p>
+                                <p className="text-gray-400 text-sm mt-1 line-clamp-3">{application.message}</p>
+                              </div>
+                            )}
+
+                            <div className="mt-3 text-xs text-gray-500">
+                              Applied: {formatDate(application.createdAt)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 ml-4">
+                            <Badge 
+                              className={
+                                application.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                                application.status === 'approved' ? 'bg-green-900 text-green-300' :
+                                'bg-red-900 text-red-300'
+                              }
+                            >
+                              {application.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                              {application.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                              {application.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
+                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      {application.status === 'pending' && (
+                        <CardContent>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="bg-green-700 hover:bg-green-600 text-white"
+                              onClick={() => approveApplicationMutation.mutate(application.id)}
+                              disabled={approveApplicationMutation.isPending}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => rejectApplicationMutation.mutate(application.id)}
+                              disabled={rejectApplicationMutation.isPending}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      )}
                     </Card>
                   ))}
                 </div>
