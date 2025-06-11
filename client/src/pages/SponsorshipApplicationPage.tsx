@@ -103,9 +103,9 @@ function SponsorshipApplicationPage() {
   // Redirect to login if not authenticated using useEffect
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
+      navigate("/auth");
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, navigate]);
 
   // Show loading while checking authentication
   if (isLoading) {
