@@ -123,11 +123,11 @@ export default function BusinessSection() {
                 >
                   {isAuthenticated ? (
                     <Link href="/profile">
-                      <a>{totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
+                      {totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}
                     </Link>
                   ) : (
                     <Link href="/auth">
-                      <a>{totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}</a>
+                      {totalUsers >= 100 ? "Program Complete" : "Join as Founding Member - FREE"}
                     </Link>
                   )}
                 </Button>
@@ -194,11 +194,11 @@ export default function BusinessSection() {
               >
                 {isAuthenticated ? (
                   <Link href="/profile">
-                    <a>Create Your Business Profile</a>
+                    Create Your Business Profile
                   </Link>
                 ) : (
                   <Link href="/auth">
-                    <a>Create Your Business Profile</a>
+                    Create Your Business Profile
                   </Link>
                 )}
               </Button>
