@@ -25,13 +25,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 
-// Form schema with support for multiple platforms
+// Platform schema for individual platform entries
 const platformSchema = z.object({
   platform: z.string().min(1, "Please select a platform"),
   profileUrl: z.string().url("Please provide a valid profile URL"),
   subscriberCount: z.coerce.number().min(0, "Subscriber count must be 0 or greater").optional(),
 });
 
+// Main application schema with multiple platforms
 const applicationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please provide a valid email address"),
@@ -143,34 +144,28 @@ function SponsorshipApplicationPage() {
         <meta name="description" content="Apply to become a sponsored content creator with Christ Collective and share your faith-based content with our community." />
       </Helmet>
       
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Content Creator Sponsorship Application</h1>
-          <p className="text-lg">
-            Join our network of sponsored content creators sharing faith-based messages across various platforms.
-          </p>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Sponsorship Application</CardTitle>
-            <CardDescription>
-              Fill out this form to apply for content creator sponsorship with Christ Collective.
-              We review all applications carefully and will contact you if your content aligns with our mission.
+      <div className="max-w-2xl mx-auto">
+        <Card className="shadow-lg border-[#D4AF37]/20">
+          <CardHeader className="text-center bg-gradient-to-r from-black to-gray-800 text-white rounded-t-lg">
+            <CardTitle className="text-2xl font-bold">Sponsorship Application</CardTitle>
+            <CardDescription className="text-gray-200">
+              Join our community of faith-based content creators
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {isError && (
+          
+          <CardContent className="p-8">
+            {isError && error && (
               <Alert variant="destructive" className="mb-6">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {error instanceof Error ? error.message : "An error occurred while submitting your application."}
+                  {error.message}
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Personal Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -236,7 +231,7 @@ function SponsorshipApplicationPage() {
                       
                       <FormField
                         control={form.control}
-                        name={`platforms.${index}.platform`}
+                        name={`platforms.${index}.platform` as const}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Platform *</FormLabel>
@@ -265,7 +260,7 @@ function SponsorshipApplicationPage() {
                       
                       <FormField
                         control={form.control}
-                        name={`platforms.${index}.profileUrl`}
+                        name={`platforms.${index}.profileUrl` as const}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Profile URL *</FormLabel>
@@ -279,7 +274,7 @@ function SponsorshipApplicationPage() {
                       
                       <FormField
                         control={form.control}
-                        name={`platforms.${index}.subscriberCount`}
+                        name={`platforms.${index}.subscriberCount` as const}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Followers/Subscribers</FormLabel>
@@ -318,55 +313,30 @@ function SponsorshipApplicationPage() {
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="audience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Target Audience</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Young adults, families, etc." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="subscriberCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Follower/Subscriber Count</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="1000" 
-                            {...field}
-                            value={field.value || ""}
-                            onChange={(e) => {
-                              const value = e.target.value === "" ? undefined : parseInt(e.target.value, 10);
-                              field.onChange(value);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="audience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Audience</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Young adults, families, etc." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField
                   control={form.control}
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Why do you want to be sponsored? *</FormLabel>
+                      <FormLabel>Why do you want to join? *</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Tell us about your mission, goals, and how sponsorship would help you..."
-                          className="min-h-[120px]"
+                          placeholder="Tell us about your faith journey and why you'd like to be sponsored..."
+                          className="resize-none"
                           {...field}
                         />
                       </FormControl>
@@ -374,27 +344,17 @@ function SponsorshipApplicationPage() {
                     </FormItem>
                   )}
                 />
-                
-                <div className="pt-4">
-                  <Button 
-                    type="submit" 
-                    className="w-full md:w-auto bg-[#D4AF37] hover:bg-[#B8860B] text-black"
-                    disabled={isPending}
-                  >
-                    {isPending ? "Submitting..." : "Submit Application"}
-                  </Button>
-                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-[#D4AF37] hover:bg-[#B8860B] text-black font-semibold"
+                  disabled={isPending}
+                >
+                  {isPending ? "Submitting..." : "Submit Application"}
+                </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex flex-col text-sm text-gray-500">
-            <p>
-              * Required fields
-            </p>
-            <p className="mt-2">
-              By submitting this application, you agree to our review process and understand that sponsorship decisions are made at the discretion of Christ Collective.
-            </p>
-          </CardFooter>
         </Card>
       </div>
     </div>
