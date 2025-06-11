@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Users, Video, Building2, Heart } from "lucide-react";
-import mountainBackground from "@assets/mountain-majesty-artistic-silhouette-of-crucifix-cross-against-sunset-sky-photo.jpg";
+import worldCrossBackground from "@assets/Untitled design_1749616500817.jpg";
 import blueSkyBg from "@assets/Beautiful_blue_sky_background_7b0e6fef20.jpg";
 import businessNetworkImg from "@assets/pexels-fauxels-3184325.jpg";
 import contentCreationImg from "@assets/pexels-cottonbro-6883807.jpg";
@@ -31,7 +31,7 @@ export default function HeroSection() {
   const slides: SlideContent[] = [
     {
       id: 1,
-      image: mountainBackground,
+      image: worldCrossBackground,
       heading: "Uniting Christians Worldwide",
       subheading: "Join our global community dedicated to faith, service, and fellowship across all denominations.",
       primaryButtonText: isAuthenticated ? "My Account" : "Join the Collective",
