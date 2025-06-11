@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
@@ -21,6 +21,17 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // Function to open all social media links for review
+  const reviewSocialMediaLinks = (platforms: any[]) => {
+    if (!Array.isArray(platforms)) return;
+    
+    platforms.forEach((platform: any) => {
+      if (platform.url) {
+        window.open(platform.url, '_blank');
+      }
+    });
+  };
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -702,30 +713,41 @@ export default function AdminDashboard() {
                         </div>
                       </CardHeader>
                       
-                      {application.status === 'pending' && (
-                        <CardContent>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-green-700 hover:bg-green-600 text-white"
-                              onClick={() => approveApplicationMutation.mutate(application.id)}
-                              disabled={approveApplicationMutation.isPending}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => rejectApplicationMutation.mutate(application.id)}
-                              disabled={rejectApplicationMutation.isPending}
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      )}
+                      <CardContent>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+                            onClick={() => reviewSocialMediaLinks(application.platforms)}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Review Links
+                          </Button>
+                          {application.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-green-700 hover:bg-green-600 text-white"
+                                onClick={() => approveApplicationMutation.mutate(application.id)}
+                                disabled={approveApplicationMutation.isPending}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => rejectApplicationMutation.mutate(application.id)}
+                                disabled={rejectApplicationMutation.isPending}
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
                     </Card>
                   ))}
                 </div>
