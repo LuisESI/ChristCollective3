@@ -264,9 +264,19 @@ export const insertContentCreatorSchema = createInsertSchema(contentCreators)
   .omit({ id: true, userId: true, isSponsored: true, sponsorshipStartDate: true, 
     sponsorshipEndDate: true, sponsorshipAmount: true, createdAt: true, updatedAt: true });
 
+// Platform schema for sponsorship applications
+const platformSchema = z.object({
+  platform: z.string().min(1, "Please select a platform"),
+  profileUrl: z.string().url("Please provide a valid profile URL"),
+  subscriberCount: z.coerce.number().min(0, "Subscriber count must be 0 or greater").optional(),
+});
+
 // Schema for creating sponsorship applications
 export const insertSponsorshipApplicationSchema = createInsertSchema(sponsorshipApplications)
-  .omit({ id: true, userId: true, status: true, reviewedAt: true, createdAt: true, updatedAt: true });
+  .omit({ id: true, userId: true, status: true, reviewedAt: true, createdAt: true, updatedAt: true })
+  .extend({
+    platforms: z.array(platformSchema).min(1, "Please add at least one platform"),
+  });
 
 // Schema for creating social media posts
 export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts)
