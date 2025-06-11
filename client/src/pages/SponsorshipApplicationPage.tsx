@@ -41,7 +41,7 @@ type ApplicationValues = z.infer<typeof applicationSchema>;
 
 function SponsorshipApplicationPage() {
   const { toast } = useToast();
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
 
   // Create form
@@ -89,7 +89,7 @@ function SponsorshipApplicationPage() {
 
   // Handle form submission
   const onSubmit = (data: ApplicationValues) => {
-    if (!isAuthenticated) {
+    if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please log in to submit a sponsorship application.",
@@ -102,13 +102,17 @@ function SponsorshipApplicationPage() {
 
   // Redirect to login if not authenticated using useEffect
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !user) {
+      console.log('SponsorshipApplicationPage: User not authenticated, redirecting to auth');
       navigate("/auth");
+    } else if (!isLoading && user) {
+      console.log('SponsorshipApplicationPage: User authenticated, showing form');
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, user, navigate]);
 
   // Show loading while checking authentication
   if (isLoading) {
+    console.log('SponsorshipApplicationPage: Loading authentication...');
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="flex justify-center">
@@ -119,7 +123,8 @@ function SponsorshipApplicationPage() {
   }
 
   // Don't render anything if not authenticated (redirect will happen)
-  if (!isAuthenticated) {
+  if (!user) {
+    console.log('SponsorshipApplicationPage: No user, returning null');
     return null;
   }
 
