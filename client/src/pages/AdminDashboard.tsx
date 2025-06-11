@@ -23,14 +23,55 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Function to open all social media links for review
-  const reviewSocialMediaLinks = (platforms: any[]) => {
-    if (!Array.isArray(platforms)) return;
+  const reviewSocialMediaLinks = (platforms: any) => {
+    console.log('Raw platforms data:', platforms);
     
-    platforms.forEach((platform: any) => {
-      if (platform.url) {
-        window.open(platform.url, '_blank');
+    let platformArray: any[] = [];
+    
+    // Handle different data structures
+    if (Array.isArray(platforms)) {
+      platformArray = platforms;
+    } else if (platforms && typeof platforms === 'object') {
+      // If it's an object, try to extract array values
+      platformArray = Object.values(platforms);
+    }
+    
+    console.log('Platform array:', platformArray);
+    
+    if (platformArray.length === 0) {
+      toast({
+        title: "No Links Found",
+        description: "This application doesn't have any social media links to review.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    let openedLinks = 0;
+    
+    platformArray.forEach((platform: any) => {
+      const url = platform.profileUrl || platform.url;
+      if (url) {
+        console.log('Opening URL:', url);
+        window.open(url, '_blank');
+        openedLinks++;
+      } else {
+        console.log('No URL found for platform:', platform);
       }
     });
+    
+    if (openedLinks > 0) {
+      toast({
+        title: "Links Opened",
+        description: `Opened ${openedLinks} social media links for review.`,
+      });
+    } else {
+      toast({
+        title: "No Valid Links",
+        description: "No valid URLs found in the platform data.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Redirect if not authenticated or not admin
@@ -719,7 +760,7 @@ export default function AdminDashboard() {
                             size="sm"
                             variant="outline"
                             className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
-                            onClick={() => reviewSocialMediaLinks(application.platforms)}
+                            onClick={() => reviewSocialMediaLinks(application.platforms as any)}
                           >
                             <ExternalLink className="h-4 w-4 mr-2" />
                             Review Links
