@@ -73,9 +73,20 @@ function SponsorshipApplicationPage() {
   // Mutation for submitting the application
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: async (data: ApplicationValues) => {
+      console.log('Submitting application data:', data);
       const response = await apiRequest("POST", "/api/sponsorship-applications", data);
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Application submission error:', errorData);
+        
+        // Handle specific validation errors
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors.map((err: any) => 
+            `${err.path ? err.path.join('.') + ': ' : ''}${err.message}`
+          ).join(', ');
+          throw new Error(`Validation errors: ${errorMessages}`);
+        }
+        
         throw new Error(errorData.message || "Failed to submit application");
       }
       return response.json();
@@ -88,9 +99,22 @@ function SponsorshipApplicationPage() {
       navigate("/profile");
     },
     onError: (error: Error) => {
+      console.error('Application submission failed:', error);
+      
+      // Show more detailed error messages
+      let description = error.message;
+      
+      if (error.message.includes("You already have a pending sponsorship application")) {
+        description = "You already have a pending application. Please wait for review before submitting another.";
+      } else if (error.message.includes("Invalid data") || error.message.includes("Validation errors")) {
+        description = "Please check all fields are filled correctly. Ensure URLs are valid and all required fields are completed.";
+      } else if (error.message.includes("Authentication") || error.message.includes("Unauthorized")) {
+        description = "Please log in again and try submitting your application.";
+      }
+      
       toast({
         title: "Submission Failed",
-        description: error.message,
+        description,
         variant: "destructive",
       });
     },
@@ -100,12 +124,37 @@ function SponsorshipApplicationPage() {
   const onSubmit = (data: ApplicationValues) => {
     if (!user) {
       toast({
-        title: "Authentication Required",
+        title: "Authentication Required", 
         description: "Please log in to submit a sponsorship application.",
         variant: "destructive",
       });
       return;
     }
+
+    // Pre-submission validation
+    const validationErrors = [];
+    
+    // Check if all platforms have valid URLs
+    data.platforms.forEach((platform, index) => {
+      if (!platform.platform) {
+        validationErrors.push(`Platform ${index + 1}: Please select a platform`);
+      }
+      if (!platform.profileUrl) {
+        validationErrors.push(`Platform ${index + 1}: Profile URL is required`);
+      } else if (!platform.profileUrl.startsWith('http')) {
+        validationErrors.push(`Platform ${index + 1}: URL must start with http:// or https://`);
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Please Fix Form Errors",
+        description: validationErrors.join('; '),
+        variant: "destructive",
+      });
+      return;
+    }
+
     mutate(data);
   };
 
@@ -265,9 +314,25 @@ function SponsorshipApplicationPage() {
                           <FormItem>
                             <FormLabel>Profile URL *</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://..." {...field} />
+                              <Input 
+                                placeholder="https://www.instagram.com/username" 
+                                {...field}
+                                onBlur={(e) => {
+                                  field.onBlur();
+                                  const value = e.target.value;
+                                  if (value && !value.startsWith('http')) {
+                                    form.setError(`platforms.${index}.profileUrl` as const, {
+                                      type: 'manual',
+                                      message: 'URL must start with http:// or https://'
+                                    });
+                                  }
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
+                            <FormDescription className="text-xs text-gray-500">
+                              Include the full URL (e.g., https://www.instagram.com/username)
+                            </FormDescription>
                           </FormItem>
                         )}
                       />

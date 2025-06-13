@@ -1023,27 +1023,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log(`Sponsorship application submission for user: ${userId}`);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
       
       // Check if user already has a pending application
       const existingApplications = await storage.getUserSponsorshipApplications(userId);
       const hasPendingApplication = existingApplications.some(app => app.status === "pending");
       
       if (hasPendingApplication) {
+        console.log(`User ${userId} already has pending application`);
         return res.status(400).json({ message: "You already have a pending sponsorship application" });
       }
       
+      console.log('Validating application data...');
       const validatedData = insertSponsorshipApplicationSchema.parse(req.body);
+      console.log('Validation successful, creating application...');
+      
       const application = await storage.createSponsorshipApplication({
         ...validatedData,
         userId
       });
       
+      console.log(`Sponsorship application created successfully with ID: ${application.id}`);
       res.status(201).json(application);
     } catch (error) {
       console.error("Error creating sponsorship application:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        console.error("Validation errors:", error.errors);
+        return res.status(400).json({ 
+          message: "Invalid data", 
+          errors: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message,
+            code: err.code
+          }))
+        });
       }
+      
+      // Database or other server errors
+      if (error instanceof Error) {
+        console.error("Server error details:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        return res.status(500).json({ 
+          message: "Failed to submit sponsorship application",
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+      }
+      
       res.status(500).json({ message: "Failed to submit sponsorship application" });
     }
   });
