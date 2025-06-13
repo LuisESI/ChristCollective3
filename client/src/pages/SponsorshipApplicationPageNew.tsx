@@ -132,7 +132,7 @@ function SponsorshipApplicationPage() {
     }
 
     // Pre-submission validation
-    const validationErrors = [];
+    const validationErrors: string[] = [];
     
     // Check if all platforms have valid URLs
     data.platforms.forEach((platform, index) => {
