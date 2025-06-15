@@ -125,14 +125,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid application ID" });
       }
       
+      // Get the application first
+      const application = await storage.getSponsorshipApplication(applicationId);
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+      
+      // Check if user already has a content creator profile
+      const existingCreator = await storage.getUserContentCreator(application.userId);
+      
+      if (!existingCreator) {
+        // Create content creator profile from approved application
+        await storage.createContentCreator({
+          name: application.name,
+          platforms: application.platforms,
+          content: application.content,
+          audience: application.audience,
+          bio: application.message, // Use their message as bio
+          isSponsored: true,
+          sponsorshipStartDate: new Date(),
+          userId: application.userId
+        });
+      } else {
+        // Update existing creator to be sponsored
+        await storage.updateContentCreator(existingCreator.id, {
+          isSponsored: true,
+          sponsorshipStartDate: new Date(),
+          platforms: application.platforms,
+          content: application.content,
+          audience: application.audience
+        });
+      }
+      
+      // Approve the application
       const approvedApplication = await storage.updateSponsorshipApplication(applicationId, {
         status: 'approved',
         reviewedAt: new Date()
       });
-      
-      if (!approvedApplication) {
-        return res.status(404).json({ message: "Application not found" });
-      }
       
       res.json(approvedApplication);
     } catch (error) {

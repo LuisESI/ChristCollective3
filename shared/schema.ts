@@ -169,17 +169,16 @@ export type BusinessProfile = typeof businessProfiles.$inferSelect;
 
 export type MembershipTier = typeof membershipTiers.$inferSelect;
 
-// Content creators
+// Content creators - updated to support multiple platforms
 export const contentCreators = pgTable("content_creators", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(),
-  platform: varchar("platform").notNull(), // YouTube, Instagram, TikTok, etc.
-  profileUrl: varchar("profile_url").notNull(),
+  platforms: jsonb("platforms").notNull(), // Array of platform objects: {platform, profileUrl, subscriberCount}
   content: text("content").notNull(), // Type of content they create
   audience: varchar("audience"), // Target audience
-  subscriberCount: integer("subscriber_count"),
   bio: text("bio"),
+  profileImage: varchar("profile_image"), // Creator's profile image
   isSponsored: boolean("is_sponsored").default(false),
   sponsorshipStartDate: timestamp("sponsorship_start_date"),
   sponsorshipEndDate: timestamp("sponsorship_end_date"),
@@ -259,17 +258,20 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   sponsorshipApplications: many(sponsorshipApplications),
 }));
 
-// Schema for creating content creators
-export const insertContentCreatorSchema = createInsertSchema(contentCreators)
-  .omit({ id: true, userId: true, isSponsored: true, sponsorshipStartDate: true, 
-    sponsorshipEndDate: true, sponsorshipAmount: true, createdAt: true, updatedAt: true });
-
 // Platform schema for sponsorship applications
 const platformSchema = z.object({
   platform: z.string().min(1, "Please select a platform"),
   profileUrl: z.string().url("Please provide a valid profile URL"),
   subscriberCount: z.coerce.number().min(0, "Subscriber count must be 0 or greater").optional(),
 });
+
+// Schema for creating content creators
+export const insertContentCreatorSchema = createInsertSchema(contentCreators)
+  .omit({ id: true, userId: true, isSponsored: true, sponsorshipStartDate: true, 
+    sponsorshipEndDate: true, sponsorshipAmount: true, createdAt: true, updatedAt: true })
+  .extend({
+    platforms: z.array(platformSchema).min(1, "Please add at least one platform"),
+  });
 
 // Schema for creating sponsorship applications
 export const insertSponsorshipApplicationSchema = createInsertSchema(sponsorshipApplications)
@@ -282,7 +284,8 @@ export const insertSponsorshipApplicationSchema = createInsertSchema(sponsorship
 export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts)
   .omit({ id: true, creatorId: true, createdAt: true });
 
-// Types
+
+
 export type InsertContentCreator = z.infer<typeof insertContentCreatorSchema>;
 export type ContentCreator = typeof contentCreators.$inferSelect;
 
