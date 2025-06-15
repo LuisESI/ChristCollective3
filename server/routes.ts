@@ -136,15 +136,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!existingCreator) {
         // Create content creator profile from approved application
-        await storage.createContentCreator({
+        const newCreator = await storage.createContentCreator({
           name: application.name,
-          platforms: application.platforms,
+          platforms: application.platforms as { platform: string; profileUrl: string; subscriberCount?: number }[],
           content: application.content,
           audience: application.audience,
           bio: application.message, // Use their message as bio
-          isSponsored: true,
-          sponsorshipStartDate: new Date(),
           userId: application.userId
+        });
+
+        // Update to mark as sponsored
+        await storage.updateContentCreator(newCreator.id, {
+          isSponsored: true,
+          sponsorshipStartDate: new Date()
         });
       } else {
         // Update existing creator to be sponsored
@@ -255,6 +259,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching business profiles:", error);
       res.status(500).json({ message: "Failed to fetch business profiles" });
+    }
+  });
+
+  // Content creator routes
+  app.get('/api/content-creators', async (req, res) => {
+    try {
+      const { sponsored } = req.query;
+      const sponsoredOnly = sponsored === 'true';
+      const creators = await storage.listContentCreators(sponsoredOnly);
+      res.json(creators);
+    } catch (error) {
+      console.error("Error fetching content creators:", error);
+      res.status(500).json({ message: "Failed to fetch content creators" });
+    }
+  });
+
+  app.get('/api/content-creators/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const creatorId = parseInt(id);
+      
+      if (isNaN(creatorId)) {
+        return res.status(400).json({ message: "Invalid creator ID" });
+      }
+      
+      const creator = await storage.getContentCreator(creatorId);
+      if (!creator) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+      
+      // Get creator's social media posts
+      const posts = await storage.getSocialMediaPostsByCreator(creatorId);
+      
+      res.json({ ...creator, posts });
+    } catch (error) {
+      console.error("Error fetching content creator:", error);
+      res.status(500).json({ message: "Failed to fetch content creator" });
+    }
+  });
+
+  app.get('/api/users/:userId/content-creator', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Only allow users to view their own creator profile or admins to view any
+      if (req.user.claims.sub !== userId && !req.user.claims.email?.includes('admin')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const creator = await storage.getUserContentCreator(userId);
+      if (!creator) {
+        return res.status(404).json({ message: "Creator profile not found" });
+      }
+      
+      const posts = await storage.getSocialMediaPostsByCreator(creator.id);
+      res.json({ ...creator, posts });
+    } catch (error) {
+      console.error("Error fetching user content creator:", error);
+      res.status(500).json({ message: "Failed to fetch creator profile" });
     }
   });
   

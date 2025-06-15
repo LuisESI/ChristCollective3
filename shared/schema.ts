@@ -267,7 +267,7 @@ const platformSchema = z.object({
 
 // Schema for creating content creators
 export const insertContentCreatorSchema = createInsertSchema(contentCreators)
-  .omit({ id: true, userId: true, isSponsored: true, sponsorshipStartDate: true, 
+  .omit({ id: true, isSponsored: true, sponsorshipStartDate: true, 
     sponsorshipEndDate: true, sponsorshipAmount: true, createdAt: true, updatedAt: true })
   .extend({
     platforms: z.array(platformSchema).min(1, "Please add at least one platform"),
