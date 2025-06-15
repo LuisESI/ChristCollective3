@@ -27,7 +27,7 @@ export default function Header() {
     { name: "Home", path: "/" },
     { name: "Donate", path: "/donate" },
     { name: "Business", path: "/business" },
-    { name: "Creators", path: "/sponsored-creators" },
+    { name: "Creators", path: "/creators" },
     { name: "About", path: "/about" },
   ];
 

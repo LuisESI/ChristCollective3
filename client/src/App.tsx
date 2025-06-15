@@ -22,6 +22,8 @@ import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
+import CreatorsPage from "@/pages/CreatorsPage";
+import CreatorProfilePage from "@/pages/CreatorProfilePage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";
@@ -44,6 +46,8 @@ function Router() {
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
+      <Route path="/creators" component={CreatorsPage} />
+      <Route path="/creators/:id" component={CreatorProfilePage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route path="/apply-sponsorship" component={SponsorshipApplicationPage} />
       <Route path="/admin" component={AdminDashboard} />
