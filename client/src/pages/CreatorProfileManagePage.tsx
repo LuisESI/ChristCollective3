@@ -188,7 +188,7 @@ export default function CreatorProfileManagePage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Play className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm text-gray-700">Content: {creatorProfile?.content}</span>
+                  <span className="text-sm text-white">Content: {creatorProfile?.content}</span>
                 </div>
                 {creatorProfile?.audience && (
                   <div className="flex items-center gap-2">
