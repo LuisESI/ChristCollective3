@@ -57,7 +57,7 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
+  return await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
@@ -80,7 +80,7 @@ export async function setupAuth(app: Express) {
   ) => {
     const claims = tokens.claims();
     const dbUser = await upsertUser(claims);
-    const user = { ...dbUser };
+    const user = dbUser ? { ...dbUser } : {};
     updateUserSession(user, tokens);
     verified(null, user);
   };
