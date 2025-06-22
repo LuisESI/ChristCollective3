@@ -7,14 +7,7 @@ import {
 import { apiRequest, getQueryFn, queryClient } from "../lib/queryClient";
 import { useToast } from "./use-toast";
 
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  isAdmin: boolean;
-};
+import { User } from "@shared/schema";
 
 type AuthContextType = {
   user: User | null;

@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Users, Play, Eye, Heart, Calendar, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { ContentCreator, SocialMediaPost } from "@shared/schema";
-import instagramLogo from "@/assets/Instagram_icon_1750620567276.png";
+import instagramLogo from "@/assets/instagram-logo.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 
 interface CreatorWithPosts extends ContentCreator {
