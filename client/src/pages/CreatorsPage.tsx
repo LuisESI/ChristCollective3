@@ -6,12 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ExternalLink, Users, Play, Eye, Heart, Star, Globe, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { ContentCreator } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 import instagramIconPath from "@assets/db059a4689b94fbb9a3d0a81e9ae8f52-32bits-32_1750620933253.png";
 import tiktokIconPath from "@assets/e7fee89a6a10380e09e348c7bd31caf4-32bits-32_1750620982285.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 import instagramLogo from "@/assets/instagram-logo.png";
 
 export default function CreatorsPage() {
+  const { user } = useAuth();
   const { data: creators, isLoading } = useQuery<ContentCreator[]>({
     queryKey: ['/api/content-creators'],
     queryFn: async () => {
@@ -160,7 +162,7 @@ export default function CreatorsPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-16 h-16">
-                      <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Luis Lucero" />
+                      <AvatarImage src={user?.profileImageUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"} alt="Luis Lucero" />
                       <AvatarFallback className="bg-amber-100 text-amber-800 text-lg font-semibold">
                         LL
                       </AvatarFallback>
