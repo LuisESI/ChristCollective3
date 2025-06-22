@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Users, Play, Eye, Heart, Calendar, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { ContentCreator, SocialMediaPost } from "@shared/schema";
+import instagramLogo from "@/assets/instagram-logo.png";
+import tiktokLogo from "@/assets/tiktok-logo.png";
 
 interface CreatorWithPosts extends ContentCreator {
   posts?: SocialMediaPost[];
@@ -27,14 +29,14 @@ export default function CreatorProfilePage() {
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
-      case 'youtube': return '📺';
-      case 'instagram': return '📷';
-      case 'tiktok': return '🎵';
-      case 'twitter': return '🐦';
-      case 'facebook': return '👥';
-      case 'linkedin': return '💼';
-      case 'twitch': return '🎮';
-      default: return '🌐';
+      case 'youtube': return <span className="text-2xl">📺</span>;
+      case 'instagram': return <img src={instagramLogo} alt="Instagram" className="w-6 h-6" />;
+      case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-6 h-6" />;
+      case 'twitter': return <span className="text-2xl">🐦</span>;
+      case 'facebook': return <span className="text-2xl">👥</span>;
+      case 'linkedin': return <span className="text-2xl">💼</span>;
+      case 'twitch': return <span className="text-2xl">🎮</span>;
+      default: return <span className="text-2xl">🌐</span>;
     }
   };
 
@@ -157,7 +159,7 @@ export default function CreatorProfilePage() {
                   <div key={index} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{getPlatformIcon(platform.platform)}</span>
+                        {getPlatformIcon(platform.platform)}
                         <span className="font-medium capitalize text-black">{platform.platform}</span>
                       </div>
                       {platform.subscriberCount && (
@@ -216,7 +218,7 @@ export default function CreatorProfilePage() {
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-lg">{getPlatformIcon(post.platform)}</span>
+                              <div className="text-lg">{getPlatformIcon(post.platform)}</div>
                               <Badge variant="outline" className="capitalize">
                                 {post.platform}
                               </Badge>
