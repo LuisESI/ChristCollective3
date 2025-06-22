@@ -93,8 +93,8 @@ export default function CreatorsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             {/* Featured Video */}
             {!isYouTubeLoading && youtubeVideo && (
-              <div className="lg:col-span-2">
-                <Card className="bg-white shadow-2xl overflow-hidden h-full">
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="bg-white shadow-2xl overflow-hidden">
                   <div className="aspect-video">
                     <iframe
                       width="100%"
@@ -129,34 +129,110 @@ export default function CreatorsPage() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Additional Content Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Community Highlights */}
+                  <Card className="bg-white shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-black">
+                        <Users className="w-5 h-5 text-yellow-600" />
+                        Community Highlights
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                        <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                          <Play className="w-5 h-5 text-black" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800 text-sm">Weekly Devotional</h4>
+                          <p className="text-xs text-gray-600">Join our live sessions</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <Heart className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800 text-sm">Prayer Requests</h4>
+                          <p className="text-xs text-gray-600">Share your needs</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800 text-sm">Events Calendar</h4>
+                          <p className="text-xs text-gray-600">Upcoming gatherings</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Creator Spotlight */}
+                  <Card className="bg-white shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-black">
+                        <Play className="w-5 h-5 text-yellow-600" />
+                        Creator Spotlight
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3 mb-4">
+                        <Avatar className="w-12 h-12">
+                          <AvatarFallback className="bg-yellow-100 text-yellow-800 font-bold">LC</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold text-gray-800">Luis Lucero</h4>
+                          <p className="text-sm text-gray-600">Faith & Inspiration</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Creating content that inspires and strengthens faith in our community.
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          <span>25K+ views</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>1.2K followers</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             )}
             
             {/* Content Highlights Sidebar */}
             <div className="lg:col-span-1 space-y-6">
               {/* Latest Updates */}
-              <Card className="bg-gradient-to-br from-amber-50 to-white shadow-lg">
+              <Card className="bg-gradient-to-br from-yellow-50 to-white shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-black">
-                    <Play className="w-5 h-5 text-amber-600" />
+                    <Play className="w-5 h-5 text-yellow-600" />
                     Latest Updates
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="border-l-4 border-amber-400 pl-4">
+                  <div className="border-l-4 border-yellow-400 pl-4">
                     <h4 className="font-semibold text-gray-800">New Creator Joined</h4>
                     <p className="text-sm text-gray-600">Welcome our newest sponsored creator</p>
-                    <span className="text-xs text-amber-600">2 days ago</span>
+                    <span className="text-xs text-yellow-600">2 days ago</span>
                   </div>
-                  <div className="border-l-4 border-amber-400 pl-4">
+                  <div className="border-l-4 border-yellow-400 pl-4">
                     <h4 className="font-semibold text-gray-800">Content Milestone</h4>
                     <p className="text-sm text-gray-600">100K+ views across all creators</p>
-                    <span className="text-xs text-amber-600">1 week ago</span>
+                    <span className="text-xs text-yellow-600">1 week ago</span>
                   </div>
-                  <div className="border-l-4 border-amber-400 pl-4">
+                  <div className="border-l-4 border-yellow-400 pl-4">
                     <h4 className="font-semibold text-gray-800">Community Growth</h4>
                     <p className="text-sm text-gray-600">New partnership announcements</p>
-                    <span className="text-xs text-amber-600">2 weeks ago</span>
+                    <span className="text-xs text-yellow-600">2 weeks ago</span>
                   </div>
                 </CardContent>
               </Card>
@@ -165,7 +241,7 @@ export default function CreatorsPage() {
               <Card className="bg-white shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-black">
-                    <Users className="w-5 h-5 text-amber-600" />
+                    <Users className="w-5 h-5 text-yellow-600" />
                     Popular Categories
                   </CardTitle>
                 </CardHeader>
@@ -195,26 +271,26 @@ export default function CreatorsPage() {
               <Card className="bg-white shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-black">
-                    <Eye className="w-5 h-5 text-amber-600" />
+                    <Eye className="w-5 h-5 text-yellow-600" />
                     Content Impact
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-amber-600">50K+</div>
+                      <div className="text-2xl font-bold text-yellow-600">50K+</div>
                       <div className="text-xs text-gray-600">Total Views</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-amber-600">1.2K</div>
+                      <div className="text-2xl font-bold text-yellow-600">1.2K</div>
                       <div className="text-xs text-gray-600">Engagements</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-amber-600">25+</div>
+                      <div className="text-2xl font-bold text-yellow-600">25+</div>
                       <div className="text-xs text-gray-600">Active Creators</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-amber-600">95%</div>
+                      <div className="text-2xl font-bold text-yellow-600">95%</div>
                       <div className="text-xs text-gray-600">Satisfaction</div>
                     </div>
                   </div>
@@ -253,7 +329,7 @@ export default function CreatorsPage() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-16 h-16">
                       <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
-                      <AvatarFallback className="bg-amber-100 text-amber-800 text-lg font-semibold">
+                      <AvatarFallback className="bg-yellow-100 text-yellow-800 text-lg font-semibold">
                         {creator.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
@@ -275,13 +351,13 @@ export default function CreatorsPage() {
                   {/* Content & Audience */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Play className="w-4 h-4 text-amber-600" />
+                      <Play className="w-4 h-4 text-yellow-600" />
                       <span className="text-sm text-gray-700 font-medium">Content:</span>
                       <span className="text-sm text-gray-600">{creator.content}</span>
                     </div>
                     {creator.audience && (
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-amber-600" />
+                        <Users className="w-4 h-4 text-yellow-600" />
                         <span className="text-sm text-gray-700 font-medium">Audience:</span>
                         <span className="text-sm text-gray-600">{creator.audience}</span>
                       </div>
@@ -305,7 +381,7 @@ export default function CreatorsPage() {
                             {platform.platform}
                           </span>
                           {platform.subscriberCount && (
-                            <Badge className="text-xs ml-1 bg-amber-400 text-black hover:bg-amber-500">
+                            <Badge className="text-xs ml-1 bg-yellow-400 text-black hover:bg-yellow-500">
                               {formatSubscriberCount(platform.subscriberCount)}
                             </Badge>
                           )}
