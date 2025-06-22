@@ -4,6 +4,7 @@ import { Logo } from "@/components/Logo";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCreatorStatus } from "@/hooks/useCreatorStatus";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [path] = useLocation();
   const { user, isLoading } = useAuth();
+  const { data: creatorStatus } = useCreatorStatus();
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
+                    <AvatarImage src={user?.profileImage || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>
@@ -77,6 +79,13 @@ export default function Header() {
                     <div className="cursor-pointer w-full">Manage Campaigns</div>
                   </Link>
                 </DropdownMenuItem>
+                {creatorStatus?.isCreator && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/creator-profile">
+                      <div className="cursor-pointer w-full">Creator Profile</div>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {user?.isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin">

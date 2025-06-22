@@ -93,6 +93,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
 
+  // Check if current user is an approved creator
+  app.get('/api/user/creator-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const creator = await storage.getUserContentCreator(userId);
+      
+      if (!creator) {
+        return res.json({ isCreator: false });
+      }
+      
+      res.json({
+        isCreator: true,
+        creatorProfile: creator
+      });
+    } catch (error) {
+      console.error("Error fetching creator status:", error);
+      res.status(500).json({ message: "Failed to fetch creator status" });
+    }
+  });
+
   // Admin middleware
   const isAdmin = async (req: any, res: any, next: any) => {
     try {
