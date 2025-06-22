@@ -203,7 +203,7 @@ export default function CreatorsPage() {
                             {platform.platform}
                           </span>
                           {platform.subscriberCount && (
-                            <Badge variant="outline" className="text-xs ml-1">
+                            <Badge className="text-xs ml-1 bg-amber-400 text-black hover:bg-amber-500">
                               {formatSubscriberCount(platform.subscriberCount)}
                             </Badge>
                           )}
