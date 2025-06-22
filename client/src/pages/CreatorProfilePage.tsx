@@ -158,7 +158,7 @@ export default function CreatorProfilePage() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{getPlatformIcon(platform.platform)}</span>
-                        <span className="font-medium capitalize">{platform.platform}</span>
+                        <span className="font-medium capitalize text-black">{platform.platform}</span>
                       </div>
                       {platform.subscriberCount && (
                         <Badge variant="outline">
