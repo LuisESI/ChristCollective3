@@ -193,7 +193,7 @@ export default function CreatorProfileManagePage() {
                 {creatorProfile?.audience && (
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-amber-600" />
-                    <span className="text-sm text-gray-700">Audience: {creatorProfile.audience}</span>
+                    <span className="text-sm text-white">Audience: {creatorProfile.audience}</span>
                   </div>
                 )}
                 <div className="space-y-2">
