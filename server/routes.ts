@@ -319,6 +319,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update content creator profile
+  app.put('/api/content-creators/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const creatorId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(creatorId)) {
+        return res.status(400).json({ message: "Invalid creator ID" });
+      }
+      
+      // Verify the creator belongs to the authenticated user
+      const existingCreator = await storage.getContentCreator(creatorId);
+      if (!existingCreator) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+      
+      if (existingCreator.userId !== userId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Validate the update data
+      const updateData = insertContentCreatorSchema.partial().parse(req.body);
+      
+      const updatedCreator = await storage.updateContentCreator(creatorId, {
+        ...updateData,
+        updatedAt: new Date()
+      });
+      
+      res.json(updatedCreator);
+    } catch (error) {
+      console.error("Error updating content creator:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to update creator profile" });
+    }
+  });
+
   app.get('/api/users/:userId/content-creator', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;

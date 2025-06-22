@@ -61,7 +61,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.profileImage || undefined} alt={user?.firstName || "User"} />
+                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>
@@ -153,6 +153,13 @@ export default function Header() {
                     Manage Campaigns
                   </div>
                 </Link>
+                {creatorStatus?.isCreator && (
+                  <Link href="/creator-profile">
+                    <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
+                      Creator Profile
+                    </div>
+                  </Link>
+                )}
                 <a 
                   href="/api/logout" 
                   className="text-foreground hover:text-primary transition-colors font-medium py-2"
