@@ -111,7 +111,7 @@ export default function CreatorProfilePage() {
             
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                <h1 className="text-3xl md:text-4xl font-bold">{creator.name}</h1>
+                <h1 className="text-3xl md:text-4xl font-bold">Luis Lucero</h1>
                 <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 w-fit">
                   Sponsored Creator
                 </Badge>
