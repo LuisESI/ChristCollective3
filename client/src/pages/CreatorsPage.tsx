@@ -160,9 +160,9 @@ export default function CreatorsPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-16 h-16">
-                      <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
+                      <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Luis Lucero" />
                       <AvatarFallback className="bg-amber-100 text-amber-800 text-lg font-semibold">
-                        {creator.name.split(' ').map(n => n[0]).join('')}
+                        LL
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
