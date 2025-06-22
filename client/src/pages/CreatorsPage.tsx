@@ -215,7 +215,7 @@ export default function CreatorsPage() {
                   {/* Action Button */}
                   <div className="pt-4">
                     <Link href={`/creators/${creator.id}`}>
-                      <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-black">
                         <Eye className="w-4 h-4 mr-2" />
                         View Profile
                       </Button>
