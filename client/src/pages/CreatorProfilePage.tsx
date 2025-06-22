@@ -9,7 +9,7 @@ import { ExternalLink, Users, Play, Eye, Heart, Calendar, ArrowLeft } from "luci
 import { Link } from "wouter";
 import { ContentCreator, SocialMediaPost } from "@shared/schema";
 import instagramLogo from "@/assets/instagram-icon-new.png";
-import tiktokLogo from "@/assets/tiktok-logo.png";
+import tiktokLogo from "@/assets/tiktok-icon-new.png";
 
 interface CreatorWithPosts extends ContentCreator {
   posts?: SocialMediaPost[];
