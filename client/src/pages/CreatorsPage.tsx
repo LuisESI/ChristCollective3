@@ -67,12 +67,65 @@ export default function CreatorsPage() {
       <div className="bg-black text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Creators for <span className="text-amber-400">Christ</span>
+            Featured <span className="text-amber-400">Creators</span>
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Discover our sponsored content creators spreading faith-based messages 
             across multiple platforms and watch featured content
           </p>
+        </div>
+      </div>
+
+      {/* Featured Content Section */}
+      <div className="bg-gradient-to-br from-amber-50 to-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-black">Featured Content</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Watch inspiring faith-based content from our community creators
+            </p>
+          </div>
+
+          {/* Featured Video */}
+          {!isYouTubeLoading && youtubeVideo && (
+            <div className="max-w-4xl mx-auto">
+              <Card className="bg-white shadow-2xl overflow-hidden">
+                <div className="aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${youtubeVideo.id}`}
+                    title={youtubeVideo.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full rounded-t-lg"
+                  ></iframe>
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-black mb-2">{youtubeVideo.title}</h3>
+                      <p className="text-gray-600 mb-4 line-clamp-2">{youtubeVideo.description}</p>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{youtubeVideo.viewCount ? parseInt(youtubeVideo.viewCount).toLocaleString() : 'N/A'} views</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{youtubeVideo.publishedAt ? new Date(youtubeVideo.publishedAt).toLocaleDateString() : 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Badge className="bg-red-100 text-red-800 hover:bg-red-200 ml-4">
+                      Featured Video
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 
