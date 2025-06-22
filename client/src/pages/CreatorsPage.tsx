@@ -7,6 +7,7 @@ import { ExternalLink, Users, Play, Eye, Heart, Star, Globe, Calendar } from "lu
 import { Link } from "wouter";
 import { ContentCreator } from "@shared/schema";
 import instagramIconPath from "@assets/db059a4689b94fbb9a3d0a81e9ae8f52-32bits-32_1750620933253.png";
+import tiktokIconPath from "@assets/e7fee89a6a10380e09e348c7bd31caf4-32bits-32_1750620982285.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 import instagramLogo from "@/assets/instagram-logo.png";
 
@@ -35,7 +36,7 @@ export default function CreatorsPage() {
     switch (platform.toLowerCase()) {
       case 'youtube': return '📺';
       case 'instagram': return <img src={instagramIconPath} alt="Instagram" className="w-6 h-6 object-contain" />;
-      case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-6 h-6 object-contain" />;
+      case 'tiktok': return <img src={tiktokIconPath} alt="TikTok" className="w-6 h-6 object-contain" />;
       case 'twitter': return '🐦';
       case 'facebook': return '👥';
       case 'linkedin': return '💼';
