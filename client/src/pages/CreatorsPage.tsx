@@ -87,51 +87,141 @@ export default function CreatorsPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4 text-black">Featured Content</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Watch inspiring faith-based content from our community creators
-            </p>
           </div>
 
-          {/* Featured Video */}
-          {!isYouTubeLoading && youtubeVideo && (
-            <div className="max-w-4xl mx-auto">
-              <Card className="bg-white shadow-2xl overflow-hidden">
-                <div className="aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${youtubeVideo.id}`}
-                    title={youtubeVideo.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full rounded-t-lg"
-                  ></iframe>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-black mb-2">{youtubeVideo.title}</h3>
-                      <p className="text-gray-600 mb-4 line-clamp-2">{youtubeVideo.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          <span>{youtubeVideo.viewCount ? parseInt(youtubeVideo.viewCount).toLocaleString() : 'N/A'} views</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{youtubeVideo.publishedAt ? new Date(youtubeVideo.publishedAt).toLocaleDateString() : 'N/A'}</span>
+          {/* Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* Featured Video */}
+            {!isYouTubeLoading && youtubeVideo && (
+              <div className="lg:col-span-2">
+                <Card className="bg-white shadow-2xl overflow-hidden h-full">
+                  <div className="aspect-video">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${youtubeVideo.id}`}
+                      title={youtubeVideo.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full rounded-t-lg"
+                    ></iframe>
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-black mb-2">{youtubeVideo.title}</h3>
+                        <p className="text-gray-600 mb-4 line-clamp-2">{youtubeVideo.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{youtubeVideo.viewCount ? parseInt(youtubeVideo.viewCount).toLocaleString() : 'N/A'} views</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>{youtubeVideo.publishedAt ? new Date(youtubeVideo.publishedAt).toLocaleDateString() : 'N/A'}</span>
+                          </div>
                         </div>
                       </div>
+                      <Badge className="bg-red-100 text-red-800 hover:bg-red-200 ml-4">
+                        Featured Video
+                      </Badge>
                     </div>
-                    <Badge className="bg-red-100 text-red-800 hover:bg-red-200 ml-4">
-                      Featured Video
-                    </Badge>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            {/* Content Highlights Sidebar */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Latest Updates */}
+              <Card className="bg-gradient-to-br from-amber-50 to-white shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-black">
+                    <Play className="w-5 h-5 text-amber-600" />
+                    Latest Updates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="border-l-4 border-amber-400 pl-4">
+                    <h4 className="font-semibold text-gray-800">New Creator Joined</h4>
+                    <p className="text-sm text-gray-600">Welcome our newest sponsored creator</p>
+                    <span className="text-xs text-amber-600">2 days ago</span>
+                  </div>
+                  <div className="border-l-4 border-amber-400 pl-4">
+                    <h4 className="font-semibold text-gray-800">Content Milestone</h4>
+                    <p className="text-sm text-gray-600">100K+ views across all creators</p>
+                    <span className="text-xs text-amber-600">1 week ago</span>
+                  </div>
+                  <div className="border-l-4 border-amber-400 pl-4">
+                    <h4 className="font-semibold text-gray-800">Community Growth</h4>
+                    <p className="text-sm text-gray-600">New partnership announcements</p>
+                    <span className="text-xs text-amber-600">2 weeks ago</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Popular Categories */}
+              <Card className="bg-white shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-black">
+                    <Users className="w-5 h-5 text-amber-600" />
+                    Popular Categories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Faith & Inspiration</span>
+                      <Badge className="bg-yellow-400 text-black text-xs">Most Popular</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Community Stories</span>
+                      <Badge variant="outline" className="text-xs">Trending</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Educational Content</span>
+                      <Badge variant="outline" className="text-xs">Growing</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Music & Worship</span>
+                      <Badge variant="outline" className="text-xs">Featured</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Stats */}
+              <Card className="bg-white shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-black">
+                    <Eye className="w-5 h-5 text-amber-600" />
+                    Content Impact
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-600">50K+</div>
+                      <div className="text-xs text-gray-600">Total Views</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-600">1.2K</div>
+                      <div className="text-xs text-gray-600">Engagements</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-600">25+</div>
+                      <div className="text-xs text-gray-600">Active Creators</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-600">95%</div>
+                      <div className="text-xs text-gray-600">Satisfaction</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
