@@ -148,8 +148,7 @@ export default function CreatorProfilePage() {
           <div className="lg:col-span-1">
             <Card className="bg-white shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">🌐</span>
+                <CardTitle className="flex items-center gap-2 text-black">
                   Social Media Platforms
                 </CardTitle>
               </CardHeader>
