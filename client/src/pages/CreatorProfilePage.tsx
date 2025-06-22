@@ -163,7 +163,7 @@ export default function CreatorProfilePage() {
                         <span className="font-medium capitalize text-black">{platform.platform}</span>
                       </div>
                       {platform.subscriberCount && (
-                        <Badge variant="outline">
+                        <Badge className="bg-yellow-400 text-black border-yellow-400">
                           {formatSubscriberCount(platform.subscriberCount)} followers
                         </Badge>
                       )}
