@@ -185,7 +185,7 @@ export default function CreatorProfilePage() {
           <div className="lg:col-span-2">
             <Card className="bg-white shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black">
                   <Play className="w-5 h-5 text-amber-600" />
                   Recent Content
                 </CardTitle>
