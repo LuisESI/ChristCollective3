@@ -162,13 +162,13 @@ export default function CreatorsPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-16 h-16">
-                      <AvatarImage src={user?.profileImageUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"} alt="Luis Lucero" />
+                      <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
                       <AvatarFallback className="bg-amber-100 text-amber-800 text-lg font-semibold">
-                        LL
+                        {creator.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-800">Luis Lucero</CardTitle>
+                      <CardTitle className="text-xl text-gray-800">{creator.name}</CardTitle>
                       <Badge className="bg-yellow-400 text-black hover:bg-yellow-500 mt-1">
                         Sponsored Creator
                       </Badge>
