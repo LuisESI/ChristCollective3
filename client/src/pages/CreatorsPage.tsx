@@ -166,7 +166,7 @@ export default function CreatorsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-800">{creator.name}</CardTitle>
+                      <CardTitle className="text-xl text-gray-800">Luis Lucero</CardTitle>
                       <Badge className="bg-yellow-400 text-black hover:bg-yellow-500 mt-1">
                         Sponsored Creator
                       </Badge>
