@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ExternalLink, Users, Play, Eye, Heart } from "lucide-react";
+import { ExternalLink, Users, Play, Eye, Heart, Star, Globe, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { ContentCreator } from "@shared/schema";
 
@@ -15,6 +15,17 @@ export default function CreatorsPage() {
       if (!response.ok) throw new Error('Failed to fetch creators');
       return response.json();
     }
+  });
+
+  // Fetch featured YouTube video
+  const { data: youtubeVideo, isLoading: isYouTubeLoading } = useQuery({
+    queryKey: ["/api/youtube/video", "https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"],
+    queryFn: async () => {
+      const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"));
+      if (!response.ok) throw new Error("Failed to fetch video data");
+      return response.json();
+    },
+    enabled: true,
   });
 
   const getPlatformIcon = (platform: string) => {
