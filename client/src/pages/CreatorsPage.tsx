@@ -33,8 +33,8 @@ export default function CreatorsPage() {
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'youtube': return '📺';
-      case 'instagram': return <img src={instagramLogo} alt="Instagram" className="w-5 h-5" />;
-      case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-5 h-5" />;
+      case 'instagram': return <img src={instagramLogo} alt="Instagram" className="w-4 h-4 object-contain" />;
+      case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-4 h-4 object-contain" />;
       case 'twitter': return '🐦';
       case 'facebook': return '👥';
       case 'linkedin': return '💼';
@@ -200,9 +200,9 @@ export default function CreatorsPage() {
                     <div className="flex flex-wrap gap-2">
                       {(creator.platforms as any[])?.map((platform, index) => (
                         <div key={index} className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1">
-                          <div className="flex items-center justify-center w-5 h-5">
+                          <div className="flex items-center justify-center w-4 h-4 flex-shrink-0">
                             {typeof getPlatformIcon(platform.platform) === 'string' ? (
-                              <span className="text-lg">{getPlatformIcon(platform.platform)}</span>
+                              <span className="text-sm">{getPlatformIcon(platform.platform)}</span>
                             ) : (
                               getPlatformIcon(platform.platform)
                             )}
