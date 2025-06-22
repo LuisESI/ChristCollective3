@@ -24,6 +24,7 @@ import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
 import CreatorsPage from "@/pages/CreatorsPage";
 import CreatorProfilePage from "@/pages/CreatorProfilePage";
+import CreatorProfileManagePage from "@/pages/CreatorProfileManagePage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/creators" component={CreatorsPage} />
       <Route path="/creators/:id" component={CreatorProfilePage} />
+      <Route path="/creator-profile" component={CreatorProfileManagePage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route path="/apply-sponsorship" component={SponsorshipApplicationPage} />
       <Route path="/admin" component={AdminDashboard} />
