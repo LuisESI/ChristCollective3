@@ -206,7 +206,7 @@ export default function CreatorProfileManagePage() {
                           {platform.platform}
                         </span>
                         {platform.subscriberCount && (
-                          <Badge variant="outline" className="text-xs ml-1">
+                          <Badge variant="outline" className="text-xs ml-1 bg-yellow-400 text-black border-yellow-500">
                             {platform.subscriberCount >= 1000000 
                               ? `${(platform.subscriberCount / 1000000).toFixed(1)}M`
                               : platform.subscriberCount >= 1000 
