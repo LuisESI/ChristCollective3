@@ -219,7 +219,7 @@ export default function CreatorProfilePage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <div className="text-lg">{getPlatformIcon(post.platform)}</div>
-                              <Badge variant="outline" className={`capitalize ${post.platform.toLowerCase() === 'instagram' ? 'bg-black text-white border-black' : ''}`}>
+                              <Badge variant="outline" className={`capitalize ${post.platform.toLowerCase() === 'instagram' || post.platform.toLowerCase() === 'tiktok' ? 'bg-black text-white border-black' : ''}`}>
                                 {post.platform}
                               </Badge>
                               {post.isSponsored && (
