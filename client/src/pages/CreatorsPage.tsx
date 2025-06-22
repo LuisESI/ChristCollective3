@@ -167,7 +167,7 @@ export default function CreatorsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <CardTitle className="text-xl text-gray-800">{creator.name}</CardTitle>
-                      <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 mt-1">
+                      <Badge className="bg-yellow-400 text-black hover:bg-yellow-500 mt-1">
                         Sponsored Creator
                       </Badge>
                     </div>
