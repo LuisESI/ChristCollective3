@@ -143,7 +143,7 @@ export default function CreatorProfileManagePage() {
         {/* Header */}
         <div className="mb-8">
           <Link href="/creators">
-            <Button variant="ghost" className="mb-4">
+            <Button variant="ghost" className="mb-4 bg-black text-white hover:bg-gray-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Creators
             </Button>
