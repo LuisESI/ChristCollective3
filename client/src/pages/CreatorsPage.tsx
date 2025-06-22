@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ExternalLink, Users, Play, Eye, Heart, Star, Globe, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { ContentCreator } from "@shared/schema";
+import tiktokLogo from "@/assets/tiktok-logo.png";
+import instagramLogo from "@/assets/instagram-logo.png";
 
 export default function CreatorsPage() {
   const { data: creators, isLoading } = useQuery<ContentCreator[]>({
@@ -31,8 +33,8 @@ export default function CreatorsPage() {
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'youtube': return '📺';
-      case 'instagram': return '📷';
-      case 'tiktok': return '🎵';
+      case 'instagram': return <img src={instagramLogo} alt="Instagram" className="w-5 h-5" />;
+      case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-5 h-5" />;
       case 'twitter': return '🐦';
       case 'facebook': return '👥';
       case 'linkedin': return '💼';
@@ -198,7 +200,13 @@ export default function CreatorsPage() {
                     <div className="flex flex-wrap gap-2">
                       {(creator.platforms as any[])?.map((platform, index) => (
                         <div key={index} className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1">
-                          <span className="text-lg">{getPlatformIcon(platform.platform)}</span>
+                          <div className="flex items-center justify-center w-5 h-5">
+                            {typeof getPlatformIcon(platform.platform) === 'string' ? (
+                              <span className="text-lg">{getPlatformIcon(platform.platform)}</span>
+                            ) : (
+                              getPlatformIcon(platform.platform)
+                            )}
+                          </div>
                           <span className="text-xs font-medium text-gray-700 capitalize">
                             {platform.platform}
                           </span>
