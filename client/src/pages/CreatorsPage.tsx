@@ -210,33 +210,6 @@ export default function CreatorsPage() {
             
             {/* Content Highlights Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Latest Updates */}
-              <Card className="bg-gradient-to-br from-yellow-50 to-white shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-black">
-                    <Play className="w-5 h-5 text-yellow-600" />
-                    Latest Updates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="border-l-4 border-yellow-400 pl-4">
-                    <h4 className="font-semibold text-gray-800">New Creator Joined</h4>
-                    <p className="text-sm text-gray-600">Welcome our newest sponsored creator</p>
-                    <span className="text-xs text-yellow-600">2 days ago</span>
-                  </div>
-                  <div className="border-l-4 border-yellow-400 pl-4">
-                    <h4 className="font-semibold text-gray-800">Content Milestone</h4>
-                    <p className="text-sm text-gray-600">100K+ views across all creators</p>
-                    <span className="text-xs text-yellow-600">1 week ago</span>
-                  </div>
-                  <div className="border-l-4 border-yellow-400 pl-4">
-                    <h4 className="font-semibold text-gray-800">Community Growth</h4>
-                    <p className="text-sm text-gray-600">New partnership announcements</p>
-                    <span className="text-xs text-yellow-600">2 weeks ago</span>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Popular Categories */}
               <Card className="bg-white shadow-lg">
                 <CardHeader>
