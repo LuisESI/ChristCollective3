@@ -10,6 +10,7 @@ import { Link } from "wouter";
 import { ContentCreator, SocialMediaPost } from "@shared/schema";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@/assets/tiktok-icon-new.png";
+import youtubeIconPath from "@assets/8ffe43e003e7013416bd66ce7de71611-32bits-32_1751771363362.png";
 
 interface CreatorWithPosts extends ContentCreator {
   posts?: SocialMediaPost[];
@@ -29,7 +30,7 @@ export default function CreatorProfilePage() {
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
-      case 'youtube': return <span className="text-2xl">📺</span>;
+      case 'youtube': return <img src={youtubeIconPath} alt="YouTube" className="w-6 h-6" />;
       case 'instagram': return <img src={instagramLogo} alt="Instagram" className="w-6 h-6" />;
       case 'tiktok': return <img src={tiktokLogo} alt="TikTok" className="w-6 h-6" />;
       case 'twitter': return <span className="text-2xl">🐦</span>;
@@ -156,22 +157,26 @@ export default function CreatorProfilePage() {
               </CardHeader>
               <CardContent className="flex flex-wrap gap-4">
                 {(creator.platforms as any[])?.map((platform, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex-1 min-w-[200px]">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex-1 min-w-[250px] max-w-[300px]">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
                         {getPlatformIcon(platform.platform)}
-                        <span className="font-medium capitalize text-black">{platform.platform}</span>
                       </div>
-                      {platform.subscriberCount && (
-                        <Badge className="bg-yellow-400 text-black border-yellow-400">
-                          {formatSubscriberCount(platform.subscriberCount)} followers
-                        </Badge>
-                      )}
+                      <div className="flex-1">
+                        <span className="font-medium capitalize text-black text-lg">{platform.platform}</span>
+                        {platform.subscriberCount && (
+                          <div className="mt-1">
+                            <Badge className="bg-yellow-400 text-black border-yellow-400 text-xs">
+                              {formatSubscriberCount(platform.subscriberCount)} followers
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full"
+                      className="w-full bg-black text-white hover:bg-gray-800"
                       onClick={() => window.open(platform.profileUrl, '_blank')}
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
