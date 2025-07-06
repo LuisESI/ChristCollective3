@@ -9,7 +9,7 @@ import { ContentCreator } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 import instagramIconPath from "@assets/db059a4689b94fbb9a3d0a81e9ae8f52-32bits-32_1750620933253.png";
 import tiktokIconPath from "@assets/e7fee89a6a10380e09e348c7bd31caf4-32bits-32_1750620982285.png";
-import youtubeIconPath from "@assets/7de0624c49041875910d8fc6655f3142-32bits-32_1751771114476.png";
+import youtubeIconPath from "@assets/8ffe43e003e7013416bd66ce7de71611-32bits-32_1751771363362.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 import instagramLogo from "@/assets/instagram-logo.png";
 
