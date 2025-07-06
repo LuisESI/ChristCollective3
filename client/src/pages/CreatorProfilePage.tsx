@@ -154,9 +154,9 @@ export default function CreatorProfilePage() {
                   Social Media Platforms
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex flex-wrap gap-4">
                 {(creator.platforms as any[])?.map((platform, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex-1 min-w-[200px]">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {getPlatformIcon(platform.platform)}
