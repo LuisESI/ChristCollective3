@@ -130,116 +130,12 @@ export default function CreatorsPage() {
                   </CardContent>
                 </Card>
 
-                {/* Additional Content Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Community Highlights */}
-                  <Card className="bg-white shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-black">
-                        <Users className="w-5 h-5 text-yellow-600" />
-                        Community Highlights
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
-                        <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                          <Play className="w-5 h-5 text-black" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm">Weekly Devotional</h4>
-                          <p className="text-xs text-gray-600">Join our live sessions</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <Heart className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm">Prayer Requests</h4>
-                          <p className="text-xs text-gray-600">Share your needs</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <Calendar className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm">Events Calendar</h4>
-                          <p className="text-xs text-gray-600">Upcoming gatherings</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
 
-                  {/* Creator Spotlight */}
-                  <Card className="bg-white shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-black">
-                        <Play className="w-5 h-5 text-yellow-600" />
-                        Creator Spotlight
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-3 mb-4">
-                        <Avatar className="w-12 h-12">
-                          <AvatarFallback className="bg-yellow-100 text-yellow-800 font-bold">LC</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-semibold text-gray-800">Luis Lucero</h4>
-                          <p className="text-sm text-gray-600">Faith & Inspiration</p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Creating content that inspires and strengthens faith in our community.
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          <span>25K+ views</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          <span>1.2K followers</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
               </div>
             )}
             
             {/* Content Highlights Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Popular Categories */}
-              <Card className="bg-white shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-black">
-                    <Users className="w-5 h-5 text-yellow-600" />
-                    Popular Categories
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Faith & Inspiration</span>
-                      <Badge className="bg-yellow-400 text-black text-xs">Most Popular</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Community Stories</span>
-                      <Badge variant="outline" className="text-xs">Trending</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Educational Content</span>
-                      <Badge variant="outline" className="text-xs">Growing</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Music & Worship</span>
-                      <Badge variant="outline" className="text-xs">Featured</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Quick Stats */}
               <Card className="bg-white shadow-lg">
                 <CardHeader>
