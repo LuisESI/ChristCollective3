@@ -75,10 +75,18 @@ export default function CreatorsPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Creators for <span className="text-yellow-400">Christ</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
             Discover our sponsored content creators spreading faith-based messages 
             across multiple platforms and watch featured content
           </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-3 text-lg">
+              Apply for Sponsorship
+            </Button>
+            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black font-semibold px-8 py-3 text-lg">
+              Learn more
+            </Button>
+          </div>
         </div>
       </div>
 
