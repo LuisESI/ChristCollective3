@@ -151,19 +151,19 @@ export default function CreatorsPage() {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">50K+</div>
+                      <div className="text-2xl font-bold text-yellow-500">50K+</div>
                       <div className="text-xs text-gray-600">Total Views</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">1.2K</div>
+                      <div className="text-2xl font-bold text-yellow-500">1.2K</div>
                       <div className="text-xs text-gray-600">Engagements</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">25+</div>
+                      <div className="text-2xl font-bold text-yellow-500">25+</div>
                       <div className="text-xs text-gray-600">Active Creators</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">95%</div>
+                      <div className="text-2xl font-bold text-yellow-500">95%</div>
                       <div className="text-xs text-gray-600">Satisfaction</div>
                     </div>
                   </div>
