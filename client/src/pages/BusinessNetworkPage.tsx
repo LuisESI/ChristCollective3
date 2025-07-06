@@ -295,7 +295,7 @@ export default function BusinessNetworkPage() {
             <TabsContent value="membership" className="space-y-10">
               <div className="max-w-4xl mx-auto text-center mb-12">
                 <h2 className="text-3xl font-bold mb-4">Founding Member Program</h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-lg text-black mb-8">
                   Join our exclusive founding member program! The first 100 members get lifetime access for FREE.
                 </p>
                 
