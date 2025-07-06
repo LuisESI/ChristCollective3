@@ -163,7 +163,7 @@ export default function AboutPage() {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-black">Faith-Centered</h3>
+                  <h3 className="text-xl font-semibold mb-2 text-black">Christ-Centered</h3>
                   <p className="text-gray-700">
                     Christ is at the center of everything we do. Our platform exists to serve 
                     His kingdom and advance His purposes.
