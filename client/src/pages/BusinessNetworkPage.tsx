@@ -146,9 +146,9 @@ export default function BusinessNetworkPage() {
       <section className="py-8 md:py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="directory" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10 bg-black p-1 rounded-lg">
-              <TabsTrigger value="directory" className="text-lg font-semibold text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-black data-[state=active]:shadow-sm">Directory</TabsTrigger>
-              <TabsTrigger value="membership" className="text-lg font-semibold text-white data-[state=active]:bg-yellow-400 data-[state=active]:text-black data-[state=active]:shadow-sm">Membership</TabsTrigger>
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="directory" className="text-lg font-semibold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">Directory</TabsTrigger>
+              <TabsTrigger value="membership" className="text-lg font-semibold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">Membership</TabsTrigger>
             </TabsList>
             
             <TabsContent value="directory" className="space-y-4 md:space-y-6">
