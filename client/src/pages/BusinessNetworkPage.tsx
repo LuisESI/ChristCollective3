@@ -331,31 +331,7 @@ export default function BusinessNetworkPage() {
                 )}
               </div>
               
-              {/* Membership Tiers */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {tiers.map((tier: MembershipTier) => (
-                  <Card key={tier.id} className="relative">
-                    <CardContent className="p-8">
-                      <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                      <div className="text-3xl font-bold text-primary mb-4">
-                        ${tier.price}<span className="text-sm text-gray-500">/month</span>
-                      </div>
-                      <p className="text-gray-600 mb-6">{tier.description}</p>
-                      
-                      <ul className="space-y-3 mb-8">
-                        {tier.features.map((feature, index) => (
-                          <li key={index} className="flex items-start">
-                            <CheckCircle size={16} className="text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      <Button className="w-full">Choose Plan</Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+
               
               {/* Stats Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
