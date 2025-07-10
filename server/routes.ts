@@ -1399,6 +1399,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // YouTube API endpoint to fetch channel videos and populate Recent Content
+  app.get('/api/youtube/channel-videos', async (req, res) => {
+    try {
+      const { handle, maxResults = 5 } = req.query;
+      
+      if (!handle || typeof handle !== 'string') {
+        return res.status(400).json({ message: "Channel handle is required" });
+      }
+      
+      // Get channel ID from handle
+      const channelId = await youtubeService.getChannelIdFromHandle(handle);
+      
+      if (!channelId) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+      
+      // Get latest videos
+      const videos = await youtubeService.getChannelVideos(channelId, parseInt(maxResults as string));
+      
+      res.json(videos);
+    } catch (error) {
+      console.error("Error fetching YouTube channel videos:", error);
+      res.status(500).json({ message: "Failed to fetch YouTube channel videos" });
+    }
+  });
+
+  // Admin endpoint to populate creator's Recent Content with real YouTube videos
+  app.post('/api/admin/populate-creator-content/:creatorId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { creatorId } = req.params;
+      const { channelHandle } = req.body;
+      
+      if (!channelHandle) {
+        return res.status(400).json({ message: "Channel handle is required" });
+      }
+      
+      // Get channel ID from handle
+      const channelId = await youtubeService.getChannelIdFromHandle(channelHandle);
+      
+      if (!channelId) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+      
+      // Get latest videos (limit to 5 for Recent Content)
+      const videos = await youtubeService.getChannelVideos(channelId, 5);
+      
+      if (videos.length === 0) {
+        return res.status(404).json({ message: "No videos found for this channel" });
+      }
+      
+      // Clear existing posts for this creator
+      await storage.clearCreatorPosts(parseInt(creatorId));
+      
+      // Add real YouTube videos as social media posts
+      for (const video of videos) {
+        await storage.createSocialMediaPost({
+          creatorId: parseInt(creatorId),
+          postUrl: `https://www.youtube.com/watch?v=${video.id}`,
+          postTitle: video.title,
+          postDescription: video.description?.substring(0, 300) + (video.description?.length > 300 ? '...' : ''),
+          thumbnailUrl: video.thumbnail,
+          platform: 'youtube',
+          viewCount: parseInt(video.viewCount) || 0,
+          likeCount: parseInt(video.likeCount) || 0,
+          commentCount: parseInt(video.commentCount) || 0,
+          postedAt: new Date(video.publishedAt),
+          isSponsored: false
+        });
+      }
+      
+      res.json({ message: `Successfully populated ${videos.length} videos for creator ${creatorId}` });
+    } catch (error) {
+      console.error("Error populating creator content:", error);
+      res.status(500).json({ message: "Failed to populate creator content" });
+    }
+  });
+
   // TikTok API endpoint to fetch user data
   app.get('/api/tiktok/user', async (req, res) => {
     try {

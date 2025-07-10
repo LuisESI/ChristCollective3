@@ -161,6 +161,77 @@ export class YouTubeService {
     }
     return num.toString();
   }
+
+  async getChannelVideos(channelId: string, maxResults: number = 10): Promise<YouTubeVideoData[]> {
+    try {
+      // Get channel's latest videos
+      const searchResponse = await fetch(
+        `${this.baseUrl}/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=${maxResults}&key=${this.apiKey}`
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      }
+
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.items || searchData.items.length === 0) {
+        return [];
+      }
+
+      // Get detailed video information for each video
+      const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
+      
+      const videosResponse = await fetch(
+        `${this.baseUrl}/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${this.apiKey}`
+      );
+
+      if (!videosResponse.ok) {
+        throw new Error(`YouTube API error: ${videosResponse.status}`);
+      }
+
+      const videosData = await videosResponse.json();
+      
+      return videosData.items.map((video: any) => ({
+        id: video.id,
+        title: video.snippet.title,
+        description: video.snippet.description,
+        thumbnail: video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url || video.snippet.thumbnails.default.url,
+        channelTitle: video.snippet.channelTitle,
+        publishedAt: video.snippet.publishedAt,
+        viewCount: video.statistics.viewCount || '0',
+        likeCount: video.statistics.likeCount || '0',
+        commentCount: video.statistics.commentCount || '0',
+        duration: video.contentDetails.duration
+      }));
+    } catch (error) {
+      console.error('Error fetching channel videos:', error);
+      throw error;
+    }
+  }
+
+  async getChannelIdFromHandle(handle: string): Promise<string | null> {
+    try {
+      const searchResponse = await fetch(
+        `${this.baseUrl}/search?part=snippet&type=channel&q=${handle}&key=${this.apiKey}`
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.status}`);
+      }
+
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.items || searchData.items.length === 0) {
+        return null;
+      }
+
+      return searchData.items[0].id.channelId;
+    } catch (error) {
+      console.error('Error fetching channel ID:', error);
+      return null;
+    }
+  }
 }
 
 export const youtubeService = new YouTubeService();

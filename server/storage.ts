@@ -92,6 +92,7 @@ export interface IStorage {
   createSocialMediaPost(postData: InsertSocialMediaPost & { creatorId: number }): Promise<SocialMediaPost>;
   getSocialMediaPost(id: number): Promise<SocialMediaPost | undefined>;
   getSocialMediaPostsByCreator(creatorId: number): Promise<SocialMediaPost[]>;
+  clearCreatorPosts(creatorId: number): Promise<void>;
   listSponsoredSocialMediaPosts(): Promise<SocialMediaPost[]>;
   updateSocialMediaPost(id: number, data: Partial<SocialMediaPost>): Promise<SocialMediaPost>;
 }
@@ -509,6 +510,12 @@ export class DatabaseStorage implements IStorage {
       .from(socialMediaPosts)
       .where(eq(socialMediaPosts.creatorId, creatorId))
       .orderBy(desc(socialMediaPosts.postedAt));
+  }
+
+  async clearCreatorPosts(creatorId: number): Promise<void> {
+    await db
+      .delete(socialMediaPosts)
+      .where(eq(socialMediaPosts.creatorId, creatorId));
   }
 
   async listSponsoredSocialMediaPosts(): Promise<SocialMediaPost[]> {
