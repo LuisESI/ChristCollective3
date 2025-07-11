@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -29,6 +29,11 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";
 import AboutPage from "@/pages/AboutPage";
+import FeedPage from "@/pages/FeedPage";
+import ExplorePage from "@/pages/ExplorePage";
+import ConnectPage from "@/pages/ConnectPage";
+import MobileProfilePage from "@/pages/MobileProfilePage";
+import BottomNavigation from "@/components/layout/BottomNavigation";
 
 function Router() {
   return (
@@ -55,8 +60,28 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/about" component={AboutPage} />
+      <Route path="/feed" component={FeedPage} />
+      <Route path="/explore" component={ExplorePage} />
+      <Route path="/connect" component={ConnectPage} />
+      <Route path="/mobile-profile" component={MobileProfilePage} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+function AppContent() {
+  const { user } = useAuth();
+  
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen">
+        <Router />
+      </main>
+      <Footer />
+      {user && <BottomNavigation />}
+      <Toaster />
+    </>
   );
 }
 
@@ -66,12 +91,7 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="dark">
         <TooltipProvider>
           <AuthProvider>
-            <Header />
-            <main className="min-h-screen">
-              <Router />
-            </main>
-            <Footer />
-            <Toaster />
+            <AppContent />
           </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
