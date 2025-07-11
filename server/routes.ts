@@ -9,7 +9,10 @@ import {
   insertDonationSchema, 
   insertBusinessProfileSchema,
   insertContentCreatorSchema,
-  insertSponsorshipApplicationSchema
+  insertSponsorshipApplicationSchema,
+  insertMinistryProfileSchema,
+  insertMinistryPostSchema,
+  insertMinistryEventSchema
 } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
@@ -1781,6 +1784,243 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Ministry routes
+  // Get all ministries
+  app.get('/api/ministries', async (req, res) => {
+    try {
+      const ministries = await storage.getAllMinistries();
+      res.json(ministries);
+    } catch (error) {
+      console.error("Error fetching ministries:", error);
+      res.status(500).json({ message: "Failed to fetch ministries" });
+    }
+  });
+
+  // Get specific ministry
+  app.get('/api/ministries/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const ministry = await storage.getMinistry(parseInt(id));
+      
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      res.json(ministry);
+    } catch (error) {
+      console.error("Error fetching ministry:", error);
+      res.status(500).json({ message: "Failed to fetch ministry" });
+    }
+  });
+
+  // Create ministry profile
+  app.post('/api/ministries', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Check if user already has a ministry profile
+      const existingProfile = await storage.getUserMinistryProfile(userId);
+      if (existingProfile) {
+        return res.status(400).json({ message: "User already has a ministry profile" });
+      }
+      
+      const profileData = insertMinistryProfileSchema.parse(req.body);
+      
+      const profile = await storage.createMinistryProfile({
+        ...profileData,
+        userId
+      });
+      
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error("Error creating ministry profile:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create ministry profile" });
+    }
+  });
+
+  // Update ministry profile
+  app.put('/api/ministries/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      if (ministry.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to update this ministry" });
+      }
+      
+      const updateData = insertMinistryProfileSchema.partial().parse(req.body);
+      const updatedMinistry = await storage.updateMinistryProfile(parseInt(id), updateData);
+      
+      res.json(updatedMinistry);
+    } catch (error) {
+      console.error("Error updating ministry:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update ministry profile" });
+    }
+  });
+
+  // Ministry posts routes
+  app.get('/api/ministries/:id/posts', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const posts = await storage.getMinistryPosts(parseInt(id));
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching ministry posts:", error);
+      res.status(500).json({ message: "Failed to fetch ministry posts" });
+    }
+  });
+
+  app.post('/api/ministries/:id/posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      if (ministry.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to post for this ministry" });
+      }
+      
+      const postData = insertMinistryPostSchema.parse(req.body);
+      const post = await storage.createMinistryPost({
+        ...postData,
+        ministryId: parseInt(id)
+      });
+      
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating ministry post:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid post data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create ministry post" });
+    }
+  });
+
+  // Ministry events routes
+  app.get('/api/ministries/:id/events', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const events = await storage.getMinistryEvents(parseInt(id));
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching ministry events:", error);
+      res.status(500).json({ message: "Failed to fetch ministry events" });
+    }
+  });
+
+  app.post('/api/ministries/:id/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      if (ministry.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to create events for this ministry" });
+      }
+      
+      const eventData = insertMinistryEventSchema.parse(req.body);
+      const event = await storage.createMinistryEvent({
+        ...eventData,
+        ministryId: parseInt(id)
+      });
+      
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating ministry event:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create ministry event" });
+    }
+  });
+
+  // Follow/unfollow ministry
+  app.post('/api/ministries/:id/follow', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      await storage.followMinistry(userId, parseInt(id));
+      res.json({ message: "Successfully followed ministry" });
+    } catch (error) {
+      console.error("Error following ministry:", error);
+      res.status(500).json({ message: "Failed to follow ministry" });
+    }
+  });
+
+  app.delete('/api/ministries/:id/follow', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      await storage.unfollowMinistry(userId, parseInt(id));
+      res.json({ message: "Successfully unfollowed ministry" });
+    } catch (error) {
+      console.error("Error unfollowing ministry:", error);
+      res.status(500).json({ message: "Failed to unfollow ministry" });
+    }
+  });
+
+  // Get user's ministry profile
+  app.get('/api/user/ministry-profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const profile = await storage.getUserMinistryProfile(userId);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching user ministry profile:", error);
+      res.status(500).json({ message: "Failed to fetch ministry profile" });
+    }
+  });
+
+  // Get user's followed ministries
+  app.get('/api/user/followed-ministries', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const ministries = await storage.getUserFollowedMinistries(userId);
+      res.json(ministries);
+    } catch (error) {
+      console.error("Error fetching followed ministries:", error);
+      res.status(500).json({ message: "Failed to fetch followed ministries" });
+    }
+  });
+
+  // Get ministry feed posts (for users who follow ministries)
+  app.get('/api/user/ministry-feed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const posts = await storage.getMinistryFeedPosts(userId);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching ministry feed:", error);
+      res.status(500).json({ message: "Failed to fetch ministry feed" });
     }
   });
 

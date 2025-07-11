@@ -7,6 +7,11 @@ import {
   contentCreators,
   sponsorshipApplications,
   socialMediaPosts,
+  ministryProfiles,
+  ministryPosts,
+  ministryEvents,
+  ministryFollowers,
+  eventRegistrations,
   type User,
   type UpsertUser,
   type Campaign,
@@ -22,6 +27,14 @@ import {
   type InsertSponsorshipApplication,
   type SocialMediaPost,
   type InsertSocialMediaPost,
+  type MinistryProfile,
+  type InsertMinistryProfile,
+  type MinistryPost,
+  type InsertMinistryPost,
+  type MinistryEvent,
+  type InsertMinistryEvent,
+  type MinistryFollower,
+  type EventRegistration,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -95,6 +108,27 @@ export interface IStorage {
   clearCreatorPosts(creatorId: number): Promise<void>;
   listSponsoredSocialMediaPosts(): Promise<SocialMediaPost[]>;
   updateSocialMediaPost(id: number, data: Partial<SocialMediaPost>): Promise<SocialMediaPost>;
+
+  // Ministry operations
+  createMinistryProfile(profileData: InsertMinistryProfile & { userId: string }): Promise<MinistryProfile>;
+  getMinistry(id: number): Promise<MinistryProfile | undefined>;
+  getUserMinistryProfile(userId: string): Promise<MinistryProfile | undefined>;
+  updateMinistryProfile(id: number, data: Partial<MinistryProfile>): Promise<MinistryProfile>;
+  getAllMinistries(): Promise<MinistryProfile[]>;
+  
+  // Ministry posts operations
+  createMinistryPost(postData: InsertMinistryPost & { ministryId: number }): Promise<MinistryPost>;
+  getMinistryPosts(ministryId: number): Promise<MinistryPost[]>;
+  
+  // Ministry events operations
+  createMinistryEvent(eventData: InsertMinistryEvent & { ministryId: number }): Promise<MinistryEvent>;
+  getMinistryEvents(ministryId: number): Promise<MinistryEvent[]>;
+  
+  // Ministry followers operations
+  followMinistry(userId: string, ministryId: number): Promise<void>;
+  unfollowMinistry(userId: string, ministryId: number): Promise<void>;
+  getUserFollowedMinistries(userId: string): Promise<MinistryProfile[]>;
+  getMinistryFeedPosts(userId: string): Promise<MinistryPost[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -432,13 +466,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listContentCreators(sponsoredOnly = false): Promise<ContentCreator[]> {
-    let query = db.select().from(contentCreators);
-    
     if (sponsoredOnly) {
-      query = query.where(eq(contentCreators.isSponsored, true));
+      return await db
+        .select()
+        .from(contentCreators)
+        .where(eq(contentCreators.isSponsored, true))
+        .orderBy(desc(contentCreators.createdAt));
     }
     
-    return await query.orderBy(desc(contentCreators.createdAt));
+    return await db
+      .select()
+      .from(contentCreators)
+      .orderBy(desc(contentCreators.createdAt));
   }
 
   // Sponsorship application operations
@@ -466,13 +505,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listSponsorshipApplications(status?: string): Promise<SponsorshipApplication[]> {
-    let query = db.select().from(sponsorshipApplications);
-    
     if (status) {
-      query = query.where(eq(sponsorshipApplications.status, status));
+      return await db
+        .select()
+        .from(sponsorshipApplications)
+        .where(eq(sponsorshipApplications.status, status))
+        .orderBy(desc(sponsorshipApplications.createdAt));
     }
     
-    return await query.orderBy(desc(sponsorshipApplications.createdAt));
+    return await db
+      .select()
+      .from(sponsorshipApplications)
+      .orderBy(desc(sponsorshipApplications.createdAt));
   }
 
   async updateSponsorshipApplication(id: number, data: Partial<SponsorshipApplication>): Promise<SponsorshipApplication> {
@@ -533,6 +577,145 @@ export class DatabaseStorage implements IStorage {
       .where(eq(socialMediaPosts.id, id))
       .returning();
     return post;
+  }
+
+  // Ministry operations
+  async createMinistryProfile(profileData: InsertMinistryProfile & { userId: string }): Promise<MinistryProfile> {
+    const [profile] = await db
+      .insert(ministryProfiles)
+      .values(profileData)
+      .returning();
+    return profile;
+  }
+
+  async getMinistry(id: number): Promise<MinistryProfile | undefined> {
+    const [ministry] = await db
+      .select()
+      .from(ministryProfiles)
+      .where(eq(ministryProfiles.id, id));
+    return ministry;
+  }
+
+  async getUserMinistryProfile(userId: string): Promise<MinistryProfile | undefined> {
+    const [profile] = await db
+      .select()
+      .from(ministryProfiles)
+      .where(eq(ministryProfiles.userId, userId));
+    return profile;
+  }
+
+  async updateMinistryProfile(id: number, data: Partial<MinistryProfile>): Promise<MinistryProfile> {
+    const [profile] = await db
+      .update(ministryProfiles)
+      .set(data)
+      .where(eq(ministryProfiles.id, id))
+      .returning();
+    return profile;
+  }
+
+  async getAllMinistries(): Promise<MinistryProfile[]> {
+    return await db
+      .select()
+      .from(ministryProfiles)
+      .where(eq(ministryProfiles.isActive, true))
+      .orderBy(desc(ministryProfiles.createdAt));
+  }
+
+  // Ministry posts operations
+  async createMinistryPost(postData: InsertMinistryPost & { ministryId: number }): Promise<MinistryPost> {
+    const [post] = await db
+      .insert(ministryPosts)
+      .values(postData)
+      .returning();
+    return post;
+  }
+
+  async getMinistryPosts(ministryId: number): Promise<MinistryPost[]> {
+    return await db
+      .select()
+      .from(ministryPosts)
+      .where(and(eq(ministryPosts.ministryId, ministryId), eq(ministryPosts.isPublished, true)))
+      .orderBy(desc(ministryPosts.createdAt));
+  }
+
+  // Ministry events operations
+  async createMinistryEvent(eventData: InsertMinistryEvent & { ministryId: number }): Promise<MinistryEvent> {
+    const [event] = await db
+      .insert(ministryEvents)
+      .values(eventData)
+      .returning();
+    return event;
+  }
+
+  async getMinistryEvents(ministryId: number): Promise<MinistryEvent[]> {
+    return await db
+      .select()
+      .from(ministryEvents)
+      .where(and(eq(ministryEvents.ministryId, ministryId), eq(ministryEvents.isPublished, true)))
+      .orderBy(ministryEvents.startDate);
+  }
+
+  // Ministry followers operations
+  async followMinistry(userId: string, ministryId: number): Promise<void> {
+    await db
+      .insert(ministryFollowers)
+      .values({ userId, ministryId })
+      .onConflictDoNothing();
+  }
+
+  async unfollowMinistry(userId: string, ministryId: number): Promise<void> {
+    await db
+      .delete(ministryFollowers)
+      .where(and(eq(ministryFollowers.userId, userId), eq(ministryFollowers.ministryId, ministryId)));
+  }
+
+  async getUserFollowedMinistries(userId: string): Promise<MinistryProfile[]> {
+    return await db
+      .select({
+        id: ministryProfiles.id,
+        userId: ministryProfiles.userId,
+        name: ministryProfiles.name,
+        description: ministryProfiles.description,
+        denomination: ministryProfiles.denomination,
+        website: ministryProfiles.website,
+        logo: ministryProfiles.logo,
+        location: ministryProfiles.location,
+        address: ministryProfiles.address,
+        phone: ministryProfiles.phone,
+        email: ministryProfiles.email,
+        socialLinks: ministryProfiles.socialLinks,
+        isActive: ministryProfiles.isActive,
+        isVerified: ministryProfiles.isVerified,
+        createdAt: ministryProfiles.createdAt,
+        updatedAt: ministryProfiles.updatedAt,
+      })
+      .from(ministryProfiles)
+      .innerJoin(ministryFollowers, eq(ministryFollowers.ministryId, ministryProfiles.id))
+      .where(eq(ministryFollowers.userId, userId))
+      .orderBy(desc(ministryFollowers.createdAt));
+  }
+
+  async getMinistryFeedPosts(userId: string): Promise<MinistryPost[]> {
+    return await db
+      .select({
+        id: ministryPosts.id,
+        ministryId: ministryPosts.ministryId,
+        title: ministryPosts.title,
+        content: ministryPosts.content,
+        type: ministryPosts.type,
+        mediaUrls: ministryPosts.mediaUrls,
+        links: ministryPosts.links,
+        isPublished: ministryPosts.isPublished,
+        createdAt: ministryPosts.createdAt,
+        updatedAt: ministryPosts.updatedAt,
+      })
+      .from(ministryPosts)
+      .innerJoin(ministryFollowers, eq(ministryFollowers.ministryId, ministryPosts.ministryId))
+      .where(and(
+        eq(ministryFollowers.userId, userId),
+        eq(ministryPosts.isPublished, true)
+      ))
+      .orderBy(desc(ministryPosts.createdAt));
   }
 }
 

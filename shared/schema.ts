@@ -221,6 +221,81 @@ export const sponsorshipApplications = pgTable("sponsorship_applications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Ministry profiles
+export const ministryProfiles = pgTable("ministry_profiles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  denomination: varchar("denomination"),
+  website: varchar("website"),
+  logo: varchar("logo"),
+  location: varchar("location"),
+  address: text("address"),
+  phone: varchar("phone"),
+  email: varchar("email"),
+  socialLinks: jsonb("social_links"), // {facebook, instagram, youtube, etc.}
+  isActive: boolean("is_active").default(true),
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ministry posts (informational posts, updates, etc.)
+export const ministryPosts = pgTable("ministry_posts", {
+  id: serial("id").primaryKey(),
+  ministryId: integer("ministry_id").notNull().references(() => ministryProfiles.id),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  type: varchar("type").notNull().default("post"), // post, announcement, update
+  mediaUrls: text("media_urls").array(), // Array of image/video URLs
+  links: jsonb("links"), // Array of external links with titles
+  isPublished: boolean("is_published").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ministry events (Bible studies, services, missions, community events)
+export const ministryEvents = pgTable("ministry_events", {
+  id: serial("id").primaryKey(),
+  ministryId: integer("ministry_id").notNull().references(() => ministryProfiles.id),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  type: varchar("type").notNull(), // bible_study, service, mission, community_event, worship, prayer
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  location: varchar("location"),
+  address: text("address"),
+  isOnline: boolean("is_online").default(false),
+  onlineLink: varchar("online_link"),
+  maxAttendees: integer("max_attendees"),
+  currentAttendees: integer("current_attendees").default(0),
+  isPublished: boolean("is_published").default(true),
+  requiresRegistration: boolean("requires_registration").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ministry followers (users who follow ministry accounts)
+export const ministryFollowers = pgTable("ministry_followers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  ministryId: integer("ministry_id").notNull().references(() => ministryProfiles.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueFollower: uniqueIndex("unique_ministry_follower").on(table.userId, table.ministryId),
+}));
+
+// Event registrations
+export const eventRegistrations = pgTable("event_registrations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  eventId: integer("event_id").notNull().references(() => ministryEvents.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueRegistration: uniqueIndex("unique_event_registration").on(table.userId, table.eventId),
+}));
+
 // Relations
 export const contentCreatorsRelations = relations(contentCreators, ({ one, many }) => ({
   user: one(users, {
@@ -244,6 +319,54 @@ export const sponsorshipApplicationsRelations = relations(sponsorshipApplication
   }),
 }));
 
+// Ministry relations
+export const ministryProfilesRelations = relations(ministryProfiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [ministryProfiles.userId],
+    references: [users.id],
+  }),
+  posts: many(ministryPosts),
+  events: many(ministryEvents),
+  followers: many(ministryFollowers),
+}));
+
+export const ministryPostsRelations = relations(ministryPosts, ({ one }) => ({
+  ministry: one(ministryProfiles, {
+    fields: [ministryPosts.ministryId],
+    references: [ministryProfiles.id],
+  }),
+}));
+
+export const ministryEventsRelations = relations(ministryEvents, ({ one, many }) => ({
+  ministry: one(ministryProfiles, {
+    fields: [ministryEvents.ministryId],
+    references: [ministryProfiles.id],
+  }),
+  registrations: many(eventRegistrations),
+}));
+
+export const ministryFollowersRelations = relations(ministryFollowers, ({ one }) => ({
+  user: one(users, {
+    fields: [ministryFollowers.userId],
+    references: [users.id],
+  }),
+  ministry: one(ministryProfiles, {
+    fields: [ministryFollowers.ministryId],
+    references: [ministryProfiles.id],
+  }),
+}));
+
+export const eventRegistrationsRelations = relations(eventRegistrations, ({ one }) => ({
+  user: one(users, {
+    fields: [eventRegistrations.userId],
+    references: [users.id],
+  }),
+  event: one(ministryEvents, {
+    fields: [eventRegistrations.eventId],
+    references: [ministryEvents.id],
+  }),
+}));
+
 // Add relations to users
 export const usersRelations = relations(users, ({ many, one }) => ({
   campaigns: many(campaigns),
@@ -256,6 +379,12 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     references: [contentCreators.userId],
   }),
   sponsorshipApplications: many(sponsorshipApplications),
+  ministryProfile: one(ministryProfiles, {
+    fields: [users.id],
+    references: [ministryProfiles.userId],
+  }),
+  ministryFollowers: many(ministryFollowers),
+  eventRegistrations: many(eventRegistrations),
 }));
 
 // Platform schema for sponsorship applications
@@ -294,3 +423,39 @@ export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
 
 export type InsertSponsorshipApplication = z.infer<typeof insertSponsorshipApplicationSchema>;
 export type SponsorshipApplication = typeof sponsorshipApplications.$inferSelect;
+
+// Ministry schemas
+export const insertMinistryProfileSchema = createInsertSchema(ministryProfiles)
+  .omit({ id: true, userId: true, isActive: true, isVerified: true, createdAt: true, updatedAt: true })
+  .extend({
+    socialLinks: z.record(z.string().url()).optional(),
+  });
+
+export const insertMinistryPostSchema = createInsertSchema(ministryPosts)
+  .omit({ id: true, ministryId: true, createdAt: true, updatedAt: true })
+  .extend({
+    mediaUrls: z.array(z.string().url()).optional(),
+    links: z.array(z.object({
+      title: z.string(),
+      url: z.string().url(),
+    })).optional(),
+  });
+
+export const insertMinistryEventSchema = createInsertSchema(ministryEvents)
+  .omit({ id: true, ministryId: true, currentAttendees: true, createdAt: true, updatedAt: true })
+  .extend({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date().optional(),
+  });
+
+export type InsertMinistryProfile = z.infer<typeof insertMinistryProfileSchema>;
+export type MinistryProfile = typeof ministryProfiles.$inferSelect;
+
+export type InsertMinistryPost = z.infer<typeof insertMinistryPostSchema>;
+export type MinistryPost = typeof ministryPosts.$inferSelect;
+
+export type InsertMinistryEvent = z.infer<typeof insertMinistryEventSchema>;
+export type MinistryEvent = typeof ministryEvents.$inferSelect;
+
+export type MinistryFollower = typeof ministryFollowers.$inferSelect;
+export type EventRegistration = typeof eventRegistrations.$inferSelect;

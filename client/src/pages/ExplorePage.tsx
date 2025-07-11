@@ -37,6 +37,11 @@ export default function ExplorePage() {
     enabled: !!user,
   });
 
+  const { data: ministries, isLoading: ministriesLoading } = useQuery({
+    queryKey: ["/api/ministries"],
+    enabled: !!user,
+  });
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -50,6 +55,7 @@ export default function ExplorePage() {
     { id: "campaigns", label: "Campaigns", icon: DollarSign },
     { id: "creators", label: "Creators", icon: Star },
     { id: "businesses", label: "Businesses", icon: Users },
+    { id: "ministries", label: "Ministries", icon: Star },
   ];
 
   const filteredCampaigns = campaigns?.filter((campaign: any) =>
@@ -65,6 +71,11 @@ export default function ExplorePage() {
   const filteredBusinesses = businesses?.filter((business: any) =>
     business.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     business.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredMinistries = ministries?.filter((ministry: any) =>
+    ministry.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -264,6 +275,51 @@ export default function ExplorePage() {
                             <Badge variant="outline">{business.industry}</Badge>
                             <span className="text-sm text-gray-500 ml-2">
                               {business.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Ministries Section */}
+        {(selectedCategory === "all" || selectedCategory === "ministries") && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Featured Ministries</h3>
+            {ministriesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredMinistries?.slice(0, 6).map((ministry: any) => (
+                  <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => navigate(`/ministry/profile/${ministry.id}`)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={ministry.logo} />
+                          <AvatarFallback>{ministry.name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{ministry.name}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{ministry.description?.substring(0, 80)}...</p>
+                          <div className="flex items-center mt-3">
+                            <Badge variant="outline">{ministry.denomination}</Badge>
+                            <span className="text-sm text-gray-500 ml-2">
+                              {ministry.location}
                             </span>
                           </div>
                         </div>

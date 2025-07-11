@@ -29,6 +29,11 @@ export default function FeedPage() {
     enabled: !!user,
   });
 
+  const { data: ministryPosts, isLoading: ministryPostsLoading } = useQuery({
+    queryKey: ["/api/user/ministry-feed"],
+    enabled: !!user,
+  });
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -91,6 +96,58 @@ export default function FeedPage() {
                             <DollarSign className="h-3 w-3 mr-1" />
                             ${campaign.raised?.toLocaleString() || 0} raised
                           </Badge>
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <button className="flex items-center space-x-1 hover:text-red-600">
+                              <Heart className="h-4 w-4" />
+                              <span>Like</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-blue-600">
+                              <MessageCircle className="h-4 w-4" />
+                              <span>Comment</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-green-600">
+                              <Share2 className="h-4 w-4" />
+                              <span>Share</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Ministry Posts */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-4">Ministry Updates</h3>
+          {ministryPostsLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {ministryPosts?.slice(0, 3).map((post: any) => (
+                <Card key={post.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>{post.title?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{post.title}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{post.content?.substring(0, 100)}...</p>
+                        <div className="flex items-center mt-3 space-x-4">
+                          <Badge variant="secondary">{post.type}</Badge>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <button className="flex items-center space-x-1 hover:text-red-600">
                               <Heart className="h-4 w-4" />
