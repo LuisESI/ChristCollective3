@@ -46,12 +46,14 @@ import {
   CheckCircle,
   ArrowRight,
   Loader2,
+  Settings,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Helmet } from "react-helmet";
+import { ThemeToggleWithLabel } from "@/components/ThemeToggle";
 
 // Form schema for user profile
 const userProfileSchema = z.object({
@@ -365,7 +367,7 @@ export default function ProfilePage() {
             <Card className="md:w-2/3">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <CardHeader>
-                  <TabsList className="grid grid-cols-4 w-full">
+                  <TabsList className="grid grid-cols-5 w-full">
                     <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-white">
                       <User className="mr-2 h-4 w-4" />
                       <span className="hidden sm:inline">Profile</span>
@@ -382,12 +384,17 @@ export default function ProfilePage() {
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span className="hidden sm:inline">Donations</span>
                     </TabsTrigger>
+                    <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Settings</span>
+                    </TabsTrigger>
                   </TabsList>
                   <CardDescription>
                     {activeTab === "profile" && "Manage your personal information and profile settings."}
                     {activeTab === "business" && "Update your business profile and networking preferences."}
                     {activeTab === "campaigns" && "View and manage your fundraising campaigns."}
                     {activeTab === "donations" && "Track your donation history and impact."}
+                    {activeTab === "settings" && "Configure your app preferences and appearance settings."}
                   </CardDescription>
                 </CardHeader>
                 
@@ -962,6 +969,68 @@ export default function ProfilePage() {
                         </Link>
                       </div>
                     )}
+                  </TabsContent>
+                  
+                  <TabsContent value="settings" className="space-y-6">
+                    <div className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Appearance</CardTitle>
+                          <CardDescription>
+                            Customize how Christ Collective looks and feels.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ThemeToggleWithLabel />
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Account</CardTitle>
+                          <CardDescription>
+                            Manage your account settings and preferences.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <div className="text-sm font-medium">Email Notifications</div>
+                              <div className="text-xs text-muted-foreground">
+                                Receive updates about campaigns and donations
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Manage
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <div className="text-sm font-medium">Privacy Settings</div>
+                              <div className="text-xs text-muted-foreground">
+                                Control who can see your profile and activity
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Configure
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <div className="text-sm font-medium">Data Export</div>
+                              <div className="text-xs text-muted-foreground">
+                                Download your data and donation history
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Export
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </TabsContent>
                 </CardContent>
               </Tabs>
