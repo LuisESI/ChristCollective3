@@ -81,7 +81,7 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-background border-b border-border p-4 sticky top-0 z-10">
+      <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-foreground">Explore</h1>
           <Button variant="outline" size="sm">
