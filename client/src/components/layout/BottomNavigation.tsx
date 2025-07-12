@@ -13,7 +13,7 @@ export default function BottomNavigation() {
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background z-50 bottom-nav-gradient-shadow">
       <div className="flex justify-around items-center h-16">
         {navigationItems.map((item) => {
           const isActive = location === item.href;
