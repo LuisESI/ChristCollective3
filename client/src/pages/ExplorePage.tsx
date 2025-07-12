@@ -172,12 +172,27 @@ export default function ExplorePage() {
                   <Card key={campaign.id} className="hover:shadow-md transition-shadow cursor-pointer"
                         onClick={() => navigate(`/donate/${campaign.slug}`)}>
                     <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback>{campaign.title?.[0]}</AvatarFallback>
-                        </Avatar>
+                      <div className="flex items-start space-x-4">
+                        {/* Cover Image on the left */}
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          {campaign.image ? (
+                            <img 
+                              src={campaign.image} 
+                              alt={campaign.title} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-400 text-lg font-bold">
+                                {campaign.title?.[0]}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Content */}
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{campaign.title}</h4>
+                          <h4 className="font-medium text-[#D4AF37] mb-2">{campaign.title}</h4>
                           <p className="text-sm text-muted-foreground mt-1">{campaign.description?.substring(0, 80)}...</p>
                           <div className="flex items-center justify-between mt-3">
                             <Badge variant="secondary">
