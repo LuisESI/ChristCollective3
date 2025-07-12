@@ -113,9 +113,22 @@
     @apply bg-black;
   }
   
-  /* Dark mode card styling with gold borders */
+  /* Dark mode card styling with gold borders and drop shadows */
   .dark .card-section {
-    @apply bg-black border-2 border-primary;
+    @apply bg-black border-2 border-primary shadow-lg;
+  }
+  
+  /* Add drop shadows to all cards in dark mode */
+  .dark [class*="card"],
+  .dark .bg-card {
+    @apply shadow-lg;
+    box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.3), 0 4px 6px -2px rgba(212, 175, 55, 0.2);
+  }
+  
+  /* Enhanced gold glow effect for borders in dark mode */
+  .dark .border-primary,
+  .dark .border-border {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
   }
   
   /* Dark mode main content areas */
