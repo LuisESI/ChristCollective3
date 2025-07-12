@@ -90,7 +90,7 @@ export default function FeedPage() {
                       </Avatar>
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{campaign.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{campaign.description?.substring(0, 100)}...</p>
+                        <p className="text-sm text-white mt-1">{campaign.description?.substring(0, 100)}...</p>
                         <div className="flex items-center mt-3 space-x-4">
                           <Badge variant="secondary">
                             <DollarSign className="h-3 w-3 mr-1" />
