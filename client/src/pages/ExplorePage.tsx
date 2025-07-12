@@ -79,11 +79,11 @@ export default function ExplorePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
+      <div className="bg-background border-b border-border p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-900">Explore</h1>
+          <h1 className="text-xl font-bold text-foreground">Explore</h1>
           <Button variant="outline" size="sm">
             <Filter className="h-4 w-4 mr-2" />
             Filter
@@ -92,7 +92,7 @@ export default function ExplorePage() {
         
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search campaigns, creators, businesses..."
             value={searchTerm}
@@ -133,18 +133,18 @@ export default function ExplorePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
                 <Badge variant="secondary">#1</Badge>
                 <div>
                   <p className="font-medium">Faith-Based Businesses</p>
-                  <p className="text-sm text-gray-600">Growing 15% this week</p>
+                  <p className="text-sm text-muted-foreground">Growing 15% this week</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
                 <Badge variant="secondary">#2</Badge>
                 <div>
                   <p className="font-medium">Mission Trips</p>
-                  <p className="text-sm text-gray-600">45 new campaigns</p>
+                  <p className="text-sm text-muted-foreground">45 new campaigns</p>
                 </div>
               </div>
             </div>

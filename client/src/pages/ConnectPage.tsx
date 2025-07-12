@@ -39,11 +39,11 @@ export default function ConnectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
+      <div className="bg-background border-b border-border p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Connect</h1>
+          <h1 className="text-xl font-bold text-foreground">Connect</h1>
           <Button variant="outline" size="sm">
             <UserPlus className="h-4 w-4 mr-2" />
             Invite Friends
@@ -62,7 +62,7 @@ export default function ConnectPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold">Build Your Christian Network</h2>
-                <p className="text-gray-600">Connect with like-minded believers, business owners, and content creators in your community.</p>
+                <p className="text-muted-foreground">Connect with like-minded believers, business owners, and content creators in your community.</p>
               </div>
             </div>
           </CardContent>

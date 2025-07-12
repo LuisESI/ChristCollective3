@@ -73,7 +73,7 @@
   --popover-foreground: 0 0% 100%;
   --card: 0 0% 0%;
   --card-foreground: 0 0% 100%;
-  --border: 0 0% 20%;
+  --border: 45 100% 50%; /* Gold border */
   --input: 0 0% 20%;
   --primary: 45 100% 50%; /* Yellow */
   --primary-foreground: 0 0% 0%;
@@ -95,7 +95,7 @@
   --sidebar-primary-foreground: 0 0% 0%;
   --sidebar-accent: 43 77% 53%;
   --sidebar-accent-foreground: 0 0% 0%;
-  --sidebar-border: 0 0% 20%;
+  --sidebar-border: 45 100% 50%; /* Gold border */
   --sidebar-ring: 43 77% 53%;
 }
 
@@ -106,6 +106,21 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* Dark mode page background */
+  .dark body {
+    @apply bg-black;
+  }
+  
+  /* Dark mode card styling with gold borders */
+  .dark .card-section {
+    @apply bg-black border-2 border-primary;
+  }
+  
+  /* Dark mode main content areas */
+  .dark main {
+    @apply bg-black;
   }
 }
 
