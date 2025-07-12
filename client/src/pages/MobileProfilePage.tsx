@@ -45,7 +45,7 @@ export default function MobileProfilePage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-card border-b border-border p-4 sticky top-0 z-10">
+      <div className="bg-black border-b border-border p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">Profile</h1>
           <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
