@@ -93,7 +93,7 @@ export default function FeedPage() {
                         <p className="text-sm text-white mt-1">{campaign.description?.substring(0, 100)}...</p>
                         <div className="flex items-center mt-3 space-x-4">
                           <Badge variant="secondary" className="bg-yellow-400 text-black hover:bg-yellow-500">
-                            {(campaign.currentAmount || 0).toLocaleString()} raised
+                            ${(campaign.currentAmount || 0).toLocaleString()} raised
                           </Badge>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <button className="flex items-center space-x-1 hover:text-red-600">
