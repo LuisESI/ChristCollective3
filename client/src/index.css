@@ -140,12 +140,12 @@
   
   /* Header gradient shadow styling */
   .header-gradient-shadow {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   }
   
   /* Dark mode header gradient shadow */
   .dark .header-gradient-shadow {
-    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.2), 0 1px 4px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 2px 16px rgba(212, 175, 55, 0.3), 0 1px 6px rgba(212, 175, 55, 0.2);
   }
 }
 
