@@ -68,15 +68,15 @@ export default function MobileProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-white">
                   {user.firstName && user.lastName 
                     ? `${user.firstName} ${user.lastName}`
                     : user.username}
                 </h2>
-                <p className="text-gray-600">@{user.username}</p>
+                <p className="text-white">@{user.username}</p>
                 <div className="flex items-center mt-2">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-sm text-gray-500">
+                  <Calendar className="h-4 w-4 mr-2 text-white" />
+                  <span className="text-sm text-white">
                     Member since {new Date(user.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
@@ -86,25 +86,25 @@ export default function MobileProfilePage() {
             {/* User Info */}
             <div className="space-y-2 text-sm">
               {user.email && (
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-white">
                   <Mail className="h-4 w-4 mr-2" />
                   {user.email}
                 </div>
               )}
               {user.phone && (
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-white">
                   <Phone className="h-4 w-4 mr-2" />
                   {user.phone}
                 </div>
               )}
               {user.location && (
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-white">
                   <MapPin className="h-4 w-4 mr-2" />
                   {user.location}
                 </div>
               )}
               {user.bio && (
-                <div className="flex items-start text-gray-600 mt-3">
+                <div className="flex items-start text-white mt-3">
                   <User className="h-4 w-4 mr-2 mt-0.5" />
                   <p>{user.bio}</p>
                 </div>
