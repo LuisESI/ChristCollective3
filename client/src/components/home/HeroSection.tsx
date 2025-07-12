@@ -135,8 +135,8 @@ export default function HeroSection() {
         </div>
       </div>
       
-      {/* Slider Controls with Icons */}
-      <div className="absolute z-20 bottom-8 left-0 right-0 flex justify-center gap-4">
+      {/* Slider Controls with Icons - Hidden on mobile */}
+      <div className="absolute z-20 bottom-8 left-0 right-0 justify-center gap-4 hidden md:flex">
         {slides.map((_, index) => {
           // Define icons for each slide
           const icons = [
@@ -164,7 +164,7 @@ export default function HeroSection() {
       </div>
       
       <button
-        className="absolute z-20 left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-opacity"
+        className="absolute z-20 left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-opacity hidden md:block"
         onClick={scrollPrev}
         aria-label="Previous slide"
       >
@@ -172,7 +172,7 @@ export default function HeroSection() {
       </button>
       
       <button
-        className="absolute z-20 right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-opacity"
+        className="absolute z-20 right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-opacity hidden md:block"
         onClick={scrollNext}
         aria-label="Next slide"
       >
