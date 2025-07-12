@@ -71,9 +71,9 @@
   --muted-foreground: 0 0% 100%;
   --popover: 0 0% 0%;
   --popover-foreground: 0 0% 100%;
-  --card: 0 0% 0%;
+  --card: 0 0% 15%;
   --card-foreground: 0 0% 100%;
-  --border: 45 100% 50%; /* Gold border */
+  --border: 0 0% 25%; /* Subtle gray border */
   --input: 0 0% 20%;
   --primary: 45 100% 50%; /* Yellow */
   --primary-foreground: 0 0% 0%;
@@ -95,7 +95,7 @@
   --sidebar-primary-foreground: 0 0% 0%;
   --sidebar-accent: 43 77% 53%;
   --sidebar-accent-foreground: 0 0% 0%;
-  --sidebar-border: 45 100% 50%; /* Gold border */
+  --sidebar-border: 0 0% 25%; /* Subtle gray border */
   --sidebar-ring: 43 77% 53%;
 }
 
@@ -113,24 +113,23 @@
     background-color: black;
   }
   
-  /* Dark mode card styling with gold borders and drop shadows */
+  /* Dark mode card styling with subtle gray borders */
   .dark .card-section {
-    background-color: black;
+    background-color: hsl(var(--card));
     border-width: 1px;
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
+    border-color: hsl(var(--border));
   }
   
-  /* Add drop shadows to all cards in dark mode */
+  /* Subtle shadows for cards in dark mode */
   .dark [class*="card"],
   .dark .bg-card {
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
   
-  /* Enhanced gold glow effect for borders in dark mode */
+  /* Subtle border styling for dark mode */
   .dark .border-primary,
   .dark .border-border {
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2), 0 0 4px rgba(212, 175, 55, 0.15);
+    border-color: hsl(var(--border));
   }
   
   /* Dark mode main content areas */
@@ -145,7 +144,7 @@
   
   /* Dark mode header gradient shadow */
   .dark .header-gradient-shadow {
-    box-shadow: 0 2px 16px rgba(212, 175, 55, 0.3), 0 1px 6px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.3);
   }
   
   /* Bottom navigation gradient shadow styling (flipped) */
@@ -155,7 +154,7 @@
   
   /* Dark mode bottom navigation gradient shadow */
   .dark .bottom-nav-gradient-shadow {
-    box-shadow: 0 -2px 16px rgba(212, 175, 55, 0.3), 0 -1px 6px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.5), 0 -1px 6px rgba(0, 0, 0, 0.3);
   }
   
   /* Make all page borders thinner */
