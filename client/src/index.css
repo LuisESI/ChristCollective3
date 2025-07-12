@@ -118,19 +118,19 @@
     background-color: black;
     border-width: 2px;
     border-color: hsl(var(--primary));
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3), 0 0 10px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
   }
   
   /* Add drop shadows to all cards in dark mode */
   .dark [class*="card"],
   .dark .bg-card {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3), 0 0 10px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
   }
   
   /* Enhanced gold glow effect for borders in dark mode */
   .dark .border-primary,
   .dark .border-border {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4), 0 0 8px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2), 0 0 4px rgba(212, 175, 55, 0.15);
   }
   
   /* Dark mode main content areas */
