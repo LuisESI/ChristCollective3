@@ -143,12 +143,12 @@ export default function BusinessNetworkPage() {
         </div>
       </section>
       
-      <section className="py-8 md:py-16 bg-gray-50">
+      <section className="py-8 md:py-16 bg-background">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="directory" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10 bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger value="directory" className="text-lg font-semibold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">Directory</TabsTrigger>
-              <TabsTrigger value="membership" className="text-lg font-semibold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">Membership</TabsTrigger>
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10 bg-muted p-1 rounded-lg">
+              <TabsTrigger value="directory" className="text-lg font-semibold data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Directory</TabsTrigger>
+              <TabsTrigger value="membership" className="text-lg font-semibold data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Membership</TabsTrigger>
             </TabsList>
             
             <TabsContent value="directory" className="space-y-4 md:space-y-6">
@@ -269,10 +269,10 @@ export default function BusinessNetworkPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-                  <Users size={48} className="mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-medium mb-2">No businesses found</h3>
-                  <p className="text-gray-500 mb-6">
+                <div className="text-center py-12 bg-card rounded-lg shadow-sm">
+                  <Users size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-medium mb-2 text-foreground">No businesses found</h3>
+                  <p className="text-muted-foreground mb-6">
                     {searchQuery || industryFilter !== "all" 
                       ? "No results match your search criteria. Try adjusting your filters."
                       : "There are no business profiles yet. Be the first to join our network!"}
@@ -295,23 +295,23 @@ export default function BusinessNetworkPage() {
             <TabsContent value="membership" className="space-y-10">
               <div className="max-w-4xl mx-auto text-center mb-12">
                 <h2 className="text-3xl font-bold mb-4">Founding Member Program</h2>
-                <p className="text-lg text-black mb-8">
+                <p className="text-lg text-foreground mb-8">
                   Join our exclusive founding member program! The first 100 members get lifetime access for FREE.
                 </p>
                 
                 {/* Progress Bar */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
+                <div className="bg-card rounded-lg p-6 shadow-sm mb-8">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-medium text-gray-700">Founding Members</span>
-                    <span className="text-sm font-medium text-gray-700">{(statistics as any)?.communityMembers || 0}/100</span>
+                    <span className="text-sm font-medium text-foreground">Founding Members</span>
+                    <span className="text-sm font-medium text-foreground">{(statistics as any)?.communityMembers || 0}/100</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="w-full bg-muted rounded-full h-3">
                     <div 
                       className="bg-primary h-3 rounded-full transition-all duration-300" 
                       style={{ width: `${Math.min(((statistics as any)?.communityMembers || 0) / 100 * 100, 100)}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {100 - ((statistics as any)?.communityMembers || 0) > 0 
                       ? `${100 - ((statistics as any)?.communityMembers || 0)} spots remaining for free lifetime membership`
                       : "Founding member program complete!"}

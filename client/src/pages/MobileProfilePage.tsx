@@ -43,11 +43,11 @@ export default function MobileProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
+      <div className="bg-card border-b border-border p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Profile</h1>
+          <h1 className="text-xl font-bold text-foreground">Profile</h1>
           <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
             <Edit className="h-4 w-4 mr-2" />
             Edit
@@ -68,15 +68,15 @@ export default function MobileProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-xl font-semibold text-foreground">
                   {user.firstName && user.lastName 
                     ? `${user.firstName} ${user.lastName}`
                     : user.username}
                 </h2>
-                <p className="text-white">@{user.username}</p>
+                <p className="text-muted-foreground">@{user.username}</p>
                 <div className="flex items-center mt-2">
-                  <Calendar className="h-4 w-4 mr-2 text-white" />
-                  <span className="text-sm text-white">
+                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
                     Member since {new Date(user.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
@@ -86,26 +86,26 @@ export default function MobileProfilePage() {
             {/* User Info */}
             <div className="space-y-2 text-sm">
               {user.email && (
-                <div className="flex items-center text-white">
-                  <Mail className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-foreground">
+                  <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
                   {user.email}
                 </div>
               )}
               {user.phone && (
-                <div className="flex items-center text-white">
-                  <Phone className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-foreground">
+                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
                   {user.phone}
                 </div>
               )}
               {user.location && (
-                <div className="flex items-center text-white">
-                  <MapPin className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-foreground">
+                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
                   {user.location}
                 </div>
               )}
               {user.bio && (
-                <div className="flex items-start text-white mt-3">
-                  <User className="h-4 w-4 mr-2 mt-0.5" />
+                <div className="flex items-start text-foreground mt-3">
+                  <User className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
                   <p>{user.bio}</p>
                 </div>
               )}

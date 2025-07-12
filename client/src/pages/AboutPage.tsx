@@ -24,22 +24,22 @@ export default function AboutPage() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">Our Mission</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Our Mission</h2>
             <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-primary">Breaking Down Barriers</h3>
-              <p className="text-gray-700 mb-6 leading-relaxed">
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 Christ Collective was founded on the belief that denominational differences should not divide 
                 the body of Christ. We create spaces where Christians from all backgrounds can come together, 
                 support one another, and work toward common goals.
               </p>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed">
                 Whether you're looking to support charitable causes, grow your business network, 
                 or collaborate on creative projects, our platform provides the tools and community 
                 to make it happen.
@@ -95,52 +95,52 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="bg-white border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-card border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Heart className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Donations & Campaigns</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Donations & Campaigns</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   Support meaningful causes and create fundraising campaigns for ministries, 
                   missions, and community projects.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-card border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Business Network</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Business Network</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   Connect with Christian business owners and professionals to grow your network 
                   with those who share your values.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-card border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Star className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Creator Sponsorship</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Creator Sponsorship</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   Support Christian content creators and influencers who are making a positive 
                   impact through their platforms.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-primary/20 hover:border-primary/40 transition-all duration-300">
+            <Card className="bg-card border-primary/20 hover:border-primary/40 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-black">Community Building</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Community Building</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   Join groups, attend events, and participate in discussions that strengthen 
                   the global Christian community.
                 </p>
