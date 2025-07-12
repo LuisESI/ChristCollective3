@@ -61,7 +61,7 @@ export default function FeedPage() {
         <Card className="mb-6">
           <CardContent className="p-6">
             <h2 className="text-lg font-semibold mb-2">Welcome back, {user.firstName || user.username}!</h2>
-            <p className="text-gray-600">Stay connected with your faith community and discover new opportunities to make a difference.</p>
+            <p className="text-white">Stay connected with your faith community and discover new opportunities to make a difference.</p>
           </CardContent>
         </Card>
 
