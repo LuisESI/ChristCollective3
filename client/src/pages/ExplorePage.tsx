@@ -105,7 +105,7 @@ export default function ExplorePage() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Category Tabs */}
-        <div className="flex space-x-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category) => {
             const Icon = category.icon;
             return (
