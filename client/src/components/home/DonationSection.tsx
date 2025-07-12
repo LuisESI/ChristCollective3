@@ -133,14 +133,14 @@ export default function DonationSection() {
                     )}
                     <CardContent className="p-6">
                       <h4 className="text-xl font-semibold mb-2 text-white">{campaign.title}</h4>
-                      <p className="text-gray-400 mb-4">
+                      <p className="text-muted-foreground mb-4">
                         {campaign.description.length > 100
                           ? campaign.description.substring(0, 100) + '...'
                           : campaign.description}
                       </p>
                       <div className="mb-4">
                         <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                        <div className="flex justify-between mt-2 text-sm text-gray-400">
+                        <div className="flex justify-between mt-2 text-sm text-muted-foreground">
                           <span>{formatCurrency(campaign.currentAmount)} raised</span>
                           <span>{formatCurrency(campaign.goal)} goal</span>
                         </div>

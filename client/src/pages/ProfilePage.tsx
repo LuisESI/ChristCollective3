@@ -316,7 +316,7 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto">
           <header className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-            <p className="text-gray-600">Manage your personal information, campaigns, donations, and business profile.</p>
+            <p className="text-muted-foreground">Manage your personal information, campaigns, donations, and business profile.</p>
           </header>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
@@ -334,20 +334,20 @@ export default function ProfilePage() {
                       ? `${user.firstName} ${user.lastName}` 
                       : (user?.email?.split('@')[0] || "User")}
                   </h2>
-                  <p className="text-gray-500 mb-6">{user?.email}</p>
+                  <p className="text-muted-foreground mb-6">{user?.email}</p>
                   
                   <div className="grid grid-cols-2 w-full gap-4 text-center">
-                    <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="bg-muted p-3 rounded-lg">
                       <div className="text-2xl font-bold text-primary">
                         {userCampaigns.length}
                       </div>
-                      <div className="text-sm text-gray-500">Campaigns</div>
+                      <div className="text-sm text-muted-foreground">Campaigns</div>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="bg-muted p-3 rounded-lg">
                       <div className="text-2xl font-bold text-primary">
                         {userDonations.length}
                       </div>
-                      <div className="text-sm text-gray-500">Donations</div>
+                      <div className="text-sm text-muted-foreground">Donations</div>
                     </div>
                   </div>
                   
@@ -844,14 +844,14 @@ export default function ProfilePage() {
                               
                               <div className="flex-1">
                                 <h3 className="font-semibold truncate">{campaign.title}</h3>
-                                <div className="text-sm text-gray-500 mb-2">
+                                <div className="text-sm text-muted-foreground mb-2">
                                   Created on {formatDate(campaign.createdAt)}
                                 </div>
                                 <div className="flex flex-wrap gap-2 text-sm">
-                                  <div className="bg-gray-100 px-2 py-1 rounded-full">
+                                  <div className="bg-muted px-2 py-1 rounded-full">
                                     {formatCurrency(campaign.currentAmount)} raised
                                   </div>
-                                  <div className="bg-gray-100 px-2 py-1 rounded-full">
+                                  <div className="bg-muted px-2 py-1 rounded-full">
                                     Goal: {formatCurrency(campaign.goal)}
                                   </div>
                                   <div className={`px-2 py-1 rounded-full ${

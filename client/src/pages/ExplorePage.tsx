@@ -178,13 +178,13 @@ export default function ExplorePage() {
                         </Avatar>
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900">{campaign.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{campaign.description?.substring(0, 80)}...</p>
+                          <p className="text-sm text-muted-foreground mt-1">{campaign.description?.substring(0, 80)}...</p>
                           <div className="flex items-center justify-between mt-3">
                             <Badge variant="secondary">
                               <DollarSign className="h-3 w-3 mr-1" />
                               ${campaign.raised?.toLocaleString() || 0}
                             </Badge>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                               {Math.round(((campaign.raised || 0) / (campaign.goal || 1)) * 100)}% funded
                             </span>
                           </div>

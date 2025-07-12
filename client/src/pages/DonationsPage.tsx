@@ -146,14 +146,14 @@ export default function DonationsPage() {
                         </span>
                       </Link>
                     </h3>
-                    <p className="text-gray-200 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       {campaign.description.length > 100
                         ? campaign.description.substring(0, 100) + '...'
                         : campaign.description}
                     </p>
                     <div className="mb-4">
                       <Progress value={calculateProgress(campaign.currentAmount, campaign.goal)} className="h-2.5" />
-                      <div className="flex justify-between mt-2 text-sm text-gray-300">
+                      <div className="flex justify-between mt-2 text-sm text-muted-foreground">
                         <span>{formatCurrency(campaign.currentAmount)} raised</span>
                         <span>{formatCurrency(campaign.goal)} goal</span>
                       </div>
