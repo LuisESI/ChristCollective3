@@ -225,7 +225,7 @@ export default function ExplorePage() {
                           <AvatarFallback>{creator.displayName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{creator.displayName}</h4>
+                          <h4 className="font-medium text-yellow-400">{creator.displayName}</h4>
                           <p className="text-sm text-gray-600">{creator.description?.substring(0, 60)}...</p>
                           <div className="flex items-center justify-between mt-2">
                             <Badge variant="outline">{creator.platform}</Badge>
