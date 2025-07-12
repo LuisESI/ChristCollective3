@@ -116,7 +116,7 @@
   /* Dark mode card styling with gold borders and drop shadows */
   .dark .card-section {
     background-color: black;
-    border-width: 2px;
+    border-width: 1px;
     border-color: hsl(var(--primary));
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
   }
@@ -156,6 +156,19 @@
   /* Dark mode bottom navigation gradient shadow */
   .dark .bottom-nav-gradient-shadow {
     box-shadow: 0 -2px 16px rgba(212, 175, 55, 0.3), 0 -1px 6px rgba(212, 175, 55, 0.2);
+  }
+  
+  /* Make all page borders thinner */
+  .border-b {
+    border-bottom-width: 1px !important;
+  }
+  
+  .border-t {
+    border-top-width: 1px !important;
+  }
+  
+  .border {
+    border-width: 1px !important;
   }
 }
 
