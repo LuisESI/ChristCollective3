@@ -65,37 +65,37 @@
 
 .dark {
   /* Dark Mode */
-  --background: 0 0% 8%; /* Dark gray background */
-  --foreground: 0 0% 95%; /* Light text */
-  --muted: 0 0% 15%; /* Muted gray */
-  --muted-foreground: 0 0% 65%; /* Muted text */
-  --popover: 0 0% 12%; /* Dark gray popover */
-  --popover-foreground: 0 0% 95%;
-  --card: 0 0% 12%; /* Dark gray cards */
-  --card-foreground: 0 0% 95%;
-  --border: 0 0% 25%; /* Light gray borders */
-  --input: 0 0% 18%; /* Dark gray inputs */
-  --primary: 45 100% 50%; /* Yellow - preserved */
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 100%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --border: 45 100% 50%; /* Gold border */
+  --input: 0 0% 20%;
+  --primary: 45 100% 50%; /* Yellow */
   --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 18%; /* Gray sections */
-  --secondary-foreground: 0 0% 95%;
-  --accent: 45 100% 50%; /* Yellow - preserved */
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 45 100% 50%; /* Yellow */
   --accent-foreground: 0 0% 0%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 45 100% 50%; /* Yellow - preserved */
+  --ring: 45 100% 50%; /* Yellow */
   --chart-1: 43 77% 53%;
-  --chart-2: 0 0% 95%;
-  --chart-3: 0 0% 95%;
+  --chart-2: 0 0% 100%;
+  --chart-3: 0 0% 100%;
   --chart-4: 43 57% 43%;
-  --chart-5: 0 0% 95%;
-  --sidebar-background: 0 0% 12%;
-  --sidebar-foreground: 0 0% 95%;
+  --chart-5: 0 0% 100%;
+  --sidebar-background: 0 0% 10%;
+  --sidebar-foreground: 0 0% 100%;
   --sidebar-primary: 43 77% 53%;
   --sidebar-primary-foreground: 0 0% 0%;
   --sidebar-accent: 43 77% 53%;
   --sidebar-accent-foreground: 0 0% 0%;
-  --sidebar-border: 0 0% 25%; /* Light gray borders */
+  --sidebar-border: 45 100% 50%; /* Gold border */
   --sidebar-ring: 43 77% 53%;
 }
 
@@ -110,166 +110,52 @@
   
   /* Dark mode page background */
   .dark body {
-    background-color: hsl(var(--background));
+    background-color: black;
   }
   
-  /* Dark mode card styling with light gray borders */
+  /* Dark mode card styling with gold borders and drop shadows */
   .dark .card-section {
-    background-color: hsl(var(--card));
+    background-color: black;
     border-width: 1px;
-    border-color: hsl(var(--border));
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
   }
   
-  /* Add subtle shadows to all cards in dark mode */
+  /* Add drop shadows to all cards in dark mode */
   .dark [class*="card"],
   .dark .bg-card {
-    background-color: hsl(var(--card));
-    border-color: hsl(var(--border));
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15), 0 0 5px rgba(212, 175, 55, 0.1);
   }
   
-  /* Light gray gradient borders in dark mode */
+  /* Enhanced gold glow effect for borders in dark mode */
   .dark .border-primary,
   .dark .border-border {
-    border-color: hsl(var(--border));
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2), 0 0 4px rgba(212, 175, 55, 0.15);
   }
   
   /* Dark mode main content areas */
   .dark main {
-    background-color: hsl(var(--background));
-  }
-  
-  /* Dark mode sections with gray backgrounds */
-  .dark section {
-    background-color: hsl(var(--background));
-  }
-  
-  /* Dark mode buttons with gray styling */
-  .dark .btn,
-  .dark button:not(.bg-primary):not([class*="bg-primary"]):not([class*="bg-yellow"]) {
-    background-color: hsl(var(--secondary));
-    border-color: hsl(var(--border));
-    color: hsl(var(--secondary-foreground));
-  }
-  
-  /* Dark mode button hover states */
-  .dark .btn:hover,
-  .dark button:not(.bg-primary):not([class*="bg-primary"]):not([class*="bg-yellow"]):hover {
-    background-color: hsl(var(--muted));
-    border-color: hsl(var(--border));
-  }
-  
-  /* Dark mode outline buttons */
-  .dark button[class*="variant-outline"],
-  .dark .btn-outline {
-    background-color: transparent;
-    border-color: hsl(var(--border));
-    color: hsl(var(--foreground));
-  }
-  
-  /* Dark mode outline button hover */
-  .dark button[class*="variant-outline"]:hover,
-  .dark .btn-outline:hover {
-    background-color: hsl(var(--secondary));
-    border-color: hsl(var(--border));
-  }
-  
-  /* Dark mode ghost buttons */
-  .dark button[class*="variant-ghost"],
-  .dark .btn-ghost {
-    background-color: transparent;
-    border-color: transparent;
-    color: hsl(var(--foreground));
-  }
-  
-  /* Dark mode ghost button hover */
-  .dark button[class*="variant-ghost"]:hover,
-  .dark .btn-ghost:hover {
-    background-color: hsl(var(--muted));
-  }
-  
-  /* Dark mode form inputs with light gray borders */
-  .dark input,
-  .dark textarea,
-  .dark select {
-    background-color: hsl(var(--input));
-    border-color: hsl(var(--border));
-    color: hsl(var(--foreground));
-  }
-  
-  /* Dark mode form inputs focus state */
-  .dark input:focus,
-  .dark textarea:focus,
-  .dark select:focus {
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
-  }
-  
-  /* Dark mode dropdowns and menus */
-  .dark .dropdown-menu,
-  .dark [role="menu"] {
-    background-color: hsl(var(--card));
-    border-color: hsl(var(--border));
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Dark mode table styling */
-  .dark table {
-    border-color: hsl(var(--border));
-  }
-  
-  .dark th,
-  .dark td {
-    border-color: hsl(var(--border));
-  }
-  
-  /* Dark mode text contrasts */
-  .dark h1,
-  .dark h2,
-  .dark h3,
-  .dark h4,
-  .dark h5,
-  .dark h6 {
-    color: hsl(var(--foreground));
-  }
-  
-  .dark p,
-  .dark span,
-  .dark div {
-    color: hsl(var(--foreground));
-  }
-  
-  /* Dark mode muted text */
-  .dark .text-muted-foreground {
-    color: hsl(var(--muted-foreground));
+    background-color: black;
   }
   
   /* Header gradient shadow styling */
   .header-gradient-shadow {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-    border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Dark mode header gradient shadow with yellow accent line */
+  /* Dark mode header gradient shadow */
   .dark .header-gradient-shadow {
-    background-color: hsl(var(--card));
-    border-bottom: 2px solid hsl(var(--primary)); /* Yellow line preserved */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 16px rgba(212, 175, 55, 0.3), 0 1px 6px rgba(212, 175, 55, 0.2);
   }
   
   /* Bottom navigation gradient shadow styling (flipped) */
   .bottom-nav-gradient-shadow {
     box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
-    border-top: 1px solid hsl(var(--border));
   }
   
-  /* Dark mode bottom navigation gradient shadow with yellow accent line */
+  /* Dark mode bottom navigation gradient shadow */
   .dark .bottom-nav-gradient-shadow {
-    background-color: hsl(var(--card));
-    border-top: 2px solid hsl(var(--primary)); /* Yellow line preserved */
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -2px 16px rgba(212, 175, 55, 0.3), 0 -1px 6px rgba(212, 175, 55, 0.2);
   }
   
   /* Make all page borders thinner */
