@@ -101,7 +101,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
@@ -110,18 +110,20 @@
   
   /* Dark mode page background */
   .dark body {
-    @apply bg-black;
+    background-color: black;
   }
   
   /* Dark mode card styling with gold borders and drop shadows */
   .dark .card-section {
-    @apply bg-black border-2 border-primary shadow-lg;
+    background-color: black;
+    border-width: 2px;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   
   /* Add drop shadows to all cards in dark mode */
   .dark [class*="card"],
   .dark .bg-card {
-    @apply shadow-lg;
     box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.3), 0 4px 6px -2px rgba(212, 175, 55, 0.2);
   }
   
@@ -133,7 +135,7 @@
   
   /* Dark mode main content areas */
   .dark main {
-    @apply bg-black;
+    background-color: black;
   }
 }
 
