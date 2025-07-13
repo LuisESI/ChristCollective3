@@ -242,7 +242,7 @@ export default function ExplorePage() {
                         </Avatar>
                         <div className="flex-1">
                           <h4 className="font-medium text-yellow-400">{creator.name}</h4>
-                          <p className="text-sm text-gray-600">{creator.bio?.substring(0, 60)}...</p>
+                          <p className="text-sm text-white">{creator.bio?.substring(0, 60)}...</p>
                           <div className="flex items-center justify-between mt-2">
                             <Badge variant="outline">{creator.content}</Badge>
                             <span className="text-sm text-gray-500">
