@@ -493,7 +493,7 @@ export default function ConnectPage() {
                   <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
                     <RadioGroupItem value="no" id="pay-no" />
                     <Label htmlFor="pay-no" className="flex-1 cursor-pointer">
-                      <div className="font-medium">No, I can't afford $15/month right now</div>
+                      <div className="font-medium">No, I can't afford $15/month right now.</div>
                       <div className="text-sm text-muted-foreground">I'd prefer a free or lower-cost option</div>
                     </Label>
                   </div>
