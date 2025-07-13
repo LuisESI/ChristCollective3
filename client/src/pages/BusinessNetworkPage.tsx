@@ -143,7 +143,7 @@ export default function BusinessNetworkPage() {
         </div>
       </section>
       
-      <section className="py-8 md:py-16 bg-background">
+      <section className="py-8 md:py-16 bg-white">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="directory" className="w-full">
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6 md:mb-10 bg-muted p-1 rounded-lg">
