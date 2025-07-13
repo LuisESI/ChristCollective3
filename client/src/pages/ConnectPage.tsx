@@ -106,8 +106,8 @@ interface SurveyData {
   customCity: string;
   ageRange: string;
   hobbies: string[];
-  commitment: boolean;
-  paymentWilling: boolean;
+  commitment: boolean | null;
+  paymentWilling: boolean | null;
 }
 
 export default function ConnectPage() {
@@ -121,8 +121,8 @@ export default function ConnectPage() {
     customCity: "",
     ageRange: "",
     hobbies: [],
-    commitment: false,
-    paymentWilling: false
+    commitment: null,
+    paymentWilling: null
   });
 
   const steps = [
@@ -175,7 +175,7 @@ export default function ConnectPage() {
       case "friends":
         return "make new local Christian friends";
       case "community":
-        return "join a local church/community event near you";
+        return "find a Christian community/church";
       default:
         return "connect with other Christians";
     }
@@ -312,22 +312,22 @@ export default function ConnectPage() {
                   <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
                     <RadioGroupItem value="entrepreneurs" id="entrepreneurs" />
                     <Label htmlFor="entrepreneurs" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Meet Local Christian Entrepreneurs</div>
-                      <div className="text-sm text-muted-foreground">Network with faith-based business owners and professionals</div>
+                      <div className="font-bold text-base">Meet Local Christian Entrepreneurs</div>
+                      <div className="text-xs text-muted-foreground font-normal">Network with faith-based business owners and professionals</div>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
                     <RadioGroupItem value="friends" id="friends" />
                     <Label htmlFor="friends" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Make New Local Christian Friends</div>
-                      <div className="text-sm text-muted-foreground">Build meaningful friendships with fellow believers</div>
+                      <div className="font-bold text-base">Make New Local Christian Friends</div>
+                      <div className="text-xs text-muted-foreground font-normal">Build meaningful friendships with fellow believers</div>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
                     <RadioGroupItem value="community" id="community" />
                     <Label htmlFor="community" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Find a Christian Community/Church Near Me</div>
-                      <div className="text-sm text-muted-foreground">Connect with local churches and faith communities</div>
+                      <div className="font-bold text-base">Find a Christian Community/Church</div>
+                      <div className="text-xs text-muted-foreground font-normal">Connect with local churches and faith communities</div>
                     </Label>
                   </div>
                 </RadioGroup>
@@ -477,7 +477,7 @@ export default function ConnectPage() {
                   </p>
                 </div>
                 <RadioGroup
-                  value={surveyData.commitment ? "yes" : "no"}
+                  value={surveyData.commitment === null ? "" : surveyData.commitment ? "yes" : "no"}
                   onValueChange={(value) => setSurveyData({ ...surveyData, commitment: value === "yes" })}
                   className="space-y-3"
                 >
@@ -519,7 +519,7 @@ export default function ConnectPage() {
                   </ul>
                 </div>
                 <RadioGroup
-                  value={surveyData.paymentWilling ? "yes" : "no"}
+                  value={surveyData.paymentWilling === null ? "" : surveyData.paymentWilling ? "yes" : "no"}
                   onValueChange={(value) => setSurveyData({ ...surveyData, paymentWilling: value === "yes" })}
                   className="space-y-3"
                 >
