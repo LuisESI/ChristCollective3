@@ -109,20 +109,6 @@ export default function FeedPage() {
                           <Badge variant="secondary" className="bg-yellow-400 text-black hover:bg-yellow-500">
                             ${(campaign.currentAmount || 0).toLocaleString()} raised
                           </Badge>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <button className="flex items-center space-x-1 hover:text-red-600">
-                              <Heart className="h-4 w-4" />
-                              <span>Like</span>
-                            </button>
-                            <button className="flex items-center space-x-1 hover:text-blue-600">
-                              <MessageCircle className="h-4 w-4" />
-                              <span>Comment</span>
-                            </button>
-                            <button className="flex items-center space-x-1 hover:text-green-600">
-                              <Share2 className="h-4 w-4" />
-                              <span>Share</span>
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </div>
