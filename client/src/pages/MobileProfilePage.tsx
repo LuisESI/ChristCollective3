@@ -134,25 +134,25 @@ export default function MobileProfilePage() {
                   <div className="text-2xl font-bold text-[#D4AF37]">
                     ${userStats?.totalDonated?.toLocaleString() || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Donated</div>
+                  <div className="text-sm text-white">Donated</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#D4AF37]">
                     {userStats?.campaignsSupported || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Campaigns</div>
+                  <div className="text-sm text-white">Campaigns</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#D4AF37]">
                     {userStats?.connectionsCount || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Connections</div>
+                  <div className="text-sm text-white">Connections</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#D4AF37]">
                     {userStats?.achievementsCount || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Achievements</div>
+                  <div className="text-sm text-white">Achievements</div>
                 </div>
               </div>
             )}
