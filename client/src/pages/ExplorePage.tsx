@@ -28,7 +28,7 @@ export default function ExplorePage() {
   });
 
   const { data: creators, isLoading: creatorsLoading } = useQuery({
-    queryKey: ["/api/creators"],
+    queryKey: ["/api/content-creators"],
     enabled: !!user,
   });
 
@@ -64,8 +64,9 @@ export default function ExplorePage() {
   );
 
   const filteredCreators = creators?.filter((creator: any) =>
-    creator.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    creator.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    creator.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    creator.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    creator.content?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredBusinesses = businesses?.filter((business: any) =>
@@ -236,16 +237,16 @@ export default function ExplorePage() {
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={creator.avatar} />
-                          <AvatarFallback>{creator.displayName?.[0]}</AvatarFallback>
+                          <AvatarImage src={creator.profileImage} />
+                          <AvatarFallback>{creator.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-medium text-yellow-400">{creator.displayName}</h4>
-                          <p className="text-sm text-gray-600">{creator.description?.substring(0, 60)}...</p>
+                          <h4 className="font-medium text-yellow-400">{creator.name}</h4>
+                          <p className="text-sm text-gray-600">{creator.bio?.substring(0, 60)}...</p>
                           <div className="flex items-center justify-between mt-2">
-                            <Badge variant="outline">{creator.platform}</Badge>
+                            <Badge variant="outline">{creator.content}</Badge>
                             <span className="text-sm text-gray-500">
-                              {creator.followers?.toLocaleString()} followers
+                              {creator.platforms?.reduce((total: number, platform: any) => total + (platform.subscriberCount || 0), 0)?.toLocaleString()} total followers
                             </span>
                           </div>
                         </div>
