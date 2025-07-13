@@ -50,7 +50,6 @@ export default function FeedPage() {
           <h1 className="text-xl font-bold text-foreground">Feed</h1>
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar} />
-            <AvatarFallback>{user.firstName?.[0] || user.username?.[0]}</AvatarFallback>
           </Avatar>
         </div>
       </div>
