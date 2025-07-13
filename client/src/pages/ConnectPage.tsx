@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Users, Heart, MapPin, Clock, DollarSign, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Heart, MapPin, Clock, DollarSign, CheckCircle, Gamepad2 } from "lucide-react";
 
 const US_CITIES = [
   "New York, NY",
@@ -47,11 +48,55 @@ const US_CITIES = [
   "Other"
 ];
 
+const HOBBIES_SPORTS = [
+  "Basketball",
+  "Football",
+  "Soccer",
+  "Tennis",
+  "Golf",
+  "Running",
+  "Cycling",
+  "Swimming",
+  "Hiking",
+  "Rock Climbing",
+  "Yoga",
+  "Martial Arts",
+  "Weightlifting",
+  "CrossFit",
+  "Reading",
+  "Writing",
+  "Photography",
+  "Painting",
+  "Music (Playing)",
+  "Music (Listening)",
+  "Cooking",
+  "Gardening",
+  "Board Games",
+  "Video Games",
+  "Chess",
+  "Fishing",
+  "Hunting",
+  "Camping",
+  "Travel",
+  "Volunteering",
+  "Dancing",
+  "Theater",
+  "Movies",
+  "Podcasts",
+  "Crafts/DIY",
+  "Collecting",
+  "Trivia",
+  "Bowling",
+  "Baseball",
+  "Volleyball"
+];
+
 interface SurveyData {
   goal: string;
   reasoning: string;
   city: string;
   customCity: string;
+  hobbies: string[];
   commitment: boolean;
   paymentWilling: boolean;
 }
@@ -65,6 +110,7 @@ export default function ConnectPage() {
     reasoning: "",
     city: "",
     customCity: "",
+    hobbies: [],
     commitment: false,
     paymentWilling: false
   });
@@ -74,6 +120,7 @@ export default function ConnectPage() {
     "Your Goal",
     "Your Why",
     "Your City",
+    "Hobbies & Sports",
     "Time Commitment",
     "Investment"
   ];
@@ -82,13 +129,23 @@ export default function ConnectPage() {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      // Skip hobbies step if the goal is "community"
+      if (currentStep === 3 && surveyData.goal === "community") {
+        setCurrentStep(currentStep + 2); // Skip hobbies step
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      // Skip hobbies step when going back if the goal is "community"
+      if (currentStep === 5 && surveyData.goal === "community") {
+        setCurrentStep(currentStep - 2); // Skip hobbies step
+      } else {
+        setCurrentStep(currentStep - 1);
+      }
     }
   };
 
@@ -124,8 +181,14 @@ export default function ConnectPage() {
       case 3:
         return surveyData.city !== "" && (surveyData.city !== "Other" || surveyData.customCity.trim() !== "");
       case 4:
-        return surveyData.commitment !== null;
+        // Skip hobbies validation for community goal
+        if (surveyData.goal === "community") {
+          return true;
+        }
+        return surveyData.hobbies.length > 0;
       case 5:
+        return surveyData.commitment !== null;
+      case 6:
         return surveyData.paymentWilling !== null;
       default:
         return false;
@@ -174,8 +237,9 @@ export default function ConnectPage() {
               {currentStep === 1 && <Heart className="h-5 w-5 text-primary" />}
               {currentStep === 2 && <Heart className="h-5 w-5 text-primary" />}
               {currentStep === 3 && <MapPin className="h-5 w-5 text-primary" />}
-              {currentStep === 4 && <Clock className="h-5 w-5 text-primary" />}
-              {currentStep === 5 && <DollarSign className="h-5 w-5 text-primary" />}
+              {currentStep === 4 && <Gamepad2 className="h-5 w-5 text-primary" />}
+              {currentStep === 5 && <Clock className="h-5 w-5 text-primary" />}
+              {currentStep === 6 && <DollarSign className="h-5 w-5 text-primary" />}
               {steps[currentStep]}
             </CardTitle>
           </CardHeader>
@@ -317,8 +381,54 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 5: Time Commitment */}
-            {currentStep === 4 && (
+            {/* Step 5: Hobbies & Sports */}
+            {currentStep === 4 && (surveyData.goal === "entrepreneurs" || surveyData.goal === "friends") && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">What are your favorite hobbies & sports?</h2>
+                  <p className="text-muted-foreground">
+                    Select activities you enjoy. This helps us match you with like-minded Christians who share your interests.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Label>Select your interests (choose multiple)</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
+                    {HOBBIES_SPORTS.map((hobby) => (
+                      <div key={hobby} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={hobby}
+                          checked={surveyData.hobbies.includes(hobby)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSurveyData({
+                                ...surveyData,
+                                hobbies: [...surveyData.hobbies, hobby]
+                              });
+                            } else {
+                              setSurveyData({
+                                ...surveyData,
+                                hobbies: surveyData.hobbies.filter(h => h !== hobby)
+                              });
+                            }
+                          }}
+                        />
+                        <Label htmlFor={hobby} className="text-sm font-normal cursor-pointer">
+                          {hobby}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {surveyData.hobbies.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      Selected: {surveyData.hobbies.join(", ")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 6: Time Commitment */}
+            {currentStep === 5 && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold mb-2">Time Commitment</h2>
@@ -349,8 +459,8 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 6: Payment Willingness */}
-            {currentStep === 5 && (
+            {/* Step 7: Payment Willingness */}
+            {currentStep === 6 && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold mb-2">Program Investment</h2>
