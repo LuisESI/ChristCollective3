@@ -105,6 +105,7 @@ interface SurveyData {
   city: string;
   customCity: string;
   ageRange: string;
+  gender: string;
   hobbies: string[];
   commitment: boolean | null;
   paymentWilling: boolean | null;
@@ -120,6 +121,7 @@ export default function ConnectPage() {
     city: "",
     customCity: "",
     ageRange: "",
+    gender: "",
     hobbies: [],
     commitment: null,
     paymentWilling: null
@@ -130,7 +132,7 @@ export default function ConnectPage() {
     "Your Goal",
     "Your Why",
     "Your City",
-    "Age Range",
+    "Age & Gender",
     "Hobbies & Sports",
     "Time Commitment",
     "Investment"
@@ -192,7 +194,7 @@ export default function ConnectPage() {
       case 3:
         return surveyData.city !== "" && (surveyData.city !== "Other" || surveyData.customCity.trim() !== "");
       case 4:
-        return surveyData.ageRange !== "";
+        return surveyData.ageRange !== "" && surveyData.gender !== "";
       case 5:
         // Skip hobbies validation for community goal
         if (surveyData.goal === "community") {
@@ -395,29 +397,57 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 5: Age Range */}
+            {/* Step 5: Age Range & Gender */}
             {currentStep === 4 && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold mb-2">What's your age range?</h2>
+                  <h2 className="text-xl font-semibold mb-2">Tell us about yourself</h2>
                   <p className="text-muted-foreground">
                     This helps us connect you with Christians in similar life stages.
                   </p>
                 </div>
-                <RadioGroup
-                  value={surveyData.ageRange}
-                  onValueChange={(value) => setSurveyData({ ...surveyData, ageRange: value })}
-                  className="space-y-3"
-                >
-                  {AGE_RANGES.map((range) => (
-                    <div key={range} className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
-                      <RadioGroupItem value={range} id={range} />
-                      <Label htmlFor={range} className="flex-1 cursor-pointer">
-                        <div className="font-medium">{range}</div>
+                
+                {/* Age Range Selection */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">What's your age range?</Label>
+                  <RadioGroup
+                    value={surveyData.ageRange}
+                    onValueChange={(value) => setSurveyData({ ...surveyData, ageRange: value })}
+                    className="space-y-3"
+                  >
+                    {AGE_RANGES.map((range) => (
+                      <div key={range} className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                        <RadioGroupItem value={range} id={range} />
+                        <Label htmlFor={range} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{range}</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                {/* Gender Selection */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Gender</Label>
+                  <RadioGroup
+                    value={surveyData.gender}
+                    onValueChange={(value) => setSurveyData({ ...surveyData, gender: value })}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                      <RadioGroupItem value="male" id="male" />
+                      <Label htmlFor="male" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Male</div>
                       </Label>
                     </div>
-                  ))}
-                </RadioGroup>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                      <RadioGroupItem value="female" id="female" />
+                      <Label htmlFor="female" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Female</div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
             )}
 
