@@ -1,325 +1,430 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, MessageSquare, Calendar, MapPin, Briefcase, UserPlus } from "lucide-react";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
+import { ChevronLeft, ChevronRight, Users, Heart, MapPin, Clock, DollarSign, CheckCircle } from "lucide-react";
+
+const US_CITIES = [
+  "New York, NY",
+  "Los Angeles, CA",
+  "Chicago, IL",
+  "Houston, TX",
+  "Phoenix, AZ",
+  "Philadelphia, PA",
+  "San Antonio, TX",
+  "San Diego, CA",
+  "Dallas, TX",
+  "San Jose, CA",
+  "Austin, TX",
+  "Jacksonville, FL",
+  "Fort Worth, TX",
+  "Columbus, OH",
+  "Charlotte, NC",
+  "San Francisco, CA",
+  "Indianapolis, IN",
+  "Seattle, WA",
+  "Denver, CO",
+  "Washington, DC",
+  "Boston, MA",
+  "Nashville, TN",
+  "Detroit, MI",
+  "Portland, OR",
+  "Memphis, TN",
+  "Oklahoma City, OK",
+  "Las Vegas, NV",
+  "Louisville, KY",
+  "Baltimore, MD",
+  "Milwaukee, WI",
+  "Atlanta, GA",
+  "Miami, FL",
+  "Other"
+];
+
+interface SurveyData {
+  goal: string;
+  reasoning: string;
+  city: string;
+  customCity: string;
+  commitment: boolean;
+  paymentWilling: boolean;
+}
 
 export default function ConnectPage() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const [, navigate] = useLocation();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [surveyData, setSurveyData] = useState<SurveyData>({
+    goal: "",
+    reasoning: "",
+    city: "",
+    customCity: "",
+    commitment: false,
+    paymentWilling: false
+  });
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/auth");
+  const steps = [
+    "Welcome",
+    "Your Goal",
+    "Your Why",
+    "Your City",
+    "Time Commitment",
+    "Investment"
+  ];
+
+  const getProgressValue = () => ((currentStep + 1) / steps.length) * 100;
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
     }
-  }, [isLoading, user, navigate]);
+  };
 
-  const { data: businesses, isLoading: businessesLoading } = useQuery({
-    queryKey: ["/api/businesses"],
-    enabled: !!user,
-  });
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
-  const { data: creators, isLoading: creatorsLoading } = useQuery({
-    queryKey: ["/api/creators"],
-    enabled: !!user,
-  });
+  const handleSubmit = () => {
+    // TODO: Submit survey data to backend
+    console.log("Survey submitted:", surveyData);
+    // For now, just show success message
+    alert("Application submitted! We'll match you with local Christians in your area.");
+    navigate("/dashboard");
+  };
 
-  if (isLoading || !user) {
+  const getGoalText = () => {
+    switch (surveyData.goal) {
+      case "entrepreneurs":
+        return "meet with local Christian entrepreneurs";
+      case "friends":
+        return "make new local Christian friends";
+      case "community":
+        return "join a local church/community event near you";
+      default:
+        return "connect with other Christians";
+    }
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return true;
+      case 1:
+        return surveyData.goal !== "";
+      case 2:
+        return surveyData.reasoning.trim() !== "";
+      case 3:
+        return surveyData.city !== "" && (surveyData.city !== "Other" || surveyData.customCity.trim() !== "");
+      case 4:
+        return surveyData.commitment !== null;
+      case 5:
+        return surveyData.paymentWilling !== null;
+      default:
+        return false;
+    }
+  };
+
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
+            <p className="text-muted-foreground mb-4">Please log in to join our Christian community matching program.</p>
+            <Button onClick={() => navigate("/auth")} className="w-full">
+              Log In
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-background border-b border-border p-4 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">Connect</h1>
-          <Button variant="outline" size="sm">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Invite Friends
-          </Button>
+      <div className="bg-background border-b border-border p-4">
+        <div className="container mx-auto max-w-2xl">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-foreground">Connect with Christians</h1>
+            <div className="text-sm text-muted-foreground">
+              Step {currentStep + 1} of {steps.length}
+            </div>
+          </div>
+          <div className="mt-4">
+            <Progress value={getProgressValue()} className="h-2" />
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* Welcome Section */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="bg-[#D4AF37] rounded-full p-3">
-                <Users className="h-6 w-6 text-white" />
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {currentStep === 0 && <Users className="h-5 w-5 text-primary" />}
+              {currentStep === 1 && <Heart className="h-5 w-5 text-primary" />}
+              {currentStep === 2 && <Heart className="h-5 w-5 text-primary" />}
+              {currentStep === 3 && <MapPin className="h-5 w-5 text-primary" />}
+              {currentStep === 4 && <Clock className="h-5 w-5 text-primary" />}
+              {currentStep === 5 && <DollarSign className="h-5 w-5 text-primary" />}
+              {steps[currentStep]}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Step 1: Welcome */}
+            {currentStep === 0 && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="bg-primary/10 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Users className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold mb-4">Welcome to Christ Collective Connect</h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Our mission is to unite Christians worldwide through meaningful local connections. 
+                    Whether you're looking to network with fellow Christian entrepreneurs, make new friends 
+                    in your faith community, or find a local church, we'll match you with like-minded 
+                    believers in your area.
+                  </p>
+                </div>
+                <div className="bg-primary/5 rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">How it works:</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      Complete our quick 5-minute survey
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      Get matched with Christians in your city
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      Join organized meetups and events
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      Build lasting faith-based relationships
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-semibold">Build Your Christian Network</h2>
-                <p className="text-muted-foreground">Connect with like-minded believers, business owners, and content creators in your community.</p>
+            )}
+
+            {/* Step 2: Goal Selection */}
+            {currentStep === 1 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">What's your main goal?</h2>
+                  <p className="text-muted-foreground">Choose what you're most interested in connecting with other Christians about.</p>
+                </div>
+                <RadioGroup
+                  value={surveyData.goal}
+                  onValueChange={(value) => setSurveyData({ ...surveyData, goal: value })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="entrepreneurs" id="entrepreneurs" />
+                    <Label htmlFor="entrepreneurs" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Meet Local Christian Entrepreneurs</div>
+                      <div className="text-sm text-muted-foreground">Network with faith-based business owners and professionals</div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="friends" id="friends" />
+                    <Label htmlFor="friends" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Make New Local Christian Friends</div>
+                      <div className="text-sm text-muted-foreground">Build meaningful friendships with fellow believers</div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="community" id="community" />
+                    <Label htmlFor="community" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Find a Christian Community/Church Near Me</div>
+                      <div className="text-sm text-muted-foreground">Connect with local churches and faith communities</div>
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
+            )}
+
+            {/* Step 3: Reasoning */}
+            {currentStep === 2 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Why do you want to {getGoalText()}?</h2>
+                  <p className="text-muted-foreground">Help us understand your motivation so we can make better matches. (1-3 sentences)</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reasoning">Your reason</Label>
+                  <Textarea
+                    id="reasoning"
+                    placeholder="Share what's driving you to connect with other Christians in your area..."
+                    value={surveyData.reasoning}
+                    onChange={(e) => setSurveyData({ ...surveyData, reasoning: e.target.value })}
+                    className="min-h-[100px]"
+                  />
+                  <div className="text-sm text-muted-foreground text-right">
+                    {surveyData.reasoning.length}/500
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: City Selection */}
+            {currentStep === 3 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">What is your home city?</h2>
+                  <p className="text-muted-foreground">We'll match you with Christians in your local area.</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Select your city</Label>
+                    <Select value={surveyData.city} onValueChange={(value) => setSurveyData({ ...surveyData, city: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose your city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {US_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {surveyData.city === "Other" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="customCity">Enter your city</Label>
+                      <Input
+                        id="customCity"
+                        placeholder="City, State"
+                        value={surveyData.customCity}
+                        onChange={(e) => setSurveyData({ ...surveyData, customCity: e.target.value })}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Time Commitment */}
+            {currentStep === 4 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Time Commitment</h2>
+                  <p className="text-muted-foreground">
+                    Are you willing to commit at least 2 hours a month to {getGoalText()} in {surveyData.city === "Other" ? surveyData.customCity : surveyData.city}?
+                  </p>
+                </div>
+                <RadioGroup
+                  value={surveyData.commitment ? "yes" : "no"}
+                  onValueChange={(value) => setSurveyData({ ...surveyData, commitment: value === "yes" })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="yes" id="commit-yes" />
+                    <Label htmlFor="commit-yes" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Yes, I can commit 2+ hours per month</div>
+                      <div className="text-sm text-muted-foreground">I'm ready to actively participate in meetups and events</div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="no" id="commit-no" />
+                    <Label htmlFor="commit-no" className="flex-1 cursor-pointer">
+                      <div className="font-medium">No, I can't commit that much time right now</div>
+                      <div className="text-sm text-muted-foreground">I'd prefer occasional or flexible participation</div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* Step 6: Payment Willingness */}
+            {currentStep === 5 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Program Investment</h2>
+                  <p className="text-muted-foreground">
+                    If accepted, are you willing to pay a $15/month fee to cover our admin costs for organizing events and maintaining the community?
+                  </p>
+                </div>
+                <div className="bg-primary/5 rounded-lg p-4 mb-4">
+                  <h3 className="font-semibold mb-2">What your $15/month covers:</h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    <li>• Event coordination and venue arrangements</li>
+                    <li>• Community management and moderation</li>
+                    <li>• Matching algorithm and platform maintenance</li>
+                    <li>• Monthly meetup organization</li>
+                    <li>• Prayer and support group facilitation</li>
+                  </ul>
+                </div>
+                <RadioGroup
+                  value={surveyData.paymentWilling ? "yes" : "no"}
+                  onValueChange={(value) => setSurveyData({ ...surveyData, paymentWilling: value === "yes" })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="yes" id="pay-yes" />
+                    <Label htmlFor="pay-yes" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Yes, I'm willing to invest $15/month</div>
+                      <div className="text-sm text-muted-foreground">I understand this helps support the community</div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                    <RadioGroupItem value="no" id="pay-no" />
+                    <Label htmlFor="pay-no" className="flex-1 cursor-pointer">
+                      <div className="font-medium">No, I can't afford $15/month right now</div>
+                      <div className="text-sm text-muted-foreground">I'd prefer a free or lower-cost option</div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex justify-between pt-6">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 0}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
+              
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className="flex items-center gap-2"
+                >
+                  Continue
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canProceed()}
+                  className="flex items-center gap-2"
+                >
+                  Submit Application
+                  <CheckCircle className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
-
-        {/* Tabs */}
-        <Tabs defaultValue="businesses" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="businesses">Businesses</TabsTrigger>
-            <TabsTrigger value="creators">Creators</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-          </TabsList>
-
-          {/* Businesses Tab */}
-          <TabsContent value="businesses">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Christian Businesses</h3>
-                <Button variant="outline" size="sm" onClick={() => navigate("/business")}>
-                  View All
-                </Button>
-              </div>
-              
-              {businessesLoading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="p-4">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {businesses?.slice(0, 5).map((business: any) => (
-                    <Card key={business.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <Avatar className="h-12 w-12">
-                              <AvatarFallback>{business.businessName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{business.businessName}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{business.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center mt-2 space-x-2">
-                                <Badge variant="outline">
-                                  <Briefcase className="h-3 w-3 mr-1" />
-                                  {business.industry}
-                                </Badge>
-                                <Badge variant="outline">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {business.location}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col space-y-2">
-                            <Button size="sm" variant="outline">
-                              Connect
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => navigate(`/business/profile/${business.id}`)}>
-                              View Profile
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Creators Tab */}
-          <TabsContent value="creators">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Content Creators</h3>
-                <Button variant="outline" size="sm" onClick={() => navigate("/creators")}>
-                  View All
-                </Button>
-              </div>
-              
-              {creatorsLoading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="p-4">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {creators?.slice(0, 5).map((creator: any) => (
-                    <Card key={creator.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <Avatar className="h-12 w-12">
-                              <AvatarImage src={creator.avatar} />
-                              <AvatarFallback>{creator.displayName?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{creator.displayName}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{creator.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center mt-2 space-x-2">
-                                <Badge variant="outline">{creator.platform}</Badge>
-                                <span className="text-sm text-gray-500">
-                                  {creator.followers?.toLocaleString()} followers
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col space-y-2">
-                            <Button size="sm" variant="outline">
-                              Follow
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => navigate(`/creators/${creator.id}`)}>
-                              View Profile
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Community Tab */}
-          <TabsContent value="community">
-            <div className="space-y-6">
-              {/* Community Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Users className="h-5 w-5 mr-2" />
-                    Community Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#D4AF37]">2,847</div>
-                      <div className="text-sm text-gray-600">Members</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#D4AF37]">156</div>
-                      <div className="text-sm text-gray-600">Businesses</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#D4AF37]">89</div>
-                      <div className="text-sm text-gray-600">Creators</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#D4AF37]">432</div>
-                      <div className="text-sm text-gray-600">Active Campaigns</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Community Events */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2" />
-                    Upcoming Events
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="bg-[#D4AF37] text-white rounded-lg p-2 text-center min-w-[60px]">
-                        <div className="text-sm font-medium">JAN</div>
-                        <div className="text-lg font-bold">15</div>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">Christian Entrepreneurs Meetup</h4>
-                        <p className="text-sm text-gray-600">Monthly networking event for faith-based business owners</p>
-                        <div className="flex items-center mt-1 text-sm text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          Downtown Community Center
-                        </div>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        RSVP
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="bg-[#D4AF37] text-white rounded-lg p-2 text-center min-w-[60px]">
-                        <div className="text-sm font-medium">JAN</div>
-                        <div className="text-lg font-bold">22</div>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">Content Creator Workshop</h4>
-                        <p className="text-sm text-gray-600">Learn strategies for Christian content creation</p>
-                        <div className="flex items-center mt-1 text-sm text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          Online Event
-                        </div>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        RSVP
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Discussion Forums */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MessageSquare className="h-5 w-5 mr-2" />
-                    Community Discussions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                      <div>
-                        <h4 className="font-medium">Faith & Business Balance</h4>
-                        <p className="text-sm text-gray-600">How do you maintain your faith while running a business?</p>
-                      </div>
-                      <Badge variant="secondary">23 replies</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                      <div>
-                        <h4 className="font-medium">Christian Content Ideas</h4>
-                        <p className="text-sm text-gray-600">Share your best faith-based content strategies</p>
-                      </div>
-                      <Badge variant="secondary">18 replies</Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                      <div>
-                        <h4 className="font-medium">Prayer Requests</h4>
-                        <p className="text-sm text-gray-600">Community prayer and support</p>
-                      </div>
-                      <Badge variant="secondary">45 replies</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
