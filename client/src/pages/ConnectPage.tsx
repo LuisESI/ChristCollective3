@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Users, Heart, MapPin, Clock, DollarSign, CheckCircle, Gamepad2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Heart, MapPin, Clock, DollarSign, CheckCircle, Gamepad2, Calendar } from "lucide-react";
 
 const US_CITIES = [
   "New York, NY",
@@ -91,11 +91,20 @@ const HOBBIES_SPORTS = [
   "Volleyball"
 ];
 
+const AGE_RANGES = [
+  "18-25",
+  "26-35",
+  "36-45",
+  "46-60",
+  "60+"
+];
+
 interface SurveyData {
   goal: string;
   reasoning: string;
   city: string;
   customCity: string;
+  ageRange: string;
   hobbies: string[];
   commitment: boolean;
   paymentWilling: boolean;
@@ -110,6 +119,7 @@ export default function ConnectPage() {
     reasoning: "",
     city: "",
     customCity: "",
+    ageRange: "",
     hobbies: [],
     commitment: false,
     paymentWilling: false
@@ -120,6 +130,7 @@ export default function ConnectPage() {
     "Your Goal",
     "Your Why",
     "Your City",
+    "Age Range",
     "Hobbies & Sports",
     "Time Commitment",
     "Investment"
@@ -130,7 +141,7 @@ export default function ConnectPage() {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       // Skip hobbies step if the goal is "community"
-      if (currentStep === 3 && surveyData.goal === "community") {
+      if (currentStep === 4 && surveyData.goal === "community") {
         setCurrentStep(currentStep + 2); // Skip hobbies step
       } else {
         setCurrentStep(currentStep + 1);
@@ -141,7 +152,7 @@ export default function ConnectPage() {
   const handleBack = () => {
     if (currentStep > 0) {
       // Skip hobbies step when going back if the goal is "community"
-      if (currentStep === 5 && surveyData.goal === "community") {
+      if (currentStep === 6 && surveyData.goal === "community") {
         setCurrentStep(currentStep - 2); // Skip hobbies step
       } else {
         setCurrentStep(currentStep - 1);
@@ -181,14 +192,16 @@ export default function ConnectPage() {
       case 3:
         return surveyData.city !== "" && (surveyData.city !== "Other" || surveyData.customCity.trim() !== "");
       case 4:
+        return surveyData.ageRange !== "";
+      case 5:
         // Skip hobbies validation for community goal
         if (surveyData.goal === "community") {
           return true;
         }
         return surveyData.hobbies.length > 0;
-      case 5:
-        return surveyData.commitment !== null;
       case 6:
+        return surveyData.commitment !== null;
+      case 7:
         return surveyData.paymentWilling !== null;
       default:
         return false;
@@ -237,9 +250,10 @@ export default function ConnectPage() {
               {currentStep === 1 && <Heart className="h-5 w-5 text-primary" />}
               {currentStep === 2 && <Heart className="h-5 w-5 text-primary" />}
               {currentStep === 3 && <MapPin className="h-5 w-5 text-primary" />}
-              {currentStep === 4 && <Gamepad2 className="h-5 w-5 text-primary" />}
-              {currentStep === 5 && <Clock className="h-5 w-5 text-primary" />}
-              {currentStep === 6 && <DollarSign className="h-5 w-5 text-primary" />}
+              {currentStep === 4 && <Calendar className="h-5 w-5 text-primary" />}
+              {currentStep === 5 && <Gamepad2 className="h-5 w-5 text-primary" />}
+              {currentStep === 6 && <Clock className="h-5 w-5 text-primary" />}
+              {currentStep === 7 && <DollarSign className="h-5 w-5 text-primary" />}
               {steps[currentStep]}
             </CardTitle>
           </CardHeader>
@@ -381,8 +395,34 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 5: Hobbies & Sports */}
-            {currentStep === 4 && (surveyData.goal === "entrepreneurs" || surveyData.goal === "friends") && (
+            {/* Step 5: Age Range */}
+            {currentStep === 4 && (
+              <div className="space-y-4">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">What's your age range?</h2>
+                  <p className="text-muted-foreground">
+                    This helps us connect you with Christians in similar life stages.
+                  </p>
+                </div>
+                <RadioGroup
+                  value={surveyData.ageRange}
+                  onValueChange={(value) => setSurveyData({ ...surveyData, ageRange: value })}
+                  className="space-y-3"
+                >
+                  {AGE_RANGES.map((range) => (
+                    <div key={range} className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent transition-colors">
+                      <RadioGroupItem value={range} id={range} />
+                      <Label htmlFor={range} className="flex-1 cursor-pointer">
+                        <div className="font-medium">{range}</div>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* Step 6: Hobbies & Sports */}
+            {currentStep === 5 && (surveyData.goal === "entrepreneurs" || surveyData.goal === "friends") && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold mb-2">What are your favorite hobbies & sports?</h2>
@@ -427,8 +467,8 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 6: Time Commitment */}
-            {currentStep === 5 && (
+            {/* Step 7: Time Commitment */}
+            {currentStep === 6 && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold mb-2">Time Commitment</h2>
@@ -459,8 +499,8 @@ export default function ConnectPage() {
               </div>
             )}
 
-            {/* Step 7: Payment Willingness */}
-            {currentStep === 6 && (
+            {/* Step 8: Payment Willingness */}
+            {currentStep === 7 && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold mb-2">Program Investment</h2>
