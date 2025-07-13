@@ -33,7 +33,7 @@ export default function ExplorePage() {
   });
 
   const { data: businesses, isLoading: businessesLoading } = useQuery({
-    queryKey: ["/api/businesses"],
+    queryKey: ["/api/business-profiles"],
     enabled: !!user,
   });
 
@@ -69,7 +69,7 @@ export default function ExplorePage() {
   );
 
   const filteredBusinesses = businesses?.filter((business: any) =>
-    business.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    business.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     business.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -294,16 +294,16 @@ export default function ExplorePage() {
                       <div className="flex items-center mb-4">
                         {business.logo ? (
                           <Avatar className="h-12 w-12 mr-4">
-                            <AvatarImage src={business.logo} alt={business.companyName || business.businessName} />
-                            <AvatarFallback>{(business.companyName || business.businessName)?.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={business.logo} alt={business.companyName} />
+                            <AvatarFallback>{business.companyName?.charAt(0)}</AvatarFallback>
                           </Avatar>
                         ) : (
                           <Avatar className="h-12 w-12 mr-4">
-                            <AvatarFallback>{(business.companyName || business.businessName)?.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{business.companyName?.charAt(0)}</AvatarFallback>
                           </Avatar>
                         )}
                         <div>
-                          <h3 className="font-semibold text-foreground">{business.companyName || business.businessName}</h3>
+                          <h3 className="font-semibold text-foreground">{business.companyName}</h3>
                           <p className="text-sm text-primary">{business.industry}</p>
                         </div>
                       </div>
