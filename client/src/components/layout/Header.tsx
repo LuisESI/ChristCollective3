@@ -140,26 +140,9 @@ export default function Header() {
                 </div>
               </Link>
             ))}
-            <hr className="border-gray-200" />
             {user ? (
               <>
-                <Link href="/profile">
-                  <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
-                    Profile
-                  </div>
-                </Link>
-                <Link href="/manage-campaigns">
-                  <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
-                    Manage Campaigns
-                  </div>
-                </Link>
-                {creatorStatus?.isCreator && (
-                  <Link href="/creator-profile">
-                    <div className="text-foreground hover:text-primary transition-colors font-medium py-2 cursor-pointer">
-                      Creator Profile
-                    </div>
-                  </Link>
-                )}
+                <hr className="border-gray-200" />
                 <a 
                   href="/api/logout" 
                   className="text-foreground hover:text-primary transition-colors font-medium py-2"
