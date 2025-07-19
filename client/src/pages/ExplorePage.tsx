@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Filter, TrendingUp, Users, DollarSign, Star } from "lucide-react";
+import { Search, TrendingUp, Users, DollarSign, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 
@@ -85,10 +85,6 @@ export default function ExplorePage() {
       <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-foreground">Explore</h1>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
         </div>
         
         {/* Search Bar */}
