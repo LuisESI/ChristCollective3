@@ -124,33 +124,7 @@ export default function ExplorePage() {
           })}
         </div>
 
-        {/* Trending Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Trending Now
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
-                <Badge variant="secondary">#1</Badge>
-                <div>
-                  <p className="font-medium">Faith-Based Businesses</p>
-                  <p className="text-sm text-muted-foreground">Growing 15% this week</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
-                <Badge variant="secondary">#2</Badge>
-                <div>
-                  <p className="font-medium">Mission Trips</p>
-                  <p className="text-sm text-muted-foreground">45 new campaigns</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Campaigns Section */}
         {(selectedCategory === "all" || selectedCategory === "campaigns") && (
