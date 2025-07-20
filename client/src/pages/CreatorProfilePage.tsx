@@ -162,13 +162,13 @@ export default function CreatorProfilePage() {
           </div>
         )}
         
-        {/* Content Type and Audience - Left aligned */}
+        {/* Content Type and Audience - Single line */}
         <div className="text-sm text-gray-400 mb-6 text-left">
-          <div>Content: {creator.content}</div>
-          {creator.audience && <div>Audience: {creator.audience}</div>}
-          {creator.sponsorshipStartDate && (
-            <div>Sponsored since {formatDate(creator.sponsorshipStartDate)}</div>
-          )}
+          <div>
+            Content: {creator.content}
+            {creator.audience && ` • Audience: ${creator.audience}`}
+            {creator.sponsorshipStartDate && ` • Sponsored since ${formatDate(creator.sponsorshipStartDate)}`}
+          </div>
         </div>
 
         {/* Action Buttons */}
