@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/ui/image-upload";
 import {
   User,
@@ -1073,8 +1074,7 @@ export default function ProfilePage() {
                   </TabsContent>
                 </CardContent>
               </Tabs>
-              </Card>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
