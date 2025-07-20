@@ -111,7 +111,7 @@ export default function CreatorProfilePage() {
 
       {/* Profile Header */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-start gap-6 mb-6">
+        <div className="flex items-start gap-6 mb-4">
           <Avatar className="w-20 h-20 ring-2 ring-gray-700">
             <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
             <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
@@ -120,22 +120,22 @@ export default function CreatorProfilePage() {
           </Avatar>
           
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-2">
               <h2 className="text-xl font-semibold">{creator.name}</h2>
               <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-2 py-1">
                 Sponsored Creator
               </Badge>
             </div>
             
-            {/* Stats Row */}
-            <div className="flex gap-6 mb-4">
-              <div className="text-center">
+            {/* Stats Row - Moved higher */}
+            <div className="flex gap-6 mb-3">
+              <div className="text-left">
                 <div className="text-lg font-semibold">
                   {creator.posts?.length || 0}
                 </div>
                 <div className="text-xs text-gray-400">posts</div>
               </div>
-              <div className="text-center">
+              <div className="text-left">
                 <div className="text-lg font-semibold">
                   {formatSubscriberCount(
                     (creator.platforms as any[])?.reduce((total: number, platform: any) => 
@@ -145,30 +145,30 @@ export default function CreatorProfilePage() {
                 </div>
                 <div className="text-xs text-gray-400">followers</div>
               </div>
-              <div className="text-center">
+              <div className="text-left">
                 <div className="text-lg font-semibold">
                   {(creator.platforms as any[])?.length || 0}
                 </div>
                 <div className="text-xs text-gray-400">platforms</div>
               </div>
             </div>
-            
-            {/* Bio */}
-            {creator.bio && (
-              <div className="mb-4">
-                <p className="text-sm leading-relaxed">{creator.bio}</p>
-              </div>
-            )}
-            
-            {/* Content Type and Audience */}
-            <div className="text-sm text-gray-400 mb-4">
-              <div>Content: {creator.content}</div>
-              {creator.audience && <div>Audience: {creator.audience}</div>}
-              {creator.sponsorshipStartDate && (
-                <div>Sponsored since {formatDate(creator.sponsorshipStartDate)}</div>
-              )}
-            </div>
           </div>
+        </div>
+
+        {/* Bio - Left aligned */}
+        {creator.bio && (
+          <div className="mb-4">
+            <p className="text-sm leading-relaxed text-left">{creator.bio}</p>
+          </div>
+        )}
+        
+        {/* Content Type and Audience - Left aligned */}
+        <div className="text-sm text-gray-400 mb-6 text-left">
+          <div>Content: {creator.content}</div>
+          {creator.audience && <div>Audience: {creator.audience}</div>}
+          {creator.sponsorshipStartDate && (
+            <div>Sponsored since {formatDate(creator.sponsorshipStartDate)}</div>
+          )}
         </div>
 
         {/* Action Buttons */}
