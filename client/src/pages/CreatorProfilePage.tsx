@@ -120,10 +120,10 @@ export default function CreatorProfilePage() {
           </Avatar>
           
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-xl font-semibold">{creator.name}</h2>
-              <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-2 py-1">
-                Sponsored Creator
+            <div className="flex flex-col gap-1 mb-2">
+              <h2 className="text-xl font-semibold text-left">{creator.name}</h2>
+              <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
+                ✨ Sponsored Creator
               </Badge>
             </div>
             
