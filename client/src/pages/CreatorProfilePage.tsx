@@ -91,197 +91,186 @@ export default function CreatorProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-amber-50">
-      {/* Header */}
-      <div className="bg-black text-white py-8">
-        <div className="container mx-auto px-4">
-          <Link href="/creators">
-            <Button variant="ghost" className="text-white hover:bg-white/10 mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Creators
+    <div className="min-h-screen bg-black text-white">
+      {/* Modern Header with Navigation */}
+      <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-800">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/creators">
+              <Button variant="ghost" className="text-white hover:bg-white/10 p-2">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <h1 className="text-lg font-semibold">{creator.name}</h1>
+            <Button variant="ghost" className="text-white hover:bg-white/10 p-2">
+              <ExternalLink className="w-5 h-5" />
             </Button>
-          </Link>
-          
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <Avatar className="w-24 h-24 md:w-32 md:h-32">
-              <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
-              <AvatarFallback className="bg-amber-100 text-amber-800 text-2xl md:text-3xl font-bold">
-                {creator.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                <h1 className="text-3xl md:text-4xl font-bold">Luis Lucero</h1>
-                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 w-fit">
-                  Sponsored Creator
-                </Badge>
-              </div>
-              
-              {creator.bio && (
-                <p className="text-lg text-gray-300 mb-4">{creator.bio}</p>
-              )}
-              
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4 text-amber-400" />
-                  <span>Content: {creator.content}</span>
-                </div>
-                {creator.audience && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-amber-400" />
-                    <span>Audience: {creator.audience}</span>
-                  </div>
-                )}
-                {creator.sponsorshipStartDate && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-400" />
-                    <span>Sponsored since: {formatDate(creator.sponsorshipStartDate)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Social Media Platforms */}
-          <div className="lg:col-span-1">
-            <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-black">
-                  Social Media Platforms
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-4">
-                {(creator.platforms as any[])?.map((platform, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4 flex-1 min-w-[250px] max-w-[300px]">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
-                        {getPlatformIcon(platform.platform)}
-                      </div>
-                      <div className="flex-1">
-                        <span className="font-medium capitalize text-black text-lg">{platform.platform}</span>
-                        {platform.subscriberCount && (
-                          <div className="mt-1">
-                            <Badge className="bg-yellow-400 text-black border-yellow-400 text-xs">
-                              {formatSubscriberCount(platform.subscriberCount)} followers
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full bg-black text-white hover:bg-gray-800"
-                      onClick={() => window.open(platform.profileUrl, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Visit Profile
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+      {/* Profile Header */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="flex items-start gap-6 mb-6">
+          <Avatar className="w-20 h-20 ring-2 ring-gray-700">
+            <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
+            <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
+              {creator.name.split(' ').map(n => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-3">
+              <h2 className="text-xl font-semibold">{creator.name}</h2>
+              <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-2 py-1">
+                Sponsored Creator
+              </Badge>
+            </div>
+            
+            {/* Stats Row */}
+            <div className="flex gap-6 mb-4">
+              <div className="text-center">
+                <div className="text-lg font-semibold">
+                  {creator.posts?.length || 0}
+                </div>
+                <div className="text-xs text-gray-400">posts</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold">
+                  {formatSubscriberCount(
+                    (creator.platforms as any[])?.reduce((total: number, platform: any) => 
+                      total + (platform.subscriberCount || 0), 0
+                    ) || 0
+                  )}
+                </div>
+                <div className="text-xs text-gray-400">followers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold">
+                  {(creator.platforms as any[])?.length || 0}
+                </div>
+                <div className="text-xs text-gray-400">platforms</div>
+              </div>
+            </div>
+            
+            {/* Bio */}
+            {creator.bio && (
+              <div className="mb-4">
+                <p className="text-sm leading-relaxed">{creator.bio}</p>
+              </div>
+            )}
+            
+            {/* Content Type and Audience */}
+            <div className="text-sm text-gray-400 mb-4">
+              <div>Content: {creator.content}</div>
+              {creator.audience && <div>Audience: {creator.audience}</div>}
+              {creator.sponsorshipStartDate && (
+                <div>Sponsored since {formatDate(creator.sponsorshipStartDate)}</div>
+              )}
+            </div>
           </div>
+        </div>
 
-          {/* Content & Posts */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-black">
-                  <Play className="w-5 h-5 text-amber-600" />
-                  Recent Content
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!creator.posts || creator.posts.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Play className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">No Content Yet</h3>
-                    <p className="text-gray-600">
-                      This creator hasn't shared any content posts yet. Check back soon!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {creator.posts.map((post) => (
-                      <div key={post.id} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-start gap-4">
-                          {post.thumbnailUrl && (
-                            <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                              <img 
-                                src={post.thumbnailUrl} 
-                                alt={post.postTitle || 'Post thumbnail'}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="text-lg">{getPlatformIcon(post.platform)}</div>
-                              <Badge variant="outline" className={`capitalize ${post.platform.toLowerCase() === 'instagram' || post.platform.toLowerCase() === 'tiktok' ? 'bg-black text-white border-black' : ''}`}>
-                                {post.platform}
-                              </Badge>
-                              {post.isSponsored && (
-                                <Badge className="bg-amber-100 text-amber-800">
-                                  Sponsored
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            {post.postTitle && (
-                              <h4 className="font-semibold text-gray-800 mb-2">{post.postTitle}</h4>
-                            )}
-                            
-                            {post.postDescription && (
-                              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{post.postDescription}</p>
-                            )}
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                {post.viewCount && (
-                                  <div className="flex items-center gap-1">
-                                    <Eye className="w-4 h-4" />
-                                    <span>{post.viewCount.toLocaleString()}</span>
-                                  </div>
-                                )}
-                                {post.likeCount && (
-                                  <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4" />
-                                    <span>{post.likeCount.toLocaleString()}</span>
-                                  </div>
-                                )}
-                                {post.postedAt && (
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4" />
-                                    <span>{formatDate(post.postedAt)}</span>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => window.open(post.postUrl, '_blank')}
-                              >
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                View Post
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Button className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium">
+            Follow
+          </Button>
+          <Button variant="outline" className="flex-1 border-gray-600 text-white hover:bg-gray-800">
+            Message
+          </Button>
+        </div>
+
+        {/* Platform Links */}
+        <div className="flex gap-3 overflow-x-auto pb-2 mb-6">
+          {(creator.platforms as any[])?.map((platform, index) => (
+            <button
+              key={index}
+              onClick={() => window.open(platform.profileUrl, '_blank')}
+              className="flex flex-col items-center gap-2 min-w-[80px] p-3 bg-gray-900 rounded-xl hover:bg-gray-800 transition-colors"
+            >
+              <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center">
+                {getPlatformIcon(platform.platform)}
+              </div>
+              <div className="text-xs text-center">
+                <div className="font-medium capitalize">{platform.platform}</div>
+                {platform.subscriberCount && (
+                  <div className="text-gray-400 text-[10px]">
+                    {formatSubscriberCount(platform.subscriberCount)}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Content Grid */}
+        <div className="border-t border-gray-800 mt-6 pt-6">
+          {!creator.posts || creator.posts.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+              <p className="text-gray-400 text-sm">
+                When {creator.name} shares content, it will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {creator.posts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => window.open(post.postUrl, '_blank')}
+                  className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
+                >
+                  {post.thumbnailUrl ? (
+                    <img 
+                      src={post.thumbnailUrl} 
+                      alt={post.postTitle || 'Post'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                      <Play className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Overlay with stats */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="flex items-center gap-4 text-white text-sm">
+                      {post.likeCount && (
+                        <div className="flex items-center gap-1">
+                          <Heart className="w-4 h-4 fill-white" />
+                          <span>{post.likeCount.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {post.viewCount && (
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{post.viewCount.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Platform indicator */}
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-black/70 rounded-full flex items-center justify-center">
+                    <div className="scale-75">
+                      {getPlatformIcon(post.platform)}
+                    </div>
+                  </div>
+                  
+                  {/* Sponsored indicator */}
+                  {post.isSponsored && (
+                    <div className="absolute top-2 left-2 bg-[#D4AF37] text-black text-xs px-1.5 py-0.5 rounded-full font-medium">
+                      Ad
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

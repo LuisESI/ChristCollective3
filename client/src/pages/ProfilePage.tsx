@@ -311,61 +311,100 @@ export default function ProfilePage() {
         <title>Your Profile - Christ Collective</title>
         <meta name="description" content="Manage your profile, campaigns, donations, and business presence on Christ Collective." />
       </Helmet>
-      
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-5xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-            <p className="text-muted-foreground">Manage your personal information, campaigns, donations, and business profile.</p>
-          </header>
-          
-          <div className="flex flex-col md:flex-row gap-6 mb-8">
-            <Card className="md:w-1/3">
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
-                    <AvatarFallback className="text-xl">
-                      {user?.firstName?.[0] || user?.email?.[0] || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h2 className="text-xl font-semibold">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}` 
-                      : (user?.email?.split('@')[0] || "User")}
-                  </h2>
-                  <p className="text-muted-foreground mb-6">{user?.email}</p>
-                  
-                  <div className="grid grid-cols-2 w-full gap-4 text-center">
-                    <div className="bg-muted p-3 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {userCampaigns.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Campaigns</div>
-                    </div>
-                    <div className="bg-muted p-3 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {userDonations.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Donations</div>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full mt-6">
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => window.location.href = "/api/logout"}
-                    >
-                      Sign Out
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="min-h-screen bg-background">
+        {/* Modern Header */}
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-semibold">Profile</h1>
+              <Button variant="ghost" size="sm">
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          {/* Profile Header */}
+          <div className="flex items-start gap-6 mb-6">
+            <Avatar className="w-20 h-20 ring-2 ring-primary">
+              <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+              <AvatarFallback className="text-xl font-bold">
+                {user?.firstName?.[0] || user?.email?.[0] || "U"}
+              </AvatarFallback>
+            </Avatar>
             
-            <Card className="md:w-2/3">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <h2 className="text-xl font-semibold">
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}` 
+                    : (user?.email?.split('@')[0] || "User")}
+                </h2>
+                {user?.isAdmin && (
+                  <Badge className="bg-primary text-primary-foreground text-xs px-2 py-1">
+                    Admin
+                  </Badge>
+                )}
+              </div>
+              
+              {/* Stats Row */}
+              <div className="flex gap-6 mb-4">
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{userCampaigns.length}</div>
+                  <div className="text-xs text-muted-foreground">campaigns</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold">{userDonations.length}</div>
+                  <div className="text-xs text-muted-foreground">donations</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold">
+                    {userDonations.reduce((total, donation: any) => total + (donation.amount || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">donated</div>
+                </div>
+              </div>
+              
+              {/* Bio */}
+              {user?.bio && (
+                <div className="mb-4">
+                  <p className="text-sm leading-relaxed">{user.bio}</p>
+                </div>
+              )}
+              
+              {/* Contact Info */}
+              <div className="text-sm text-muted-foreground mb-4">
+                <div>{user?.email}</div>
+                {user?.location && <div>📍 {user.location}</div>}
+                {user?.phone && <div>📞 {user.phone}</div>}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 mb-6">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setActiveTab("profile")}
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => window.location.href = "/api/logout"}
+            >
+              Sign Out
+            </Button>
+          </div>
+
+          {/* Tabs Content */}
+          <div className="space-y-6">
+            <Card>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <CardHeader>
                   <TabsList className="grid grid-cols-5 w-full">
                     <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -1034,7 +1073,8 @@ export default function ProfilePage() {
                   </TabsContent>
                 </CardContent>
               </Tabs>
-            </Card>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
