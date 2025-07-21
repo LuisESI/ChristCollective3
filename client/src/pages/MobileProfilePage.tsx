@@ -57,105 +57,107 @@ export default function MobileProfilePage() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-        {/* Profile Header */}
-        <Card className="mb-6 bg-black border-gray-600">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="text-lg">
-                  {user.firstName?.[0] || user.username?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-white">
+        {/* Profile Header - Matching /profile layout */}
+        <div className="mb-6">
+          <div className="flex items-start space-x-4 mb-6">
+            <Avatar className="h-20 w-20 border-4 border-[#D4AF37]">
+              <AvatarImage src={user.avatar} />
+              <AvatarFallback className="text-xl bg-gray-800 text-white">
+                {user.firstName?.[0] || user.username?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-2">
+                <h2 className="text-2xl font-bold text-white">
                   {user.firstName && user.lastName 
                     ? `${user.firstName} ${user.lastName}`
                     : user.username}
                 </h2>
-                <p className="text-gray-300">@{user.username}</p>
-                <div className="flex items-center mt-2">
-                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm text-gray-300">
-                    Member since {new Date(user.createdAt || Date.now()).toLocaleDateString()}
-                  </span>
+                {user.isAdmin && (
+                  <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
+                    Admin
+                  </Badge>
+                )}
+              </div>
+              
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">
+                    {statsLoading ? "..." : (userStats?.campaignCount || userCampaigns?.length || 0)}
+                  </div>
+                  <div className="text-xs text-gray-400">campaigns</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">
+                    {statsLoading ? "..." : (userStats?.donationCount || 0)}
+                  </div>
+                  <div className="text-xs text-gray-400">donations</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">
+                    {statsLoading ? "..." : (userStats?.totalDonated || 0)}
+                  </div>
+                  <div className="text-xs text-gray-400">donated</div>
                 </div>
               </div>
-            </div>
 
-            {/* User Info */}
-            <div className="space-y-2 text-sm">
-              {user.email && (
-                <div className="flex items-center text-white">
-                  <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                  {user.email}
-                </div>
-              )}
-              {user.phone && (
-                <div className="flex items-center text-white">
-                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                  {user.phone}
-                </div>
-              )}
-              {user.location && (
-                <div className="flex items-center text-white">
-                  <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                  {user.location}
-                </div>
-              )}
-              {user.bio && (
-                <div className="flex items-start text-white mt-3">
-                  <User className="h-4 w-4 mr-2 mt-0.5 text-gray-400" />
-                  <p>{user.bio}</p>
-                </div>
-              )}
+              {/* Contact Info */}
+              <div className="space-y-1 text-sm">
+                {user.email && (
+                  <div className="text-white">{user.email}</div>
+                )}
+                {user.location && (
+                  <div className="flex items-center text-white">
+                    <MapPin className="h-4 w-4 mr-1 text-red-500" />
+                    {user.location}
+                  </div>
+                )}
+                {user.phone && (
+                  <div className="flex items-center text-white">
+                    <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                    {user.phone}
+                  </div>
+                )}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Stats */}
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/profile")}
+              className="border-gray-600 text-white hover:bg-gray-800"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleLogout}
+              className="border-gray-600 text-white hover:bg-gray-800"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+
+        {/* Settings Card */}
         <Card className="mb-6 bg-black border-gray-600">
-          <CardHeader>
-            <CardTitle className="text-lg text-white">Your Impact</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <div className="grid grid-cols-2 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="text-center animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[#D4AF37]">
-                    ${userStats?.totalDonated?.toLocaleString() || 0}
-                  </div>
-                  <div className="text-sm text-white">Donated</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-[#D4AF37] rounded-lg">
+                  <User className="h-5 w-5 text-black" />
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[#D4AF37]">
-                    {userStats?.campaignsSupported || 0}
-                  </div>
-                  <div className="text-sm text-white">Campaigns</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[#D4AF37]">
-                    {userStats?.connectionsCount || 0}
-                  </div>
-                  <div className="text-sm text-white">Connections</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[#D4AF37]">
-                    {userStats?.achievementsCount || 0}
-                  </div>
-                  <div className="text-sm text-white">Achievements</div>
+                <div>
+                  <h3 className="font-medium text-white">Profile Settings</h3>
+                  <p className="text-sm text-gray-400">Manage your personal information and profile settings.</p>
                 </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
