@@ -199,8 +199,8 @@ export default function FeedPage() {
                         <h4 className="font-medium text-gray-900">{creator.displayName}</h4>
                         <p className="text-sm text-gray-600">{creator.description?.substring(0, 80)}...</p>
                         <div className="flex items-center mt-2 space-x-2">
-                          <Badge variant="outline" className="text-xs px-2 py-0.5">{creator.platform}</Badge>
-                          <span className="text-xs text-gray-500">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none">{creator.platform}</Badge>
+                          <span className="text-[10px] text-gray-500 leading-none">
                             {creator.followers?.toLocaleString()} followers
                           </span>
                         </div>
