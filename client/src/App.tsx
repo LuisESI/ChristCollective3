@@ -33,7 +33,7 @@ import FeedPage from "@/pages/FeedPage";
 import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
-import MobileProfilePage from "@/pages/MobileProfilePage";
+
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 
@@ -66,7 +66,7 @@ function Router() {
       <Route path="/explore" component={ExplorePage} />
       <Route path="/create" component={CreatePage} />
       <Route path="/connect" component={ConnectPage} />
-      <Route path="/mobile-profile" component={MobileProfilePage} />
+
       <Route path="/privacy-settings" component={PrivacySettingsPage} />
       <Route component={NotFound} />
     </Switch>

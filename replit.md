@@ -155,3 +155,4 @@ Preferred communication style: Simple, everyday language.
 
 Changelog:
 - July 02, 2025. Initial setup
+- July 21, 2025. Consolidated mobile and desktop profile pages into single unified creator profile page at `/profile` route with creator-focused layout, social platform integration, privacy settings, and mobile-responsive design
