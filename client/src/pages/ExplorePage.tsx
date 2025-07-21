@@ -213,11 +213,8 @@ export default function ExplorePage() {
                         <div className="flex-1">
                           <h4 className="font-medium text-yellow-400">{creator.name}</h4>
                           <p className="text-sm text-white">{creator.bio?.substring(0, 60)}...</p>
-                          <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center mt-2">
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none">{creator.content}</Badge>
-                            <span className="text-[10px] text-gray-500 leading-none">
-                              {creator.platforms?.reduce((total: number, platform: any) => total + (platform.subscriberCount || 0), 0)?.toLocaleString()} followers
-                            </span>
                           </div>
                         </div>
                       </div>
