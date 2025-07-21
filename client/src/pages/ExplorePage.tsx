@@ -214,9 +214,9 @@ export default function ExplorePage() {
                           <h4 className="font-medium text-yellow-400">{creator.name}</h4>
                           <p className="text-sm text-white">{creator.bio?.substring(0, 60)}...</p>
                           <div className="flex items-center justify-between mt-2">
-                            <Badge variant="outline">{creator.content}</Badge>
-                            <span className="text-sm text-gray-500">
-                              {creator.platforms?.reduce((total: number, platform: any) => total + (platform.subscriberCount || 0), 0)?.toLocaleString()} total followers
+                            <Badge variant="outline" className="text-xs px-2 py-0.5">{creator.content}</Badge>
+                            <span className="text-xs text-gray-500">
+                              {creator.platforms?.reduce((total: number, platform: any) => total + (platform.subscriberCount || 0), 0)?.toLocaleString()} followers
                             </span>
                           </div>
                         </div>
