@@ -102,18 +102,18 @@ export default function MobileProfilePage() {
                 </div>
               </div>
 
-              {/* Contact Info */}
+              {/* Contact Info - Controlled by privacy settings */}
               <div className="space-y-1 text-sm">
-                {user.email && (
+                {user.showEmail && user.email && (
                   <div className="text-white">{user.email}</div>
                 )}
-                {user.location && (
+                {user.showLocation && user.location && (
                   <div className="flex items-center text-white">
                     <MapPin className="h-4 w-4 mr-1 text-red-500" />
                     {user.location}
                   </div>
                 )}
-                {user.phone && (
+                {user.showPhone && user.phone && (
                   <div className="flex items-center text-white">
                     <Phone className="h-4 w-4 mr-1 text-gray-400" />
                     {user.phone}
@@ -145,7 +145,10 @@ export default function MobileProfilePage() {
         </div>
 
         {/* Settings Card */}
-        <Card className="mb-6 bg-black border-gray-600">
+        <Card 
+          className="mb-6 bg-black border-gray-600 cursor-pointer hover:bg-gray-900 transition-colors"
+          onClick={() => navigate("/privacy-settings")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -157,6 +160,7 @@ export default function MobileProfilePage() {
                   <p className="text-sm text-gray-400">Manage your personal information and profile settings.</p>
                 </div>
               </div>
+              <Settings className="h-5 w-5 text-gray-400" />
             </div>
           </CardContent>
         </Card>

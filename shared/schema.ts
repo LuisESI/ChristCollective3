@@ -44,6 +44,10 @@ export const users = pgTable("users", {
   phone: varchar("phone"),
   username: varchar("username", { length: 50 }),
   password: varchar("password"),
+  // Privacy settings
+  showEmail: boolean("show_email").default(false),
+  showPhone: boolean("show_phone").default(false),
+  showLocation: boolean("show_location").default(false),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables

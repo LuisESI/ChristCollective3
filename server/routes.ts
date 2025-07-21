@@ -441,6 +441,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Privacy settings route
+  app.put('/api/user/privacy-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { showEmail, showPhone, showLocation } = req.body;
+      
+      // Validate input
+      const privacyData = {
+        showEmail: Boolean(showEmail),
+        showPhone: Boolean(showPhone),
+        showLocation: Boolean(showLocation)
+      };
+      
+      const user = await storage.updateUser(userId, privacyData);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating privacy settings:", error);
+      res.status(500).json({ message: "Failed to update privacy settings" });
+    }
+  });
+
   // Campaign routes
   app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
