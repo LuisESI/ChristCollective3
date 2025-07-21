@@ -83,11 +83,11 @@ export default function FeedPage() {
               {campaigns?.slice(0, 3).map((campaign: any) => (
                 <Card key={campaign.id} className="hover:shadow-md transition-shadow border-gray-600 overflow-hidden cursor-pointer"
                       onClick={() => navigate(`/donate/${campaign.slug}`)}>
-                  {/* White Header Section */}
-                  <div className="bg-white px-4 py-3 border-b border-gray-200">
+                  {/* Black Header Section */}
+                  <div className="bg-black px-4 py-3 border-b border-gray-600">
                     <div className="flex items-center space-x-2">
                       <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">✦</span>
+                        <span className="text-black text-xs font-bold">✦</span>
                       </div>
                       <span className="text-[#D4AF37] font-semibold text-sm tracking-wide">CHRIST COLLECTIVE</span>
                     </div>
