@@ -1,10 +1,11 @@
-import { Home, Compass, Users, User } from "lucide-react";
+import { Home, Compass, Users, User, Plus } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { icon: Home, label: "Feed", href: "/feed" },
   { icon: Compass, label: "Explore", href: "/explore" },
+  { icon: Plus, label: "Create", href: "/create" },
   { icon: Users, label: "Connect", href: "/connect" },
   { icon: User, label: "Profile", href: "/mobile-profile" },
 ];

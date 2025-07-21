@@ -31,6 +31,7 @@ import AuthTestPage from "@/pages/AuthTestPage";
 import AboutPage from "@/pages/AboutPage";
 import FeedPage from "@/pages/FeedPage";
 import ExplorePage from "@/pages/ExplorePage";
+import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
 import MobileProfilePage from "@/pages/MobileProfilePage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/about" component={AboutPage} />
       <Route path="/feed" component={FeedPage} />
       <Route path="/explore" component={ExplorePage} />
+      <Route path="/create" component={CreatePage} />
       <Route path="/connect" component={ConnectPage} />
       <Route path="/mobile-profile" component={MobileProfilePage} />
       <Route component={NotFound} />
