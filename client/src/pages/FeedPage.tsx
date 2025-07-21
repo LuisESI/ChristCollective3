@@ -57,7 +57,7 @@ export default function FeedPage() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Welcome Message */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-black border-gray-600">
           <CardContent className="p-6">
             <h2 className="text-lg font-semibold mb-2">Welcome back, {user.firstName || user.username}!</h2>
             <p className="text-white">Stay connected with your faith community and discover new opportunities to make a difference.</p>
@@ -81,7 +81,7 @@ export default function FeedPage() {
           ) : (
             <div className="space-y-4">
               {campaigns?.slice(0, 3).map((campaign: any) => (
-                <Card key={campaign.id} className="hover:shadow-md transition-shadow">
+                <Card key={campaign.id} className="hover:shadow-md transition-shadow bg-black border-gray-600">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-4">
                       {/* Cover Image on the left */}
@@ -136,7 +136,7 @@ export default function FeedPage() {
           ) : (
             <div className="space-y-4">
               {ministryPosts?.slice(0, 3).map((post: any) => (
-                <Card key={post.id} className="hover:shadow-md transition-shadow">
+                <Card key={post.id} className="hover:shadow-md transition-shadow bg-black border-gray-600">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
                       <Avatar className="h-10 w-10">
@@ -188,7 +188,7 @@ export default function FeedPage() {
           ) : (
             <div className="space-y-4">
               {creators?.slice(0, 2).map((creator: any) => (
-                <Card key={creator.id} className="hover:shadow-md transition-shadow">
+                <Card key={creator.id} className="hover:shadow-md transition-shadow bg-black border-gray-600">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-12 w-12">
@@ -196,8 +196,8 @@ export default function FeedPage() {
                         <AvatarFallback>{creator.displayName?.[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{creator.displayName}</h4>
-                        <p className="text-sm text-gray-600">{creator.description?.substring(0, 80)}...</p>
+                        <h4 className="font-medium text-white">{creator.displayName}</h4>
+                        <p className="text-sm text-gray-300">{creator.description?.substring(0, 80)}...</p>
                         <div className="flex items-center mt-2">
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none">{creator.platform}</Badge>
                         </div>
@@ -214,9 +214,9 @@ export default function FeedPage() {
         </div>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="bg-black border-gray-600">
           <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
+            <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">

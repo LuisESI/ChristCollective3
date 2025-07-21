@@ -213,7 +213,7 @@ export default function ConnectPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-black border-gray-600">
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
             <p className="text-muted-foreground mb-4">Please log in to join our Christian community matching program.</p>
@@ -245,9 +245,9 @@ export default function ConnectPage() {
 
       {/* Content */}
       <div className="container mx-auto max-w-2xl px-4 py-8">
-        <Card>
+        <Card className="bg-black border-gray-600">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               {currentStep === 0 && <Users className="h-5 w-5 text-primary" />}
               {currentStep === 1 && <Heart className="h-5 w-5 text-primary" />}
               {currentStep === 2 && <Heart className="h-5 w-5 text-primary" />}

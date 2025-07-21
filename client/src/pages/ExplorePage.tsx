@@ -202,7 +202,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCreators?.slice(0, 6).map((creator: any) => (
-                  <Card key={creator.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                  <Card key={creator.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
                         onClick={() => navigate(`/creators/${creator.id}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-3">
@@ -256,7 +256,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBusinesses?.slice(0, 6).map((business: any) => (
-                  <Card key={business.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                  <Card key={business.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
                         onClick={() => navigate(`/business/profile/${business.id}`)}>
                     <CardContent className="p-6">
                       <div className="flex items-center mb-4">
@@ -271,22 +271,22 @@ export default function ExplorePage() {
                           </Avatar>
                         )}
                         <div>
-                          <h3 className="font-semibold text-foreground">{business.companyName}</h3>
-                          <p className="text-sm text-primary">{business.industry}</p>
+                          <h3 className="font-semibold text-yellow-400">{business.companyName}</h3>
+                          <p className="text-sm text-yellow-400">{business.industry}</p>
                         </div>
                       </div>
                       
-                      <p className="text-muted-foreground mb-4 line-clamp-3">
+                      <p className="text-white mb-4 line-clamp-3">
                         {business.description}
                       </p>
                       
                       <div className="flex justify-between items-center text-sm">
                         {business.location && (
-                          <span className="text-muted-foreground">
+                          <span className="text-gray-300">
                             📍 {business.location}
                           </span>
                         )}
-                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                        <Button variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-500">
                           View Profile
                         </Button>
                       </div>
@@ -316,7 +316,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredMinistries?.slice(0, 6).map((ministry: any) => (
-                  <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                  <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
                         onClick={() => navigate(`/ministry/profile/${ministry.id}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
@@ -325,11 +325,11 @@ export default function ExplorePage() {
                           <AvatarFallback>{ministry.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{ministry.name}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{ministry.description?.substring(0, 80)}...</p>
+                          <h4 className="font-medium text-yellow-400">{ministry.name}</h4>
+                          <p className="text-sm text-white mt-1">{ministry.description?.substring(0, 80)}...</p>
                           <div className="flex items-center mt-3">
                             <Badge variant="outline">{ministry.denomination}</Badge>
-                            <span className="text-sm text-gray-500 ml-2">
+                            <span className="text-sm text-gray-300 ml-2">
                               {ministry.location}
                             </span>
                           </div>

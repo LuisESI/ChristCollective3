@@ -404,7 +404,7 @@ export default function ProfilePage() {
 
           {/* Tabs Content */}
           <div className="space-y-6">
-            <Card>
+            <Card className="bg-black border-gray-600">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <CardHeader>
                   <TabsList className="grid grid-cols-5 w-full">
