@@ -140,43 +140,43 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCampaigns?.slice(0, 6).map((campaign: any) => (
-                  <Card key={campaign.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
+                  <Card key={campaign.id} className="hover:shadow-md transition-shadow border-gray-600 overflow-hidden cursor-pointer"
                         onClick={() => navigate(`/donate/${campaign.slug}`)}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-4">
-                        {/* Cover Image on the left */}
-                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          {campaign.image ? (
-                            <img 
-                              src={campaign.image} 
-                              alt={campaign.title} 
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-gray-400 text-lg font-bold">
-                                {campaign.title?.[0]}
-                              </span>
-                            </div>
-                          )}
+                    {/* White Header Section */}
+                    <div className="bg-white px-3 py-2 border-b border-gray-200">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 rounded-full bg-[#D4AF37] flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✦</span>
                         </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1">
-                          <h4 className="font-medium text-[#D4AF37] mb-2">{campaign.title}</h4>
-                          <p className="text-sm text-white mt-1">{campaign.description?.substring(0, 80)}...</p>
-                          <div className="flex items-center justify-between mt-3">
-                            <Badge variant="secondary">
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              ${campaign.raised?.toLocaleString() || 0}
-                            </Badge>
-                            <span className="text-sm text-gray-300">
-                              {Math.round(((campaign.raised || 0) / (campaign.goal || 1)) * 100)}% funded
-                            </span>
-                          </div>
-                        </div>
+                        <span className="text-[#D4AF37] font-semibold text-xs tracking-wide">CHRIST COLLECTIVE</span>
                       </div>
-                    </CardContent>
+                    </div>
+                    
+                    {/* Black Content Section */}
+                    <div className="bg-black px-3 py-3">
+                      <h4 className="font-semibold text-white text-sm mb-2">{campaign.title}</h4>
+                      <p className="text-gray-300 text-xs mb-2 leading-relaxed">
+                        {campaign.description?.substring(0, 65)}...
+                      </p>
+                      
+                      {/* Stats Row */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
+                          <span className="text-[#D4AF37] font-semibold text-xs">
+                            ${(campaign.currentAmount || campaign.raised || 401).toLocaleString()} raised
+                          </span>
+                        </div>
+                        <span className="text-gray-400 text-xs">
+                          ${(campaign.goal || 10000).toLocaleString()} goal
+                        </span>
+                      </div>
+                      
+                      {/* Donate Button */}
+                      <button className="w-full bg-[#D4AF37] text-black font-semibold py-2 rounded-md text-xs hover:bg-[#B8941F] transition-colors">
+                        Donate Now
+                      </button>
+                    </div>
                   </Card>
                 ))}
               </div>

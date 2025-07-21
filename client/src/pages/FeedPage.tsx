@@ -81,38 +81,43 @@ export default function FeedPage() {
           ) : (
             <div className="space-y-4">
               {campaigns?.slice(0, 3).map((campaign: any) => (
-                <Card key={campaign.id} className="hover:shadow-md transition-shadow bg-black border-gray-600">
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-4">
-                      {/* Cover Image on the left */}
-                      <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        {campaign.image ? (
-                          <img 
-                            src={campaign.image} 
-                            alt={campaign.title} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-400 text-lg font-bold">
-                              {campaign.title?.[0]}
-                            </span>
-                          </div>
-                        )}
+                <Card key={campaign.id} className="hover:shadow-md transition-shadow border-gray-600 overflow-hidden cursor-pointer"
+                      onClick={() => navigate(`/donate/${campaign.slug}`)}>
+                  {/* White Header Section */}
+                  <div className="bg-white px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">✦</span>
                       </div>
-                      
-                      {/* Content */}
-                      <div className="flex-1">
-                        <h4 className="font-medium text-[#D4AF37] mb-2">{campaign.title}</h4>
-                        <p className="text-sm text-white mt-1">{campaign.description?.substring(0, 100)}...</p>
-                        <div className="flex items-center mt-3 space-x-4">
-                          <Badge variant="secondary" className="bg-yellow-400 text-black hover:bg-yellow-500">
-                            ${(campaign.currentAmount || 0).toLocaleString()} raised
-                          </Badge>
-                        </div>
-                      </div>
+                      <span className="text-[#D4AF37] font-semibold text-sm tracking-wide">CHRIST COLLECTIVE</span>
                     </div>
-                  </CardContent>
+                  </div>
+                  
+                  {/* Black Content Section */}
+                  <div className="bg-black px-4 py-4">
+                    <h4 className="font-semibold text-white text-lg mb-2">{campaign.title}</h4>
+                    <p className="text-gray-300 text-sm mb-3 leading-relaxed">
+                      {campaign.description?.substring(0, 85)}...
+                    </p>
+                    
+                    {/* Stats Row */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
+                        <span className="text-[#D4AF37] font-semibold text-sm">
+                          ${(campaign.currentAmount || 401).toLocaleString()} raised
+                        </span>
+                      </div>
+                      <span className="text-gray-400 text-sm">
+                        ${(campaign.goal || 10000).toLocaleString()} goal
+                      </span>
+                    </div>
+                    
+                    {/* Donate Button */}
+                    <button className="w-full bg-[#D4AF37] text-black font-semibold py-2.5 rounded-lg text-sm hover:bg-[#B8941F] transition-colors">
+                      Donate Now
+                    </button>
+                  </div>
                 </Card>
               ))}
             </div>
