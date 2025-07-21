@@ -140,7 +140,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCampaigns?.slice(0, 6).map((campaign: any) => (
-                  <Card key={campaign.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                  <Card key={campaign.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
                         onClick={() => navigate(`/donate/${campaign.slug}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-4">
@@ -164,13 +164,13 @@ export default function ExplorePage() {
                         {/* Content */}
                         <div className="flex-1">
                           <h4 className="font-medium text-[#D4AF37] mb-2">{campaign.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{campaign.description?.substring(0, 80)}...</p>
+                          <p className="text-sm text-white mt-1">{campaign.description?.substring(0, 80)}...</p>
                           <div className="flex items-center justify-between mt-3">
                             <Badge variant="secondary">
                               <DollarSign className="h-3 w-3 mr-1" />
                               ${campaign.raised?.toLocaleString() || 0}
                             </Badge>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-gray-300">
                               {Math.round(((campaign.raised || 0) / (campaign.goal || 1)) * 100)}% funded
                             </span>
                           </div>

@@ -58,7 +58,7 @@ export default function MobileProfilePage() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Profile Header */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-black border-gray-600">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-4">
               <Avatar className="h-16 w-16">
@@ -68,15 +68,15 @@ export default function MobileProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-foreground">
+                <h2 className="text-xl font-semibold text-white">
                   {user.firstName && user.lastName 
                     ? `${user.firstName} ${user.lastName}`
                     : user.username}
                 </h2>
-                <p className="text-muted-foreground">@{user.username}</p>
+                <p className="text-gray-300">@{user.username}</p>
                 <div className="flex items-center mt-2">
                   <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-gray-300">
                     Member since {new Date(user.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                 </div>
@@ -86,26 +86,26 @@ export default function MobileProfilePage() {
             {/* User Info */}
             <div className="space-y-2 text-sm">
               {user.email && (
-                <div className="flex items-center text-foreground">
-                  <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-white">
+                  <Mail className="h-4 w-4 mr-2 text-gray-400" />
                   {user.email}
                 </div>
               )}
               {user.phone && (
-                <div className="flex items-center text-foreground">
-                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-white">
+                  <Phone className="h-4 w-4 mr-2 text-gray-400" />
                   {user.phone}
                 </div>
               )}
               {user.location && (
-                <div className="flex items-center text-foreground">
-                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                <div className="flex items-center text-white">
+                  <MapPin className="h-4 w-4 mr-2 text-gray-400" />
                   {user.location}
                 </div>
               )}
               {user.bio && (
-                <div className="flex items-start text-foreground mt-3">
-                  <User className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
+                <div className="flex items-start text-white mt-3">
+                  <User className="h-4 w-4 mr-2 mt-0.5 text-gray-400" />
                   <p>{user.bio}</p>
                 </div>
               )}
@@ -114,9 +114,9 @@ export default function MobileProfilePage() {
         </Card>
 
         {/* Stats */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-black border-gray-600">
           <CardHeader>
-            <CardTitle className="text-lg">Your Impact</CardTitle>
+            <CardTitle className="text-lg text-white">Your Impact</CardTitle>
           </CardHeader>
           <CardContent>
             {statsLoading ? (
@@ -160,9 +160,9 @@ export default function MobileProfilePage() {
         </Card>
 
         {/* My Campaigns */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-black border-gray-600">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-white">
               <span>My Campaigns</span>
               <Button variant="outline" size="sm" onClick={() => navigate("/donate/create")}>
                 Create New
