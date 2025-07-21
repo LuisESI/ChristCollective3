@@ -85,10 +85,7 @@ export default function FeedPage() {
                       onClick={() => navigate(`/donate/${campaign.slug}`)}>
                   {/* Black Header Section */}
                   <div className="bg-black px-4 py-3 border-b border-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center">
-                        <span className="text-black text-xs font-bold">✦</span>
-                      </div>
+                    <div className="flex items-center">
                       <span className="text-[#D4AF37] font-semibold text-sm tracking-wide">CHRIST COLLECTIVE</span>
                     </div>
                   </div>

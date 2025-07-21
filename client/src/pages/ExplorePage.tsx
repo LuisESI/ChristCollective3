@@ -144,10 +144,7 @@ export default function ExplorePage() {
                         onClick={() => navigate(`/donate/${campaign.slug}`)}>
                     {/* Black Header Section */}
                     <div className="bg-black px-3 py-2 border-b border-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-5 h-5 rounded-full bg-[#D4AF37] flex items-center justify-center">
-                          <span className="text-black text-xs font-bold">✦</span>
-                        </div>
+                      <div className="flex items-center">
                         <span className="text-[#D4AF37] font-semibold text-xs tracking-wide">CHRIST COLLECTIVE</span>
                       </div>
                     </div>
