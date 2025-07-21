@@ -94,7 +94,7 @@ export default function PrivacySettingsPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => navigate("/mobile-profile")}
+              onClick={() => navigate("/profile")}
               className="text-white hover:bg-gray-800"
             >
               <ArrowLeft className="h-4 w-4" />

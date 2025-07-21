@@ -7,7 +7,7 @@ const navigationItems = [
   { icon: Compass, label: "Explore", href: "/explore" },
   { icon: Plus, label: "Create", href: "/create" },
   { icon: Users, label: "Connect", href: "/connect" },
-  { icon: User, label: "Profile", href: "/mobile-profile" },
+  { icon: User, label: "Profile", href: "/profile" },
 ];
 
 export default function BottomNavigation() {
