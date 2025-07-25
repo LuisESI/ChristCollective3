@@ -33,6 +33,7 @@ import FeedPage from "@/pages/FeedPage";
 import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
+import MinistryProfilePage from "@/pages/MinistryProfilePage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -52,7 +53,7 @@ function Router() {
       <Route path="/business" component={BusinessNetworkPage} />
       <Route path="/business/profile/:id" component={BusinessProfilePage} />
       <Route path="/business-profile" component={BusinessNetworkPage} />
-      <Route path="/ministry-profile" component={ExplorePage} />
+      <Route path="/ministry-profile" component={MinistryProfilePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />

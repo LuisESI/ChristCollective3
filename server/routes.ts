@@ -428,6 +428,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User ministry profile route
+  app.get('/api/user/ministry-profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const profile = await storage.getUserMinistryProfile(userId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Ministry profile not found" });
+      }
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching ministry profile:", error);
+      res.status(500).json({ message: "Failed to fetch ministry profile" });
+    }
+  });
+
   // User routes
   app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
