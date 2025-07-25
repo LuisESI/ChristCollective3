@@ -60,8 +60,12 @@ export function setupAuth(app: Express) {
         return done(null, false);
       }
       
-      // Try to find user by username first, then by email
+      // Try to find user by username first (exact match), then case-insensitive, then by email
       let user = await storage.getUserByUsername(username);
+      if (!user) {
+        // Try case-insensitive username search
+        user = await storage.getUserByUsernameInsensitive(username);
+      }
       if (!user) {
         user = await storage.getUserByEmail(username);
       }
