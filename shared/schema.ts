@@ -44,6 +44,7 @@ export const users = pgTable("users", {
   phone: varchar("phone"),
   username: varchar("username", { length: 50 }),
   password: varchar("password"),
+  userType: varchar("user_type", { enum: ["creator", "business_owner", "ministry"] }),
   // Privacy settings
   showEmail: boolean("show_email").default(false),
   showPhone: boolean("show_phone").default(false),

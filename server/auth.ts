@@ -82,10 +82,10 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, email, password, firstName, lastName, phone } = req.body;
+      const { username, email, password, firstName, lastName, phone, userType } = req.body;
       
-      if (!username || !password || !phone) {
-        return res.status(400).json({ message: "Username, password, and phone number are required" });
+      if (!username || !password || !phone || !userType) {
+        return res.status(400).json({ message: "Username, password, phone number, and user type are required" });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -108,6 +108,7 @@ export function setupAuth(app: Express) {
         firstName: firstName || null,
         lastName: lastName || null,
         phone: phone,
+        userType: userType,
       });
 
       req.login(user, (err) => {
@@ -140,7 +141,7 @@ export function setupAuth(app: Express) {
     }
     next();
   }, (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
         console.error("Passport authentication error:", err);
         return res.status(500).json({ message: "Authentication error" });

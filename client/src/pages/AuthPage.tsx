@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Logo } from "@/components/Logo";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -26,7 +27,8 @@ export default function AuthPage() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-    phone: ""
+    phone: "",
+    userType: ""
   });
 
   // Redirect if already logged in
@@ -60,10 +62,10 @@ export default function AuthPage() {
     e.preventDefault();
     
     // Validate required fields
-    if (!registerData.username || !registerData.password || !registerData.phone) {
+    if (!registerData.username || !registerData.password || !registerData.phone || !registerData.userType) {
       toast({
         title: "Missing Information",
-        description: "Username, password, and phone number are required",
+        description: "Username, password, phone number, and user type are required",
         variant: "destructive",
       });
       return;
@@ -227,6 +229,22 @@ export default function AuthPage() {
                         placeholder="(555) 123-4567"
                         required
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="userType">Are you a... *</Label>
+                      <Select 
+                        value={registerData.userType} 
+                        onValueChange={(value) => setRegisterData({ ...registerData, userType: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="creator">Content Creator</SelectItem>
+                          <SelectItem value="business_owner">Business Owner</SelectItem>
+                          <SelectItem value="ministry">Ministry</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label htmlFor="register-password">Password *</Label>
