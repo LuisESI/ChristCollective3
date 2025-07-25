@@ -115,7 +115,7 @@ export default function AuthPage() {
           title: "Welcome to Ministry! ⛪",
           description: "Called to serve? Let's help you connect with your community and organize impactful ministry events.",
         });
-        setLocation("/explore");
+        setLocation("/ministry-profile");
       } else {
         // No user type selected - go to main feed
         toast({

@@ -221,14 +221,32 @@ export default function ProfilePage() {
             <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
               <p className="text-gray-400 text-sm mb-4">
-                Complete your profile to connect with the Christian community and share your faith journey.
+                Choose your path to connect with the Christian community and share your faith journey.
               </p>
-              <Button 
-                onClick={() => navigate("/creator-profile")}
-                className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
-              >
-                Complete Your Profile
-              </Button>
+              <div className="flex flex-col gap-3">
+                <Button 
+                  onClick={() => navigate("/creator-profile")}
+                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                >
+                  Become a Content Creator
+                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => navigate("/business")}
+                    variant="outline"
+                    className="flex-1 border-gray-600 text-white hover:bg-gray-800"
+                  >
+                    Business Networking
+                  </Button>
+                  <Button 
+                    onClick={() => navigate("/ministry-profile")}
+                    variant="outline"
+                    className="flex-1 border-gray-600 text-white hover:bg-gray-800"
+                  >
+                    Start a Ministry
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 
