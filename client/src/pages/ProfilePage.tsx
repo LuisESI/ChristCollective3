@@ -124,29 +124,31 @@ export default function ProfilePage() {
                 )}
               </div>
               
-              {/* Stats Row */}
-              <div className="flex gap-6 mb-3">
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {creator?.posts?.length || creator?.totalPosts || 5}
+              {/* Stats Row - Only show for creators with actual data */}
+              {creatorProfile?.isCreator && creator && (
+                <div className="flex gap-6 mb-3">
+                  <div className="text-left">
+                    <div className="text-lg font-semibold">
+                      {creator?.posts?.length || creator?.totalPosts || 0}
+                    </div>
+                    <div className="text-xs text-gray-400">posts</div>
                   </div>
-                  <div className="text-xs text-gray-400">posts</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {creator?.totalFollowers ? 
-                      formatSubscriberCount(creator.totalFollowers) : 
-                      "57.2K"}
+                  <div className="text-left">
+                    <div className="text-lg font-semibold">
+                      {creator?.totalFollowers ? 
+                        formatSubscriberCount(creator.totalFollowers) : 
+                        "0"}
+                    </div>
+                    <div className="text-xs text-gray-400">followers</div>
                   </div>
-                  <div className="text-xs text-gray-400">followers</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {creator?.platformCount || (creator?.platforms as any[])?.length || 3}
+                  <div className="text-left">
+                    <div className="text-lg font-semibold">
+                      {creator?.platformCount || (creator?.platforms as any[])?.length || 0}
+                    </div>
+                    <div className="text-xs text-gray-400">platforms</div>
                   </div>
-                  <div className="text-xs text-gray-400">platforms</div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -154,7 +156,7 @@ export default function ProfilePage() {
           {(creator?.bio || user.bio) && (
             <div className="mb-4">
               <p className="text-sm leading-relaxed text-left">
-                {creator?.bio || user.bio || "Building a worldwide Christian community through digital ministry and connecting believers across denominations."}
+                {creator?.bio || user.bio}
               </p>
             </div>
           )}
@@ -214,20 +216,39 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Default Social Platform Icons if no creator platforms */}
-          {(!creator?.platforms || (creator.platforms as any[]).length === 0) && (
-            <div className="flex gap-3 justify-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">IG</span>
-              </div>
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">YT</span>
-              </div>
-              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">TT</span>
-              </div>
+          {/* Welcome message for new users without creator profile */}
+          {!creatorProfile?.isCreator && (
+            <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Complete your profile to connect with the Christian community and share your faith journey.
+              </p>
+              <Button 
+                onClick={() => navigate("/creator-profile")}
+                className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+              >
+                Complete Your Profile
+              </Button>
             </div>
           )}
+
+          {/* Empty state for creators without platforms */}
+          {creatorProfile?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
+            <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-2">Connect Your Platforms</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Link your social media accounts to showcase your content and connect with sponsors.
+              </p>
+              <Button 
+                onClick={() => navigate("/creator-profile")}
+                className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+              >
+                Add Platforms
+              </Button>
+            </div>
+          )}
+
+
 
           {/* Content Grid */}
           <div className="border-t border-gray-800 mt-6 pt-6">
