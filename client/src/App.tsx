@@ -34,6 +34,7 @@ import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
 import MinistryProfilePage from "@/pages/MinistryProfilePage";
+import EditProfilePage from "@/pages/EditProfilePage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/ministry-profile" component={MinistryProfilePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/edit-profile" component={EditProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/creators" component={CreatorsPage} />
       <Route path="/creators/:id" component={CreatorProfilePage} />

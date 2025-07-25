@@ -91,7 +91,7 @@ export default function ProfilePage() {
               </h1>
               <Button 
                 variant="ghost" 
-                onClick={() => navigate("/creator-profile")}
+                onClick={() => navigate("/edit-profile")}
                 className="text-white hover:bg-white/10 p-2"
               >
                 <Edit className="w-5 h-5" />
@@ -175,7 +175,7 @@ export default function ProfilePage() {
           {/* Action Buttons - Edit for own profile */}
           <div className="flex gap-3 mb-6">
             <Button 
-              onClick={() => navigate("/creator-profile")}
+              onClick={() => navigate("/edit-profile")}
               className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
             >
               <Edit className="w-4 h-4 mr-2" />
@@ -225,7 +225,7 @@ export default function ProfilePage() {
               </p>
               <div className="flex flex-col gap-3">
                 <Button 
-                  onClick={() => navigate("/creator-profile")}
+                  onClick={() => navigate("/edit-profile")}
                   className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
                 >
                   Become a Content Creator
@@ -258,7 +258,7 @@ export default function ProfilePage() {
                 Link your social media accounts to showcase your content and connect with sponsors.
               </p>
               <Button 
-                onClick={() => navigate("/creator-profile")}
+                onClick={() => navigate("/edit-profile")}
                 className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
               >
                 Add Platforms
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                   Your content will appear here once you start sharing.
                 </p>
                 <Button 
-                  onClick={() => navigate("/creator-profile")}
+                  onClick={() => navigate("/edit-profile")}
                   className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
                 >
                   <Edit className="w-4 h-4 mr-2" />
