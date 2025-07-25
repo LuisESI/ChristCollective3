@@ -51,6 +51,8 @@ function Router() {
       <Route path="/manage-campaigns" component={ManageCampaignsPage} />
       <Route path="/business" component={BusinessNetworkPage} />
       <Route path="/business/profile/:id" component={BusinessProfilePage} />
+      <Route path="/business-profile" component={BusinessNetworkPage} />
+      <Route path="/ministry-profile" component={ExplorePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />

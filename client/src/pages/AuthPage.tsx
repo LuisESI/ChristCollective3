@@ -62,10 +62,10 @@ export default function AuthPage() {
     e.preventDefault();
     
     // Validate required fields
-    if (!registerData.username || !registerData.password || !registerData.phone || !registerData.userType) {
+    if (!registerData.username || !registerData.password || !registerData.phone) {
       toast({
         title: "Missing Information",
-        description: "Username, password, phone number, and user type are required",
+        description: "Username, password, and phone number are required",
         variant: "destructive",
       });
       return;
@@ -96,7 +96,34 @@ export default function AuthPage() {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...registrationData } = registerData;
       await registerMutation.mutateAsync(registrationData);
-      setLocation("/");
+      
+      // Guide user based on their selected type
+      if (registerData.userType === "creator") {
+        toast({
+          title: "Welcome, Creator! 🎬",
+          description: "Ready to share your faith-based content? Let's set up your creator profile and get you started with sponsorship opportunities.",
+        });
+        setLocation("/creator-profile");
+      } else if (registerData.userType === "business_owner") {
+        toast({
+          title: "Welcome, Business Owner! 💼",
+          description: "Time to connect with fellow Christian professionals. Let's create your business profile and explore networking opportunities.",
+        });
+        setLocation("/business");
+      } else if (registerData.userType === "ministry") {
+        toast({
+          title: "Welcome to Ministry! ⛪",
+          description: "Called to serve? Let's help you connect with your community and organize impactful ministry events.",
+        });
+        setLocation("/explore");
+      } else {
+        // No user type selected - go to main feed
+        toast({
+          title: "Welcome to Christ Collective! ✨",
+          description: "Explore our community and discover how you can make a difference through faith.",
+        });
+        setLocation("/");
+      }
     } catch (error) {
       console.error("Registration failed:", error);
     }
@@ -231,7 +258,7 @@ export default function AuthPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="userType">Are you a... *</Label>
+                      <Label htmlFor="userType">Are you a... (Optional)</Label>
                       <Select 
                         value={registerData.userType} 
                         onValueChange={(value) => setRegisterData({ ...registerData, userType: value })}
@@ -240,11 +267,20 @@ export default function AuthPage() {
                           <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="creator">Content Creator</SelectItem>
-                          <SelectItem value="business_owner">Business Owner</SelectItem>
-                          <SelectItem value="ministry">Ministry</SelectItem>
+                          <SelectItem value="creator">
+                            Content Creator - Share your faith through content
+                          </SelectItem>
+                          <SelectItem value="business_owner">
+                            Business Owner - Connect with Christian professionals  
+                          </SelectItem>
+                          <SelectItem value="ministry">
+                            Ministry - Serve and lead your community
+                          </SelectItem>
                         </SelectContent>
                       </Select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Selecting your role helps us guide you to the right features after registration.
+                      </p>
                     </div>
                     <div>
                       <Label htmlFor="register-password">Password *</Label>

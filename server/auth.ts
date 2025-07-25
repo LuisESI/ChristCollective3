@@ -84,8 +84,8 @@ export function setupAuth(app: Express) {
     try {
       const { username, email, password, firstName, lastName, phone, userType } = req.body;
       
-      if (!username || !password || !phone || !userType) {
-        return res.status(400).json({ message: "Username, password, phone number, and user type are required" });
+      if (!username || !password || !phone) {
+        return res.status(400).json({ message: "Username, password, and phone number are required" });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -108,7 +108,7 @@ export function setupAuth(app: Express) {
         firstName: firstName || null,
         lastName: lastName || null,
         phone: phone,
-        userType: userType,
+        userType: userType || null,
       });
 
       req.login(user, (err) => {

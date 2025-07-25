@@ -156,3 +156,4 @@ Preferred communication style: Simple, everyday language.
 Changelog:
 - July 02, 2025. Initial setup
 - July 21, 2025. Consolidated mobile and desktop profile pages into single unified creator profile page at `/profile` route with creator-focused layout, social platform integration, privacy settings, and mobile-responsive design
+- July 25, 2025. Added optional user type selection during signup with smart guidance system. Users can select Creator, Business Owner, or Ministry roles, which automatically directs them to appropriate onboarding flows with personalized welcome messages and feature guidance.
