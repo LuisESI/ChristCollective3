@@ -106,9 +106,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ isCreator: false });
       }
       
+      // Get creator's social media posts
+      const posts = await storage.getSocialMediaPostsByCreator(creator.id);
+      
+      // Calculate stats like the public profile does
+      const platforms = creator.platforms || [];
+      const totalFollowers = Array.isArray(platforms) ? 
+        platforms.reduce((sum: number, platform: any) => sum + (platform.subscriberCount || 0), 0) : 0;
+      
+      const enhancedCreator = {
+        ...creator,
+        posts,
+        totalPosts: posts?.length || 0,
+        totalFollowers,
+        platformCount: Array.isArray(platforms) ? platforms.length : 0
+      };
+      
       res.json({
         isCreator: true,
-        creatorProfile: creator
+        creatorProfile: enhancedCreator
       });
     } catch (error) {
       console.error("Error fetching creator status:", error);
