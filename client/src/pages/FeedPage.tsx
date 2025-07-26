@@ -15,6 +15,12 @@ export default function FeedPage() {
     queryKey: ["/api/user"],
   });
 
+  // Get posts from followed users when user is logged in
+  const { data: followingPosts } = useQuery({
+    queryKey: ["/api/feed/following"],
+    enabled: !!user?.id,
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex items-center justify-center">
@@ -37,9 +43,42 @@ export default function FeedPage() {
         <div className="max-w-4xl mx-auto">
 
 
+          {/* Follow Suggestions */}
+          <FollowSuggestions />
+
+          {/* Feed Tabs for Logged In Users */}
+          {user && (
+            <div className="flex justify-center mb-6">
+              <div className="bg-gray-800 rounded-lg p-1 flex">
+                <Button 
+                  variant="ghost" 
+                  className="text-[#D4AF37] bg-gray-700 hover:bg-gray-600"
+                >
+                  Following
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-300 hover:bg-gray-700"
+                >
+                  Discover
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Posts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts && posts.length > 0 ? (
+            {/* Show posts from followed users if available and user is logged in */}
+            {user && followingPosts && followingPosts.length > 0 ? (
+              followingPosts.map((post: any) => (
+                <PlatformPostCard
+                  key={post.id}
+                  post={post}
+                  currentUserId={user?.id}
+                  showActions={true}
+                />
+              ))
+            ) : posts && posts.length > 0 ? (
               posts.map((post: any) => (
                 <PlatformPostCard
                   key={post.id}
@@ -49,7 +88,13 @@ export default function FeedPage() {
                 />
               ))
             ) : (
-              <FollowSuggestions />
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
+                  <p>Start following members to see their inspiring content in your feed!</p>
+                </div>
+              </div>
             )}
           </div>
 

@@ -291,6 +291,16 @@ export const postInteractions = pgTable("post_interactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User follows (users following other users)
+export const userFollows = pgTable("user_follows", {
+  id: serial("id").primaryKey(),
+  followerId: varchar("follower_id").notNull().references(() => users.id),
+  followingId: varchar("following_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueFollow: uniqueIndex("unique_user_follow").on(table.followerId, table.followingId),
+}));
+
 // Ministry events (Bible studies, services, missions, community events)
 export const ministryEvents = pgTable("ministry_events", {
   id: serial("id").primaryKey(),
@@ -518,3 +528,6 @@ export const insertPostInteractionSchema = createInsertSchema(postInteractions).
 });
 export type InsertPostInteraction = z.infer<typeof insertPostInteractionSchema>;
 export type PostInteraction = typeof postInteractions.$inferSelect;
+
+export type UserFollow = typeof userFollows.$inferSelect;
+export type InsertUserFollow = typeof userFollows.$inferInsert;

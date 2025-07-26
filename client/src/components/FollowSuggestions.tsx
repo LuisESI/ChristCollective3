@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +7,8 @@ import { CreatePostModal } from "@/components/CreatePostModal";
 import { Link } from "wouter";
 import { Plus, Users, Building2, Church, UserPlus, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useRef, useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // Add CSS for hiding scrollbar
 const scrollbarHideStyle = `
@@ -26,6 +28,8 @@ export function FollowSuggestions() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: creators } = useQuery({
     queryKey: ["/api/content-creators"],
@@ -68,6 +72,7 @@ export function FollowSuggestions() {
           description: creator.bio || 'Content Creator',
           followers: creator.totalFollowers || 0,
           avatar: creator.profileImageUrl,
+          userId: creator.userId, // Add userId for follow functionality
         }));
       suggestions.push(...randomCreators);
     }
@@ -83,6 +88,7 @@ export function FollowSuggestions() {
           displayName: business.companyName,
           description: business.description || business.industry || 'Business professional',
           avatar: business.logoUrl,
+          userId: business.userId, // Add userId for follow functionality
         }));
       suggestions.push(...randomBusinesses);
     }
@@ -99,12 +105,36 @@ export function FollowSuggestions() {
           description: ministry.description || 'Ministry organization',
           followers: 0, // No follower count for ministries
           avatar: ministry.logoUrl,
+          userId: ministry.userId, // Add userId for follow functionality
         }));
       suggestions.push(...randomMinistries);
     }
 
     return suggestions.sort(() => Math.random() - 0.5).slice(0, 6);
   };
+
+  // Follow mutation
+  const followMutation = useMutation({
+    mutationFn: async (targetUserId: string) => {
+      return apiRequest(`/api/users/${targetUserId}/follow`, {
+        method: "POST",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Successfully followed user!",
+      });
+      // Optionally refetch user stats or update UI
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to follow user",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Update suggestions when data loads
   React.useEffect(() => {
@@ -249,10 +279,17 @@ export function FollowSuggestions() {
                           View
                         </Button>
                       </Link>
-                      <Button size="sm" className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
-                        <UserPlus className="w-3 h-3 mr-1" />
-                        Follow
-                      </Button>
+                      {user && (
+                        <Button 
+                          size="sm" 
+                          className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                          onClick={() => followMutation.mutate(suggestion.userId)}
+                          disabled={followMutation.isPending}
+                        >
+                          <UserPlus className="w-3 h-3 mr-1" />
+                          {followMutation.isPending ? "Following..." : "Follow"}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
