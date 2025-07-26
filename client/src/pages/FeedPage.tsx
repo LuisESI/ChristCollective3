@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
+import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
 import { Plus, Sparkles } from "lucide-react";
 
@@ -69,25 +70,7 @@ export default function FeedPage() {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
-                  <Sparkles className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No Posts Yet</h3>
-                  <p className="text-gray-400 mb-6">
-                    Be the first to share inspiring content with the community!
-                  </p>
-                  {user && (
-                    <CreatePostModal
-                      trigger={
-                        <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create First Post
-                        </Button>
-                      }
-                    />
-                  )}
-                </div>
-              </div>
+              <FollowSuggestions />
             )}
           </div>
 

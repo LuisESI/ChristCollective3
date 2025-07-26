@@ -1,0 +1,229 @@
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { CreatePostModal } from "@/components/CreatePostModal";
+import { Link } from "wouter";
+import { Plus, Users, Building2, Church, UserPlus, Heart } from "lucide-react";
+
+export function FollowSuggestions() {
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+  });
+
+  const { data: creators } = useQuery({
+    queryKey: ["/api/content-creators"],
+  });
+
+  const { data: businesses } = useQuery({
+    queryKey: ["/api/business-profiles"],
+  });
+
+  const { data: ministries } = useQuery({
+    queryKey: ["/api/ministries"],
+  });
+
+  // Get random suggestions from each category
+  const getRandomSuggestions = () => {
+    const suggestions: any[] = [];
+
+    // Add random creators
+    if (creators?.length) {
+      const randomCreators = creators
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map((creator: any) => ({
+          ...creator,
+          type: 'creator',
+          displayName: creator.name,
+          description: creator.bio || 'Content Creator',
+          followers: creator.totalFollowers || 0,
+          avatar: creator.profileImageUrl,
+        }));
+      suggestions.push(...randomCreators);
+    }
+
+    // Add random businesses
+    if (businesses?.length) {
+      const randomBusinesses = businesses
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2)
+        .map((business: any) => ({
+          ...business,
+          type: 'business',
+          displayName: business.companyName,
+          description: business.industry || 'Business',
+          followers: Math.floor(Math.random() * 1000) + 100, // Placeholder followers
+          avatar: business.logoUrl,
+        }));
+      suggestions.push(...randomBusinesses);
+    }
+
+    // Add random ministries
+    if (ministries?.length) {
+      const randomMinistries = ministries
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2)
+        .map((ministry: any) => ({
+          ...ministry,
+          type: 'ministry',
+          displayName: ministry.name,
+          description: ministry.description || 'Ministry',
+          followers: Math.floor(Math.random() * 500) + 50, // Placeholder followers
+          avatar: ministry.logoUrl,
+        }));
+      suggestions.push(...randomMinistries);
+    }
+
+    return suggestions.sort(() => Math.random() - 0.5).slice(0, 6);
+  };
+
+  const suggestions = getRandomSuggestions();
+
+  const getProfileLink = (suggestion: any) => {
+    switch (suggestion.type) {
+      case 'creator':
+        return `/creators/${suggestion.id}`;
+      case 'business':
+        return `/business/profile/${suggestion.id}`;
+      case 'ministry':
+        return `/ministry-profile`; // Adjust based on your ministry routing
+      default:
+        return '#';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'creator':
+        return <Users className="w-4 h-4" />;
+      case 'business':
+        return <Building2 className="w-4 h-4" />;
+      case 'ministry':
+        return <Church className="w-4 h-4" />;
+      default:
+        return <Users className="w-4 h-4" />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'creator':
+        return 'bg-purple-500/20 text-purple-300';
+      case 'business':
+        return 'bg-blue-500/20 text-blue-300';
+      case 'ministry':
+        return 'bg-green-500/20 text-green-300';
+      default:
+        return 'bg-gray-500/20 text-gray-300';
+    }
+  };
+
+  return (
+    <div className="col-span-full space-y-8">
+      {/* Header Section */}
+      <div className="text-center">
+        <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
+          <Heart className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">Welcome to the Community!</h3>
+          <p className="text-gray-400 mb-6">
+            Start by following inspiring profiles and creating your first post
+          </p>
+          {user && (
+            <CreatePostModal
+              trigger={
+                <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Post
+                </Button>
+              }
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Follow Suggestions */}
+      {suggestions.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <UserPlus className="w-5 h-5 text-[#D4AF37]" />
+            <h2 className="text-xl font-semibold text-white">Discover Amazing Profiles</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {suggestions.map((suggestion, index) => (
+              <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-gray-900 border-gray-700 hover:border-[#D4AF37]/50 transition-colors">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={suggestion.avatar} alt={suggestion.displayName} />
+                      <AvatarFallback className="bg-[#D4AF37] text-black">
+                        {suggestion.displayName?.charAt(0) || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-white truncate">{suggestion.displayName}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={`text-xs ${getTypeColor(suggestion.type)}`}>
+                          {getTypeIcon(suggestion.type)}
+                          <span className="ml-1 capitalize">{suggestion.type}</span>
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-gray-400 line-clamp-2">
+                    {suggestion.description}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">
+                      {suggestion.followers.toLocaleString()} followers
+                    </span>
+                    
+                    <div className="flex gap-2">
+                      <Link href={getProfileLink(suggestion)}>
+                        <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                          View
+                        </Button>
+                      </Link>
+                      <Button size="sm" className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
+                        <UserPlus className="w-3 h-3 mr-1" />
+                        Follow
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Show More Button */}
+          <div className="text-center mt-6">
+            <Button 
+              variant="outline" 
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              onClick={() => window.location.reload()} // Simple refresh for new suggestions
+            >
+              Show More Suggestions
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Fallback if no profiles exist */}
+      {suggestions.length === 0 && (
+        <div className="bg-gray-900 rounded-lg p-8 border border-gray-700 text-center">
+          <Users className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">No Profiles Yet</h3>
+          <p className="text-gray-400">
+            Be the first to create a profile and start building the community!
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
