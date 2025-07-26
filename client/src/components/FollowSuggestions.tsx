@@ -32,6 +32,12 @@ export function FollowSuggestions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get user's current following list to pre-populate followedUsers
+  const { data: following } = useQuery({
+    queryKey: [`/api/users/${user?.id}/following`],
+    enabled: !!user?.id,
+  });
+
   const { data: creators } = useQuery({
     queryKey: ["/api/content-creators"],
   });
@@ -131,12 +137,19 @@ export function FollowSuggestions() {
         title: "Success",
         description: "Successfully followed user!",
       });
-      // Optionally refetch user stats or update UI
+      // Refetch following list to keep it in sync
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/following`] });
     },
     onError: (error: any) => {
+      console.error("Follow error:", error);
+      // Parse error message from response
+      let errorMessage = "Failed to follow user";
+      if (error?.message) {
+        errorMessage = error.message;
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to follow user",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -146,6 +159,14 @@ export function FollowSuggestions() {
   React.useEffect(() => {
     setSuggestions(getRandomSuggestions());
   }, [creators, businesses, ministries, user]);
+
+  // Update followedUsers when following data loads
+  React.useEffect(() => {
+    if (following?.length) {
+      const followedIds = new Set(following.map((f: any) => f.id));
+      setFollowedUsers(followedIds);
+    }
+  }, [following]);
 
   const getProfileLink = (suggestion: any) => {
     switch (suggestion.type) {
