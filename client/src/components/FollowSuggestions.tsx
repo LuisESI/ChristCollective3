@@ -336,7 +336,15 @@ export function FollowSuggestions() {
                           View
                         </Button>
                       </Link>
-                      {user && user.id !== suggestion.userId && (
+                      {user && (
+                        console.log('Debug:', {
+                          userId: user.id, 
+                          suggestionUserId: suggestion.userId, 
+                          suggestionType: suggestion.type,
+                          equal: user.id === suggestion.userId
+                        }),
+                        user.id !== suggestion.userId
+                      ) && (
                         <Button 
                           size="sm" 
                           className={followedUsers.has(suggestion.userId) 
