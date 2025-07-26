@@ -230,23 +230,15 @@ export function FollowSuggestions() {
                 </CardHeader>
                 
                 <CardContent className="space-y-3">
-                  {suggestion.type !== 'business' && (
-                    <p className="text-sm text-gray-400 line-clamp-2">
-                      {suggestion.description}
-                    </p>
-                  )}
+                  <p className="text-sm text-gray-400 line-clamp-2">
+                    {suggestion.description}
+                  </p>
                   
                   <div className="flex items-center justify-between">
                     {suggestion.type === 'creator' && suggestion.totalFollowers ? (
                       <span className="text-xs text-gray-500">
                         {(suggestion.totalFollowers || 0).toLocaleString()} followers
                       </span>
-                    ) : suggestion.type === 'business' ? (
-                      <div className="flex-1 min-w-0 mr-3">
-                        <p className="text-xs text-gray-500 line-clamp-2">
-                          {suggestion.description}
-                        </p>
-                      </div>
                     ) : (
                       <div className="flex-1"></div>
                     )}
