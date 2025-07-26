@@ -7,6 +7,17 @@ import { CreatePostModal } from "@/components/CreatePostModal";
 import { Link } from "wouter";
 import { Plus, Users, Building2, Church, UserPlus, Heart } from "lucide-react";
 
+// Add CSS for hiding scrollbar
+const scrollbarHideStyle = `
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
 export function FollowSuggestions() {
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
@@ -53,8 +64,7 @@ export function FollowSuggestions() {
           ...business,
           type: 'business',
           displayName: business.companyName,
-          description: business.industry || 'Business',
-          followers: Math.floor(Math.random() * 1000) + 100, // Placeholder followers
+          description: business.description || business.industry || 'Business professional',
           avatar: business.logoUrl,
         }));
       suggestions.push(...randomBusinesses);
@@ -69,8 +79,8 @@ export function FollowSuggestions() {
           ...ministry,
           type: 'ministry',
           displayName: ministry.name,
-          description: ministry.description || 'Ministry',
-          followers: Math.floor(Math.random() * 500) + 50, // Placeholder followers
+          description: ministry.description || 'Ministry organization',
+          followers: 0, // No follower count for ministries
           avatar: ministry.logoUrl,
         }));
       suggestions.push(...randomMinistries);
@@ -121,7 +131,9 @@ export function FollowSuggestions() {
   };
 
   return (
-    <div className="col-span-full space-y-8">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: scrollbarHideStyle }} />
+      <div className="col-span-full space-y-8">
       {/* Header Section */}
       <div className="text-center">
         <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
@@ -151,9 +163,10 @@ export function FollowSuggestions() {
             <h2 className="text-xl font-semibold text-white">Discover Amazing Profiles</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
+               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {suggestions.map((suggestion, index) => (
-              <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-gray-900 border-gray-700 hover:border-[#D4AF37]/50 transition-colors">
+              <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-gray-900 border-gray-700 hover:border-[#D4AF37]/50 transition-colors flex-shrink-0 w-80">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="w-12 h-12">
@@ -175,16 +188,28 @@ export function FollowSuggestions() {
                 </CardHeader>
                 
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-gray-400 line-clamp-2">
-                    {suggestion.description}
-                  </p>
+                  {suggestion.type !== 'business' && (
+                    <p className="text-sm text-gray-400 line-clamp-2">
+                      {suggestion.description}
+                    </p>
+                  )}
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
-                      {suggestion.followers.toLocaleString()} followers
-                    </span>
+                    {suggestion.type === 'creator' && suggestion.totalFollowers ? (
+                      <span className="text-xs text-gray-500">
+                        {(suggestion.totalFollowers || 0).toLocaleString()} followers
+                      </span>
+                    ) : suggestion.type === 'business' ? (
+                      <div className="flex-1 min-w-0 mr-3">
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {suggestion.description}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex-1"></div>
+                    )}
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <Link href={getProfileLink(suggestion)}>
                         <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800">
                           View
@@ -224,6 +249,7 @@ export function FollowSuggestions() {
           </p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
