@@ -50,6 +50,11 @@ export function FollowSuggestions() {
     queryKey: ["/api/ministries"],
   });
 
+  // Get all users for basic profile suggestions
+  const { data: allUsers } = useQuery({
+    queryKey: ["/api/users"],
+  });
+
   // Scroll functions for the slider
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -115,6 +120,33 @@ export function FollowSuggestions() {
           userId: ministry.userId, // Add userId for follow functionality
         }));
       suggestions.push(...randomMinistries);
+    }
+
+    // Add basic user profiles for users without specific profiles
+    if (allUsers?.length) {
+      // Get users who don't have creator, business, or ministry profiles
+      const profiledUserIds = new Set([
+        ...(creators || []).map((c: any) => c.userId),
+        ...(businesses || []).map((b: any) => b.userId),
+        ...(ministries || []).map((m: any) => m.userId)
+      ]);
+
+      const basicUsers = allUsers
+        .filter((user: any) => !profiledUserIds.has(user.id))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2)
+        .map((user: any) => ({
+          ...user,
+          type: 'user',
+          displayName: user.firstName && user.lastName 
+            ? `${user.firstName} ${user.lastName}` 
+            : user.username || user.email?.split('@')[0] || 'User',
+          description: 'Community member',
+          avatar: user.profileImageUrl,
+          userId: user.id,
+        }));
+      
+      suggestions.push(...basicUsers);
     }
 
     return suggestions.sort(() => Math.random() - 0.5).slice(0, 6);
@@ -188,7 +220,7 @@ export function FollowSuggestions() {
   // Update suggestions when data loads
   React.useEffect(() => {
     setSuggestions(getRandomSuggestions());
-  }, [creators, businesses, ministries, user]);
+  }, [creators, businesses, ministries, allUsers, user]);
 
   // Update followedUsers when following data loads
   React.useEffect(() => {
@@ -206,6 +238,8 @@ export function FollowSuggestions() {
         return `/business/profile/${suggestion.id}`;
       case 'ministry':
         return `/ministry-profile`; // Adjust based on your ministry routing
+      case 'user':
+        return `/profile`; // Basic user profile link
       default:
         return '#';
     }
@@ -219,6 +253,8 @@ export function FollowSuggestions() {
         return <Building2 className="w-4 h-4" />;
       case 'ministry':
         return <Church className="w-4 h-4" />;
+      case 'user':
+        return <UserPlus className="w-4 h-4" />;
       default:
         return <Users className="w-4 h-4" />;
     }
@@ -232,6 +268,8 @@ export function FollowSuggestions() {
         return 'bg-blue-500/20 text-blue-300';
       case 'ministry':
         return 'bg-green-500/20 text-green-300';
+      case 'user':
+        return 'bg-gray-500/20 text-gray-300';
       default:
         return 'bg-gray-500/20 text-gray-300';
     }
@@ -336,15 +374,7 @@ export function FollowSuggestions() {
                           View
                         </Button>
                       </Link>
-                      {user && (
-                        console.log('Debug:', {
-                          userId: user.id, 
-                          suggestionUserId: suggestion.userId, 
-                          suggestionType: suggestion.type,
-                          equal: user.id === suggestion.userId
-                        }),
-                        user.id !== suggestion.userId
-                      ) && (
+                      {user && user.id !== suggestion.userId && (
                         <Button 
                           size="sm" 
                           className={followedUsers.has(suggestion.userId) 
