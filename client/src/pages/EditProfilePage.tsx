@@ -72,7 +72,8 @@ export default function EditProfilePage() {
     enabled: !!user,
   });
 
-  const userBusinessProfile = businessProfiles?.find((profile: any) => profile.userId === user?.id);
+  const userBusinessProfile = Array.isArray(businessProfiles) ? 
+    businessProfiles.find((profile: any) => profile.userId === user?.id) : null;
 
   // Creator form
   const creatorForm = useForm({
@@ -111,17 +112,27 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (creatorStatus?.creatorProfile) {
       const creator = creatorStatus.creatorProfile;
+      const platforms = creator.platforms || [];
+      
+      // Extract platform URLs
+      const youtubeUrl = platforms.find((p: any) => p.platform === 'youtube')?.profileUrl || "";
+      const instagramUrl = platforms.find((p: any) => p.platform === 'instagram')?.profileUrl || "";
+      const tiktokUrl = platforms.find((p: any) => p.platform === 'tiktok')?.profileUrl || "";
+      const twitterUrl = platforms.find((p: any) => p.platform === 'twitter')?.profileUrl || "";
+      const facebookUrl = platforms.find((p: any) => p.platform === 'facebook')?.profileUrl || "";
+      const linkedinUrl = platforms.find((p: any) => p.platform === 'linkedin')?.profileUrl || "";
+      
       creatorForm.reset({
         name: creator.name || "",
         bio: creator.bio || "",
         content: creator.content || "",
         audience: creator.audience || "",
-        youtubeUrl: "",
-        instagramUrl: "",
-        tiktokUrl: "",
-        twitterUrl: "",
-        facebookUrl: "",
-        linkedinUrl: "",
+        youtubeUrl,
+        instagramUrl,
+        tiktokUrl,
+        twitterUrl,
+        facebookUrl,
+        linkedinUrl,
         profileImage: creator.profileImage || "",
       });
     }
@@ -156,15 +167,33 @@ export default function EditProfilePage() {
       const { youtubeUrl, instagramUrl, tiktokUrl, twitterUrl, facebookUrl, linkedinUrl, ...profileData } = data;
       
       if (creatorStatus?.creatorProfile?.id) {
-        return apiRequest(`/api/content-creators/${creatorStatus.creatorProfile.id}`, {
+        const response = await fetch(`/api/content-creators/${creatorStatus.creatorProfile.id}`, {
           method: "PUT",
-          body: { ...profileData, platforms },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...profileData, platforms }),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update creator profile: ${response.statusText}`);
+        }
+        
+        return response.json();
       } else {
-        return apiRequest("/api/content-creators", {
+        const response = await fetch("/api/content-creators", {
           method: "POST",
-          body: { ...profileData, platforms },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...profileData, platforms }),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to create creator profile: ${response.statusText}`);
+        }
+        
+        return response.json();
       }
     },
     onSuccess: () => {
@@ -183,15 +212,33 @@ export default function EditProfilePage() {
   const updateBusinessMutation = useMutation({
     mutationFn: async (data: any) => {
       if (userBusinessProfile?.id) {
-        return apiRequest(`/api/business-profiles/${userBusinessProfile.id}`, {
+        const response = await fetch(`/api/business-profiles/${userBusinessProfile.id}`, {
           method: "PUT",
-          body: data,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update business profile: ${response.statusText}`);
+        }
+        
+        return response.json();
       } else {
-        return apiRequest("/api/business-profiles", {
+        const response = await fetch("/api/business-profiles", {
           method: "POST",
-          body: data,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to create business profile: ${response.statusText}`);
+        }
+        
+        return response.json();
       }
     },
     onSuccess: () => {
@@ -223,7 +270,7 @@ export default function EditProfilePage() {
     );
   }
 
-  const hasCreatorProfile = creatorStatus?.isCreator;
+  const hasCreatorProfile = creatorStatus?.isCreator || false;
   const hasBusinessProfile = !!userBusinessProfile;
 
   return (
@@ -255,9 +302,9 @@ export default function EditProfilePage() {
           <div className="mb-6">
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="w-16 h-16 ring-2 ring-gray-700">
-                <AvatarImage src={user.profileImageUrl || ''} alt={user.firstName || user.username} />
+                <AvatarImage src={user.profileImageUrl || ''} alt={user.firstName || user.username || ''} />
                 <AvatarFallback className="bg-gray-800 text-white text-lg font-bold">
-                  {user.firstName?.[0] || user.username?.[0]}
+                  {(user.firstName?.[0] || user.username?.[0] || 'U').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
