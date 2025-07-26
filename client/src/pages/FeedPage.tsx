@@ -35,28 +35,7 @@ export default function FeedPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Sparkles className="w-6 h-6 text-[#D4AF37]" />
-              <h1 className="text-3xl font-bold text-white">Community Feed</h1>
-              <Sparkles className="w-6 h-6 text-[#D4AF37]" />
-            </div>
-            <p className="text-gray-400 mb-6">
-              Share your journey, discover inspiring content, and connect with fellow believers
-            </p>
-            
-            {user && (
-              <CreatePostModal
-                trigger={
-                  <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-lg px-8 py-3">
-                    <Plus className="w-5 h-5 mr-2" />
-                    Share Your Story
-                  </Button>
-                }
-              />
-            )}
-          </div>
+
 
           {/* Posts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
