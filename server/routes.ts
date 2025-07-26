@@ -457,8 +457,279 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const posts = await storage.getSocialMediaPostsByCreator(creatorId);
       res.json(posts);
     } catch (error) {
-      console.error("Error fetching user content creator:", error);
-      res.status(500).json({ message: "Failed to fetch creator profile" });
+      console.error("Error fetching creator posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  // Platform posts endpoints - unified content sharing for all user types
+  
+  // Create a new platform post
+  app.post('/api/platform-posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const { authorType, authorId, title, content, mediaUrls, aspectRatio, mediaType, tags } = req.body;
+      const userId = req.user.id;
+      
+      // Validate required fields
+      if (!content || !aspectRatio) {
+        return res.status(400).json({ message: "Content and aspect ratio are required" });
+      }
+
+      // Validate aspect ratio
+      const validAspectRatios = ['16:9', '9:16', '4:3', '1:1'];
+      if (!validAspectRatios.includes(aspectRatio)) {
+        return res.status(400).json({ message: "Invalid aspect ratio. Must be one of: 16:9, 9:16, 4:3, 1:1" });
+      }
+
+      // Verify user ownership of the profile they're posting as
+      if (authorType === 'creator' && authorId) {
+        const creator = await storage.getContentCreator(authorId);
+        if (!creator || creator.userId !== userId) {
+          return res.status(403).json({ message: "Access denied: You don't own this creator profile" });
+        }
+      } else if (authorType === 'business' && authorId) {
+        const business = await storage.getBusinessProfile(authorId);
+        if (!business || business.userId !== userId) {
+          return res.status(403).json({ message: "Access denied: You don't own this business profile" });
+        }
+      } else if (authorType === 'ministry' && authorId) {
+        const ministry = await storage.getUserMinistryProfile(userId);
+        if (!ministry || ministry.id !== authorId) {
+          return res.status(403).json({ message: "Access denied: You don't own this ministry profile" });
+        }
+      }
+
+      const post = await storage.createPlatformPost({
+        userId,
+        authorType,
+        authorId,
+        title,
+        content,
+        mediaUrls: mediaUrls || [],
+        aspectRatio,
+        mediaType: mediaType || 'image',
+        tags: tags || [],
+        isPublished: true,
+      });
+
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating platform post:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
+  // Get all platform posts (public feed)
+  app.get('/api/platform-posts', async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const posts = await storage.listPlatformPosts(limit);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching platform posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  // Get user's platform posts
+  app.get('/api/platform-posts/user/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user.id;
+      
+      // Users can only see their own posts unless they're admin
+      if (userId !== currentUserId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const posts = await storage.getUserPlatformPosts(userId);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching user platform posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  // Get specific platform post
+  app.get('/api/platform-posts/:id', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching platform post:", error);
+      res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
+  // Update platform post
+  app.put('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check ownership
+      if (post.userId !== userId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedPost = await storage.updatePlatformPost(postId, req.body);
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Error updating platform post:", error);
+      res.status(500).json({ message: "Failed to update post" });
+    }
+  });
+
+  // Delete platform post
+  app.delete('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check ownership
+      if (post.userId !== userId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await storage.deletePlatformPost(postId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting platform post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
+  // Post interaction endpoints
+  
+  // Like/unlike a post
+  app.post('/api/platform-posts/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user already liked the post
+      const existingLike = await storage.getUserPostInteraction(postId, userId, 'like');
+      
+      if (existingLike) {
+        // Unlike the post
+        await storage.deletePostInteraction(existingLike.id);
+        await storage.updatePlatformPost(postId, { 
+          likesCount: Math.max(0, (post.likesCount || 0) - 1) 
+        });
+        res.json({ liked: false, likesCount: Math.max(0, (post.likesCount || 0) - 1) });
+      } else {
+        // Like the post
+        await storage.createPostInteraction({
+          postId,
+          userId,
+          type: 'like',
+        });
+        await storage.updatePlatformPost(postId, { 
+          likesCount: (post.likesCount || 0) + 1 
+        });
+        res.json({ liked: true, likesCount: (post.likesCount || 0) + 1 });
+      }
+    } catch (error) {
+      console.error("Error toggling post like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
+  // Add comment to post
+  app.post('/api/platform-posts/:id/comment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+      const { content } = req.body;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+      
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      const comment = await storage.createPostInteraction({
+        postId,
+        userId,
+        type: 'comment',
+        content: content.trim(),
+      });
+      
+      await storage.updatePlatformPost(postId, { 
+        commentsCount: (post.commentsCount || 0) + 1 
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      res.status(500).json({ message: "Failed to add comment" });
+    }
+  });
+
+  // Get post interactions (comments)
+  app.get('/api/platform-posts/:id/interactions', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const interactions = await storage.getPostInteractions(postId);
+      res.json(interactions);
+    } catch (error) {
+      console.error("Error fetching post interactions:", error);
+      res.status(500).json({ message: "Failed to fetch interactions" });
     }
   });
   

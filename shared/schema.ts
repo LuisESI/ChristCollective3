@@ -261,6 +261,36 @@ export const ministryPosts = pgTable("ministry_posts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Platform content posts - unified content sharing for all user types
+export const platformPosts = pgTable("platform_posts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  authorType: varchar("author_type").notNull(), // creator, business, ministry, user
+  authorId: integer("author_id"), // reference to specific profile (creator_id, business_id, ministry_id)
+  title: varchar("title"),
+  content: text("content").notNull(),
+  mediaUrls: text("media_urls").array(), // Array of image/video URLs
+  aspectRatio: varchar("aspect_ratio").notNull(), // 16:9, 9:16, 4:3, 1:1
+  mediaType: varchar("media_type").notNull().default("image"), // image, video, text
+  tags: text("tags").array(), // Array of hashtags
+  isPublished: boolean("is_published").default(true),
+  likesCount: integer("likes_count").default(0),
+  commentsCount: integer("comments_count").default(0),
+  sharesCount: integer("shares_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Post interactions (likes, comments, shares)
+export const postInteractions = pgTable("post_interactions", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => platformPosts.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type").notNull(), // like, comment, share
+  content: text("content"), // For comments
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Ministry events (Bible studies, services, missions, community events)
 export const ministryEvents = pgTable("ministry_events", {
   id: serial("id").primaryKey(),
@@ -465,3 +495,26 @@ export type MinistryEvent = typeof ministryEvents.$inferSelect;
 
 export type MinistryFollower = typeof ministryFollowers.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
+
+// Platform posts schemas
+export const insertPlatformPostSchema = createInsertSchema(platformPosts).omit({
+  id: true,
+  likesCount: true,
+  commentsCount: true,
+  sharesCount: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  tags: z.array(z.string()).optional(),
+  mediaUrls: z.array(z.string().url()).optional(),
+});
+
+export type InsertPlatformPost = z.infer<typeof insertPlatformPostSchema>;
+export type PlatformPost = typeof platformPosts.$inferSelect;
+
+export const insertPostInteractionSchema = createInsertSchema(postInteractions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPostInteraction = z.infer<typeof insertPostInteractionSchema>;
+export type PostInteraction = typeof postInteractions.$inferSelect;

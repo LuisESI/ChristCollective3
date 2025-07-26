@@ -35,6 +35,12 @@ import {
   type InsertMinistryEvent,
   type MinistryFollower,
   type EventRegistration,
+  platformPosts,
+  postInteractions,
+  type PlatformPost,
+  type InsertPlatformPost,
+  type PostInteraction,
+  type InsertPostInteraction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -131,6 +137,20 @@ export interface IStorage {
   unfollowMinistry(userId: string, ministryId: number): Promise<void>;
   getUserFollowedMinistries(userId: string): Promise<MinistryProfile[]>;
   getMinistryFeedPosts(userId: string): Promise<MinistryPost[]>;
+
+  // Platform posts operations
+  createPlatformPost(postData: InsertPlatformPost & { userId: string }): Promise<PlatformPost>;
+  getPlatformPost(id: number): Promise<PlatformPost | undefined>;
+  listPlatformPosts(limit?: number): Promise<PlatformPost[]>;
+  getUserPlatformPosts(userId: string): Promise<PlatformPost[]>;
+  updatePlatformPost(id: number, data: Partial<PlatformPost>): Promise<PlatformPost>;
+  deletePlatformPost(id: number): Promise<void>;
+
+  // Post interaction operations
+  createPostInteraction(interactionData: InsertPostInteraction): Promise<PostInteraction>;
+  getPostInteractions(postId: number): Promise<PostInteraction[]>;
+  getUserPostInteraction(postId: number, userId: string, type: string): Promise<PostInteraction | undefined>;
+  deletePostInteraction(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -734,6 +754,90 @@ export class DatabaseStorage implements IStorage {
         eq(ministryPosts.isPublished, true)
       ))
       .orderBy(desc(ministryPosts.createdAt));
+  }
+
+  // Platform posts operations
+  async createPlatformPost(postData: InsertPlatformPost & { userId: string }): Promise<PlatformPost> {
+    const [post] = await db
+      .insert(platformPosts)
+      .values(postData)
+      .returning();
+    return post;
+  }
+
+  async getPlatformPost(id: number): Promise<PlatformPost | undefined> {
+    const [post] = await db
+      .select()
+      .from(platformPosts)
+      .where(eq(platformPosts.id, id));
+    return post;
+  }
+
+  async listPlatformPosts(limit = 50): Promise<PlatformPost[]> {
+    return await db
+      .select()
+      .from(platformPosts)
+      .where(eq(platformPosts.isPublished, true))
+      .orderBy(desc(platformPosts.createdAt))
+      .limit(limit);
+  }
+
+  async getUserPlatformPosts(userId: string): Promise<PlatformPost[]> {
+    return await db
+      .select()
+      .from(platformPosts)
+      .where(eq(platformPosts.userId, userId))
+      .orderBy(desc(platformPosts.createdAt));
+  }
+
+  async updatePlatformPost(id: number, data: Partial<PlatformPost>): Promise<PlatformPost> {
+    const [post] = await db
+      .update(platformPosts)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(platformPosts.id, id))
+      .returning();
+    return post;
+  }
+
+  async deletePlatformPost(id: number): Promise<void> {
+    await db
+      .delete(platformPosts)
+      .where(eq(platformPosts.id, id));
+  }
+
+  // Post interaction operations
+  async createPostInteraction(interactionData: InsertPostInteraction): Promise<PostInteraction> {
+    const [interaction] = await db
+      .insert(postInteractions)
+      .values(interactionData)
+      .returning();
+    return interaction;
+  }
+
+  async getPostInteractions(postId: number): Promise<PostInteraction[]> {
+    return await db
+      .select()
+      .from(postInteractions)
+      .where(eq(postInteractions.postId, postId))
+      .orderBy(desc(postInteractions.createdAt));
+  }
+
+  async getUserPostInteraction(postId: number, userId: string, type: string): Promise<PostInteraction | undefined> {
+    const [interaction] = await db
+      .select()
+      .from(postInteractions)
+      .where(and(
+        eq(postInteractions.postId, postId),
+        eq(postInteractions.userId, userId),
+        eq(postInteractions.type, type)
+      ));
+    return interaction;
+  }
+
+  async deletePostInteraction(id: number): Promise<void> {
+    await db
+      .delete(postInteractions)
+      .where(eq(postInteractions.id, id));
   }
 }
 

@@ -1,0 +1,288 @@
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react";
+// import { formatDistanceToNow } from "date-fns";
+
+interface PlatformPostProps {
+  post: {
+    id: number;
+    userId: string;
+    authorType: string;
+    authorId?: number;
+    title?: string;
+    content: string;
+    mediaUrls?: string[];
+    aspectRatio: string;
+    mediaType: string;
+    tags?: string[];
+    isPublished: boolean;
+    likesCount: number;
+    commentsCount: number;
+    sharesCount: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  currentUserId?: string;
+  showActions?: boolean;
+}
+
+export function PlatformPostCard({ post, currentUserId, showActions = true }: PlatformPostProps) {
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest(`/api/platform-posts/${post.id}/like`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (data) => {
+      setIsLiked(data.liked);
+      setLikesCount(data.likesCount);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const commentMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return await apiRequest(`/api/platform-posts/${post.id}/comment`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      });
+    },
+    onSuccess: () => {
+      setNewComment("");
+      toast({ title: "Comment added successfully!" });
+      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}/interactions`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error adding comment",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLike = () => {
+    if (!currentUserId) {
+      toast({
+        title: "Login required",
+        description: "Please log in to like posts",
+        variant: "destructive",
+      });
+      return;
+    }
+    likeMutation.mutate();
+  };
+
+  const handleComment = () => {
+    if (!currentUserId) {
+      toast({
+        title: "Login required",
+        description: "Please log in to comment",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!newComment.trim()) {
+      toast({
+        title: "Comment required",
+        description: "Please enter a comment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    commentMutation.mutate(newComment.trim());
+  };
+
+  const getAspectRatioClass = () => {
+    switch (post.aspectRatio) {
+      case "16:9":
+        return "aspect-video"; // 16:9
+      case "9:16":
+        return "aspect-[9/16]"; // 9:16 (portrait)
+      case "4:3":
+        return "aspect-[4/3]"; // 4:3
+      case "1:1":
+      default:
+        return "aspect-square"; // 1:1
+    }
+  };
+
+  const getAuthorDisplayName = () => {
+    switch (post.authorType) {
+      case "creator":
+        return "Creator Profile";
+      case "business":
+        return "Business Profile";
+      case "ministry":
+        return "Ministry Profile";
+      default:
+        return "Personal Account";
+    }
+  };
+
+  return (
+    <Card className="bg-gray-900 border-gray-700 w-full max-w-md mx-auto">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar className="w-10 h-10">
+              <AvatarFallback className="bg-[#D4AF37] text-black">
+                {post.authorType.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-white text-sm">{getAuthorDisplayName()}</p>
+              <p className="text-xs text-gray-400">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+            <MoreHorizontal className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        {post.title && (
+          <h3 className="font-semibold text-white text-sm mt-2">{post.title}</h3>
+        )}
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {/* Content Text */}
+        <p className="text-white text-sm leading-relaxed">{post.content}</p>
+
+        {/* Media Content */}
+        {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (
+          <div className={`${getAspectRatioClass()} w-full rounded-lg overflow-hidden bg-gray-800`}>
+            {post.mediaType === "video" ? (
+              <video
+                controls
+                className="w-full h-full object-cover"
+                poster={post.mediaUrls[0]}
+              >
+                <source src={post.mediaUrls[0]} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                src={post.mediaUrls[0]}
+                alt={post.title || "Post media"}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                }}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {post.tags.map((tag, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="bg-gray-800 text-gray-300 text-xs px-2 py-1"
+              >
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {showActions && (
+          <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLike}
+                disabled={likeMutation.isPending}
+                className={`flex items-center gap-2 ${
+                  isLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                <span className="text-xs">{likesCount}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowComments(!showComments)}
+                className="flex items-center gap-2 text-gray-400 hover:text-white"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-xs">{post.commentsCount}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-gray-400 hover:text-white"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="text-xs">{post.sharesCount}</span>
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <span>{post.aspectRatio}</span>
+              <span>•</span>
+              <span className="capitalize">{post.mediaType}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Comments Section */}
+        {showComments && currentUserId && (
+          <div className="space-y-3 pt-3 border-t border-gray-700">
+            <div className="flex gap-2">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                rows={2}
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm"
+              />
+              <Button
+                onClick={handleComment}
+                disabled={commentMutation.isPending || !newComment.trim()}
+                className="bg-[#D4AF37] text-black hover:bg-[#B8941F] self-end"
+                size="sm"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
