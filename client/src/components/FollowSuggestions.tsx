@@ -237,9 +237,9 @@ export function FollowSuggestions() {
       case 'business':
         return `/business/profile/${suggestion.id}`;
       case 'ministry':
-        return `/ministry-profile`; // Adjust based on your ministry routing
+        return `/ministry-profile`;
       case 'user':
-        return `/profile`; // Basic user profile link
+        return `/profile`; // Basic users go to general profile page
       default:
         return '#';
     }
