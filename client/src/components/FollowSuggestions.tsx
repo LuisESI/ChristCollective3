@@ -66,12 +66,10 @@ export function FollowSuggestions() {
   // Get random suggestions from each category
   const getRandomSuggestions = () => {
     const suggestions: any[] = [];
-    const currentUserId = user?.id;
 
-    // Add random creators (excluding current user)
+    // Add random creators
     if (creators?.length) {
       const randomCreators = creators
-        .filter((creator: any) => creator.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
         .map((creator: any) => ({
@@ -86,10 +84,9 @@ export function FollowSuggestions() {
       suggestions.push(...randomCreators);
     }
 
-    // Add random businesses (excluding current user)
+    // Add random businesses
     if (businesses?.length) {
       const randomBusinesses = businesses
-        .filter((business: any) => business.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 2)
         .map((business: any) => ({
@@ -103,10 +100,9 @@ export function FollowSuggestions() {
       suggestions.push(...randomBusinesses);
     }
 
-    // Add random ministries (excluding current user)
+    // Add random ministries
     if (ministries?.length) {
       const randomMinistries = ministries
-        .filter((ministry: any) => ministry.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 2)
         .map((ministry: any) => ({
@@ -144,6 +140,40 @@ export function FollowSuggestions() {
       console.error("Follow error:", error);
       // Parse error message from response
       let errorMessage = "Failed to follow user";
+      if (error?.message) {
+        errorMessage = error.message;
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Unfollow mutation
+  const unfollowMutation = useMutation({
+    mutationFn: async (targetUserId: string) => {
+      return apiRequest(`/api/users/${targetUserId}/follow`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: (_, targetUserId) => {
+      setFollowedUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(targetUserId);
+        return newSet;
+      });
+      toast({
+        title: "Success",
+        description: "Successfully unfollowed user!",
+      });
+      // Refetch following list to keep it in sync
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/following`] });
+    },
+    onError: (error: any) => {
+      console.error("Unfollow error:", error);
+      let errorMessage = "Failed to unfollow user";
       if (error?.message) {
         errorMessage = error.message;
       }
@@ -306,22 +336,26 @@ export function FollowSuggestions() {
                           View
                         </Button>
                       </Link>
-                      {user && (
+                      {user && user.id !== suggestion.userId && (
                         <Button 
                           size="sm" 
                           className={followedUsers.has(suggestion.userId) 
-                            ? "bg-gray-600 text-gray-300 cursor-not-allowed" 
+                            ? "bg-gray-600 text-gray-300 hover:bg-red-600 hover:text-white" 
                             : "bg-[#D4AF37] text-black hover:bg-[#B8941F]"
                           }
-                          onClick={() => followMutation.mutate(suggestion.userId)}
-                          disabled={followMutation.isPending || followedUsers.has(suggestion.userId)}
+                          onClick={() => {
+                            if (followedUsers.has(suggestion.userId)) {
+                              unfollowMutation.mutate(suggestion.userId);
+                            } else {
+                              followMutation.mutate(suggestion.userId);
+                            }
+                          }}
+                          disabled={followMutation.isPending || unfollowMutation.isPending}
                         >
                           <UserPlus className="w-3 h-3 mr-1" />
                           {followedUsers.has(suggestion.userId) 
-                            ? "Following" 
-                            : followMutation.isPending 
-                              ? "Following..." 
-                              : "Follow"
+                            ? (unfollowMutation.isPending ? "Unfollowing..." : "Following")
+                            : (followMutation.isPending ? "Following..." : "Follow")
                           }
                         </Button>
                       )}
