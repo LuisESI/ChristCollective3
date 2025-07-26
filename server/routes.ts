@@ -328,13 +328,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Creator not found" });
       }
       
-      // Get creator's social media posts
-      const posts = await storage.getSocialMediaPostsByCreator(creatorId);
+      // Get creator's social media posts (only visible ones for public view)
+      const posts = await storage.getVisibleSocialMediaPostsByCreator(creatorId);
       
       res.json({ ...creator, posts });
     } catch (error) {
       console.error("Error fetching content creator:", error);
       res.status(500).json({ message: "Failed to fetch content creator" });
+    }
+  });
+
+  // Update social media post visibility
+  app.put('/api/social-media-posts/:id/visibility', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const { isVisibleOnProfile } = req.body;
+      const userId = req.user.id;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      // Get the post and verify ownership
+      const post = await storage.getSocialMediaPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Get creator to verify ownership
+      const creator = await storage.getContentCreator(post.creatorId);
+      if (!creator || (creator.userId !== userId && !req.user.isAdmin)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedPost = await storage.updateSocialMediaPost(postId, {
+        isVisibleOnProfile: Boolean(isVisibleOnProfile)
+      });
+      
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Error updating post visibility:", error);
+      res.status(500).json({ message: "Failed to update post visibility" });
     }
   });
 
@@ -396,6 +431,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const posts = await storage.getSocialMediaPostsByCreator(creator.id);
       res.json({ ...creator, posts });
+    } catch (error) {
+      console.error("Error fetching user content creator:", error);
+      res.status(500).json({ message: "Failed to fetch creator profile" });
+    }
+  });
+
+  // Get all posts for a creator (for post management)
+  app.get('/api/social-media-posts/creator/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const creatorId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(creatorId)) {
+        return res.status(400).json({ message: "Invalid creator ID" });
+      }
+      
+      // Verify the creator belongs to the authenticated user
+      const creator = await storage.getContentCreator(creatorId);
+      if (!creator || (creator.userId !== userId && !req.user.isAdmin)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const posts = await storage.getSocialMediaPostsByCreator(creatorId);
+      res.json(posts);
     } catch (error) {
       console.error("Error fetching user content creator:", error);
       res.status(500).json({ message: "Failed to fetch creator profile" });

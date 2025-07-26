@@ -207,6 +207,7 @@ export const socialMediaPosts = pgTable("social_media_posts", {
   commentCount: integer("comment_count"),
   postedAt: timestamp("posted_at"),
   isSponsored: boolean("is_sponsored").default(false),
+  isVisibleOnProfile: boolean("is_visible_on_profile").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

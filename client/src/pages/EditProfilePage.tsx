@@ -5,12 +5,160 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, User, Briefcase, Church, Edit, Save, Plus } from "lucide-react";
+import { ArrowLeft, User, Briefcase, Church, Edit, Save, Plus, Eye, EyeOff, ExternalLink, Play } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+// Post Management Component
+function PostManagementSection({ creatorProfile, queryClient, toast }: any) {
+  const { data: allPosts, refetch } = useQuery({
+    queryKey: [`/api/social-media-posts/creator/${creatorProfile.id}`],
+    enabled: !!creatorProfile.id,
+  });
+
+  const updatePostVisibility = useMutation({
+    mutationFn: async ({ postId, isVisible }: { postId: number; isVisible: boolean }) => {
+      const response = await fetch(`/api/social-media-posts/${postId}/visibility`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isVisibleOnProfile: isVisible }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update post visibility: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Post visibility updated successfully!" });
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["/api/user/creator-status"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating post visibility",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggleVisibility = (postId: number, currentVisibility: boolean) => {
+    updatePostVisibility.mutate({ 
+      postId, 
+      isVisible: !currentVisibility 
+    });
+  };
+
+  const posts = allPosts || creatorProfile.posts || [];
+
+  return (
+    <Card className="bg-gray-900 border-gray-700">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Edit className="w-5 h-5" />
+          Manage Your Posts
+        </CardTitle>
+        <p className="text-gray-400 text-sm">
+          Control which posts from your linked social media accounts appear on your profile.
+        </p>
+      </CardHeader>
+      <CardContent>
+        {posts.length === 0 ? (
+          <div className="text-center py-8">
+            <Play className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">No Posts Found</h3>
+            <p className="text-gray-400">
+              Posts from your linked social media accounts will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post: any) => (
+              <div 
+                key={post.id} 
+                className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
+                  post.isVisibleOnProfile !== false
+                    ? 'bg-gray-800 border-gray-600' 
+                    : 'bg-gray-800/50 border-gray-700 opacity-60'
+                }`}
+              >
+                {/* Post Thumbnail */}
+                <div className="flex-shrink-0">
+                  {post.thumbnailUrl ? (
+                    <img 
+                      src={post.thumbnailUrl} 
+                      alt={post.postTitle || 'Post thumbnail'}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center">
+                      <Play className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Post Info */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-white truncate">
+                    {post.postTitle || 'Untitled Post'}
+                  </h4>
+                  <p className="text-sm text-gray-400 line-clamp-2">
+                    {post.postDescription || 'No description available'}
+                  </p>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                    <span className="capitalize">{post.platform}</span>
+                    {post.viewCount && <span>{post.viewCount.toLocaleString()} views</span>}
+                    {post.likeCount && <span>{post.likeCount.toLocaleString()} likes</span>}
+                    {post.postedAt && (
+                      <span>{new Date(post.postedAt).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(post.postUrl, '_blank')}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleVisibility(post.id, post.isVisibleOnProfile !== false)}
+                    disabled={updatePostVisibility.isPending}
+                    className={`${
+                      post.isVisibleOnProfile !== false
+                        ? 'text-green-400 hover:text-green-300' 
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    {post.isVisibleOnProfile !== false ? (
+                      <Eye className="w-4 h-4" />
+                    ) : (
+                      <EyeOff className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 // Import form components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -327,7 +475,7 @@ export default function EditProfilePage() {
 
           {/* Profile Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-900">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-900">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Overview
@@ -335,6 +483,10 @@ export default function EditProfilePage() {
               <TabsTrigger value="creator" className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
                 Creator Profile
+              </TabsTrigger>
+              <TabsTrigger value="posts" className="flex items-center gap-2">
+                <Edit className="w-4 h-4" />
+                Manage Posts
               </TabsTrigger>
               <TabsTrigger value="business" className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4" />
@@ -588,6 +740,33 @@ export default function EditProfilePage() {
                   </Form>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Post Management Tab */}
+            <TabsContent value="posts" className="space-y-4">
+              {hasCreatorProfile && creatorStatus?.creatorProfile ? (
+                <PostManagementSection 
+                  creatorProfile={creatorStatus.creatorProfile} 
+                  queryClient={queryClient}
+                  toast={toast}
+                />
+              ) : (
+                <Card className="bg-gray-900 border-gray-700">
+                  <CardContent className="text-center py-8">
+                    <Edit className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-white mb-2">No Creator Profile</h3>
+                    <p className="text-gray-400 mb-4">
+                      Create a creator profile first to manage your posts.
+                    </p>
+                    <Button 
+                      onClick={() => setActiveTab("creator")}
+                      className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                    >
+                      Create Creator Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* Business Profile Tab */}
