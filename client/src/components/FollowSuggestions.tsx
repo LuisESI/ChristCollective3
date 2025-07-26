@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { Link } from "wouter";
-import { Plus, Users, Building2, Church, UserPlus, Heart } from "lucide-react";
+import { Plus, Users, Building2, Church, UserPlus, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useRef, useState } from "react";
 
 // Add CSS for hiding scrollbar
 const scrollbarHideStyle = `
@@ -23,6 +24,9 @@ export function FollowSuggestions() {
     queryKey: ["/api/user"],
   });
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
   const { data: creators } = useQuery({
     queryKey: ["/api/content-creators"],
   });
@@ -34,6 +38,19 @@ export function FollowSuggestions() {
   const { data: ministries } = useQuery({
     queryKey: ["/api/ministries"],
   });
+
+  // Scroll functions for the slider
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
 
   // Get random suggestions from each category
   const getRandomSuggestions = () => {
@@ -89,7 +106,10 @@ export function FollowSuggestions() {
     return suggestions.sort(() => Math.random() - 0.5).slice(0, 6);
   };
 
-  const suggestions = getRandomSuggestions();
+  // Update suggestions when data loads
+  React.useEffect(() => {
+    setSuggestions(getRandomSuggestions());
+  }, [creators, businesses, ministries]);
 
   const getProfileLink = (suggestion: any) => {
     switch (suggestion.type) {
@@ -158,13 +178,35 @@ export function FollowSuggestions() {
       {/* Follow Suggestions */}
       {suggestions.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <UserPlus className="w-5 h-5 text-[#D4AF37]" />
-            <h2 className="text-xl font-semibold text-white">Discover Amazing Profiles</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-[#D4AF37]" />
+              <h2 className="text-xl font-semibold text-white">Discover Amazing Profiles</h2>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={scrollLeft}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 p-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={scrollRight}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 p-2"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
           
-          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
-               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div 
+            ref={scrollContainerRef}
+            className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {suggestions.map((suggestion, index) => (
               <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-gray-900 border-gray-700 hover:border-[#D4AF37]/50 transition-colors flex-shrink-0 w-80">
                 <CardHeader className="pb-3">
@@ -231,7 +273,7 @@ export function FollowSuggestions() {
             <Button 
               variant="outline" 
               className="border-gray-600 text-gray-300 hover:bg-gray-800"
-              onClick={() => window.location.reload()} // Simple refresh for new suggestions
+              onClick={() => setSuggestions(getRandomSuggestions())}
             >
               Show More Suggestions
             </Button>
