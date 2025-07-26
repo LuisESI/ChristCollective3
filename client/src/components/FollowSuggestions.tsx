@@ -60,10 +60,12 @@ export function FollowSuggestions() {
   // Get random suggestions from each category
   const getRandomSuggestions = () => {
     const suggestions: any[] = [];
+    const currentUserId = user?.id;
 
-    // Add random creators
+    // Add random creators (excluding current user)
     if (creators?.length) {
       const randomCreators = creators
+        .filter((creator: any) => creator.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
         .map((creator: any) => ({
@@ -78,9 +80,10 @@ export function FollowSuggestions() {
       suggestions.push(...randomCreators);
     }
 
-    // Add random businesses
+    // Add random businesses (excluding current user)
     if (businesses?.length) {
       const randomBusinesses = businesses
+        .filter((business: any) => business.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 2)
         .map((business: any) => ({
@@ -94,9 +97,10 @@ export function FollowSuggestions() {
       suggestions.push(...randomBusinesses);
     }
 
-    // Add random ministries
+    // Add random ministries (excluding current user)
     if (ministries?.length) {
       const randomMinistries = ministries
+        .filter((ministry: any) => ministry.userId !== currentUserId)
         .sort(() => Math.random() - 0.5)
         .slice(0, 2)
         .map((ministry: any) => ({
@@ -141,7 +145,7 @@ export function FollowSuggestions() {
   // Update suggestions when data loads
   React.useEffect(() => {
     setSuggestions(getRandomSuggestions());
-  }, [creators, businesses, ministries]);
+  }, [creators, businesses, ministries, user]);
 
   const getProfileLink = (suggestion: any) => {
     switch (suggestion.type) {
