@@ -269,7 +269,9 @@ export default function ExplorePage() {
                         )}
                         <div>
                           <h3 className="font-semibold text-yellow-400">{business.companyName}</h3>
-                          <p className="text-sm text-yellow-400">{business.industry}</p>
+                          <div className="inline-flex items-center justify-center w-auto min-w-[60px] h-6 px-3 bg-white rounded-full">
+                            <p className="text-xs text-black font-medium">{business.industry}</p>
+                          </div>
                         </div>
                       </div>
                       
