@@ -128,7 +128,7 @@ export function FollowSuggestions() {
           <Heart className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">Welcome to the Community!</h3>
           <p className="text-gray-400 mb-6">
-            Start by following inspiring profiles and creating your first post
+            Share your faith journey, inspire others with God's love, and help build a community where Christ's light shines through every story
           </p>
           {user && (
             <CreatePostModal
