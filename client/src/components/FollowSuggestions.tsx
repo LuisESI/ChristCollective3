@@ -28,6 +28,7 @@ export function FollowSuggestions() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -120,7 +121,8 @@ export function FollowSuggestions() {
         method: "POST",
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, targetUserId) => {
+      setFollowedUsers(prev => new Set(prev).add(targetUserId));
       toast({
         title: "Success",
         description: "Successfully followed user!",
@@ -282,12 +284,20 @@ export function FollowSuggestions() {
                       {user && (
                         <Button 
                           size="sm" 
-                          className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                          className={followedUsers.has(suggestion.userId) 
+                            ? "bg-gray-600 text-gray-300 cursor-not-allowed" 
+                            : "bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                          }
                           onClick={() => followMutation.mutate(suggestion.userId)}
-                          disabled={followMutation.isPending}
+                          disabled={followMutation.isPending || followedUsers.has(suggestion.userId)}
                         >
                           <UserPlus className="w-3 h-3 mr-1" />
-                          {followMutation.isPending ? "Following..." : "Follow"}
+                          {followedUsers.has(suggestion.userId) 
+                            ? "Following" 
+                            : followMutation.isPending 
+                              ? "Following..." 
+                              : "Follow"
+                          }
                         </Button>
                       )}
                     </div>
