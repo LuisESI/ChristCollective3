@@ -58,26 +58,26 @@ export default function ExplorePage() {
     { id: "ministries", label: "Ministries", icon: Star },
   ];
 
-  const filteredCampaigns = campaigns?.filter((campaign: any) =>
+  const filteredCampaigns = campaigns && Array.isArray(campaigns) ? campaigns.filter((campaign: any) =>
     campaign.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     campaign.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
-  const filteredCreators = creators?.filter((creator: any) =>
+  const filteredCreators = creators && Array.isArray(creators) ? creators.filter((creator: any) =>
     creator.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     creator.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     creator.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
-  const filteredBusinesses = businesses?.filter((business: any) =>
+  const filteredBusinesses = businesses && Array.isArray(businesses) ? businesses.filter((business: any) =>
     business.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     business.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
-  const filteredMinistries = ministries?.filter((ministry: any) =>
+  const filteredMinistries = ministries && Array.isArray(ministries) ? ministries.filter((ministry: any) =>
     ministry.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   return (
     <div className="min-h-screen bg-background pb-20">
