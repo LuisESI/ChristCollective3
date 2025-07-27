@@ -23,7 +23,7 @@ export default function FeedPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37] mx-auto mb-4"></div>
           <p className="text-gray-400">Loading your feed...</p>
@@ -33,7 +33,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900">
+    <div className="min-h-screen bg-black text-white pb-20">
       <Helmet>
         <title>Feed - Christ Collective</title>
         <meta name="description" content="Discover and share inspiring content from the Christ Collective community" />
