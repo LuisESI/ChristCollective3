@@ -269,47 +269,95 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
             </div>
           </div>
 
-          {/* Aspect Ratio */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white">Aspect Ratio *</label>
-            <Select
-              value={formData.aspectRatio}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, aspectRatio: value }))}
-            >
-              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
-                {ASPECT_RATIOS.map((ratio) => (
-                  <SelectItem key={ratio.value} value={ratio.value}>
-                    <div>
-                      <div className="font-medium">{ratio.label}</div>
-                      <div className="text-xs text-gray-400">{ratio.description}</div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Media URLs */}
+          {/* Aspect Ratio - Only show for Image/Video */}
           {formData.mediaType !== "text" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white">Media URLs</label>
-              <div className="flex gap-2">
-                <Input
-                  value={newMediaUrl}
-                  onChange={(e) => setNewMediaUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              <label className="text-sm font-medium text-white">Aspect Ratio *</label>
+              <Select
+                value={formData.aspectRatio}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, aspectRatio: value }))}
+              >
+                <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {ASPECT_RATIOS.map((ratio) => (
+                    <SelectItem key={ratio.value} value={ratio.value}>
+                      <div>
+                        <div className="font-medium">{ratio.label}</div>
+                        <div className="text-xs text-gray-400">{ratio.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* File Upload - Only show for Image/Video */}
+          {formData.mediaType !== "text" && (
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-white">
+                Upload {formData.mediaType === "image" ? "Image" : "Video"}
+              </label>
+              
+              {/* File Upload Area */}
+              <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-400 mb-2">
+                  Click to upload or drag and drop your {formData.mediaType}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formData.mediaType === "image" ? "PNG, JPG, GIF up to 10MB" : "MP4, MOV up to 100MB"}
+                </p>
+                <input
+                  type="file"
+                  accept={formData.mediaType === "image" ? "image/*" : "video/*"}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // In a real app, you'd upload the file to a storage service
+                      // For now, we'll use a placeholder URL
+                      const fileUrl = URL.createObjectURL(file);
+                      setFormData(prev => ({
+                        ...prev,
+                        mediaUrls: [...prev.mediaUrls, fileUrl]
+                      }));
+                    }
+                  }}
                 />
                 <Button
                   type="button"
-                  onClick={addMediaUrl}
-                  className="bg-gray-700 hover:bg-gray-600"
+                  variant="outline"
+                  className="mt-2 border-gray-600 text-gray-300 hover:bg-gray-800"
+                  onClick={(e) => {
+                    const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
+                    input?.click();
+                  }}
                 >
-                  <Upload className="w-4 h-4" />
+                  Choose File
                 </Button>
+              </div>
+
+              {/* Alternative: Add Media URL */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-400">Or add media URL:</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newMediaUrl}
+                    onChange={(e) => setNewMediaUrl(e.target.value)}
+                    placeholder={`https://example.com/${formData.mediaType === "image" ? "image.jpg" : "video.mp4"}`}
+                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                  />
+                  <Button
+                    type="button"
+                    onClick={addMediaUrl}
+                    className="bg-gray-700 hover:bg-gray-600"
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
               {formData.mediaUrls.length > 0 && (
                 <div className="flex flex-wrap gap-2">

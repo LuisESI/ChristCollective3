@@ -144,9 +144,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
   };
 
   return (
-    <Card className="bg-gray-900 border-gray-700 w-full max-w-md mx-auto">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+    <Card className="bg-black border-gray-800 w-full">
+      <CardContent className="p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarFallback className="bg-[#D4AF37] text-black">
@@ -165,22 +166,22 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
           </Button>
         </div>
         
+        {/* Title (if exists) */}
         {post.title && (
-          <h3 className="font-semibold text-white text-sm mt-2">{post.title}</h3>
+          <h3 className="font-semibold text-white text-base mb-2">{post.title}</h3>
         )}
-      </CardHeader>
 
-      <CardContent className="space-y-3">
         {/* Content Text */}
-        <p className="text-white text-sm leading-relaxed">{post.content}</p>
+        <p className="text-white text-sm leading-relaxed mb-3">{post.content}</p>
 
-        {/* Media Content */}
+        {/* Media Content - Dynamic aspect ratio like Twitter */}
         {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (
-          <div className={`${getAspectRatioClass()} w-full rounded-lg overflow-hidden bg-gray-800`}>
+          <div className="w-full mb-3">
             {post.mediaType === "video" ? (
               <video
                 controls
-                className="w-full h-full object-cover"
+                className="w-full rounded-lg bg-gray-900"
+                style={{ maxHeight: '500px' }}
                 poster={post.mediaUrls[0]}
               >
                 <source src={post.mediaUrls[0]} type="video/mp4" />
@@ -190,7 +191,8 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
               <img
                 src={post.mediaUrls[0]}
                 alt={post.title || "Post media"}
-                className="w-full h-full object-cover"
+                className="w-full rounded-lg bg-gray-900"
+                style={{ maxHeight: '500px', objectFit: 'cover' }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
