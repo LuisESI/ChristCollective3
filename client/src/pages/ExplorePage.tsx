@@ -151,26 +151,49 @@ export default function ExplorePage() {
                     
                     {/* Black Content Section */}
                     <div className="bg-black px-3 py-3">
-                      <h4 className="font-semibold text-white text-sm mb-2">{campaign.title}</h4>
-                      <p className="text-gray-300 text-xs mb-2 leading-relaxed">
-                        {campaign.description?.substring(0, 65)}...
-                      </p>
-                      
-                      {/* Stats Row */}
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
-                          <span className="text-[#D4AF37] font-semibold text-xs">
-                            ${(campaign.currentAmount || campaign.raised || 401).toLocaleString()} raised
-                          </span>
+                      <div className="flex gap-3">
+                        {/* Left side - Campaign cover image */}
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 bg-gray-800 border border-gray-600 rounded-lg flex items-center justify-center overflow-hidden">
+                            {campaign.imageUrl ? (
+                              <img 
+                                src={campaign.imageUrl} 
+                                alt={campaign.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="text-gray-500 text-xs text-center">
+                                <div className="w-6 h-6 mx-auto mb-1">📷</div>
+                                <div className="text-[10px]">Cover</div>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-gray-400 text-xs">
-                          ${(campaign.goal || 10000).toLocaleString()} goal
-                        </span>
+
+                        {/* Right side - Campaign content */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-white text-sm mb-2">{campaign.title}</h4>
+                          <p className="text-gray-300 text-xs mb-2 leading-relaxed">
+                            {campaign.description?.substring(0, 50)}...
+                          </p>
+                          
+                          {/* Stats Row */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
+                              <span className="text-[#D4AF37] font-semibold text-xs">
+                                ${(campaign.currentAmount || campaign.raised || 401).toLocaleString()} raised
+                              </span>
+                            </div>
+                            <span className="text-gray-400 text-xs">
+                              ${(campaign.goal || 10000).toLocaleString()} goal
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       
-                      {/* Donate Button */}
-                      <button className="w-full bg-[#D4AF37] text-black font-semibold py-2 rounded-md text-xs hover:bg-[#B8941F] transition-colors">
+                      {/* Donate Button - Full width below */}
+                      <button className="w-full bg-[#D4AF37] text-black font-semibold py-2 rounded-md text-xs hover:bg-[#B8941F] transition-colors mt-3">
                         Donate Now
                       </button>
                     </div>
