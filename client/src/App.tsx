@@ -57,6 +57,7 @@ function Router() {
       <Route path="/ministry-profile" component={MinistryProfilePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/profile/:username" component={ProfilePage} />
       <Route path="/edit-profile" component={EditProfilePage} />
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/creators" component={CreatorsPage} />

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import instagramLogo from "@/assets/instagram-icon-new.png";
@@ -15,17 +15,32 @@ import youtubeIconPath from "@assets/8ffe43e003e7013416bd66ce7de71611-32bits-32_
 export default function ProfilePage() {
   const { user, isLoading, logoutMutation } = useAuth();
   const [, navigate] = useLocation();
+  const params = useParams();
+  const username = params.username;
+  
+  // If no username in URL, viewing current user's profile
+  const isOwnProfile = !username;
+  const profileUser = isOwnProfile ? user : null;
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated and trying to view own profile
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !user && isOwnProfile) {
       navigate("/auth");
     }
-  }, [isLoading, user, navigate]);
+  }, [isLoading, user, navigate, isOwnProfile]);
+
+  // Fetch profile user data by username if viewing someone else's profile
+  const { data: fetchedUser, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/users/by-username", username],
+    enabled: !!username,
+  });
+
+  // Determine which user data to use
+  const displayUser = isOwnProfile ? user : fetchedUser;
 
   const { data: creatorProfile, isLoading: creatorLoading } = useQuery({
-    queryKey: ["/api/user/creator-status"],
-    enabled: !!user,
+    queryKey: isOwnProfile ? ["/api/user/creator-status"] : ["/api/users/creator-status", displayUser?.id],
+    enabled: !!displayUser,
   });
 
   const getPlatformIcon = (platform: string) => {
@@ -56,10 +71,25 @@ export default function ProfilePage() {
     });
   };
 
-  if (isLoading || !user) {
+  if (isLoading || (isOwnProfile && !user) || (username && userLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // If viewing someone else's profile and user not found
+  if (username && !fetchedUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">User Not Found</h1>
+          <p className="text-gray-400 mb-6">The profile you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate("/")} className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
+            Go Home
+          </Button>
+        </div>
       </div>
     );
   }
@@ -85,17 +115,19 @@ export default function ProfilePage() {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <h1 className="text-lg font-semibold">
-                {user.firstName && user.lastName 
-                  ? `${user.firstName} ${user.lastName}`
-                  : user.username}
+                {displayUser?.firstName && displayUser?.lastName 
+                  ? `${displayUser.firstName} ${displayUser.lastName}`
+                  : displayUser?.username}
               </h1>
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate("/edit-profile")}
-                className="text-white hover:bg-white/10 p-2"
-              >
-                <Edit className="w-5 h-5" />
-              </Button>
+              {isOwnProfile && (
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate("/edit-profile")}
+                  className="text-white hover:bg-white/10 p-2"
+                >
+                  <Edit className="w-5 h-5" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -104,18 +136,18 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-start gap-6 mb-4">
             <Avatar className="w-20 h-20 ring-2 ring-gray-700">
-              <AvatarImage src={user.profileImageUrl || creator?.profileImage || ''} alt={user.firstName || user.username} />
+              <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.firstName || displayUser?.username} />
               <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
-                {user.firstName?.[0] || user.username?.[0]}
+                {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div className="flex flex-col gap-1 mb-2">
                 <h2 className="text-xl font-semibold text-left">
-                  {user.firstName && user.lastName 
-                    ? `${user.firstName} ${user.lastName}`
-                    : user.username}
+                  {displayUser?.firstName && displayUser?.lastName 
+                    ? `${displayUser.firstName} ${displayUser.lastName}`
+                    : displayUser?.username}
                 </h2>
                 {creatorProfile?.isCreator && (
                   <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
@@ -153,10 +185,10 @@ export default function ProfilePage() {
           </div>
 
           {/* Bio - Left aligned */}
-          {(creator?.bio || user.bio) && (
+          {(creator?.bio || displayUser?.bio) && (
             <div className="mb-4">
               <p className="text-sm leading-relaxed text-left">
-                {creator?.bio || user.bio}
+                {creator?.bio || displayUser?.bio}
               </p>
             </div>
           )}
@@ -172,23 +204,43 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Action Buttons - Edit for own profile */}
+          {/* Action Buttons - Different for own vs others' profiles */}
           <div className="flex gap-3 mb-6">
-            <Button 
-              onClick={() => navigate("/edit-profile")}
-              className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
-            <Button 
-              onClick={() => navigate("/privacy-settings")}
-              variant="outline" 
-              className="flex-1 border-gray-600 text-white hover:bg-gray-800"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
+            {isOwnProfile ? (
+              <>
+                <Button 
+                  onClick={() => navigate("/edit-profile")}
+                  className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button 
+                  onClick={() => navigate("/privacy-settings")}
+                  variant="outline" 
+                  className="flex-1 border-gray-600 text-white hover:bg-gray-800"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="outline"
+                  className="flex-1 border-gray-600 text-white hover:bg-gray-800"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Message
+                </Button>
+                <Button 
+                  className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Follow
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Platform Links */}
@@ -216,8 +268,8 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Welcome message for new users without creator profile */}
-          {!creatorProfile?.isCreator && (
+          {/* Welcome message for new users without creator profile - only show for own profile */}
+          {isOwnProfile && !creatorProfile?.isCreator && (
             <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
               <p className="text-gray-400 text-sm mb-4">
@@ -250,8 +302,8 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Empty state for creators without platforms */}
-          {creatorProfile?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
+          {/* Empty state for creators without platforms - only show for own profile */}
+          {isOwnProfile && creatorProfile?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
             <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Connect Your Platforms</h3>
               <p className="text-gray-400 text-sm mb-4">

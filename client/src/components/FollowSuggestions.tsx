@@ -239,7 +239,7 @@ export function FollowSuggestions() {
       case 'ministry':
         return `/ministry-profile`;
       case 'user':
-        return `/profile`; // Basic users go to general profile page
+        return `/profile/${suggestion.username}`; // Username-based profile URLs
       default:
         return '#';
     }
