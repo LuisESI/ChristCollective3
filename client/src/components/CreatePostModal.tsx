@@ -359,28 +359,59 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
                   </Button>
                 </div>
               </div>
+
+              {/* Media Preview */}
               {formData.mediaUrls.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.mediaUrls.map((url, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="bg-gray-700 text-white flex items-center gap-1"
-                    >
-                      {url.substring(0, 30)}...
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeMediaUrl(url)}
-                        className="p-0 h-auto text-gray-400 hover:text-white"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </Badge>
-                  ))}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-white">Preview</label>
+                  <div className="grid gap-3">
+                    {formData.mediaUrls.map((url, index) => (
+                      <div key={index} className="relative bg-gray-800 rounded-lg overflow-hidden">
+                        {formData.mediaType === "video" ? (
+                          <video
+                            controls
+                            className="w-full max-h-64 object-contain"
+                            style={{ maxHeight: '256px' }}
+                          >
+                            <source src={url} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <img
+                            src={url}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full max-h-64 object-contain"
+                            style={{ maxHeight: '256px' }}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzM3NDE1MSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5Q0EzQUYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBub3QgZm91bmQ8L3RleHQ+PC9zdmc+";
+                            }}
+                          />
+                        )}
+                        
+                        {/* Remove button */}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2 h-8 w-8 p-0"
+                          onClick={() => removeMediaUrl(url)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                        
+                        {/* URL display */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2">
+                          <p className="text-xs text-gray-300 truncate">
+                            {url}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
+
             </div>
           )}
 
