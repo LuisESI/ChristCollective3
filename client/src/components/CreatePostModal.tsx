@@ -14,12 +14,7 @@ interface CreatePostModalProps {
   trigger?: React.ReactNode;
 }
 
-const ASPECT_RATIOS = [
-  { value: "16:9", label: "16:9 (Landscape)", description: "YouTube, desktop content" },
-  { value: "9:16", label: "9:16 (Portrait)", description: "TikTok, Instagram Stories" },
-  { value: "4:3", label: "4:3 (Standard)", description: "Traditional photos" },
-  { value: "1:1", label: "1:1 (Square)", description: "Instagram posts" },
-];
+
 
 const MEDIA_TYPES = [
   { value: "image", label: "Image", icon: Image },
@@ -34,7 +29,6 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
     content: "",
     authorType: "user",
     authorId: null,
-    aspectRatio: "1:1",
     mediaType: "image",
     mediaUrls: [] as string[],
     tags: [] as string[],
@@ -86,7 +80,6 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
       content: "",
       authorType: "user",
       authorId: null,
-      aspectRatio: "1:1",
       mediaType: "image",
       mediaUrls: [],
       tags: [],
@@ -269,30 +262,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
             </div>
           </div>
 
-          {/* Aspect Ratio - Only show for Image/Video */}
-          {formData.mediaType !== "text" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-white">Aspect Ratio *</label>
-              <Select
-                value={formData.aspectRatio}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, aspectRatio: value }))}
-              >
-                <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
-                  {ASPECT_RATIOS.map((ratio) => (
-                    <SelectItem key={ratio.value} value={ratio.value}>
-                      <div>
-                        <div className="font-medium">{ratio.label}</div>
-                        <div className="text-xs text-gray-400">{ratio.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+
 
           {/* File Upload - Only show for Image/Video */}
           {formData.mediaType !== "text" && (

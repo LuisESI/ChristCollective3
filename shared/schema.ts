@@ -270,7 +270,6 @@ export const platformPosts = pgTable("platform_posts", {
   title: varchar("title"),
   content: text("content").notNull(),
   mediaUrls: text("media_urls").array(), // Array of image/video URLs
-  aspectRatio: varchar("aspect_ratio").notNull(), // 16:9, 9:16, 4:3, 1:1
   mediaType: varchar("media_type").notNull().default("image"), // image, video, text
   tags: text("tags").array(), // Array of hashtags
   isPublished: boolean("is_published").default(true),

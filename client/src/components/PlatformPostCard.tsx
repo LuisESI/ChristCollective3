@@ -116,19 +116,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
     commentMutation.mutate(newComment.trim());
   };
 
-  const getAspectRatioClass = () => {
-    switch (post.aspectRatio) {
-      case "16:9":
-        return "aspect-video"; // 16:9
-      case "9:16":
-        return "aspect-[9/16]"; // 9:16 (portrait)
-      case "4:3":
-        return "aspect-[4/3]"; // 4:3
-      case "1:1":
-      default:
-        return "aspect-square"; // 1:1
-    }
-  };
+
 
   const getAuthorDisplayName = () => {
     switch (post.authorType) {
@@ -255,8 +243,6 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
             </div>
 
             <div className="flex items-center gap-1 text-xs text-gray-500">
-              <span>{post.aspectRatio}</span>
-              <span>•</span>
               <span className="capitalize">{post.mediaType}</span>
             </div>
           </div>
