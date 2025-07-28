@@ -467,18 +467,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new platform post
   app.post('/api/platform-posts', isAuthenticated, async (req: any, res) => {
     try {
-      const { authorType, authorId, title, content, mediaUrls, aspectRatio, mediaType, tags } = req.body;
+      const { authorType, authorId, title, content, mediaUrls, mediaType, tags } = req.body;
       const userId = req.user.id;
       
       // Validate required fields
-      if (!content || !aspectRatio) {
-        return res.status(400).json({ message: "Content and aspect ratio are required" });
-      }
-
-      // Validate aspect ratio
-      const validAspectRatios = ['16:9', '9:16', '4:3', '1:1'];
-      if (!validAspectRatios.includes(aspectRatio)) {
-        return res.status(400).json({ message: "Invalid aspect ratio. Must be one of: 16:9, 9:16, 4:3, 1:1" });
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
       }
 
       // Verify user ownership of the profile they're posting as
@@ -506,7 +500,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title,
         content,
         mediaUrls: mediaUrls || [],
-        aspectRatio,
         mediaType: mediaType || 'image',
         tags: tags || [],
         isPublished: true,
