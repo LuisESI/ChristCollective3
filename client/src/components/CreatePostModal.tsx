@@ -56,7 +56,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
     mutationFn: async (postData: any) => {
       return await apiRequest("/api/platform-posts", {
         method: "POST",
-        body: JSON.stringify(postData),
+        data: postData,
       });
     },
     onSuccess: () => {
@@ -140,7 +140,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
   const getAuthorOptions = () => {
     const options = [{ value: "user", label: "Personal Account", id: null }];
 
-    if (creatorStatus?.creatorProfile) {
+    if (creatorStatus?.isCreator && creatorStatus?.creatorProfile) {
       options.push({
         value: "creator",
         label: `Creator: ${creatorStatus.creatorProfile.name}`,
@@ -148,7 +148,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
       });
     }
 
-    if (businessProfiles?.length > 0) {
+    if (Array.isArray(businessProfiles) && businessProfiles.length > 0) {
       businessProfiles.forEach((business: any) => {
         options.push({
           value: "business",
@@ -158,7 +158,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
       });
     }
 
-    if (ministryProfile) {
+    if (ministryProfile && ministryProfile.name) {
       options.push({
         value: "ministry",
         label: `Ministry: ${ministryProfile.name}`,

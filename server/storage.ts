@@ -950,28 +950,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFollowedUsersPosts(userId: string, limit = 50): Promise<PlatformPost[]> {
-    const results = await db
-      .select({
-        id: platformPosts.id,
-        userId: platformPosts.userId,
-        content: platformPosts.content,
-        mediaUrls: platformPosts.mediaUrls,
-        aspectRatio: platformPosts.aspectRatio,
-        tags: platformPosts.tags,
-        likesCount: platformPosts.likesCount,
-        commentsCount: platformPosts.commentsCount,
-        sharesCount: platformPosts.sharesCount,
-        isPublished: platformPosts.isPublished,
-        createdAt: platformPosts.createdAt,
-        updatedAt: platformPosts.updatedAt,
-      })
+    return await db
+      .select()
       .from(platformPosts)
       .innerJoin(userFollows, eq(userFollows.followingId, platformPosts.userId))
       .where(and(eq(userFollows.followerId, userId), eq(platformPosts.isPublished, true)))
       .orderBy(desc(platformPosts.createdAt))
       .limit(limit);
-    
-    return results;
   }
 }
 
