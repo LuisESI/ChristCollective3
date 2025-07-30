@@ -530,12 +530,7 @@ export default function EditProfilePage() {
   const hasCreatorProfile = creatorStatus?.isCreator || false;
   const hasBusinessProfile = !!userBusinessProfile;
   
-  console.log("Business profile check:", { 
-    businessProfiles, 
-    userBusinessProfile, 
-    hasBusinessProfile, 
-    userId: user?.id 
-  });
+
 
   return (
     <>
