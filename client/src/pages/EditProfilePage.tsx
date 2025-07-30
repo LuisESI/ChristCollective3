@@ -570,6 +570,7 @@ export default function EditProfilePage() {
                     ? `${user.firstName} ${user.lastName}`
                     : user.username}
                 </h2>
+                <p className="text-gray-400 text-sm">@{user.username}</p>
                 <div className="flex gap-2 mt-1">
                   {hasCreatorProfile && (
                     <Badge className="bg-[#D4AF37] text-black text-xs">Creator</Badge>
@@ -618,10 +619,7 @@ export default function EditProfilePage() {
                     <label className="text-sm font-medium text-gray-300">Username</label>
                     <p className="text-white">{user.username}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-300">Display Name</label>
-                    <p className="text-white">{user.displayName || "Not set"}</p>
-                  </div>
+
                   <div>
                     <label className="text-sm font-medium text-gray-300">Email</label>
                     <p className="text-white">{user.email}</p>
