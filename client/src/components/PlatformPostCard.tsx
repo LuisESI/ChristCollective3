@@ -241,10 +241,6 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
                 <span className="text-xs">{post.sharesCount}</span>
               </Button>
             </div>
-
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <span className="capitalize">{post.mediaType}</span>
-            </div>
           </div>
         )}
 
