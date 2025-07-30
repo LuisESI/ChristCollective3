@@ -194,6 +194,7 @@ const businessProfileSchema = z.object({
 });
 
 const basicProfileSchema = z.object({
+  username: z.string().min(1, "Username is required"),
   bio: z.string().optional(),
   profileImageUrl: z.string().optional(),
 });
@@ -263,6 +264,7 @@ export default function EditProfilePage() {
   const basicProfileForm = useForm({
     resolver: zodResolver(basicProfileSchema),
     defaultValues: {
+      username: user?.username || "",
       bio: user?.bio || "",
       profileImageUrl: user?.profileImageUrl || "",
     },
@@ -314,6 +316,7 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (user) {
       basicProfileForm.reset({
+        username: user.username || "",
         bio: user.bio || "",
         profileImageUrl: user.profileImageUrl || "",
       });
@@ -493,14 +496,30 @@ export default function EditProfilePage() {
         profileImageUrl = uploadResult.url;
       }
       
-      return await apiRequest(`/api/user/profile`, {
-        method: "PUT",
-        data: { ...data, profileImageUrl },
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...data, profileImageUrl }),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.field === 'username') {
+          throw new Error('Username already taken. Please choose a different username.');
+        }
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: "Profile updated successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Clear the selected profile image after successful update
+      setSelectedProfileImage(null);
+      setProfileImagePreview("");
     },
     onError: (error: any) => {
       toast({
@@ -799,7 +818,23 @@ export default function EditProfilePage() {
                 <CardContent>
                   <Form {...basicProfileForm}>
                     <form onSubmit={basicProfileForm.handleSubmit(onBasicProfileSubmit)} className="space-y-4">
-
+                      <FormField
+                        control={basicProfileForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Username</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="Enter your username"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <FormField
                         control={basicProfileForm.control}

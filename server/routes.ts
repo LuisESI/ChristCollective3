@@ -829,6 +829,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const updateData = req.body;
+      
+      // If username is being updated, check for uniqueness
+      if (updateData.username) {
+        const currentUser = await storage.getUser(userId);
+        
+        // Only check if username is actually changing
+        if (currentUser && updateData.username !== currentUser.username) {
+          const existingUser = await storage.getUserByUsername(updateData.username);
+          if (existingUser) {
+            return res.status(400).json({ 
+              message: "Username already taken",
+              field: "username"
+            });
+          }
+        }
+      }
+      
       const user = await storage.updateUser(userId, updateData);
       res.json(user);
     } catch (error) {
