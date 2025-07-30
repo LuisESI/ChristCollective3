@@ -196,7 +196,6 @@ const businessProfileSchema = z.object({
 });
 
 const basicProfileSchema = z.object({
-  displayName: z.string().optional(),
   bio: z.string().optional(),
   profileImageUrl: z.string().optional(),
 });
@@ -268,7 +267,6 @@ export default function EditProfilePage() {
   const basicProfileForm = useForm({
     resolver: zodResolver(basicProfileSchema),
     defaultValues: {
-      displayName: user?.displayName || "",
       bio: user?.bio || "",
       profileImageUrl: user?.profileImageUrl || "",
     },
@@ -322,7 +320,6 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (user) {
       basicProfileForm.reset({
-        displayName: user.displayName || "",
         bio: user.bio || "",
         profileImageUrl: user.profileImageUrl || "",
       });
@@ -707,23 +704,7 @@ export default function EditProfilePage() {
                 <CardContent>
                   <Form {...basicProfileForm}>
                     <form onSubmit={basicProfileForm.handleSubmit(onBasicProfileSubmit)} className="space-y-4">
-                      <FormField
-                        control={basicProfileForm.control}
-                        name="displayName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Display Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="Your display name"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+
 
                       <FormField
                         control={basicProfileForm.control}
@@ -756,7 +737,7 @@ export default function EditProfilePage() {
                               alt="Profile preview" 
                             />
                             <AvatarFallback className="bg-gray-800 text-white text-lg font-bold">
-                              {user?.displayName?.[0] || user?.firstName?.[0] || user?.username?.[0] || 'U'}
+                              {user?.firstName?.[0] || user?.username?.[0] || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           

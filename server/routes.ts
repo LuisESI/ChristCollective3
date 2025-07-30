@@ -104,9 +104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate the input
       const validatedData = z.object({
-        displayName: z.string().optional(),
         bio: z.string().optional(),
-        profileImageUrl: z.string().url().optional().or(z.literal('')),
+        profileImageUrl: z.string().optional(),
       }).parse(updateData);
 
       const updatedUser = await storage.updateUser(userId, validatedData);
