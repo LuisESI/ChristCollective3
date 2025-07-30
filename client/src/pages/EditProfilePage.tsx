@@ -195,12 +195,18 @@ const businessProfileSchema = z.object({
   profileImage: z.string().optional(),
 });
 
+const basicProfileSchema = z.object({
+  displayName: z.string().optional(),
+  bio: z.string().optional(),
+  profileImageUrl: z.string().optional(),
+});
+
 export default function EditProfilePage() {
   const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("profile");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -256,6 +262,16 @@ export default function EditProfilePage() {
     },
   });
 
+  // Basic profile form for all users
+  const basicProfileForm = useForm({
+    resolver: zodResolver(basicProfileSchema),
+    defaultValues: {
+      displayName: user?.displayName || "",
+      bio: user?.bio || "",
+      profileImageUrl: user?.profileImageUrl || "",
+    },
+  });
+
   // Update form defaults when data loads
   useEffect(() => {
     if (creatorStatus?.creatorProfile) {
@@ -300,6 +316,16 @@ export default function EditProfilePage() {
       });
     }
   }, [userBusinessProfile, businessForm]);
+
+  useEffect(() => {
+    if (user) {
+      basicProfileForm.reset({
+        displayName: user.displayName || "",
+        bio: user.bio || "",
+        profileImageUrl: user.profileImageUrl || "",
+      });
+    }
+  }, [user, basicProfileForm]);
 
   // Mutations
   const updateCreatorMutation = useMutation({
@@ -410,6 +436,30 @@ export default function EditProfilePage() {
     updateBusinessMutation.mutate(data);
   };
 
+  const updateBasicProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest(`/api/user/profile`, {
+        method: "PUT",
+        data: data,
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Profile updated successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onBasicProfileSubmit = (data: any) => {
+    updateBasicProfileMutation.mutate(data);
+  };
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -475,22 +525,26 @@ export default function EditProfilePage() {
 
           {/* Profile Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-900">
+            <TabsList className="grid w-full grid-cols-5 bg-gray-900">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Overview
               </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <Edit className="w-4 h-4" />
+                Profile
+              </TabsTrigger>
               <TabsTrigger value="creator" className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
-                Creator Profile
+                Creator
               </TabsTrigger>
               <TabsTrigger value="posts" className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
-                Manage Posts
+                Posts
               </TabsTrigger>
               <TabsTrigger value="business" className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4" />
-                Business Profile
+                Business
               </TabsTrigger>
             </TabsList>
 
@@ -506,12 +560,16 @@ export default function EditProfilePage() {
                     <p className="text-white">{user.username}</p>
                   </div>
                   <div>
+                    <label className="text-sm font-medium text-gray-300">Display Name</label>
+                    <p className="text-white">{user.displayName || "Not set"}</p>
+                  </div>
+                  <div>
                     <label className="text-sm font-medium text-gray-300">Email</label>
                     <p className="text-white">{user.email}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-300">Phone</label>
-                    <p className="text-white">{user.phone || "Not provided"}</p>
+                    <label className="text-sm font-medium text-gray-300">Bio</label>
+                    <p className="text-white">{user.bio || "Not set"}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -568,6 +626,100 @@ export default function EditProfilePage() {
                       )}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Basic Profile Tab */}
+            <TabsContent value="profile" className="space-y-4">
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Edit className="w-5 h-5" />
+                    Edit Basic Profile
+                  </CardTitle>
+                  <p className="text-gray-400 text-sm">
+                    Update your display name, bio, and profile picture that everyone can see.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Form {...basicProfileForm}>
+                    <form onSubmit={basicProfileForm.handleSubmit(onBasicProfileSubmit)} className="space-y-4">
+                      <FormField
+                        control={basicProfileForm.control}
+                        name="displayName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Display Name</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="Your display name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={basicProfileForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Bio</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="Tell others about yourself..."
+                                rows={3}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={basicProfileForm.control}
+                        name="profileImageUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Profile Picture URL</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="https://example.com/your-profile-picture.jpg"
+                                type="url"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                        disabled={updateBasicProfileMutation.isPending}
+                      >
+                        {updateBasicProfileMutation.isPending ? (
+                          <>
+                            <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Profile
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </TabsContent>

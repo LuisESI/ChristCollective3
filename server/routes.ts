@@ -96,6 +96,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
 
+  // Update basic user profile
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const updateData = req.body;
+      
+      // Validate the input
+      const validatedData = z.object({
+        displayName: z.string().optional(),
+        bio: z.string().optional(),
+        profileImageUrl: z.string().url().optional().or(z.literal('')),
+      }).parse(updateData);
+
+      const updatedUser = await storage.updateUser(userId, validatedData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Check if current user is an approved creator
   app.get('/api/user/creator-status', isAuthenticated, async (req: any, res) => {
     try {

@@ -136,18 +136,19 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-start gap-6 mb-4">
             <Avatar className="w-20 h-20 ring-2 ring-gray-700">
-              <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.firstName || displayUser?.username} />
+              <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.displayName || displayUser?.firstName || displayUser?.username} />
               <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
-                {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
+                {displayUser?.displayName?.[0] || displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div className="flex flex-col gap-1 mb-2">
                 <h2 className="text-xl font-semibold text-left">
-                  {displayUser?.firstName && displayUser?.lastName 
+                  {displayUser?.displayName || 
+                   (displayUser?.firstName && displayUser?.lastName 
                     ? `${displayUser.firstName} ${displayUser.lastName}`
-                    : displayUser?.username}
+                    : displayUser?.username)}
                 </h2>
                 {creatorProfile?.isCreator && (
                   <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
