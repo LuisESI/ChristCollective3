@@ -61,7 +61,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
         method: "POST",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setIsLiked(data.liked);
       setLikesCount(data.likesCount);
     },
@@ -78,7 +78,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
     mutationFn: async (content: string) => {
       return await apiRequest(`/api/platform-posts/${post.id}/comment`, {
         method: "POST",
-        body: JSON.stringify({ content }),
+        data: { content },
       });
     },
     onSuccess: () => {
@@ -146,7 +146,9 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
 
   // Helper functions for user profile information
   const getUserProfileImage = () => {
-    return postAuthor?.profilePicture || "";
+    const imageUrl = postAuthor?.profileImageUrl || "";
+    console.log("Profile image URL:", imageUrl, "for user:", postAuthor?.username);
+    return imageUrl;
   };
 
   const getUserInitials = () => {
