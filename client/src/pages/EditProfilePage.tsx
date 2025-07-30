@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, User, Briefcase, Church, Edit, Save, Plus, Eye, EyeOff, ExternalLink, Play } from "lucide-react";
+import { ArrowLeft, User, Briefcase, Church, Edit, Save, Plus, Eye, EyeOff, ExternalLink, Play, Upload, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -207,6 +207,8 @@ export default function EditProfilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("profile");
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>("");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -438,9 +440,29 @@ export default function EditProfilePage() {
 
   const updateBasicProfileMutation = useMutation({
     mutationFn: async (data: any) => {
+      // If there's a selected profile image, upload it first
+      let profileImageUrl = data.profileImageUrl;
+      
+      if (selectedProfileImage) {
+        const formData = new FormData();
+        formData.append('profileImage', selectedProfileImage);
+        
+        const uploadResponse = await fetch('/api/upload/profile-image', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload profile image');
+        }
+        
+        const uploadResult = await uploadResponse.json();
+        profileImageUrl = uploadResult.url;
+      }
+      
       return await apiRequest(`/api/user/profile`, {
         method: "PUT",
-        data: data,
+        data: { ...data, profileImageUrl },
       });
     },
     onSuccess: () => {
@@ -458,6 +480,46 @@ export default function EditProfilePage() {
 
   const onBasicProfileSubmit = (data: any) => {
     updateBasicProfileMutation.mutate(data);
+  };
+
+  // Handle profile image selection
+  const handleProfileImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setSelectedProfileImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProfileImage = () => {
+    setSelectedProfileImage(null);
+    setProfileImagePreview("");
   };
 
   if (isLoading || !user) {
@@ -682,24 +744,70 @@ export default function EditProfilePage() {
                         )}
                       />
 
-                      <FormField
-                        control={basicProfileForm.control}
-                        name="profileImageUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Profile Picture URL</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="https://example.com/your-profile-picture.jpg"
-                                type="url"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {/* Profile Picture Upload */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">Profile Picture</label>
+                        
+                        {/* Current/Preview Image */}
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-16 h-16 ring-2 ring-gray-700">
+                            <AvatarImage 
+                              src={profileImagePreview || user?.profileImageUrl || ''} 
+                              alt="Profile preview" 
+                            />
+                            <AvatarFallback className="bg-gray-800 text-white text-lg font-bold">
+                              {user?.displayName?.[0] || user?.firstName?.[0] || user?.username?.[0] || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            {selectedProfileImage ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-300">{selectedProfileImage.name}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={removeProfileImage}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400">
+                                {user?.profileImageUrl ? "Current profile picture" : "No profile picture set"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Upload Button */}
+                        <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center hover:border-gray-500 transition-colors">
+                          <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-400 mb-2">
+                            Click to upload a new profile picture
+                          </p>
+                          <p className="text-xs text-gray-500 mb-3">
+                            PNG, JPG up to 5MB
+                          </p>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleProfileImageSelect}
+                            className="hidden"
+                            id="profile-image-upload"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                            onClick={() => document.getElementById('profile-image-upload')?.click()}
+                          >
+                            Choose File
+                          </Button>
+                        </div>
+                      </div>
 
                       <Button 
                         type="submit" 

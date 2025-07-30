@@ -120,6 +120,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile image upload endpoint
+  app.post('/api/upload/profile-image', isAuthenticated, upload.single('profileImage'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Return the URL path for the uploaded file
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ url: imageUrl });
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
   // Check if current user is an approved creator
   app.get('/api/user/creator-status', isAuthenticated, async (req: any, res) => {
     try {
