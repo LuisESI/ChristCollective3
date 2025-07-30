@@ -437,6 +437,12 @@ export class DatabaseStorage implements IStorage {
     return updatedProfile;
   }
 
+  async deleteBusinessProfile(id: number): Promise<void> {
+    await db
+      .delete(businessProfiles)
+      .where(eq(businessProfiles.id, id));
+  }
+
   async listBusinessProfiles(): Promise<BusinessProfile[]> {
     return await db
       .select()

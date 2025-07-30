@@ -1413,6 +1413,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/business-profiles/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const profileId = parseInt(id, 10);
+      
+      if (isNaN(profileId)) {
+        return res.status(400).json({ message: "Invalid profile ID" });
+      }
+      
+      const profile = await storage.getBusinessProfile(profileId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      // Check if the user owns this profile
+      const userId = req.user.id;
+      if (profile.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this profile" });
+      }
+      
+      await storage.deleteBusinessProfile(profileId);
+      
+      res.json({ message: "Business profile deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting business profile:", error);
+      res.status(500).json({ message: "Failed to delete business profile" });
+    }
+  });
+
   // Membership tiers
   app.get('/api/membership-tiers', async (req, res) => {
     try {

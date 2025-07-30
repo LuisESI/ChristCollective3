@@ -427,6 +427,48 @@ export default function EditProfilePage() {
     },
   });
 
+  const deleteBusinessMutation = useMutation({
+    mutationFn: async () => {
+      if (!userBusinessProfile?.id) {
+        throw new Error("No business profile to delete");
+      }
+      
+      const response = await fetch(`/api/business-profiles/${userBusinessProfile.id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete business profile: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Business profile deleted successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/business-profiles"] });
+      // Reset the business form
+      businessForm.reset({
+        companyName: "",
+        industry: "",
+        description: "",
+        website: "",
+        location: "",
+        employeeCount: "",
+        foundedYear: "",
+        profileImage: "",
+      });
+      // Switch back to overview tab
+      setActiveTab("overview");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error deleting business profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const onCreatorSubmit = (data: any) => {
     updateCreatorMutation.mutate(data);
   };
@@ -711,18 +753,23 @@ export default function EditProfilePage() {
                             </Button>
                             <Button 
                               onClick={() => {
-                                // TODO: Add delete business profile functionality
-                                toast({
-                                  title: "Delete Business Profile",
-                                  description: "This feature will be available soon",
-                                });
+                                if (confirm("Are you sure you want to delete your business profile? This action cannot be undone.")) {
+                                  deleteBusinessMutation.mutate();
+                                }
                               }}
                               variant="outline" 
                               size="sm"
                               className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                              disabled={deleteBusinessMutation.isPending}
                             >
-                              <X className="w-4 h-4 mr-1" />
-                              Delete
+                              {deleteBusinessMutation.isPending ? (
+                                <div className="animate-spin w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full" />
+                              ) : (
+                                <>
+                                  <X className="w-4 h-4 mr-1" />
+                                  Delete
+                                </>
+                              )}
                             </Button>
                           </>
                         ) : (
@@ -1253,16 +1300,24 @@ export default function EditProfilePage() {
                             type="button"
                             variant="outline"
                             className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            disabled={deleteBusinessMutation.isPending}
                             onClick={() => {
-                              // TODO: Add delete business profile functionality
-                              toast({
-                                title: "Delete Business Profile",
-                                description: "This feature will be available soon",
-                              });
+                              if (confirm("Are you sure you want to delete your business profile? This action cannot be undone.")) {
+                                deleteBusinessMutation.mutate();
+                              }
                             }}
                           >
-                            <X className="w-4 h-4 mr-2" />
-                            Delete Profile
+                            {deleteBusinessMutation.isPending ? (
+                              <div className="flex items-center gap-2">
+                                <div className="animate-spin w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full" />
+                                Deleting...
+                              </div>
+                            ) : (
+                              <>
+                                <X className="w-4 h-4 mr-2" />
+                                Delete Profile
+                              </>
+                            )}
                           </Button>
                         )}
                       </div>
