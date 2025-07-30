@@ -1229,23 +1229,43 @@ export default function EditProfilePage() {
                         />
                       </div>
 
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                        disabled={updateBusinessMutation.isPending}
-                      >
-                        {updateBusinessMutation.isPending ? (
-                          <div className="flex items-center gap-2">
-                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                            Saving...
-                          </div>
-                        ) : (
-                          <>
-                            <Save className="w-4 h-4 mr-2" />
-                            {hasBusinessProfile ? "Update Business Profile" : "Create Business Profile"}
-                          </>
+                      <div className="flex gap-3">
+                        <Button 
+                          type="submit" 
+                          className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                          disabled={updateBusinessMutation.isPending}
+                        >
+                          {updateBusinessMutation.isPending ? (
+                            <div className="flex items-center gap-2">
+                              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                              Saving...
+                            </div>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4 mr-2" />
+                              {hasBusinessProfile ? "Update Business Profile" : "Create Business Profile"}
+                            </>
+                          )}
+                        </Button>
+                        
+                        {hasBusinessProfile && (
+                          <Button 
+                            type="button"
+                            variant="outline"
+                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            onClick={() => {
+                              // TODO: Add delete business profile functionality
+                              toast({
+                                title: "Delete Business Profile",
+                                description: "This feature will be available soon",
+                              });
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Delete Profile
+                          </Button>
                         )}
-                      </Button>
+                      </div>
                     </form>
                   </Form>
                 </CardContent>
