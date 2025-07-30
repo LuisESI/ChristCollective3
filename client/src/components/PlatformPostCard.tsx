@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,6 +41,19 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch user data for the post author
+  const { data: postAuthor } = useQuery({
+    queryKey: ["/api/users/by-id", post.userId],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/by-id?userId=${encodeURIComponent(post.userId)}`);
+      if (!response.ok) {
+        throw new Error('User not found');
+      }
+      return response.json();
+    },
+    enabled: !!post.userId,
+  });
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -133,29 +146,31 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
 
   // Helper functions for user profile information
   const getUserProfileImage = () => {
-    // This would need to be passed from the parent component or fetched
-    // For now, return empty string to show fallback
-    return "";
+    return postAuthor?.profilePicture || "";
   };
 
   const getUserInitials = () => {
-    // Get initials from username or author type
-    if (post.userId) {
-      return post.userId.charAt(0).toUpperCase();
+    if (postAuthor?.firstName && postAuthor?.lastName) {
+      return `${postAuthor.firstName.charAt(0)}${postAuthor.lastName.charAt(0)}`.toUpperCase();
+    }
+    if (postAuthor?.username) {
+      return postAuthor.username.charAt(0).toUpperCase();
     }
     return post.authorType.charAt(0).toUpperCase();
   };
 
   const getUserDisplayName = () => {
-    // This would ideally show the user's actual name
-    // For now, use the existing author display logic
+    if (postAuthor?.firstName && postAuthor?.lastName) {
+      return `${postAuthor.firstName} ${postAuthor.lastName}`;
+    }
+    if (postAuthor?.username) {
+      return postAuthor.username;
+    }
     return getAuthorDisplayName();
   };
 
   const getUserUsername = () => {
-    // This would need to be passed from parent or fetched
-    // For now, use userId as fallback
-    return post.userId || "username";
+    return postAuthor?.username || post.userId || "username";
   };
 
   return (

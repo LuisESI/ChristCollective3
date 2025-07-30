@@ -2517,6 +2517,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user by ID
+  app.get("/api/users/by-id", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      if (!userId) {
+        return res.status(400).json({ message: "UserId parameter is required" });
+      }
+      const user = await storage.getUser(userId as string);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // User follow system routes
   app.post("/api/users/:userId/follow", isAuthenticated, async (req: any, res) => {
     try {
