@@ -131,6 +131,33 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
     }
   };
 
+  // Helper functions for user profile information
+  const getUserProfileImage = () => {
+    // This would need to be passed from the parent component or fetched
+    // For now, return empty string to show fallback
+    return "";
+  };
+
+  const getUserInitials = () => {
+    // Get initials from username or author type
+    if (post.userId) {
+      return post.userId.charAt(0).toUpperCase();
+    }
+    return post.authorType.charAt(0).toUpperCase();
+  };
+
+  const getUserDisplayName = () => {
+    // This would ideally show the user's actual name
+    // For now, use the existing author display logic
+    return getAuthorDisplayName();
+  };
+
+  const getUserUsername = () => {
+    // This would need to be passed from parent or fetched
+    // For now, use userId as fallback
+    return post.userId || "username";
+  };
+
   return (
     <Card className="bg-black border-gray-800 w-full">
       <CardContent className="p-6">
@@ -138,15 +165,14 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
+              <AvatarImage src={getUserProfileImage()} alt="Profile" />
               <AvatarFallback className="bg-[#D4AF37] text-black">
-                {post.authorType.charAt(0).toUpperCase()}
+                {getUserInitials()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium text-white text-sm">{getAuthorDisplayName()}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(post.createdAt).toLocaleDateString()}
-              </p>
+              <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
+              <p className="text-xs text-gray-400">@{getUserUsername()}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
@@ -240,6 +266,11 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
                 <Share2 className="w-4 h-4" />
                 <span className="text-xs">{post.sharesCount}</span>
               </Button>
+            </div>
+            
+            {/* Date moved to bottom right */}
+            <div className="text-xs text-gray-500">
+              {new Date(post.createdAt).toLocaleDateString()}
             </div>
           </div>
         )}
