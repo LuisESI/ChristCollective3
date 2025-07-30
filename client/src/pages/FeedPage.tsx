@@ -67,7 +67,7 @@ export default function FeedPage() {
           )}
 
           {/* Posts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Show posts from followed users if available and user is logged in */}
             {user && followingPosts && followingPosts.length > 0 ? (
               followingPosts.map((post: any) => (

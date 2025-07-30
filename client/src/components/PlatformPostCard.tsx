@@ -133,7 +133,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
 
   return (
     <Card className="bg-black border-gray-800 w-full">
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
