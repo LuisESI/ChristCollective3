@@ -32,6 +32,14 @@ export default function ProfilePage() {
   // Fetch profile user data by username if viewing someone else's profile
   const { data: fetchedUser, isLoading: userLoading } = useQuery({
     queryKey: ["/api/users/by-username", username],
+    queryFn: async () => {
+      if (!username) return null;
+      const response = await fetch(`/api/users/by-username?username=${encodeURIComponent(username)}`);
+      if (!response.ok) {
+        throw new Error('User not found');
+      }
+      return response.json();
+    },
     enabled: !!username,
   });
 

@@ -2500,10 +2500,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user by username
-  app.get("/api/users/by-username/:username", async (req, res) => {
+  app.get("/api/users/by-username", async (req, res) => {
     try {
-      const { username } = req.params;
-      const user = await storage.getUserByUsername(username);
+      const { username } = req.query;
+      if (!username) {
+        return res.status(400).json({ message: "Username parameter is required" });
+      }
+      const user = await storage.getUserByUsername(username as string);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
