@@ -645,19 +645,46 @@ export default function EditProfilePage() {
                           <p className="text-sm text-gray-400">Share your faith-based content</p>
                         </div>
                       </div>
-                      {hasCreatorProfile ? (
-                        <Badge className="bg-green-600 text-white">Active</Badge>
-                      ) : (
-                        <Button 
-                          onClick={() => setActiveTab("creator")}
-                          variant="outline" 
-                          size="sm"
-                          className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Create
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {hasCreatorProfile ? (
+                          <>
+                            <Button 
+                              onClick={() => setActiveTab("creator")}
+                              variant="outline" 
+                              size="sm"
+                              className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Update Creator Profile
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                // TODO: Add delete creator profile functionality
+                                toast({
+                                  title: "Delete Creator Profile",
+                                  description: "This feature will be available soon",
+                                });
+                              }}
+                              variant="outline" 
+                              size="sm"
+                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </>
+                        ) : (
+                          <Button 
+                            onClick={() => setActiveTab("creator")}
+                            variant="outline" 
+                            size="sm"
+                            className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Create Creator Profile
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
@@ -668,19 +695,46 @@ export default function EditProfilePage() {
                           <p className="text-sm text-gray-400">Connect with Christian professionals</p>
                         </div>
                       </div>
-                      {hasBusinessProfile ? (
-                        <Badge className="bg-green-600 text-white">Active</Badge>
-                      ) : (
-                        <Button 
-                          onClick={() => setActiveTab("business")}
-                          variant="outline" 
-                          size="sm"
-                          className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Create
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {hasBusinessProfile ? (
+                          <>
+                            <Button 
+                              onClick={() => setActiveTab("business")}
+                              variant="outline" 
+                              size="sm"
+                              className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Update Business Profile
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                // TODO: Add delete business profile functionality
+                                toast({
+                                  title: "Delete Business Profile",
+                                  description: "This feature will be available soon",
+                                });
+                              }}
+                              variant="outline" 
+                              size="sm"
+                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </>
+                        ) : (
+                          <Button 
+                            onClick={() => setActiveTab("business")}
+                            variant="outline" 
+                            size="sm"
+                            className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Create Business Profile
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
