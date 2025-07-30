@@ -192,7 +192,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mb-3">
             {post.tags.map((tag, index) => (
               <Badge
                 key={index}
