@@ -346,16 +346,24 @@ export default function ProfilePage() {
                   <Play className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                <p className="text-gray-400 text-sm">
-                  Your content will appear here once you start sharing.
-                </p>
-                <Button 
-                  onClick={() => navigate("/edit-profile")}
-                  className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Add Content
-                </Button>
+                {isOwnProfile ? (
+                  <>
+                    <p className="text-gray-400 text-sm">
+                      Your content will appear here once you start sharing.
+                    </p>
+                    <Button 
+                      onClick={() => navigate("/edit-profile")}
+                      className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Add Content
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-gray-400 text-sm">
+                    No content has been shared yet.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">
