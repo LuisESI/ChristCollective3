@@ -34,6 +34,7 @@ import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
 import MinistryProfilePage from "@/pages/MinistryProfilePage";
+import MinistryCreatePage from "@/pages/MinistryCreatePage";
 import EditProfilePage from "@/pages/EditProfilePage";
 import CreatorSharePage from "@/pages/CreatorSharePage";
 import CreatorSocialSharePage from "@/pages/CreatorSocialSharePage";
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/business/profile/:id" component={BusinessProfilePage} />
       <Route path="/business-profile" component={BusinessNetworkPage} />
       <Route path="/ministry-profile" component={MinistryProfilePage} />
+      <Route path="/ministry/create" component={MinistryCreatePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/profile/:username" component={ProfilePage} />
