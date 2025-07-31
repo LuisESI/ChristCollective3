@@ -35,7 +35,7 @@ export default function CreatorSocialSharePage() {
 
   // Redirect if not a creator
   useEffect(() => {
-    if (user && creatorStatus && !creatorStatus.isCreator) {
+    if (user && creatorStatus && !(creatorStatus as any)?.isCreator) {
       toast({
         title: "Creator Profile Required",
         description: "You need a creator profile to share content from other platforms.",

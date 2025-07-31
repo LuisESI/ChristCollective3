@@ -16,7 +16,8 @@ import {
   Megaphone,
   Building,
   DollarSign,
-  Sparkles
+  Sparkles,
+  Share2
 } from "lucide-react";
 import { Helmet } from "react-helmet";
 
@@ -132,9 +133,9 @@ export default function CreatePage() {
   ];
 
   // Check what profiles user already has
-  const hasCreatorProfile = creatorStatus?.isCreator;
-  const hasBusinessProfile = businessProfiles && businessProfiles.length > 0;
-  const hasMinistryProfile = ministryProfile && !ministryProfile.message;
+  const hasCreatorProfile = (creatorStatus as any)?.isCreator;
+  const hasBusinessProfile = businessProfiles && (businessProfiles as any[])?.length > 0;
+  const hasMinistryProfile = ministryProfile && !(ministryProfile as any)?.message;
 
   // Filter base options based on existing profiles
   const filteredBaseOptions = baseCreateOptions.filter(option => {
