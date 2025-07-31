@@ -99,7 +99,7 @@ export default function CreatePage() {
       color: "text-green-500",
       bgColor: "bg-green-50",
       href: "/ministry/create",
-      badge: "Coming Soon",
+      badge: null,
       userType: "all"
     },
     {
@@ -132,6 +132,21 @@ export default function CreatePage() {
     }
   ];
 
+  // Additional options for ministry profiles
+  const ministryOnlyOptions = [
+    {
+      id: "create-event",
+      title: "Create Event",
+      description: "Organize community events, church services, and gatherings",
+      icon: Users,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      href: "/events/create",
+      badge: "Ministry Only",
+      userType: "ministry"
+    }
+  ];
+
   // Check what profiles user already has
   const hasCreatorProfile = (creatorStatus as any)?.isCreator;
   const hasBusinessProfile = businessProfiles && (businessProfiles as any[])?.length > 0;
@@ -141,24 +156,22 @@ export default function CreatePage() {
   const filteredBaseOptions = baseCreateOptions.filter(option => {
     if (option.id === "creator" && hasCreatorProfile) return false;
     if (option.id === "business" && hasBusinessProfile) return false;
+    if (option.id === "ministry" && hasMinistryProfile) return false;
     return true;
   });
 
-  // Update ministry option to be active
-  const updatedOptions = filteredBaseOptions.map(option => {
-    if (option.id === "ministry") {
-      return {
-        ...option,
-        badge: null, // Remove "Coming Soon"
-        href: "/ministry/create"
-      };
-    }
-    return option;
-  });
-
-  const createOptions = hasCreatorProfile 
-    ? [...updatedOptions, ...creatorOnlyOptions]
-    : updatedOptions;
+  // Build final create options based on user profiles
+  let createOptions = [...filteredBaseOptions];
+  
+  // Add creator-specific options
+  if (hasCreatorProfile) {
+    createOptions = [...createOptions, ...creatorOnlyOptions];
+  }
+  
+  // Add ministry-specific options
+  if (hasMinistryProfile) {
+    createOptions = [...createOptions, ...ministryOnlyOptions];
+  }
 
   return (
     <>
@@ -178,6 +191,11 @@ export default function CreatePage() {
             {hasCreatorProfile && (
               <span className="block text-[#D4AF37] text-xs mt-1">
                 ✨ Creator features unlocked! Share content from your platforms.
+              </span>
+            )}
+            {hasMinistryProfile && (
+              <span className="block text-green-400 text-xs mt-1">
+                ⛪ Ministry features unlocked! Create events and organize gatherings.
               </span>
             )}
           </p>
