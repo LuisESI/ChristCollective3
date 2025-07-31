@@ -42,14 +42,8 @@ export default function FeedPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
 
-
-          {/* Follow Suggestions */}
-          <FollowSuggestions />
-
-
-
-          {/* Posts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Posts Grid - Now appears first */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Show posts from followed users if available and user is logged in */}
             {user && followingPosts && followingPosts.length > 0 ? (
               followingPosts.map((post: any) => (
@@ -82,7 +76,7 @@ export default function FeedPage() {
 
           {/* Load More Button */}
           {posts && posts.length >= 50 && (
-            <div className="text-center mt-8">
+            <div className="text-center mb-8">
               <Button 
                 variant="outline" 
                 className="border-gray-600 text-gray-300 hover:bg-gray-800"
@@ -91,6 +85,9 @@ export default function FeedPage() {
               </Button>
             </div>
           )}
+
+          {/* Follow Suggestions - Now appears after posts */}
+          <FollowSuggestions />
         </div>
       </div>
     </div>
