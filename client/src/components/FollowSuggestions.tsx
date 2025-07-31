@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { Link } from "wouter";
-import { Plus, Users, Building2, Church, UserPlus, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Users, Building2, Church, UserPlus, Heart, ChevronLeft, ChevronRight, X } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,7 @@ export function FollowSuggestions() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
+  const [isWelcomeSectionVisible, setIsWelcomeSectionVisible] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -285,25 +286,35 @@ export function FollowSuggestions() {
       <style dangerouslySetInnerHTML={{ __html: scrollbarHideStyle }} />
       <div className="col-span-full space-y-8">
       {/* Header Section */}
-      <div className="text-center">
-        <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
-          <Heart className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">Welcome to the Community!</h3>
-          <p className="text-gray-400 mb-6">
-            Share your faith journey, inspire others with God's love, and help build a community where Christ's light shines through every story
-          </p>
-          {user && (
-            <CreatePostModal
-              trigger={
-                <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Post
-                </Button>
-              }
-            />
-          )}
+      {isWelcomeSectionVisible && (
+        <div className="text-center">
+          <div className="bg-gray-900 rounded-lg p-8 border border-gray-700 relative">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white hover:bg-gray-800"
+              onClick={() => setIsWelcomeSectionVisible(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+            <Heart className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">Welcome to the Community!</h3>
+            <p className="text-gray-400 mb-6">
+              Share your faith journey, inspire others with God's love, and help build a community where Christ's light shines through every story
+            </p>
+            {user && (
+              <CreatePostModal
+                trigger={
+                  <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Your First Post
+                  </Button>
+                }
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Follow Suggestions */}
       {suggestions.length > 0 && (
