@@ -101,7 +101,7 @@ export default function CreatorProfilePage() {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
-            <h1 className="text-lg font-semibold">{creator.name}</h1>
+            <h1 className="text-lg font-semibold text-center flex-1">{creator.name}</h1>
             <Button variant="ghost" className="text-white hover:bg-white/10 p-2">
               <ExternalLink className="w-5 h-5" />
             </Button>
@@ -112,9 +112,9 @@ export default function CreatorProfilePage() {
       {/* Profile Header */}
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-start gap-6 mb-4">
-          <Avatar className="w-20 h-20 ring-2 ring-gray-700">
+          <Avatar className="w-32 h-32 ring-2 ring-gray-700">
             <AvatarImage src={creator.profileImage || ''} alt={creator.name} />
-            <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
+            <AvatarFallback className="bg-gray-800 text-white text-3xl font-bold">
               {creator.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
@@ -147,9 +147,9 @@ export default function CreatorProfilePage() {
               </div>
               <div className="text-left">
                 <div className="text-lg font-semibold">
-                  {(creator.platforms as any[])?.length || 0}
+                  0
                 </div>
-                <div className="text-xs text-gray-400">platforms</div>
+                <div className="text-xs text-gray-400">following</div>
               </div>
             </div>
           </div>
