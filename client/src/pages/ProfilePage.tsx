@@ -131,12 +131,12 @@ export default function ProfilePage() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <h1 className="text-lg font-semibold">
+              <h1 className="text-lg font-semibold text-center flex-1">
                 {displayUser?.firstName && displayUser?.lastName 
                   ? `${displayUser.firstName} ${displayUser.lastName}`
                   : displayUser?.username}
               </h1>
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <Button 
                   variant="ghost" 
                   onClick={() => navigate("/edit-profile")}
@@ -144,6 +144,8 @@ export default function ProfilePage() {
                 >
                   <Edit className="w-5 h-5" />
                 </Button>
+              ) : (
+                <div className="w-9 h-9"></div>
               )}
             </div>
           </div>
