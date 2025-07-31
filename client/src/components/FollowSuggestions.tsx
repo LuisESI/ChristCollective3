@@ -385,7 +385,7 @@ export function FollowSuggestions() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-white truncate">{suggestion.displayName}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge className={`text-xs ${getTypeColor(suggestion.type)}`}>
+                        <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 text-xs">
                           {getTypeIcon(suggestion.type)}
                           <span className="ml-1 capitalize">{suggestion.type}</span>
                         </Badge>
@@ -395,13 +395,13 @@ export function FollowSuggestions() {
                 </CardHeader>
                 
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-gray-400 line-clamp-2">
+                  <p className="text-sm text-gray-300 line-clamp-2">
                     {suggestion.description}
                   </p>
                   
                   <div className="flex items-center justify-between">
                     {suggestion.type === 'creator' && suggestion.totalFollowers ? (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {(suggestion.totalFollowers || 0).toLocaleString()} followers
                       </span>
                     ) : (
@@ -410,7 +410,7 @@ export function FollowSuggestions() {
                     
                     <div className="flex gap-2 flex-shrink-0">
                       <Link href={getProfileLink(suggestion)}>
-                        <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                        <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
                           View
                         </Button>
                       </Link>
@@ -419,7 +419,7 @@ export function FollowSuggestions() {
                           size="sm" 
                           className={followedUsers.has(suggestion.userId) 
                             ? "bg-gray-600 text-gray-300 hover:bg-red-600 hover:text-white" 
-                            : "bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                            : "bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
                           }
                           onClick={() => {
                             if (followedUsers.has(suggestion.userId)) {
