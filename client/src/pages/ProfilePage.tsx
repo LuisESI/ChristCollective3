@@ -152,9 +152,9 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-start gap-6 mb-4">
-            <Avatar className="w-24 h-24 ring-2 ring-gray-700">
+            <Avatar className="w-32 h-32 ring-2 ring-gray-700">
               <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.firstName || displayUser?.username} />
-              <AvatarFallback className="bg-gray-800 text-white text-2xl font-bold">
+              <AvatarFallback className="bg-gray-800 text-white text-3xl font-bold">
                 {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>
             </Avatar>
