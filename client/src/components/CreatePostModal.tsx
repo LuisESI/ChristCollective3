@@ -12,6 +12,7 @@ import { Plus, X, Upload, Image, Video, Type } from "lucide-react";
 
 interface CreatePostModalProps {
   trigger?: React.ReactNode;
+  onPostCreated?: () => void;
 }
 
 
@@ -22,7 +23,7 @@ const MEDIA_TYPES = [
   { value: "text", label: "Text Only", icon: Type },
 ];
 
-export function CreatePostModal({ trigger }: CreatePostModalProps) {
+export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -64,6 +65,7 @@ export function CreatePostModal({ trigger }: CreatePostModalProps) {
       setOpen(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      onPostCreated?.(); // Call the callback when post is created
     },
     onError: (error: any) => {
       toast({

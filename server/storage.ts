@@ -146,6 +146,7 @@ export interface IStorage {
   getPlatformPost(id: number): Promise<PlatformPost | undefined>;
   listPlatformPosts(limit?: number): Promise<PlatformPost[]>;
   getUserPlatformPosts(userId: string): Promise<PlatformPost[]>;
+  getUserPosts(userId: string): Promise<PlatformPost[]>; // Alias for getUserPlatformPosts
   updatePlatformPost(id: number, data: Partial<PlatformPost>): Promise<PlatformPost>;
   deletePlatformPost(id: number): Promise<void>;
 
@@ -807,6 +808,11 @@ export class DatabaseStorage implements IStorage {
       .from(platformPosts)
       .where(eq(platformPosts.userId, userId))
       .orderBy(desc(platformPosts.createdAt));
+  }
+
+  // Alias method for getUserPlatformPosts
+  async getUserPosts(userId: string): Promise<PlatformPost[]> {
+    return this.getUserPlatformPosts(userId);
   }
 
   async updatePlatformPost(id: number, data: Partial<PlatformPost>): Promise<PlatformPost> {

@@ -2537,6 +2537,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's posts
+  app.get("/api/users/:userId/posts", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const posts = await storage.getUserPosts(userId);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      res.status(500).json({ message: "Failed to fetch user posts" });
+    }
+  });
+
   // Creator content import routes
   app.post("/api/creators/import/:platform", isAuthenticated, async (req: any, res) => {
     try {

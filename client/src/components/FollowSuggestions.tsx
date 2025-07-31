@@ -29,9 +29,24 @@ export function FollowSuggestions() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
-  const [isWelcomeSectionVisible, setIsWelcomeSectionVisible] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check if user has already dismissed welcome or has posts
+  const { data: userPosts } = useQuery({
+    queryKey: [`/api/users/${user?.id}/posts`],
+    enabled: !!user?.id,
+  });
+
+  // Check if welcome section should be visible
+  const shouldShowWelcome = user && (!userPosts || userPosts.length === 0) && 
+    !localStorage.getItem(`welcome-dismissed-${user.id}`);
+
+  const hideWelcomeSection = () => {
+    if (user?.id) {
+      localStorage.setItem(`welcome-dismissed-${user.id}`, 'true');
+    }
+  };
 
   // Get user's current following list to pre-populate followedUsers
   const { data: following } = useQuery({
@@ -285,15 +300,15 @@ export function FollowSuggestions() {
     <>
       <style dangerouslySetInnerHTML={{ __html: scrollbarHideStyle }} />
       <div className="col-span-full space-y-8">
-      {/* Header Section */}
-      {isWelcomeSectionVisible && (
+      {/* Header Section - Only show to new users without posts */}
+      {shouldShowWelcome && (
         <div className="text-center">
           <div className="bg-gray-900 rounded-lg p-8 border border-gray-700 relative">
             <Button 
               variant="ghost" 
               size="sm"
               className="absolute top-4 right-4 text-gray-400 hover:text-white hover:bg-gray-800"
-              onClick={() => setIsWelcomeSectionVisible(false)}
+              onClick={hideWelcomeSection}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -310,6 +325,7 @@ export function FollowSuggestions() {
                     Create Your First Post
                   </Button>
                 }
+                onPostCreated={hideWelcomeSection}
               />
             )}
           </div>
