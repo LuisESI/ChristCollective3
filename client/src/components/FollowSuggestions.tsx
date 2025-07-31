@@ -309,6 +309,14 @@ export function FollowSuggestions() {
               <h2 className="text-xl font-semibold text-white">Discover Amazing Profiles</h2>
             </div>
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                onClick={() => setSuggestions(getRandomSuggestions())}
+              >
+                Show More Suggestions
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -404,16 +412,7 @@ export function FollowSuggestions() {
             ))}
           </div>
 
-          {/* Show More Button */}
-          <div className="text-center mt-6">
-            <Button 
-              variant="outline" 
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
-              onClick={() => setSuggestions(getRandomSuggestions())}
-            >
-              Show More Suggestions
-            </Button>
-          </div>
+
         </div>
       )}
 

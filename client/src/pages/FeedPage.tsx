@@ -46,25 +46,7 @@ export default function FeedPage() {
           {/* Follow Suggestions */}
           <FollowSuggestions />
 
-          {/* Feed Tabs for Logged In Users */}
-          {user && (
-            <div className="flex justify-center mb-6">
-              <div className="bg-gray-800 rounded-lg p-1 flex">
-                <Button 
-                  variant="ghost" 
-                  className="text-[#D4AF37] bg-gray-700 hover:bg-gray-600"
-                >
-                  Following
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="text-gray-300 hover:bg-gray-700"
-                >
-                  Discover
-                </Button>
-              </div>
-            </div>
-          )}
+
 
           {/* Posts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
