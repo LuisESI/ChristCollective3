@@ -385,7 +385,7 @@ export function FollowSuggestions() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-white truncate">{suggestion.displayName}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 text-xs">
+                        <Badge className={`text-xs ${getTypeColor(suggestion.type)}`}>
                           {getTypeIcon(suggestion.type)}
                           <span className="ml-1 capitalize">{suggestion.type}</span>
                         </Badge>
