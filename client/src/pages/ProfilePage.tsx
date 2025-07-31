@@ -54,6 +54,12 @@ export default function ProfilePage() {
     enabled: !!displayUser,
   });
 
+  // Get user's following count
+  const { data: followingData } = useQuery({
+    queryKey: [`/api/users/${displayUser?.id}/following`],
+    enabled: !!displayUser?.id,
+  });
+
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'youtube': return <img src={youtubeIconPath} alt="YouTube" className="w-6 h-6" />;
@@ -146,9 +152,9 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-start gap-6 mb-4">
-            <Avatar className="w-20 h-20 ring-2 ring-gray-700">
+            <Avatar className="w-24 h-24 ring-2 ring-gray-700">
               <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.firstName || displayUser?.username} />
-              <AvatarFallback className="bg-gray-800 text-white text-xl font-bold">
+              <AvatarFallback className="bg-gray-800 text-white text-2xl font-bold">
                 {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>
             </Avatar>
@@ -168,31 +174,29 @@ export default function ProfilePage() {
                 )}
               </div>
               
-              {/* Stats Row - Only show for creators with actual data */}
-              {creatorProfile?.isCreator && creator && (
-                <div className="flex gap-6 mb-3">
-                  <div className="text-left">
-                    <div className="text-lg font-semibold">
-                      {creator?.posts?.length || creator?.totalPosts || 0}
-                    </div>
-                    <div className="text-xs text-gray-400">posts</div>
+              {/* Stats Row - Show for all users */}
+              <div className="flex gap-6 mb-3">
+                <div className="text-left">
+                  <div className="text-lg font-semibold">
+                    {creator?.posts?.length || creator?.totalPosts || 0}
                   </div>
-                  <div className="text-left">
-                    <div className="text-lg font-semibold">
-                      {creator?.totalFollowers ? 
-                        formatSubscriberCount(creator.totalFollowers) : 
-                        "0"}
-                    </div>
-                    <div className="text-xs text-gray-400">followers</div>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-lg font-semibold">
-                      {creator?.platformCount || (creator?.platforms as any[])?.length || 0}
-                    </div>
-                    <div className="text-xs text-gray-400">platforms</div>
-                  </div>
+                  <div className="text-xs text-gray-400">posts</div>
                 </div>
-              )}
+                <div className="text-left">
+                  <div className="text-lg font-semibold">
+                    {creator?.totalFollowers ? 
+                      formatSubscriberCount(creator.totalFollowers) : 
+                      "0"}
+                  </div>
+                  <div className="text-xs text-gray-400">followers</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-lg font-semibold">
+                    {followingData?.length || 0}
+                  </div>
+                  <div className="text-xs text-gray-400">following</div>
+                </div>
+              </div>
             </div>
           </div>
 
