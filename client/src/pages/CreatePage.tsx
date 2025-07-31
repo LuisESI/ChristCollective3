@@ -30,6 +30,16 @@ export default function CreatePage() {
     enabled: !!user,
   });
 
+  const { data: businessProfiles } = useQuery({
+    queryKey: ["/api/business-profiles"],
+    enabled: !!user,
+  });
+
+  const { data: ministryProfile } = useQuery({
+    queryKey: ["/api/user/ministry-profile"],
+    enabled: !!user,
+  });
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
@@ -108,44 +118,46 @@ export default function CreatePage() {
   // Additional options for creator profiles
   const creatorOnlyOptions = [
     {
-      id: "share-youtube",
-      title: "Share YouTube Content",
-      description: "Import and share your YouTube videos with the community",
-      icon: Video,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      href: "/creators/share/youtube",
+      id: "share-social",
+      title: "Share Social Media Content",
+      description: "Import and share content from YouTube, TikTok, and Instagram",
+      icon: Share2,
+      color: "text-[#D4AF37]",
+      bgColor: "bg-yellow-50",
+      href: "/creators/share",
       badge: "Creator Only",
-      userType: "creator"
-    },
-    {
-      id: "share-tiktok",
-      title: "Share TikTok Content",
-      description: "Import and share your TikTok videos with the community",
-      icon: Camera,
-      color: "text-pink-600",
-      bgColor: "bg-pink-50",
-      href: "/creators/share/tiktok",
-      badge: "Creator Only",
-      userType: "creator"
-    },
-    {
-      id: "share-instagram",
-      title: "Share Instagram Content",
-      description: "Import and share your Instagram posts with the community",
-      icon: Camera,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      href: "/creators/share/instagram",
-      badge: "Creator Only",
-      userType: "creator"
+      userType: "creator",
+      action: "social-share"
     }
   ];
 
-  const isCreator = creatorStatus?.isCreator;
-  const createOptions = isCreator 
-    ? [...baseCreateOptions, ...creatorOnlyOptions]
-    : baseCreateOptions;
+  // Check what profiles user already has
+  const hasCreatorProfile = creatorStatus?.isCreator;
+  const hasBusinessProfile = businessProfiles && businessProfiles.length > 0;
+  const hasMinistryProfile = ministryProfile && !ministryProfile.message;
+
+  // Filter base options based on existing profiles
+  const filteredBaseOptions = baseCreateOptions.filter(option => {
+    if (option.id === "creator" && hasCreatorProfile) return false;
+    if (option.id === "business" && hasBusinessProfile) return false;
+    return true;
+  });
+
+  // Update ministry option to be active
+  const updatedOptions = filteredBaseOptions.map(option => {
+    if (option.id === "ministry") {
+      return {
+        ...option,
+        badge: null, // Remove "Coming Soon"
+        href: "/ministry/create"
+      };
+    }
+    return option;
+  });
+
+  const createOptions = hasCreatorProfile 
+    ? [...updatedOptions, ...creatorOnlyOptions]
+    : updatedOptions;
 
   return (
     <>
@@ -162,7 +174,7 @@ export default function CreatePage() {
           </div>
           <p className="text-gray-300 text-sm mt-1">
             What would you like to create today?
-            {isCreator && (
+            {hasCreatorProfile && (
               <span className="block text-[#D4AF37] text-xs mt-1">
                 ✨ Creator features unlocked! Share content from your platforms.
               </span>
@@ -189,6 +201,9 @@ export default function CreatePage() {
                         // Handle create post action - this would trigger the CreatePostModal
                         // For now, navigate to feed where they can use the post creation
                         navigate(option.href);
+                      } else if (option.action === "social-share") {
+                        // Handle social share - show platform selection
+                        navigate("/creators/share/youtube"); // Default to YouTube for now
                       } else {
                         navigate(option.href);
                       }
