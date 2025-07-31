@@ -2492,7 +2492,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users", async (req, res) => {
     try {
       const users = await storage.getAllUsers();
-      res.json(users);
+      // Filter out users with null or invalid usernames to prevent broken profile links
+      const validUsers = users.filter(user => user.username && user.username !== 'null');
+      res.json(validUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
@@ -2503,8 +2505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/by-username", async (req, res) => {
     try {
       const { username } = req.query;
-      if (!username) {
-        return res.status(400).json({ message: "Username parameter is required" });
+      if (!username || username === 'null' || username === null) {
+        return res.status(400).json({ message: "Valid username parameter is required" });
       }
       const user = await storage.getUserByUsername(username as string);
       if (!user) {

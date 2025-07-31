@@ -132,7 +132,7 @@ export function FollowSuggestions() {
       ]);
 
       const basicUsers = allUsers
-        .filter((user: any) => !profiledUserIds.has(user.id))
+        .filter((user: any) => !profiledUserIds.has(user.id) && user.username) // Only include users with valid usernames
         .sort(() => Math.random() - 0.5)
         .slice(0, 2)
         .map((user: any) => ({
@@ -144,6 +144,7 @@ export function FollowSuggestions() {
           description: 'Community member',
           avatar: user.profileImageUrl,
           userId: user.id,
+          username: user.username, // Ensure username is explicitly set
         }));
       
       suggestions.push(...basicUsers);
@@ -239,7 +240,11 @@ export function FollowSuggestions() {
       case 'ministry':
         return `/ministry-profile`;
       case 'user':
-        return `/profile/${suggestion.username}`; // Username-based profile URLs
+        // Validate username before creating link
+        if (!suggestion.username || suggestion.username === 'null' || suggestion.username === null) {
+          return '#'; // Return placeholder if no valid username
+        }
+        return `/profile/${suggestion.username}`;
       default:
         return '#';
     }

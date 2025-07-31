@@ -30,17 +30,20 @@ export default function ProfilePage() {
   }, [isLoading, user, navigate, isOwnProfile]);
 
   // Fetch profile user data by username if viewing someone else's profile
-  const { data: fetchedUser, isLoading: userLoading } = useQuery({
+  const { data: fetchedUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ["/api/users/by-username", username],
     queryFn: async () => {
-      if (!username) return null;
+      if (!username || username === 'null' || username === null) {
+        throw new Error('Invalid username');
+      }
       const response = await fetch(`/api/users/by-username?username=${encodeURIComponent(username)}`);
       if (!response.ok) {
         throw new Error('User not found');
       }
       return response.json();
     },
-    enabled: !!username,
+    enabled: !!username && username !== 'null',
+    retry: false, // Don't retry on 404s
   });
 
   // Determine which user data to use
@@ -87,10 +90,10 @@ export default function ProfilePage() {
     );
   }
 
-  // If viewing someone else's profile and user not found
-  if (username && !fetchedUser) {
+  // If viewing someone else's profile and user not found or invalid username
+  if (username && (userError || !fetchedUser || username === 'null')) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">User Not Found</h1>
           <p className="text-gray-400 mb-6">The profile you're looking for doesn't exist.</p>
