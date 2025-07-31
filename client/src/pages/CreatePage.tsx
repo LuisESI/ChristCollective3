@@ -181,24 +181,26 @@ export default function CreatePage() {
       </Helmet>
       <div className="min-h-screen bg-background pb-20">
         {/* Header */}
-        <div className="bg-black border-b border-border p-4 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white">Create</h1>
-            <Sparkles className="h-6 w-6 text-[#D4AF37]" />
+        <div className="bg-black border-b border-border sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4 max-w-2xl">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-white">Create</h1>
+              <Sparkles className="h-6 w-6 text-[#D4AF37]" />
+            </div>
+            <p className="text-gray-300 text-sm mt-1">
+              What would you like to create today?
+              {hasCreatorProfile && (
+                <span className="block text-[#D4AF37] text-xs mt-1">
+                  ✨ Creator features unlocked! Share content from your platforms.
+                </span>
+              )}
+              {hasMinistryProfile && (
+                <span className="block text-green-400 text-xs mt-1">
+                  ⛪ Ministry features unlocked! Create events and organize gatherings.
+                </span>
+              )}
+            </p>
           </div>
-          <p className="text-gray-300 text-sm mt-1">
-            What would you like to create today?
-            {hasCreatorProfile && (
-              <span className="block text-[#D4AF37] text-xs mt-1">
-                ✨ Creator features unlocked! Share content from your platforms.
-              </span>
-            )}
-            {hasMinistryProfile && (
-              <span className="block text-green-400 text-xs mt-1">
-                ⛪ Ministry features unlocked! Create events and organize gatherings.
-              </span>
-            )}
-          </p>
         </div>
 
         {/* Content */}
