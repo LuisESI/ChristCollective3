@@ -8,8 +8,8 @@ import { Link } from "wouter";
 import { ContentCreator } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 import instagramIconPath from "@assets/db059a4689b94fbb9a3d0a81e9ae8f52-32bits-32_1750620933253.png";
-import tiktokIconPath from "@assets/e7fee89a6a10380e09e348c7bd31caf4-32bits-32_1750620982285.png";
-import youtubeIconPath from "@assets/8ffe43e003e7013416bd66ce7de71611-32bits-32_1751771363362.png";
+import tiktokIconPath from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
+import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
 import tiktokLogo from "@/assets/tiktok-logo.png";
 import instagramLogo from "@/assets/instagram-logo.png";
 

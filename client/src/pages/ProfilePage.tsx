@@ -9,8 +9,8 @@ import { useLocation, useParams } from "wouter";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import instagramLogo from "@/assets/instagram-icon-new.png";
-import tiktokLogo from "@/assets/tiktok-icon-new.png";
-import youtubeIconPath from "@assets/8ffe43e003e7013416bd66ce7de71611-32bits-32_1751771363362.png";
+import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
+import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
 
 export default function ProfilePage() {
   const { user, isLoading, logoutMutation } = useAuth();
