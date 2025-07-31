@@ -2535,6 +2535,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator content import routes
+  app.post("/api/creators/import/:platform", isAuthenticated, async (req: any, res) => {
+    try {
+      const { platform } = req.params;
+      const { url } = req.body;
+      const userId = req.user.id;
+
+      if (!url || !platform) {
+        return res.status(400).json({ message: "URL and platform are required" });
+      }
+
+      // Verify user has creator profile
+      const creatorStatus = await storage.getCreatorStatusByUserId(userId);
+      if (!creatorStatus.isCreator) {
+        return res.status(403).json({ message: "Creator profile required" });
+      }
+
+      let importedContent;
+      
+      switch (platform) {
+        case "youtube":
+          importedContent = await importYouTubeContent(url);
+          break;
+        case "tiktok":
+          importedContent = await importTikTokContent(url);
+          break;
+        case "instagram":
+          importedContent = await importInstagramContent(url);
+          break;
+        default:
+          return res.status(400).json({ message: "Unsupported platform" });
+      }
+
+      res.json(importedContent);
+    } catch (error) {
+      console.error("Error importing content:", error);
+      res.status(500).json({ message: "Failed to import content" });
+    }
+  });
+
+  // Helper functions for content import
+  async function importYouTubeContent(url: string) {
+    // Extract video ID from URL
+    const videoId = extractYouTubeVideoId(url);
+    if (!videoId) {
+      throw new Error("Invalid YouTube URL");
+    }
+
+    try {
+      // Use existing YouTube API service
+      const videoData = await fetch(`http://localhost:5000/api/youtube/video?videoId=${videoId}`);
+      const video = await videoData.json();
+      
+      return {
+        title: video.title,
+        description: video.description,
+        thumbnailUrl: video.thumbnailUrl,
+        platform: "youtube",
+        originalUrl: url
+      };
+    } catch (error) {
+      throw new Error("Failed to fetch YouTube video data");
+    }
+  }
+
+  async function importTikTokContent(url: string) {
+    // For TikTok, we can extract basic info from the URL structure
+    // In a real implementation, you'd use TikTok's API or a scraping service
+    return {
+      title: "TikTok Video",
+      description: "Imported from TikTok",
+      thumbnailUrl: "/api/placeholder/400/400",
+      platform: "tiktok",
+      originalUrl: url
+    };
+  }
+
+  async function importInstagramContent(url: string) {
+    // For Instagram, similar approach - would need proper API integration
+    return {
+      title: "Instagram Post",
+      description: "Imported from Instagram",
+      thumbnailUrl: "/api/placeholder/400/400",
+      platform: "instagram", 
+      originalUrl: url
+    };
+  }
+
+  function extractYouTubeVideoId(url: string): string | null {
+    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  }
+
   // User follow system routes
   app.post("/api/users/:userId/follow", isAuthenticated, async (req: any, res) => {
     try {

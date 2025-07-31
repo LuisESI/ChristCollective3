@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,12 @@ export default function CreatePage() {
   const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
 
+  // Get user's profile data to determine capabilities
+  const { data: creatorStatus } = useQuery({
+    queryKey: ["/api/user/creator-status"],
+    enabled: !!user,
+  });
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
@@ -38,7 +45,8 @@ export default function CreatePage() {
     );
   }
 
-  const createOptions = [
+  // Base options available to all regular users
+  const baseCreateOptions = [
     {
       id: "campaign",
       title: "Create Campaign",
@@ -47,17 +55,8 @@ export default function CreatePage() {
       color: "text-red-500",
       bgColor: "bg-red-50",
       href: "/donate/create",
-      badge: "Popular"
-    },
-    {
-      id: "business",
-      title: "Business Profile",
-      description: "Create or update your business profile for networking",
-      icon: Briefcase,
-      color: "text-blue-500",
-      bgColor: "bg-blue-50",
-      href: "/business/create",
-      badge: null
+      badge: "Popular",
+      userType: "all"
     },
     {
       id: "creator",
@@ -67,7 +66,19 @@ export default function CreatePage() {
       color: "text-purple-500",
       bgColor: "bg-purple-50",
       href: "/creators/profile/manage",
-      badge: null
+      badge: null,
+      userType: "all"
+    },
+    {
+      id: "business",
+      title: "Business Profile",
+      description: "Create or update your business profile for networking",
+      icon: Briefcase,
+      color: "text-blue-500",
+      bgColor: "bg-blue-50",
+      href: "/business/create",
+      badge: null,
+      userType: "all"
     },
     {
       id: "ministry",
@@ -77,29 +88,64 @@ export default function CreatePage() {
       color: "text-green-500",
       bgColor: "bg-green-50",
       href: "/ministry/create",
-      badge: "Coming Soon"
+      badge: "Coming Soon",
+      userType: "all"
     },
     {
-      id: "event",
-      title: "Create Event",
-      description: "Organize community events and gatherings",
-      icon: Users,
-      color: "text-orange-500",
-      bgColor: "bg-orange-50",
-      href: "/events/create",
-      badge: "Coming Soon"
-    },
-    {
-      id: "content",
-      title: "Share Content",
-      description: "Share inspirational content, testimonies, or updates",
+      id: "post",
+      title: "Create Post",
+      description: "Share inspirational content, testimonies, or updates with the community",
       icon: PenTool,
       color: "text-indigo-500",
       bgColor: "bg-indigo-50",
-      href: "/content/create",
-      badge: "Coming Soon"
+      href: "/feed",
+      badge: null,
+      userType: "all",
+      action: "create-post"
     }
   ];
+
+  // Additional options for creator profiles
+  const creatorOnlyOptions = [
+    {
+      id: "share-youtube",
+      title: "Share YouTube Content",
+      description: "Import and share your YouTube videos with the community",
+      icon: Video,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      href: "/creators/share/youtube",
+      badge: "Creator Only",
+      userType: "creator"
+    },
+    {
+      id: "share-tiktok",
+      title: "Share TikTok Content",
+      description: "Import and share your TikTok videos with the community",
+      icon: Camera,
+      color: "text-pink-600",
+      bgColor: "bg-pink-50",
+      href: "/creators/share/tiktok",
+      badge: "Creator Only",
+      userType: "creator"
+    },
+    {
+      id: "share-instagram",
+      title: "Share Instagram Content",
+      description: "Import and share your Instagram posts with the community",
+      icon: Camera,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      href: "/creators/share/instagram",
+      badge: "Creator Only",
+      userType: "creator"
+    }
+  ];
+
+  const isCreator = creatorStatus?.isCreator;
+  const createOptions = isCreator 
+    ? [...baseCreateOptions, ...creatorOnlyOptions]
+    : baseCreateOptions;
 
   return (
     <>
@@ -114,7 +160,14 @@ export default function CreatePage() {
             <h1 className="text-xl font-bold text-white">Create</h1>
             <Sparkles className="h-6 w-6 text-[#D4AF37]" />
           </div>
-          <p className="text-gray-300 text-sm mt-1">What would you like to create today?</p>
+          <p className="text-gray-300 text-sm mt-1">
+            What would you like to create today?
+            {isCreator && (
+              <span className="block text-[#D4AF37] text-xs mt-1">
+                ✨ Creator features unlocked! Share content from your platforms.
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Content */}
@@ -132,7 +185,13 @@ export default function CreatePage() {
                   }`}
                   onClick={() => {
                     if (!isComingSoon) {
-                      navigate(option.href);
+                      if (option.action === "create-post") {
+                        // Handle create post action - this would trigger the CreatePostModal
+                        // For now, navigate to feed where they can use the post creation
+                        navigate(option.href);
+                      } else {
+                        navigate(option.href);
+                      }
                     }
                   }}
                 >
