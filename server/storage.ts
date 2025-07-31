@@ -126,6 +126,8 @@ export interface IStorage {
   getUserMinistryProfile(userId: string): Promise<MinistryProfile | undefined>;
   updateMinistryProfile(id: number, data: Partial<MinistryProfile>): Promise<MinistryProfile>;
   getAllMinistries(): Promise<MinistryProfile[]>;
+  getPendingMinistries(): Promise<MinistryProfile[]>;
+  deleteMinistryProfile(id: number): Promise<void>;
   
   // Ministry posts operations
   createMinistryPost(postData: InsertMinistryPost & { ministryId: number }): Promise<MinistryPost>;
@@ -677,6 +679,20 @@ export class DatabaseStorage implements IStorage {
       .from(ministryProfiles)
       .where(eq(ministryProfiles.isActive, true))
       .orderBy(desc(ministryProfiles.createdAt));
+  }
+
+  async getPendingMinistries(): Promise<MinistryProfile[]> {
+    return await db
+      .select()
+      .from(ministryProfiles)
+      .where(eq(ministryProfiles.isActive, false))
+      .orderBy(desc(ministryProfiles.createdAt));
+  }
+
+  async deleteMinistryProfile(id: number): Promise<void> {
+    await db
+      .delete(ministryProfiles)
+      .where(eq(ministryProfiles.id, id));
   }
 
   // Ministry posts operations

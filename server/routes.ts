@@ -767,10 +767,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // File upload route - supports both images and videos
   app.post('/api/upload', isAuthenticated, (req, res, next) => {
-    // Create a fields configuration that accepts both 'image' and 'video' fields
+    // Create a fields configuration that accepts both 'image', 'video' and 'file' fields
     const uploadFields = upload.fields([
       { name: 'image', maxCount: 1 },
-      { name: 'video', maxCount: 1 }
+      { name: 'video', maxCount: 1 },
+      { name: 'file', maxCount: 1 }
     ]);
     
     uploadFields(req, res, (err) => {
@@ -784,12 +785,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const files = req.files;
       
-      if (!files || ((!files.image || files.image.length === 0) && (!files.video || files.video.length === 0))) {
+      if (!files || ((!files.image || files.image.length === 0) && (!files.video || files.video.length === 0) && (!files.file || files.file.length === 0))) {
         return res.status(400).json({ message: "No file uploaded" });
       }
       
-      // Determine which file was uploaded (image or video)
-      const file = files.image ? files.image[0] : files.video[0];
+      // Determine which file was uploaded (image, video, or file)
+      const file = files.image ? files.image[0] : files.video ? files.video[0] : files.file[0];
       
       // Create a public URL for the uploaded file
       // Use relative path for flexibility across environments
@@ -798,7 +799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ 
         url: fileUrl,
         filename: file.filename,
-        fileType: files.image ? 'image' : 'video',
+        fileType: files.image ? 'image' : files.video ? 'video' : 'file',
         success: true 
       });
     } catch (error) {
@@ -2295,7 +2296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const profile = await storage.createMinistryProfile({
         ...profileData,
-        userId
+        userId,
+        isActive: false, // Require admin approval
       });
       
       res.status(201).json(profile);
@@ -2305,6 +2307,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create ministry profile" });
+    }
+  });
+
+  // Admin approval for ministry profiles
+  app.patch('/api/ministries/:id/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      const updatedMinistry = await storage.updateMinistryProfile(parseInt(id), {
+        isActive: true,
+        isVerified: true,
+      });
+      
+      res.json(updatedMinistry);
+    } catch (error) {
+      console.error("Error approving ministry:", error);
+      res.status(500).json({ message: "Failed to approve ministry" });
+    }
+  });
+
+  // Admin rejection for ministry profiles
+  app.patch('/api/ministries/:id/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) {
+        return res.status(404).json({ message: "Ministry not found" });
+      }
+      
+      // Delete the ministry profile
+      await storage.deleteMinistryProfile(parseInt(id));
+      
+      res.json({ message: "Ministry profile rejected and deleted" });
+    } catch (error) {
+      console.error("Error rejecting ministry:", error);
+      res.status(500).json({ message: "Failed to reject ministry" });
+    }
+  });
+
+  // Get pending ministry profiles for admin
+  app.get('/api/ministries/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const pendingMinistries = await storage.getPendingMinistries();
+      res.json(pendingMinistries);
+    } catch (error) {
+      console.error("Error fetching pending ministries:", error);
+      res.status(500).json({ message: "Failed to fetch pending ministries" });
     }
   });
 
