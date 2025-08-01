@@ -58,7 +58,7 @@ export default function MinistriesPage() {
       
       <div className="min-h-screen bg-black text-white">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gray-900 to-black py-16">
+        <div className="bg-black py-16">
           <div className="max-w-6xl mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
               Christian Ministries
