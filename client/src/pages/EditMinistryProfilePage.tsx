@@ -62,7 +62,8 @@ export default function EditMinistryProfilePage() {
   // Update form when ministry profile loads
   useEffect(() => {
     if (ministryProfile) {
-      form.reset({
+      console.log("Loading ministry profile data:", ministryProfile);
+      const formData = {
         name: ministryProfile.name || "",
         description: ministryProfile.description || "",
         denomination: ministryProfile.denomination || "",
@@ -73,7 +74,9 @@ export default function EditMinistryProfilePage() {
         phone: ministryProfile.phone || "",
         email: ministryProfile.email || "",
         socialLinks: ministryProfile.socialLinks || {},
-      } as EditMinistryFormData);
+      } as EditMinistryFormData;
+      console.log("Form data being set:", formData);
+      form.reset(formData);
     }
   }, [ministryProfile, form]);
 
