@@ -16,10 +16,12 @@ import {
   Calendar,
   Heart,
   Share2,
-  ArrowLeft
+  ArrowLeft,
+  Clock,
+  Globe
 } from "lucide-react";
 import { Link } from "wouter";
-import { MinistryProfile } from "@shared/schema";
+import { MinistryProfile, MinistryEvent } from "@shared/schema";
 
 export default function MinistryProfileViewPage() {
   const [match, params] = useRoute("/ministry/:id");
@@ -30,6 +32,17 @@ export default function MinistryProfileViewPage() {
     queryFn: async () => {
       const response = await fetch(`/api/ministries/${ministryId}`);
       if (!response.ok) throw new Error("Ministry not found");
+      return response.json();
+    },
+    enabled: !!ministryId,
+  });
+
+  // Fetch ministry events
+  const { data: events = [], isLoading: isLoadingEvents } = useQuery({
+    queryKey: ["/api/ministries", ministryId, "events"],
+    queryFn: async () => {
+      const response = await fetch(`/api/ministries/${ministryId}/events`);
+      if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
     enabled: !!ministryId,
@@ -195,11 +208,76 @@ export default function MinistryProfileViewPage() {
                   <CardTitle className="text-white">Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400">No upcoming events</p>
-                    <p className="text-gray-500 text-sm">Stay tuned for announcements</p>
-                  </div>
+                  {isLoadingEvents ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full border-b-2 border-primary h-8 w-8 mx-auto mb-4"></div>
+                      <p className="text-gray-400">Loading events...</p>
+                    </div>
+                  ) : events.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Calendar className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                      <p className="text-gray-400">No upcoming events</p>
+                      <p className="text-gray-500 text-sm">Stay tuned for announcements</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {events.map((event: MinistryEvent) => (
+                        <div key={event.id} className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
+                          <div className="flex gap-4">
+                            {/* Event Flyer */}
+                            {event.flyerImage && (
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={event.flyerImage}
+                                  alt={`${event.title} flyer`}
+                                  className="w-16 h-16 object-cover rounded-lg border border-gray-600"
+                                />
+                              </div>
+                            )}
+                            
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-white font-semibold text-lg mb-2">{event.title}</h4>
+                              <p className="text-gray-300 text-sm mb-3 line-clamp-2">{event.description}</p>
+                              
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                                <div className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  {new Date(event.startDate).toLocaleDateString()}
+                                </div>
+                                <div className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                {event.location && (
+                                  <div className="flex items-center">
+                                    <MapPin className="h-4 w-4 mr-1" />
+                                    {event.location}
+                                  </div>
+                                )}
+                                {event.isOnline && (
+                                  <div className="flex items-center">
+                                    <Globe className="h-4 w-4 mr-1" />
+                                    Online Event
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center justify-between mt-3">
+                                <Badge variant="outline" className="border-gray-600 text-gray-300">
+                                  {event.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                </Badge>
+                                {event.maxAttendees && (
+                                  <span className="text-xs text-gray-500">
+                                    {event.currentAttendees || 0}/{event.maxAttendees} attending
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -287,7 +365,7 @@ export default function MinistryProfileViewPage() {
                   <Separator className="bg-gray-700" />
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Events Hosted</span>
-                    <span className="text-white font-semibold">0</span>
+                    <span className="text-white font-semibold">{events.length}</span>
                   </div>
                   <Separator className="bg-gray-700" />
                   <div className="flex justify-between items-center">
