@@ -35,6 +35,16 @@ export default function MinistryProfileViewPage() {
     enabled: !!ministryId,
   });
 
+  // Check if user is authenticated
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: async () => {
+      const response = await fetch("/api/user");
+      if (!response.ok) return null;
+      return response.json();
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white">
@@ -131,10 +141,12 @@ export default function MinistryProfileViewPage() {
                   </div>
                   
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Users className="h-4 w-4 mr-2" />
-                      Follow Ministry
-                    </Button>
+                    {currentUser && (
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Users className="h-4 w-4 mr-2" />
+                        Follow Ministry
+                      </Button>
+                    )}
                     <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
                       <Heart className="h-4 w-4 mr-2" />
                       Support
