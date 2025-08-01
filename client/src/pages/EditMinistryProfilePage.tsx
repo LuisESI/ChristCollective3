@@ -300,7 +300,7 @@ export default function EditMinistryProfilePage() {
                               </FormControl>
                               <SelectContent>
                                 {denominations.map((denomination) => (
-                                  <SelectItem key={denomination} value={denomination.toLowerCase()}>
+                                  <SelectItem key={denomination} value={denomination}>
                                     {denomination}
                                   </SelectItem>
                                 ))}
