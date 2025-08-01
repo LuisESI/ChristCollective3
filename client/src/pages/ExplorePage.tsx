@@ -341,7 +341,7 @@ export default function ExplorePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredMinistries?.slice(0, 6).map((ministry: any) => (
                   <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
-                        onClick={() => navigate(`/ministry/profile/${ministry.id}`)}>
+                        onClick={() => navigate(`/ministry/${ministry.id}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Avatar className="h-10 w-10">
