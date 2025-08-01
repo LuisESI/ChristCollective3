@@ -343,82 +343,108 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Pending Campaigns</CardTitle>
-              <Clock className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
-                {pendingLoading ? "..." : Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Pending Ministries</p>
+                  <p className="text-2xl font-bold text-green-400 mt-1">
+                    {ministriesLoading ? "..." : Array.isArray(pendingMinistries) ? pendingMinistries.length : 0}
+                  </p>
+                </div>
+                <Building className="h-8 w-8 text-green-400/50" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-green-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-400">
-                {usersLoading ? "..." : Array.isArray(allUsers) ? allUsers.length : 0}
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Pending Campaigns</p>
+                  <p className="text-2xl font-bold text-primary mt-1">
+                    {pendingLoading ? "..." : Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-primary/50" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Total Transactions</CardTitle>
-              <Receipt className="h-4 w-4 text-blue-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-400">
-                {transactionsLoading ? "..." : Array.isArray(allTransactions) ? allTransactions.length : 0}
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Users</p>
+                  <p className="text-2xl font-bold text-blue-400 mt-1">
+                    {usersLoading ? "..." : Array.isArray(allUsers) ? allUsers.length : 0}
+                  </p>
+                </div>
+                <Users className="h-8 w-8 text-blue-400/50" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Total Raised</CardTitle>
-              <DollarSign className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
-                {transactionsLoading 
-                  ? "..." 
-                  : formatCurrency(
-                      Array.isArray(allTransactions) ? allTransactions.reduce((sum: number, transaction: Donation) => 
-                        sum + (Number(transaction.amount) || 0), 0
-                      ) : 0
-                    )
-                }
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Raised</p>
+                  <p className="text-xl font-bold text-primary mt-1">
+                    {transactionsLoading 
+                      ? "..." 
+                      : formatCurrency(
+                          Array.isArray(allTransactions) ? allTransactions.reduce((sum: number, transaction: Donation) => 
+                            sum + (Number(transaction.amount) || 0), 0
+                          ) : 0
+                        )
+                    }
+                  </p>
+                </div>
+                <DollarSign className="h-8 w-8 text-primary/50" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="campaigns" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-900 border-gray-800">
-            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Campaigns
+        <Tabs defaultValue="ministries" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900 border-gray-800 text-xs">
+            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">Ministries</span>
+                <span className="text-xs opacity-70">({Array.isArray(pendingMinistries) ? pendingMinistries.length : 0})</span>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Transactions
+            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">Campaigns</span>
+                <span className="text-xs opacity-70">({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})</span>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Users
+            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">Sponsors</span>
+                <span className="text-xs opacity-70">({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})</span>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Sponsorships ({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})
+            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">All Campaigns</span>
+                <span className="text-xs opacity-70">Manage</span>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Ministries ({Array.isArray(pendingMinistries) ? pendingMinistries.length : 0})
+            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">Transactions</span>
+                <span className="text-xs opacity-70">View</span>
+              </div>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
-              Pending ({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})
+            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
+              <div className="flex flex-col items-center">
+                <span className="font-medium">Users</span>
+                <span className="text-xs opacity-70">Manage</span>
+              </div>
             </TabsTrigger>
           </TabsList>
 
@@ -842,111 +868,110 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {Array.isArray(pendingMinistries) && pendingMinistries.map((ministry: any) => (
-                    <Card key={ministry.id} className="bg-gray-900 border-gray-800">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-start space-x-4 flex-1">
-                            {/* Ministry Logo */}
-                            <Avatar className="h-16 w-16">
+                    <Card key={ministry.id} className="bg-gray-900/50 border-gray-700 backdrop-blur overflow-hidden">
+                      <div className="p-6">
+                        <div className="flex flex-col sm:flex-row gap-6">
+                          {/* Ministry Logo */}
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-20 w-20 mx-auto sm:mx-0">
                               <AvatarImage src={ministry.logo} alt={ministry.name} />
-                              <AvatarFallback className="bg-primary text-black text-lg font-bold">
+                              <AvatarFallback className="bg-primary text-black text-2xl font-bold">
                                 {ministry.name?.charAt(0) || 'M'}
                               </AvatarFallback>
                             </Avatar>
-                            
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-white text-xl">{ministry.name}</CardTitle>
-                              <CardDescription className="text-gray-400 mt-1">
-                                {ministry.denomination && (
-                                  <span className="inline-block mr-3">
-                                    <Badge variant="outline" className="text-xs">
+                          </div>
+                          
+                          {/* Ministry Details */}
+                          <div className="flex-1 min-w-0 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                              <div>
+                                <h3 className="text-xl font-bold text-white mb-2">{ministry.name}</h3>
+                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                  {ministry.denomination && (
+                                    <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
                                       {ministry.denomination}
                                     </Badge>
-                                  </span>
-                                )}
-                                {ministry.location && (
-                                  <span className="text-sm text-gray-500">
-                                    <MapPin className="h-3 w-3 inline mr-1" />
-                                    {ministry.location}
-                                  </span>
-                                )}
-                              </CardDescription>
-                              
-                              {/* Description */}
-                              <div className="mt-3">
-                                <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                                  {ministry.description}
-                                </p>
-                              </div>
-
-                              {/* Contact Information */}
-                              <div className="mt-4 space-y-2">
-                                <div className="flex items-center text-sm text-gray-400">
-                                  <Mail className="h-4 w-4 mr-2" />
-                                  <span>{ministry.email}</span>
+                                  )}
+                                  <Badge className="bg-yellow-900/30 border-yellow-600 text-yellow-300">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Pending Review
+                                  </Badge>
                                 </div>
-                                <div className="flex items-center text-sm text-gray-400">
-                                  <Phone className="h-4 w-4 mr-2" />
+                              </div>
+                            </div>
+                            
+                            {/* Description */}
+                            <div className="mb-6">
+                              <p className="text-gray-300 text-sm leading-relaxed">
+                                {ministry.description}
+                              </p>
+                            </div>
+
+                            {/* Contact Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
+                                  <Mail className="h-4 w-4 mr-2 text-primary" />
+                                  <span className="break-all">{ministry.email}</span>
+                                </div>
+                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
+                                  <Phone className="h-4 w-4 mr-2 text-primary" />
                                   <span>{ministry.phone}</span>
                                 </div>
-                                <div className="flex items-center text-sm text-gray-400">
-                                  <MapPin className="h-4 w-4 mr-2" />
-                                  <span>{ministry.address}</span>
+                              </div>
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
+                                  <MapPin className="h-4 w-4 mr-2 text-primary" />
+                                  <span className="break-words">{ministry.address}</span>
                                 </div>
                                 {ministry.website && (
-                                  <div className="flex items-center text-sm text-gray-400">
-                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                  <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
+                                    <ExternalLink className="h-4 w-4 mr-2 text-primary" />
                                     <a 
                                       href={ministry.website} 
                                       target="_blank" 
                                       rel="noopener noreferrer"
-                                      className="text-primary hover:underline"
+                                      className="text-primary hover:underline break-all"
                                     >
                                       {ministry.website}
                                     </a>
                                   </div>
                                 )}
                               </div>
+                            </div>
 
-                              <div className="mt-4 text-xs text-gray-500">
+                            {/* Actions */}
+                            <div className="flex flex-col sm:flex-row gap-3 items-center">
+                              <div className="flex gap-3">
+                                <Button
+                                  size="sm"
+                                  className="bg-green-700 hover:bg-green-600 text-white px-6"
+                                  onClick={() => approveMinistryMutation.mutate(ministry.id)}
+                                  disabled={approveMinistryMutation.isPending}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  {approveMinistryMutation.isPending ? "Approving..." : "Approve"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="px-6"
+                                  onClick={() => rejectMinistryMutation.mutate(ministry.id)}
+                                  disabled={rejectMinistryMutation.isPending}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  {rejectMinistryMutation.isPending ? "Rejecting..." : "Reject"}
+                                </Button>
+                              </div>
+                              <div className="text-xs text-gray-500 sm:ml-auto">
                                 Submitted: {ministry.createdAt ? formatDate(ministry.createdAt) : 'Unknown'}
                               </div>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-2 ml-4">
-                            <Badge className="bg-yellow-900 text-yellow-300">
-                              <Clock className="h-3 w-3 mr-1" />
-                              Pending Approval
-                            </Badge>
-                          </div>
                         </div>
-                      </CardHeader>
-                      
-                      <CardContent>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            className="bg-green-700 hover:bg-green-600 text-white"
-                            onClick={() => approveMinistryMutation.mutate(ministry.id)}
-                            disabled={approveMinistryMutation.isPending}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            {approveMinistryMutation.isPending ? "Approving..." : "Approve Ministry"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => rejectMinistryMutation.mutate(ministry.id)}
-                            disabled={rejectMinistryMutation.isPending}
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            {rejectMinistryMutation.isPending ? "Rejecting..." : "Reject"}
-                          </Button>
-                        </div>
-                      </CardContent>
+                      </div>
                     </Card>
                   ))}
                 </div>

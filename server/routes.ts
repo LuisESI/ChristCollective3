@@ -2264,6 +2264,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending ministry profiles for admin (must come before :id route)
+  app.get('/api/ministries/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const pendingMinistries = await storage.getPendingMinistries();
+      res.json(pendingMinistries);
+    } catch (error) {
+      console.error("Error fetching pending ministries:", error);
+      res.status(500).json({ message: "Failed to fetch pending ministries" });
+    }
+  });
+
   // Get specific ministry
   app.get('/api/ministries/:id', async (req, res) => {
     try {
@@ -2366,24 +2385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending ministry profiles for admin
-  app.get('/api/ministries/pending', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      
-      // Check if user is admin
-      const user = await storage.getUser(userId);
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      const pendingMinistries = await storage.getPendingMinistries();
-      res.json(pendingMinistries);
-    } catch (error) {
-      console.error("Error fetching pending ministries:", error);
-      res.status(500).json({ message: "Failed to fetch pending ministries" });
-    }
-  });
+
 
   // Update ministry profile
   app.put('/api/ministries/:id', isAuthenticated, async (req: any, res) => {
