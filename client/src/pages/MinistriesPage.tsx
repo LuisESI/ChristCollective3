@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet";
+import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -217,13 +218,15 @@ export default function MinistriesPage() {
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="flex-1 bg-primary hover:bg-primary/90"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
+                        <Link href={`/ministry/${ministry.id}`} className="flex-1">
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-primary hover:bg-primary/90"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
                         <Button 
                           size="sm" 
                           variant="outline" 
