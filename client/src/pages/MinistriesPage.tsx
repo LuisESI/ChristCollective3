@@ -13,7 +13,7 @@ import {
   Mail, 
   ExternalLink, 
   Search,
-  Users,
+  Eye,
   Calendar,
   Filter
 } from "lucide-react";
@@ -221,8 +221,8 @@ export default function MinistriesPage() {
                           size="sm" 
                           className="flex-1 bg-primary hover:bg-primary/90"
                         >
-                          <Users className="h-4 w-4 mr-1" />
-                          Follow
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
                         <Button 
                           size="sm" 
