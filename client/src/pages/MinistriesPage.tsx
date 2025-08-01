@@ -60,7 +60,7 @@ export default function MinistriesPage() {
         {/* Header */}
         <div className="bg-black py-16">
           <div className="max-w-6xl mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Christian Ministries
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
