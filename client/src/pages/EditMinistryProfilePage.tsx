@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ArrowLeft, Upload, Save, Building, MapPin, Mail, Phone, Globe, FileText } from "lucide-react";
-import { insertMinistryProfileSchema, type InsertMinistryProfile } from "@shared/schema";
+import { insertMinistryProfileSchema, type InsertMinistryProfile, type MinistryProfile } from "@shared/schema";
 
 type EditMinistryFormData = InsertMinistryProfile;
 
@@ -39,7 +39,7 @@ export default function EditMinistryProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Get user's ministry profile
-  const { data: ministryProfile, isLoading } = useQuery({
+  const { data: ministryProfile, isLoading } = useQuery<MinistryProfile>({
     queryKey: ["/api/user/ministry-profile"],
   });
 
@@ -55,7 +55,7 @@ export default function EditMinistryProfilePage() {
       address: "",
       phone: "",
       email: "",
-      socialLinks: null,
+      socialLinks: {},
     },
   });
 
@@ -72,7 +72,7 @@ export default function EditMinistryProfilePage() {
         address: ministryProfile.address || "",
         phone: ministryProfile.phone || "",
         email: ministryProfile.email || "",
-        socialLinks: ministryProfile.socialLinks || null,
+        socialLinks: ministryProfile.socialLinks || {},
       } as EditMinistryFormData);
     }
   }, [ministryProfile, form]);
@@ -228,7 +228,7 @@ export default function EditMinistryProfilePage() {
                       {form.watch("logo") && (
                         <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-600">
                           <img 
-                            src={form.watch("logo")} 
+                            src={form.watch("logo") || ""} 
                             alt="Ministry logo" 
                             className="w-full h-full object-cover"
                           />
@@ -273,6 +273,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Input 
                                 {...field} 
+                                value={field.value || ""}
                                 className="bg-gray-800 border-gray-600 text-white"
                                 placeholder="Enter ministry name"
                               />
@@ -288,7 +289,7 @@ export default function EditMinistryProfilePage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-white">Denomination</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                               <FormControl>
                                 <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
                                   <SelectValue placeholder="Select denomination" />
@@ -316,6 +317,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Input 
                                 {...field} 
+                                value={field.value || ""}
                                 className="bg-gray-800 border-gray-600 text-white"
                                 placeholder="City, State"
                               />
@@ -334,6 +336,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Input 
                                 {...field} 
+                                value={field.value || ""}
                                 className="bg-gray-800 border-gray-600 text-white"
                                 placeholder="https://yourministry.com"
                               />
@@ -355,6 +358,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Input 
                                 {...field} 
+                                value={field.value || ""}
                                 type="email"
                                 className="bg-gray-800 border-gray-600 text-white"
                                 placeholder="contact@ministry.com"
@@ -374,6 +378,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Input 
                                 {...field} 
+                                value={field.value || ""}
                                 className="bg-gray-800 border-gray-600 text-white"
                                 placeholder="(555) 123-4567"
                               />
@@ -392,6 +397,7 @@ export default function EditMinistryProfilePage() {
                             <FormControl>
                               <Textarea 
                                 {...field} 
+                                value={field.value || ""}
                                 className="bg-gray-800 border-gray-600 text-white min-h-[80px]"
                                 placeholder="Full address including street, city, state, and ZIP"
                               />
@@ -413,6 +419,7 @@ export default function EditMinistryProfilePage() {
                         <FormControl>
                           <Textarea 
                             {...field} 
+                            value={field.value || ""}
                             className="bg-gray-800 border-gray-600 text-white min-h-[120px]"
                             placeholder="Describe your ministry, mission, and activities..."
                           />
