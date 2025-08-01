@@ -67,6 +67,12 @@ export default function AdminDashboard() {
     enabled: user?.isAdmin === true,
   });
 
+  // Fetch pending ministries for approval
+  const { data: pendingMinistries = [], isLoading: ministriesLoading } = useQuery({
+    queryKey: ["/api/ministries/pending"],
+    enabled: user?.isAdmin === true,
+  });
+
   const approveMutation = useMutation({
     mutationFn: async (campaignId: string) => {
       await apiRequest("POST", `/api/admin/campaigns/${campaignId}/approve`);
@@ -226,6 +232,70 @@ export default function AdminDashboard() {
     },
   });
 
+  // Ministry approval mutations
+  const approveMinistryMutation = useMutation({
+    mutationFn: async (ministryId: number) => {
+      await apiRequest("PATCH", `/api/ministries/${ministryId}/approve`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries"] });
+      toast({
+        title: "Ministry Approved",
+        description: "The ministry profile has been approved and is now live.",
+      });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const rejectMinistryMutation = useMutation({
+    mutationFn: async (ministryId: number) => {
+      await apiRequest("PATCH", `/api/ministries/${ministryId}/reject`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
+      toast({
+        title: "Ministry Rejected",
+        description: "The ministry profile has been rejected and removed.",
+      });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -331,7 +401,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="campaigns" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-900 border-gray-800">
+          <TabsList className="grid w-full grid-cols-6 bg-gray-900 border-gray-800">
             <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Campaigns
             </TabsTrigger>
@@ -343,6 +413,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Sponsorships ({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})
+            </TabsTrigger>
+            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
+              Ministries ({Array.isArray(pendingMinistries) ? pendingMinistries.length : 0})
             </TabsTrigger>
             <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black">
               Pending ({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})
@@ -737,6 +810,143 @@ export default function AdminDashboard() {
                           </div>
                         </CardContent>
                       )}
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="ministries" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-primary mb-4">Ministry Profile Approvals</h2>
+              {ministriesLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="bg-gray-900 border-gray-800">
+                      <CardContent className="p-6">
+                        <div className="animate-pulse">
+                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                          <div className="h-8 bg-gray-700 rounded w-20"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : Array.isArray(pendingMinistries) && pendingMinistries.length === 0 ? (
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardContent className="p-6 text-center">
+                    <Building className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No pending ministry profiles.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {Array.isArray(pendingMinistries) && pendingMinistries.map((ministry: any) => (
+                    <Card key={ministry.id} className="bg-gray-900 border-gray-800">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start space-x-4 flex-1">
+                            {/* Ministry Logo */}
+                            <Avatar className="h-16 w-16">
+                              <AvatarImage src={ministry.logo} alt={ministry.name} />
+                              <AvatarFallback className="bg-primary text-black text-lg font-bold">
+                                {ministry.name?.charAt(0) || 'M'}
+                              </AvatarFallback>
+                            </Avatar>
+                            
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-white text-xl">{ministry.name}</CardTitle>
+                              <CardDescription className="text-gray-400 mt-1">
+                                {ministry.denomination && (
+                                  <span className="inline-block mr-3">
+                                    <Badge variant="outline" className="text-xs">
+                                      {ministry.denomination}
+                                    </Badge>
+                                  </span>
+                                )}
+                                {ministry.location && (
+                                  <span className="text-sm text-gray-500">
+                                    <MapPin className="h-3 w-3 inline mr-1" />
+                                    {ministry.location}
+                                  </span>
+                                )}
+                              </CardDescription>
+                              
+                              {/* Description */}
+                              <div className="mt-3">
+                                <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
+                                  {ministry.description}
+                                </p>
+                              </div>
+
+                              {/* Contact Information */}
+                              <div className="mt-4 space-y-2">
+                                <div className="flex items-center text-sm text-gray-400">
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  <span>{ministry.email}</span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-400">
+                                  <Phone className="h-4 w-4 mr-2" />
+                                  <span>{ministry.phone}</span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-400">
+                                  <MapPin className="h-4 w-4 mr-2" />
+                                  <span>{ministry.address}</span>
+                                </div>
+                                {ministry.website && (
+                                  <div className="flex items-center text-sm text-gray-400">
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    <a 
+                                      href={ministry.website} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline"
+                                    >
+                                      {ministry.website}
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="mt-4 text-xs text-gray-500">
+                                Submitted: {ministry.createdAt ? formatDate(ministry.createdAt) : 'Unknown'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 ml-4">
+                            <Badge className="bg-yellow-900 text-yellow-300">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending Approval
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-green-700 hover:bg-green-600 text-white"
+                            onClick={() => approveMinistryMutation.mutate(ministry.id)}
+                            disabled={approveMinistryMutation.isPending}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            {approveMinistryMutation.isPending ? "Approving..." : "Approve Ministry"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => rejectMinistryMutation.mutate(ministry.id)}
+                            disabled={rejectMinistryMutation.isPending}
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            {rejectMinistryMutation.isPending ? "Rejecting..." : "Reject"}
+                          </Button>
+                        </div>
+                      </CardContent>
                     </Card>
                   ))}
                 </div>
