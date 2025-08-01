@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,12 @@ export default function Header() {
   const [path] = useLocation();
   const { user, isLoading } = useAuth();
   const { data: creatorStatus } = useCreatorStatus();
+  
+  // Check if user has a ministry profile
+  const { data: ministryProfile } = useQuery({
+    queryKey: ["/api/user/ministry-profile"],
+    enabled: !!user,
+  });
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -84,6 +91,13 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/creator-profile">
                       <div className="cursor-pointer w-full">Creator Profile</div>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {ministryProfile && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/edit-ministry-profile">
+                      <div className="cursor-pointer w-full">Edit Ministry Profile</div>
                     </Link>
                   </DropdownMenuItem>
                 )}
