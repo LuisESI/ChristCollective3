@@ -41,6 +41,7 @@ import CreatorSocialSharePage from "@/pages/CreatorSocialSharePage";
 import MinistriesPage from "@/pages/MinistriesPage";
 import MinistryProfileViewPage from "@/pages/MinistryProfileViewPage";
 import EditMinistryProfilePage from "@/pages/EditMinistryProfilePage";
+import EventCreatePage from "@/pages/EventCreatePage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/feed" component={FeedPage} />
       <Route path="/explore" component={ExplorePage} />
       <Route path="/create" component={CreatePage} />
+      <Route path="/events/create" component={EventCreatePage} />
       <Route path="/creators/share" component={CreatorSocialSharePage} />
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />
