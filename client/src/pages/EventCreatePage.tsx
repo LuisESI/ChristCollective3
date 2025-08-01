@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Calendar, MapPin, Clock, Users, Save } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Clock, Users, Save, Upload, X, Image } from "lucide-react";
 import { insertMinistryEventSchema, type InsertMinistryEvent } from "@shared/schema";
 import { z } from "zod";
 
@@ -20,6 +20,7 @@ const eventFormSchema = insertMinistryEventSchema.extend({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
   type: z.string().min(1, "Event type is required"),
+  flyerImage: z.string().optional(),
 });
 
 type EventFormData = z.infer<typeof eventFormSchema>;
@@ -27,6 +28,9 @@ type EventFormData = z.infer<typeof eventFormSchema>;
 export default function EventCreatePage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's ministry profile to ensure they can create events
   const { data: ministryProfile, isLoading: isLoadingProfile } = useQuery({
@@ -48,6 +52,7 @@ export default function EventCreatePage() {
       onlineLink: "",
       requiresRegistration: false,
       isPublished: true,
+      flyerImage: "",
     },
   });
 
@@ -61,6 +66,7 @@ export default function EventCreatePage() {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : undefined,
         maxAttendees: data.maxAttendees ? Number(data.maxAttendees) : undefined,
+        flyerImage: data.flyerImage || undefined,
       };
       
       return apiRequest(`/api/ministries/${ministryProfile.id}/events`, {
@@ -84,6 +90,78 @@ export default function EventCreatePage() {
       });
     },
   });
+
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload file
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Update form with uploaded image URL
+      form.setValue('flyerImage', result.url);
+      
+      toast({
+        title: "Image uploaded",
+        description: "Your event flyer has been uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      setImagePreview("");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview("");
+    form.setValue('flyerImage', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const onSubmit = (data: EventFormData) => {
     createEventMutation.mutate(data);
@@ -213,6 +291,78 @@ export default function EventCreatePage() {
                               className="bg-gray-800 border-gray-600 text-white min-h-[100px]"
                               placeholder="Describe your event, what to expect, and any special instructions..."
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Event Flyer Upload */}
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="flyerImage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Event Flyer (Optional)</FormLabel>
+                          <FormControl>
+                            <div className="space-y-4">
+                              {/* Image Preview */}
+                              {imagePreview && (
+                                <div className="relative inline-block">
+                                  <img
+                                    src={imagePreview}
+                                    alt="Event flyer preview"
+                                    className="max-w-full h-48 object-cover rounded-lg border border-gray-600"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={removeImage}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {/* Upload Area */}
+                              {!imagePreview && (
+                                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
+                                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                  <p className="text-gray-400 mb-2">
+                                    Click to upload or drag and drop your event flyer
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    PNG, JPG, GIF up to 5MB
+                                  </p>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="mt-3 border-gray-600 hover:bg-gray-800"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isUploadingImage}
+                                  >
+                                    <Image className="h-4 w-4 mr-2" />
+                                    {isUploadingImage ? "Uploading..." : "Choose Image"}
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {/* Hidden File Input */}
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleImageUpload(file);
+                                }}
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

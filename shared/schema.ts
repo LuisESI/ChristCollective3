@@ -318,6 +318,7 @@ export const ministryEvents = pgTable("ministry_events", {
   currentAttendees: integer("current_attendees").default(0),
   isPublished: boolean("is_published").default(true),
   requiresRegistration: boolean("requires_registration").default(false),
+  flyerImage: varchar("flyer_image"), // URL to uploaded flyer image
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
