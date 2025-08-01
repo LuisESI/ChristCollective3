@@ -95,6 +95,7 @@ export default function EditMinistryProfilePage() {
       navigate("/profile");
     },
     onError: (error: any) => {
+      console.error("Ministry update error:", error);
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update ministry profile. Please try again.",
@@ -119,7 +120,7 @@ export default function EditMinistryProfilePage() {
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("image", file);
       
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -147,6 +148,9 @@ export default function EditMinistryProfilePage() {
   };
 
   const onSubmit = (data: EditMinistryFormData) => {
+    console.log("Form submission data:", data);
+    console.log("Ministry profile ID:", ministryProfile?.id);
+    console.log("Form errors:", form.formState.errors);
     updateMinistryMutation.mutate(data);
   };
 
