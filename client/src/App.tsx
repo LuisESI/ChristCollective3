@@ -38,6 +38,7 @@ import MinistryCreatePage from "@/pages/MinistryCreatePage";
 import EditProfilePage from "@/pages/EditProfilePage";
 import CreatorSharePage from "@/pages/CreatorSharePage";
 import CreatorSocialSharePage from "@/pages/CreatorSocialSharePage";
+import MinistriesPage from "@/pages/MinistriesPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/creators" component={CreatorsPage} />
       <Route path="/creators/:id" component={CreatorProfilePage} />
       <Route path="/creator-profile" component={CreatorProfileManagePage} />
+      <Route path="/ministries" component={MinistriesPage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />
       <Route path="/apply-sponsorship" component={SponsorshipApplicationPage} />
       <Route path="/admin" component={AdminDashboard} />
