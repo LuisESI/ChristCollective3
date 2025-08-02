@@ -226,7 +226,7 @@ export default function BusinessNetworkPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProfiles.map((profile: BusinessProfile) => (
-                  <Card key={profile.id} className="bg-gray-900/50 border-gray-700 backdrop-blur hover:bg-gray-900/70 transition-all duration-300">
+                  <Card key={profile.id} className="bg-gray-900/50 border-gray-700 backdrop-blur hover:bg-gray-900/70 transition-all duration-300 flex flex-col h-full">
                     <CardHeader className="text-center pb-4">
                       <Avatar className="h-20 w-20 mx-auto mb-4">
                         <AvatarImage src={profile.logo} alt={profile.companyName} />
@@ -247,12 +247,12 @@ export default function BusinessNetworkPage() {
                       </CardDescription>
                     </CardHeader>
                     
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-0 flex flex-col flex-1">
                       <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
                         {profile.description}
                       </p>
                       
-                      <div className="space-y-2 mb-4">
+                      <div className="space-y-2 mb-4 flex-1">
                         {profile.location && (
                           <div className="flex items-center text-xs text-gray-400">
                             <MapPin className="h-3 w-3 mr-2 text-primary" />
@@ -267,7 +267,7 @@ export default function BusinessNetworkPage() {
                         )}
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-auto">
                         <Link href={`/business/profile/${profile.id}`} className="flex-1">
                           <Button 
                             size="sm" 
