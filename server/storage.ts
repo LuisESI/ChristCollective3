@@ -44,6 +44,8 @@ import {
   userFollows,
   type UserFollow,
   type InsertUserFollow,
+  businessFollows,
+  type BusinessFollow,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -1001,6 +1003,35 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(userFollows.followerId, userId), eq(platformPosts.isPublished, true)))
       .orderBy(desc(platformPosts.createdAt))
       .limit(limit);
+  }
+  // Business follow operations
+  async followBusiness(userId: string, businessId: number): Promise<BusinessFollow> {
+    const [follow] = await db
+      .insert(businessFollows)
+      .values({ userId, businessId })
+      .onConflictDoNothing()
+      .returning();
+    return follow;
+  }
+
+  async unfollowBusiness(userId: string, businessId: number): Promise<void> {
+    await db
+      .delete(businessFollows)
+      .where(and(
+        eq(businessFollows.userId, userId), 
+        eq(businessFollows.businessId, businessId)
+      ));
+  }
+
+  async isBusinessFollowing(userId: string, businessId: number): Promise<boolean> {
+    const [follow] = await db
+      .select()
+      .from(businessFollows)
+      .where(and(
+        eq(businessFollows.userId, userId), 
+        eq(businessFollows.businessId, businessId)
+      ));
+    return !!follow;
   }
 }
 

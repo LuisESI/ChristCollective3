@@ -2772,6 +2772,78 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     return match ? match[1] : null;
   }
 
+  // Business follow system routes
+  app.post("/api/businesses/:businessId/follow", isAuthenticated, async (req: any, res) => {
+    try {
+      const { businessId } = req.params;
+      const userId = req.user.id;
+      const businessIdInt = parseInt(businessId);
+
+      if (isNaN(businessIdInt)) {
+        return res.status(400).json({ message: "Invalid business ID" });
+      }
+
+      // Check if business exists
+      const business = await storage.getBusinessProfile(businessIdInt);
+      if (!business) {
+        return res.status(404).json({ message: "Business not found" });
+      }
+
+      // Check if user owns this business
+      if (business.userId === userId) {
+        return res.status(400).json({ message: "Cannot follow your own business" });
+      }
+
+      // Check if already following
+      const isFollowing = await storage.isBusinessFollowing(userId, businessIdInt);
+      if (isFollowing) {
+        return res.status(400).json({ message: "Already following this business" });
+      }
+
+      const follow = await storage.followBusiness(userId, businessIdInt);
+      res.json({ message: "Successfully followed business", follow });
+    } catch (error) {
+      console.error("Error following business:", error);
+      res.status(500).json({ message: "Failed to follow business" });
+    }
+  });
+
+  app.delete("/api/businesses/:businessId/follow", isAuthenticated, async (req: any, res) => {
+    try {
+      const { businessId } = req.params;
+      const userId = req.user.id;
+      const businessIdInt = parseInt(businessId);
+
+      if (isNaN(businessIdInt)) {
+        return res.status(400).json({ message: "Invalid business ID" });
+      }
+
+      await storage.unfollowBusiness(userId, businessIdInt);
+      res.json({ message: "Successfully unfollowed business" });
+    } catch (error) {
+      console.error("Error unfollowing business:", error);
+      res.status(500).json({ message: "Failed to unfollow business" });
+    }
+  });
+
+  app.get("/api/businesses/:businessId/following", isAuthenticated, async (req: any, res) => {
+    try {
+      const { businessId } = req.params;
+      const userId = req.user.id;
+      const businessIdInt = parseInt(businessId);
+
+      if (isNaN(businessIdInt)) {
+        return res.status(400).json({ message: "Invalid business ID" });
+      }
+
+      const isFollowing = await storage.isBusinessFollowing(userId, businessIdInt);
+      res.json({ isFollowing });
+    } catch (error) {
+      console.error("Error checking business follow status:", error);
+      res.status(500).json({ message: "Failed to check follow status" });
+    }
+  });
+
   // User follow system routes
   app.post("/api/users/:userId/follow", isAuthenticated, async (req: any, res) => {
     try {

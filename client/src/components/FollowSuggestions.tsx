@@ -116,7 +116,8 @@ export function FollowSuggestions() {
           displayName: business.companyName,
           description: business.description || business.industry || 'Business professional',
           avatar: business.logoUrl,
-          userId: business.userId, // Add userId for follow functionality
+          businessId: business.id, // Use business ID for follow functionality
+          userId: business.userId, // Keep for ownership checks
         }));
       suggestions.push(...randomBusinesses);
     }
@@ -133,7 +134,8 @@ export function FollowSuggestions() {
           description: ministry.description || 'Ministry organization',
           followers: 0, // No follower count for ministries
           avatar: ministry.logoUrl,
-          userId: ministry.userId, // Add userId for follow functionality
+          ministryId: ministry.id, // Use ministry ID for follow functionality
+          userId: ministry.userId, // Keep for ownership checks
         }));
       suggestions.push(...randomMinistries);
     }

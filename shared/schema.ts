@@ -301,6 +301,16 @@ export const userFollows = pgTable("user_follows", {
   uniqueFollow: uniqueIndex("unique_user_follow").on(table.followerId, table.followingId),
 }));
 
+// Business profile follows (users following business profiles)
+export const businessFollows = pgTable("business_follows", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessId: integer("business_id").notNull().references(() => businessProfiles.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueFollow: uniqueIndex("unique_business_follow").on(table.userId, table.businessId),
+}));
+
 // Ministry events (Bible studies, services, missions, community events)
 export const ministryEvents = pgTable("ministry_events", {
   id: serial("id").primaryKey(),
@@ -432,6 +442,18 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   }),
   ministryFollowers: many(ministryFollowers),
   eventRegistrations: many(eventRegistrations),
+  businessFollows: many(businessFollows),
+}));
+
+export const businessFollowsRelations = relations(businessFollows, ({ one }) => ({
+  user: one(users, {
+    fields: [businessFollows.userId],
+    references: [users.id],
+  }),
+  business: one(businessProfiles, {
+    fields: [businessFollows.businessId],
+    references: [businessProfiles.id],
+  }),
 }));
 
 // Platform schema for sponsorship applications
@@ -506,6 +528,8 @@ export type MinistryEvent = typeof ministryEvents.$inferSelect;
 
 export type MinistryFollower = typeof ministryFollowers.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
+export type BusinessFollow = typeof businessFollows.$inferSelect;
+export type UserFollow = typeof userFollows.$inferSelect;
 
 // Platform posts schemas
 export const insertPlatformPostSchema = createInsertSchema(platformPosts).omit({
