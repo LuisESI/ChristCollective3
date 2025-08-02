@@ -2489,6 +2489,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ministryId: parseInt(id)
       });
       
+      // Automatically create a ministry post for the event to appear in followers' feeds
+      const eventPostContent = `📅 ${eventData.title}
+
+${eventData.description}
+
+📍 ${eventData.location ? eventData.location : 'Location TBD'}
+📅 ${new Date(eventData.startDate).toLocaleDateString()} at ${new Date(eventData.startDate).toLocaleTimeString()}
+
+${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
+
+      await storage.createMinistryPost({
+        ministryId: parseInt(id),
+        title: `New Event: ${eventData.title}`,
+        content: eventPostContent,
+        type: 'event_announcement',
+        mediaUrls: eventData.flyerImage ? [eventData.flyerImage] : [],
+        isPublished: true
+      });
+      
       res.status(201).json(event);
     } catch (error) {
       console.error("Error creating ministry event:", error);
@@ -2510,6 +2529,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Ministry not found" });
       }
       
+      // Prevent users from following their own ministry
+      if (ministry.userId === userId) {
+        return res.status(400).json({ message: "Cannot follow your own ministry" });
+      }
+      
       await storage.followMinistry(userId, parseInt(id));
       res.json({ message: "Successfully followed ministry" });
     } catch (error) {
@@ -2528,6 +2552,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error unfollowing ministry:", error);
       res.status(500).json({ message: "Failed to unfollow ministry" });
+    }
+  });
+
+  // Check if user is following ministry
+  app.get('/api/ministries/:id/following', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      const isFollowing = await storage.isUserFollowingMinistry(userId, parseInt(id));
+      res.json({ isFollowing });
+    } catch (error) {
+      console.error("Error checking follow status:", error);
+      res.status(500).json({ message: "Failed to check follow status" });
+    }
+  });
+
+  // Get ministry feed posts for authenticated user
+  app.get('/api/feed/ministry-posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const ministryPosts = await storage.getMinistryFeedPosts(userId);
+      res.json(ministryPosts);
+    } catch (error) {
+      console.error("Error fetching ministry feed posts:", error);
+      res.status(500).json({ message: "Failed to fetch ministry feed posts" });
     }
   });
 

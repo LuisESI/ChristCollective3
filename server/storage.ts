@@ -140,6 +140,7 @@ export interface IStorage {
   // Ministry followers operations
   followMinistry(userId: string, ministryId: number): Promise<void>;
   unfollowMinistry(userId: string, ministryId: number): Promise<void>;
+  isUserFollowingMinistry(userId: string, ministryId: number): Promise<boolean>;
   getUserFollowedMinistries(userId: string): Promise<MinistryProfile[]>;
   getMinistryFeedPosts(userId: string): Promise<MinistryPost[]>;
 
@@ -743,6 +744,14 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(ministryFollowers.userId, userId), eq(ministryFollowers.ministryId, ministryId)));
   }
 
+  async isUserFollowingMinistry(userId: string, ministryId: number): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(ministryFollowers)
+      .where(and(eq(ministryFollowers.userId, userId), eq(ministryFollowers.ministryId, ministryId)));
+    return !!result;
+  }
+
   async getUserFollowedMinistries(userId: string): Promise<MinistryProfile[]> {
     return await db
       .select({
@@ -782,9 +791,16 @@ export class DatabaseStorage implements IStorage {
         isPublished: ministryPosts.isPublished,
         createdAt: ministryPosts.createdAt,
         updatedAt: ministryPosts.updatedAt,
+        ministry: {
+          id: ministryProfiles.id,
+          name: ministryProfiles.name,
+          logo: ministryProfiles.logo,
+          denomination: ministryProfiles.denomination,
+        }
       })
       .from(ministryPosts)
       .innerJoin(ministryFollowers, eq(ministryFollowers.ministryId, ministryPosts.ministryId))
+      .innerJoin(ministryProfiles, eq(ministryProfiles.id, ministryPosts.ministryId))
       .where(and(
         eq(ministryFollowers.userId, userId),
         eq(ministryPosts.isPublished, true)

@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
+import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
 import { Plus, Sparkles } from "lucide-react";
+import { useMemo } from "react";
 
 export default function FeedPage() {
   const { data: posts, isLoading } = useQuery({
@@ -20,6 +22,27 @@ export default function FeedPage() {
     queryKey: ["/api/feed/following"],
     enabled: !!user?.id,
   });
+
+  // Get ministry posts from followed ministries
+  const { data: ministryPosts = [] } = useQuery({
+    queryKey: ["/api/feed/ministry-posts"],
+    enabled: !!user?.id,
+  });
+
+  // Combine and sort all posts by creation date
+  const allPosts = useMemo(() => {
+    const userPosts = (user && followingPosts && followingPosts.length > 0) ? followingPosts : (posts || []);
+    const ministry = ministryPosts || [];
+    
+    // Combine posts and add type identifier
+    const combined = [
+      ...userPosts.map((post: any) => ({ ...post, postType: 'user' })),
+      ...ministry.map((post: any) => ({ ...post, postType: 'ministry' }))
+    ];
+    
+    // Sort by creation date (newest first)
+    return combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [posts, followingPosts, ministryPosts, user]);
 
   if (isLoading) {
     return (
@@ -44,31 +67,28 @@ export default function FeedPage() {
 
           {/* Posts Grid - Now appears first */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Show posts from followed users if available and user is logged in */}
-            {user && followingPosts && followingPosts.length > 0 ? (
-              followingPosts.map((post: any) => (
-                <PlatformPostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={user?.id}
-                  showActions={true}
-                />
-              ))
-            ) : posts && posts.length > 0 ? (
-              posts.map((post: any) => (
-                <PlatformPostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={user?.id}
-                  showActions={true}
-                />
+            {allPosts.length > 0 ? (
+              allPosts.map((post: any) => (
+                post.postType === 'ministry' ? (
+                  <MinistryPostCard
+                    key={`ministry-${post.id}`}
+                    post={post}
+                  />
+                ) : (
+                  <PlatformPostCard
+                    key={`user-${post.id}`}
+                    post={post}
+                    currentUserId={user?.id}
+                    showActions={true}
+                  />
+                )
               ))
             ) : (
               <div className="col-span-full text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
-                  <p>Start following members to see their inspiring content in your feed!</p>
+                  <p>Start following members and ministries to see their inspiring content in your feed!</p>
                 </div>
               </div>
             )}

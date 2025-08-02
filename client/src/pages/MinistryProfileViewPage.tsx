@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Building, 
   MapPin, 
@@ -18,7 +19,9 @@ import {
   Share2,
   ArrowLeft,
   Clock,
-  Globe
+  Globe,
+  UserPlus,
+  UserMinus
 } from "lucide-react";
 import { Link } from "wouter";
 import { MinistryProfile, MinistryEvent } from "@shared/schema";
@@ -26,6 +29,8 @@ import { MinistryProfile, MinistryEvent } from "@shared/schema";
 export default function MinistryProfileViewPage() {
   const [match, params] = useRoute("/ministry/:id");
   const ministryId = params?.id;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: ministry, isLoading } = useQuery({
     queryKey: ["/api/ministries", ministryId],
@@ -57,6 +62,81 @@ export default function MinistryProfileViewPage() {
       return response.json();
     },
   });
+
+  // Check if user is following this ministry
+  const { data: isFollowing = false } = useQuery({
+    queryKey: ["/api/ministries", ministryId, "following"],
+    queryFn: async () => {
+      if (!currentUser || !ministryId) return false;
+      const response = await fetch(`/api/ministries/${ministryId}/following`);
+      if (!response.ok) return false;
+      const data = await response.json();
+      return data.isFollowing;
+    },
+    enabled: !!currentUser && !!ministryId,
+  });
+
+  // Follow/unfollow mutations
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/ministries/${ministryId}/follow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to follow ministry');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries", ministryId, "following"] });
+      toast({
+        title: "Success",
+        description: "You are now following this ministry!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to follow ministry. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const unfollowMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/ministries/${ministryId}/follow`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to unfollow ministry');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries", ministryId, "following"] });
+      toast({
+        title: "Success",
+        description: "You have unfollowed this ministry.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to unfollow ministry. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFollowToggle = () => {
+    if (isFollowing) {
+      unfollowMutation.mutate();
+    } else {
+      followMutation.mutate();
+    }
+  };
+
+  // Don't show follow button if user owns this ministry
+  const isOwnMinistry = currentUser && ministry && ministry.userId === currentUser.id;
 
   if (isLoading) {
     return (
@@ -154,10 +234,20 @@ export default function MinistryProfileViewPage() {
                   </div>
                   
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                    {currentUser && (
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Users className="h-4 w-4 mr-2" />
-                        Follow Ministry
+                    {currentUser && !isOwnMinistry && (
+                      <Button 
+                        onClick={handleFollowToggle}
+                        disabled={followMutation.isPending || unfollowMutation.isPending}
+                        className={isFollowing ? "bg-gray-600 hover:bg-gray-700" : "bg-primary hover:bg-primary/90"}
+                      >
+                        {followMutation.isPending || unfollowMutation.isPending ? (
+                          <div className="animate-spin rounded-full border-b-2 border-white h-4 w-4 mr-2"></div>
+                        ) : isFollowing ? (
+                          <UserMinus className="h-4 w-4 mr-2" />
+                        ) : (
+                          <UserPlus className="h-4 w-4 mr-2" />
+                        )}
+                        {isFollowing ? "Unfollow" : "Follow Ministry"}
                       </Button>
                     )}
                     <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
