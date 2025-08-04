@@ -120,7 +120,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                     <div className="flex items-center text-xs text-gray-400 mt-1">
                       <Clock className="h-3 w-3 mr-1" />
                       <span>{formatDate(post.createdAt)}</span>
-                      <Badge variant="outline" className="ml-2 text-xs bg-purple-900/30 border-purple-600 text-purple-300">
+                      <Badge variant="outline" className="ml-2 text-xs bg-green-900/30 border-green-600 text-green-300">
                         <Calendar className="h-3 w-3 mr-1" />
                         Event
                       </Badge>
@@ -181,7 +181,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
               <Clock className="h-3 w-3 mr-1" />
               <span>{formatDate(post.createdAt)}</span>
               {post.type === 'event_announcement' && (
-                <Badge variant="outline" className="ml-2 text-xs bg-purple-900/30 border-purple-600 text-purple-300">
+                <Badge variant="outline" className="ml-2 text-xs bg-green-900/30 border-green-600 text-green-300">
                   <Calendar className="h-3 w-3 mr-1" />
                   Event
                 </Badge>
