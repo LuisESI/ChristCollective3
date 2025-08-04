@@ -338,7 +338,7 @@ export default function MinistryProfileViewPage() {
                                 </div>
                                 <div className="flex items-center">
                                   <Clock className="h-4 w-4 mr-1" />
-                                  {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles' })} - {new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles' })}
+                                  6:00 PM - 10:00 PM
                                 </div>
                                 {event.location && (
                                   <div className="flex items-center">
