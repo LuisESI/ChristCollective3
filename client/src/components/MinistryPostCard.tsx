@@ -2,9 +2,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Clock, Church, RotateCcw, MousePointer, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Clock, Church, RotateCcw, MousePointer, ExternalLink, Users, CheckCircle, Clock3, X } from "lucide-react";
 import { MinistryPost } from "@shared/schema";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MinistryPostCardProps {
   post: MinistryPost & {
@@ -21,6 +24,84 @@ interface MinistryPostCardProps {
 
 export function MinistryPostCard({ post, disableClick = false, flatLayout = false }: MinistryPostCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  // RSVP functionality for event posts
+  const { data: userRsvp } = useQuery({
+    queryKey: ['/api/ministry-posts', post.id, 'rsvp'],
+    enabled: isAuthenticated && post.type === 'event_announcement',
+  });
+
+  const { data: rsvpCounts } = useQuery({
+    queryKey: ['/api/ministry-posts', post.id, 'rsvps'],
+    enabled: post.type === 'event_announcement',
+  });
+
+  const rsvpMutation = useMutation({
+    mutationFn: async ({ status, notes }: { status: string; notes?: string }) => {
+      return apiRequest(`/api/ministry-posts/${post.id}/rsvp`, {
+        method: 'POST',
+        body: { status, notes }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvp'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvps'] });
+    }
+  });
+
+  const removeRsvpMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/ministry-posts/${post.id}/rsvp`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvp'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvps'] });
+    }
+  });
+
+  const handleRsvp = (status: string) => {
+    if (userRsvp?.status === status) {
+      removeRsvpMutation.mutate();
+    } else {
+      rsvpMutation.mutate({ status });
+    }
+  };
+
+  const getRsvpIcon = (status: string) => {
+    switch (status) {
+      case 'going':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'maybe':
+        return <Clock3 className="w-4 h-4" />;
+      case 'not_going':
+        return <X className="w-4 h-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const getRsvpColor = (status: string, isActive: boolean) => {
+    if (!isActive) return "text-gray-400 border-gray-300";
+    
+    switch (status) {
+      case 'going':
+        return "text-green-600 border-green-600 bg-green-50";
+      case 'maybe':
+        return "text-yellow-600 border-yellow-600 bg-yellow-50";
+      case 'not_going':
+        return "text-red-600 border-red-600 bg-red-50";
+      default:
+        return "text-gray-600 border-gray-300";
+    }
+  };
+
+  const getRsvpCount = (status: string) => {
+    return rsvpCounts?.find(r => r.status === status)?.count || 0;
+  };
   
   const formatDate = (dateString: string | Date | null) => {
     if (!dateString) return 'Unknown date';
@@ -154,8 +235,57 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   </div>
                 </div>
                 
-                {/* View Post Button */}
-                <div className="pt-3 border-t border-gray-600 mt-3">
+                {/* RSVP and View Post Buttons */}
+                <div className="pt-3 border-t border-gray-600 mt-3 space-y-3">
+                  {/* RSVP Buttons */}
+                  {isAuthenticated && (
+                    <div className="space-y-2">
+                      <div className="text-xs text-gray-400 mb-2">RSVP:</div>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`flex-1 ${getRsvpColor('going', userRsvp?.status === 'going')}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRsvp('going');
+                          }}
+                          disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                        >
+                          {getRsvpIcon('going')}
+                          <span className="ml-1 text-xs">Going ({getRsvpCount('going')})</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`flex-1 ${getRsvpColor('maybe', userRsvp?.status === 'maybe')}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRsvp('maybe');
+                          }}
+                          disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                        >
+                          {getRsvpIcon('maybe')}
+                          <span className="ml-1 text-xs">Maybe ({getRsvpCount('maybe')})</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`flex-1 ${getRsvpColor('not_going', userRsvp?.status === 'not_going')}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRsvp('not_going');
+                          }}
+                          disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                        >
+                          {getRsvpIcon('not_going')}
+                          <span className="ml-1 text-xs">Can't Go ({getRsvpCount('not_going')})</span>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* View Post Button */}
                   <Button
                     variant="outline"
                     size="sm"
@@ -262,6 +392,54 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   </a>
                 );
               })}
+            </div>
+          )}
+
+          {/* RSVP Section for Flat Layout */}
+          {isAuthenticated && (
+            <div className="pt-4 border-t border-gray-600 space-y-3">
+              <div className="text-sm text-gray-400 mb-3">RSVP to this event:</div>
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`flex-1 ${getRsvpColor('going', userRsvp?.status === 'going')}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRsvp('going');
+                  }}
+                  disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                >
+                  {getRsvpIcon('going')}
+                  <span className="ml-2">Going ({getRsvpCount('going')})</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`flex-1 ${getRsvpColor('maybe', userRsvp?.status === 'maybe')}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRsvp('maybe');
+                  }}
+                  disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                >
+                  {getRsvpIcon('maybe')}
+                  <span className="ml-2">Maybe ({getRsvpCount('maybe')})</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`flex-1 ${getRsvpColor('not_going', userRsvp?.status === 'not_going')}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRsvp('not_going');
+                  }}
+                  disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
+                >
+                  {getRsvpIcon('not_going')}
+                  <span className="ml-2">Can't Go ({getRsvpCount('not_going')})</span>
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

@@ -2467,6 +2467,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ministry post RSVP routes
+  app.post("/api/ministry-posts/:id/rsvp", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const postId = parseInt(req.params.id);
+      const { status, notes } = req.body;
+
+      if (!["going", "maybe", "not_going"].includes(status)) {
+        return res.status(400).json({ message: "Invalid RSVP status" });
+      }
+
+      const rsvp = await storage.createOrUpdateRsvp(userId, postId, status, notes);
+      res.json(rsvp);
+    } catch (error) {
+      console.error("Error creating/updating RSVP:", error);
+      res.status(500).json({ message: "Failed to create/update RSVP" });
+    }
+  });
+
+  app.get("/api/ministry-posts/:id/rsvp", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const postId = parseInt(req.params.id);
+      const rsvp = await storage.getRsvpByUserAndPost(userId, postId);
+      
+      res.json(rsvp || { status: null });
+    } catch (error) {
+      console.error("Error fetching RSVP:", error);
+      res.status(500).json({ message: "Failed to fetch RSVP" });
+    }
+  });
+
+  app.get("/api/ministry-posts/:id/rsvps", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const rsvps = await storage.getRsvpsForPost(postId);
+      
+      res.json(rsvps);
+    } catch (error) {
+      console.error("Error fetching RSVP counts:", error);
+      res.status(500).json({ message: "Failed to fetch RSVP counts" });
+    }
+  });
+
+  app.delete("/api/ministry-posts/:id/rsvp", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const postId = parseInt(req.params.id);
+      await storage.deleteRsvp(userId, postId);
+      
+      res.json({ message: "RSVP removed successfully" });
+    } catch (error) {
+      console.error("Error removing RSVP:", error);
+      res.status(500).json({ message: "Failed to remove RSVP" });
+    }
+  });
+
   app.post('/api/ministries/:id/posts', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;

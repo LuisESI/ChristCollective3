@@ -11,6 +11,7 @@ import {
   ministryPosts,
   ministryEvents,
   ministryFollowers,
+  ministryPostRsvps,
   eventRegistrations,
   type User,
   type UpsertUser,
@@ -34,6 +35,8 @@ import {
   type MinistryEvent,
   type InsertMinistryEvent,
   type MinistryFollower,
+  type MinistryPostRsvp,
+  type InsertMinistryPostRsvp,
   type EventRegistration,
   platformPosts,
   postInteractions,
@@ -772,6 +775,45 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(ministryFollowers)
       .where(and(eq(ministryFollowers.userId, userId), eq(ministryFollowers.ministryId, ministryId)));
+  }
+
+  // Ministry post RSVP operations
+  async createOrUpdateRsvp(userId: string, postId: number, status: string, notes?: string): Promise<MinistryPostRsvp> {
+    const [rsvp] = await db
+      .insert(ministryPostRsvps)
+      .values({ userId, postId, status, notes })
+      .onConflictDoUpdate({
+        target: [ministryPostRsvps.userId, ministryPostRsvps.postId],
+        set: { status, notes, updatedAt: new Date() }
+      })
+      .returning();
+    return rsvp;
+  }
+
+  async getRsvpByUserAndPost(userId: string, postId: number): Promise<MinistryPostRsvp | undefined> {
+    const [rsvp] = await db
+      .select()
+      .from(ministryPostRsvps)
+      .where(and(eq(ministryPostRsvps.userId, userId), eq(ministryPostRsvps.postId, postId)));
+    return rsvp;
+  }
+
+  async getRsvpsForPost(postId: number): Promise<{ status: string; count: number }[]> {
+    const result = await db
+      .select({
+        status: ministryPostRsvps.status,
+        count: sql<number>`count(*)::int`
+      })
+      .from(ministryPostRsvps)
+      .where(eq(ministryPostRsvps.postId, postId))
+      .groupBy(ministryPostRsvps.status);
+    return result;
+  }
+
+  async deleteRsvp(userId: string, postId: number): Promise<void> {
+    await db
+      .delete(ministryPostRsvps)
+      .where(and(eq(ministryPostRsvps.userId, userId), eq(ministryPostRsvps.postId, postId)));
   }
 
   async isUserFollowingMinistry(userId: string, ministryId: number): Promise<boolean> {

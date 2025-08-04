@@ -353,6 +353,19 @@ export const eventRegistrations = pgTable("event_registrations", {
   uniqueRegistration: uniqueIndex("unique_event_registration").on(table.userId, table.eventId),
 }));
 
+// Ministry post RSVPs (for event announcements)
+export const ministryPostRsvps = pgTable("ministry_post_rsvps", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  postId: integer("post_id").notNull().references(() => ministryPosts.id),
+  status: varchar("status").notNull().default("going"), // going, maybe, not_going
+  notes: text("notes"), // Optional notes from user
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueRsvp: uniqueIndex("unique_ministry_post_rsvp").on(table.userId, table.postId),
+}));
+
 // Relations
 export const contentCreatorsRelations = relations(contentCreators, ({ one, many }) => ({
   user: one(users, {
@@ -525,6 +538,13 @@ export type MinistryPost = typeof ministryPosts.$inferSelect;
 
 export type InsertMinistryEvent = z.infer<typeof insertMinistryEventSchema>;
 export type MinistryEvent = typeof ministryEvents.$inferSelect;
+
+// Ministry post RSVP schemas
+export const insertMinistryPostRsvpSchema = createInsertSchema(ministryPostRsvps)
+  .omit({ id: true, userId: true, createdAt: true, updatedAt: true });
+
+export type InsertMinistryPostRsvp = z.infer<typeof insertMinistryPostRsvpSchema>;
+export type MinistryPostRsvp = typeof ministryPostRsvps.$inferSelect;
 
 export type MinistryFollower = typeof ministryFollowers.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
