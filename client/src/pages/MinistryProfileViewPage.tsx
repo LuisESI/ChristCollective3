@@ -46,11 +46,13 @@ export default function MinistryProfileViewPage() {
   const { data: events = [], isLoading: isLoadingEvents } = useQuery({
     queryKey: ["/api/ministries", ministryId, "events"],
     queryFn: async () => {
-      const response = await fetch(`/api/ministries/${ministryId}/events`);
+      const response = await fetch(`/api/ministries/${ministryId}/events?t=${Date.now()}`);
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
     enabled: !!ministryId,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   // Check if user is authenticated
