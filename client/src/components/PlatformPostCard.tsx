@@ -304,30 +304,24 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
         {/* Comments Section */}
         {(showComments || expandComments) && (
-          <div className="space-y-3 pt-3 border-t border-gray-700">
+          <div className="space-y-3 pt-3">
             {/* Existing Comments */}
             {Array.isArray(comments) && comments.length > 0 && (
               <div className="space-y-3 mb-4">
                 {comments.map((comment: any) => (
-                  <div key={comment.id} className="flex gap-3 items-start">
-                    <div className="flex items-center gap-2">
-                      <Heart className="w-4 h-4 text-gray-400" />
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src={comment.user?.profileImageUrl} alt={comment.user?.firstName} />
-                        <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
-                          {comment.user?.firstName?.[0] || comment.user?.username?.[0] || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
+                  <div key={comment.id} className="flex gap-2 items-start">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={comment.user?.profileImageUrl} alt={comment.user?.firstName} />
+                      <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
+                        {comment.user?.firstName?.[0] || comment.user?.username?.[0] || "U"}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex-1">
                       <div className="text-sm">
                         <span className="font-semibold text-white">
                           {comment.user?.firstName || comment.user?.username || "User"}
                         </span>
                         <span className="text-gray-300 ml-2">{comment.content}</span>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {new Date(comment.createdAt).toLocaleDateString()}
-                        </div>
                       </div>
                     </div>
                   </div>
