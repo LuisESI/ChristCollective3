@@ -106,19 +106,19 @@ export default function MinistriesPage() {
         </div>
 
         {/* Ministries Grid */}
-        <div className="max-w-6xl mx-auto px-4 py-12 bg-white rounded-lg">
+        <div className="max-w-6xl mx-auto px-4 py-12">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(9)].map((_, i) => (
-                <Card key={i} className="bg-white border-gray-200 shadow-lg">
+                <Card key={i} className="bg-gray-900 border-gray-700">
                   <CardContent className="p-6">
                     <div className="animate-pulse">
-                      <div className="h-16 w-16 bg-gray-300 rounded-full mb-4 mx-auto"></div>
-                      <div className="h-4 bg-gray-300 rounded w-3/4 mb-2 mx-auto"></div>
-                      <div className="h-3 bg-gray-300 rounded w-1/2 mb-4 mx-auto"></div>
+                      <div className="h-16 w-16 bg-gray-700 rounded-full mb-4 mx-auto"></div>
+                      <div className="h-4 bg-gray-700 rounded w-3/4 mb-2 mx-auto"></div>
+                      <div className="h-3 bg-gray-700 rounded w-1/2 mb-4 mx-auto"></div>
                       <div className="space-y-2">
-                        <div className="h-3 bg-gray-300 rounded"></div>
-                        <div className="h-3 bg-gray-300 rounded w-5/6"></div>
+                        <div className="h-3 bg-gray-700 rounded"></div>
+                        <div className="h-3 bg-gray-700 rounded w-5/6"></div>
                       </div>
                     </div>
                   </CardContent>
@@ -127,11 +127,11 @@ export default function MinistriesPage() {
             </div>
           ) : filteredMinistries.length === 0 ? (
             <div className="text-center py-16">
-              <Building className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <Building className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">
                 {searchQuery || denominationFilter ? "No ministries found" : "No ministries yet"}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-500 mb-6">
                 {searchQuery || denominationFilter 
                   ? "Try adjusting your search or filter criteria" 
                   : "Be the first to add your ministry to our community"
@@ -147,8 +147,8 @@ export default function MinistriesPage() {
             <>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Found {filteredMinistries.length} Ministries</h2>
-                  <p className="text-gray-600 mt-1">
+                  <h2 className="text-2xl font-bold text-white">Found {filteredMinistries.length} Ministries</h2>
+                  <p className="text-gray-400 mt-1">
                     {searchQuery && `Searching for "${searchQuery}"`}
                     {searchQuery && denominationFilter && " • "}
                     {denominationFilter && `Filtered by ${denominationFilter}`}
@@ -158,7 +158,7 @@ export default function MinistriesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMinistries.map((ministry: MinistryProfile) => (
-                  <Card key={ministry.id} className="bg-white border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Card key={ministry.id} className="bg-gray-900/50 border-gray-700 backdrop-blur hover:bg-gray-900/70 transition-all duration-300">
                     <CardHeader className="text-center pb-4">
                       <Avatar className="h-20 w-20 mx-auto mb-4">
                         <AvatarImage src={ministry.logo} alt={ministry.name} />
@@ -167,8 +167,8 @@ export default function MinistriesPage() {
                         </AvatarFallback>
                       </Avatar>
                       
-                      <CardTitle className="text-gray-900 text-lg">{ministry.name}</CardTitle>
-                      <CardDescription className="text-gray-600">
+                      <CardTitle className="text-white text-lg">{ministry.name}</CardTitle>
+                      <CardDescription className="text-gray-400">
                         <div className="flex flex-wrap gap-2 justify-center mt-2">
                           {ministry.denomination && (
                             <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
@@ -185,25 +185,25 @@ export default function MinistriesPage() {
                     </CardHeader>
                     
                     <CardContent className="pt-0">
-                      <p className="text-gray-700 text-sm mb-4 line-clamp-3 leading-relaxed">
+                      <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
                         {ministry.description}
                       </p>
                       
                       <div className="space-y-2 mb-4">
                         {ministry.location && (
-                          <div className="flex items-center text-xs text-gray-600">
+                          <div className="flex items-center text-xs text-gray-400">
                             <MapPin className="h-3 w-3 mr-2 text-primary" />
                             <span className="truncate">{ministry.location}</span>
                           </div>
                         )}
                         {ministry.email && (
-                          <div className="flex items-center text-xs text-gray-600">
+                          <div className="flex items-center text-xs text-gray-400">
                             <Mail className="h-3 w-3 mr-2 text-primary" />
                             <span className="truncate">{ministry.email}</span>
                           </div>
                         )}
                         {ministry.website && (
-                          <div className="flex items-center text-xs text-gray-600">
+                          <div className="flex items-center text-xs text-gray-400">
                             <ExternalLink className="h-3 w-3 mr-2 text-primary" />
                             <a 
                               href={ministry.website} 
@@ -230,7 +230,7 @@ export default function MinistriesPage() {
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          className="flex-1 border-gray-300 hover:bg-gray-100"
+                          className="flex-1 border-gray-600 hover:bg-gray-800"
                         >
                           <Calendar className="h-4 w-4 mr-1" />
                           Events
