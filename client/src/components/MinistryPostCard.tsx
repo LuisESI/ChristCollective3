@@ -15,9 +15,11 @@ interface MinistryPostCardProps {
       denomination?: string;
     };
   };
+  disableClick?: boolean;
+  flatLayout?: boolean;
 }
 
-export function MinistryPostCard({ post }: MinistryPostCardProps) {
+export function MinistryPostCard({ post, disableClick = false, flatLayout = false }: MinistryPostCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const formatDate = (dateString: string | Date | null) => {
@@ -34,8 +36,8 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
   // Check if this is an event post with media
   const isEventWithMedia = post.type === 'event_announcement' && post.mediaUrls && post.mediaUrls.length > 0;
 
-  // For event posts with media, render interactive flip card
-  if (isEventWithMedia) {
+  // For event posts with media, render interactive flip card (unless flat layout is requested)
+  if (isEventWithMedia && !flatLayout) {
     return (
       <div className="flip-card-container relative h-96 w-full perspective-1000">
         <div 
@@ -168,6 +170,94 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Flat layout for event posts on individual post pages
+  if (isEventWithMedia && flatLayout) {
+    return (
+      <Card className="bg-black border-gray-700 backdrop-blur">
+        <CardHeader className="pb-4">
+          <div className="flex items-start space-x-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={post.ministry?.logo} alt={post.ministry?.name} />
+              <AvatarFallback className="bg-primary text-black">
+                <Church className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <h3 className="font-semibold text-white text-lg">
+                  {post.ministry?.name || 'Ministry'}
+                </h3>
+                {post.ministry?.denomination && (
+                  <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
+                    {post.ministry.denomination}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center text-sm text-gray-400 mt-1">
+                <Clock className="h-4 w-4 mr-1" />
+                <span>{formatDate(post.createdAt)}</span>
+                <Badge variant="outline" className="ml-3 text-xs bg-green-900/30 border-green-600 text-green-300">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Event
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {/* Event Image */}
+          {post.mediaUrls && post.mediaUrls.length > 0 && (
+            <div className="relative overflow-hidden rounded-lg">
+              <img 
+                src={post.mediaUrls[0]} 
+                alt="Event flyer"
+                className="w-full h-64 object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMUYyOTM3Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDE2MCA5MUwyNDAgOTFMMjAwIDE1MFoiIGZpbGw9IiNENEFGMzciLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSIxODgiIHk9IjEzOCI+CjxwYXRoIGQ9Im0xNSAyLTEgMWg0djJIMHYtMmg0bC0xLTFoMTJabTIuNSA0aC0xMWwyIDExaDdsMi0xMVoiIGZpbGw9IiNENEFGMzciLz4KPHN2Zz4=';
+                }}
+              />
+            </div>
+          )}
+          
+          {/* Event Title */}
+          {post.title && (
+            <h2 className="font-bold text-white text-xl">
+              {post.title.replace('New Event: ', '')}
+            </h2>
+          )}
+          
+          {/* Event Content */}
+          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+            {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+          </div>
+          
+          {/* Additional Links */}
+          {post.links && Array.isArray(post.links) && post.links.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-semibold text-white">Related Links:</h4>
+              {post.links.map((link: unknown, index: number) => {
+                const linkStr = String(link);
+                return (
+                  <a
+                    key={index}
+                    href={linkStr}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-primary/90 block break-all"
+                  >
+                    {linkStr}
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     );
   }
 

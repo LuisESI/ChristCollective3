@@ -87,6 +87,7 @@ export default function PostPage() {
             <MinistryPostCard 
               post={post} 
               disableClick={true}
+              flatLayout={true}
             />
           ) : (
             <PlatformPostCard 
