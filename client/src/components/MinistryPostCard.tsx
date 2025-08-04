@@ -381,44 +381,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             </div>
           )}
 
-          {/* RSVP and View Post Section for Flat Layout */}
-          <div className="pt-4 border-t border-gray-600">
-            <div className="flex space-x-3">
-              {/* RSVP Button */}
-              {isAuthenticated && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`flex-1 ${(userRsvp as any)?.status ? getRsvpColor((userRsvp as any).status, true) : 'text-gray-400 border-gray-500 hover:border-green-500 hover:text-green-400'}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Cycle through RSVP states: null -> going -> maybe -> not_going -> null
-                    const currentStatus = (userRsvp as any)?.status;
-                    if (!currentStatus) {
-                      handleRsvp('going');
-                    } else if (currentStatus === 'going') {
-                      handleRsvp('maybe');
-                    } else if (currentStatus === 'maybe') {
-                      handleRsvp('not_going');
-                    } else {
-                      removeRsvpMutation.mutate();
-                    }
-                  }}
-                  disabled={rsvpMutation.isPending || removeRsvpMutation.isPending}
-                >
-                  {(userRsvp as any)?.status ? getRsvpIcon((userRsvp as any).status) : <Users className="w-4 h-4" />}
-                  <span className="ml-2">
-                    {(userRsvp as any)?.status ? 
-                      ((userRsvp as any).status === 'going' ? `Going (${getRsvpCount('going')})` : 
-                       (userRsvp as any).status === 'maybe' ? `Maybe (${getRsvpCount('maybe')})` : `Can't Go (${getRsvpCount('not_going')})`) 
-                      : 'RSVP'}
-                  </span>
-                </Button>
-              )}
-              
 
-            </div>
-          </div>
         </CardContent>
       </Card>
     );
