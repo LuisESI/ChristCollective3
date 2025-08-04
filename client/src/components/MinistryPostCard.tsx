@@ -210,6 +210,18 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* Event Title */}
+          {post.title && (
+            <h4 className="font-semibold text-white text-base">
+              {post.title.replace('New Event: ', '')}
+            </h4>
+          )}
+          
+          {/* Event Content */}
+          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+            {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+          </div>
+          
           {/* Event Image - Full Size */}
           {post.mediaUrls && post.mediaUrls.length > 0 && (
             <div className="w-full">
@@ -223,18 +235,6 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               />
             </div>
           )}
-          
-          {/* Event Title */}
-          {post.title && (
-            <h4 className="font-semibold text-white mb-3 text-base">
-              {post.title.replace('New Event: ', '')}
-            </h4>
-          )}
-          
-          {/* Event Content */}
-          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
-          </div>
           
           {/* Additional Links */}
           {post.links && Array.isArray(post.links) && post.links.length > 0 && (
