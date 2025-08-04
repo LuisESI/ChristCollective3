@@ -48,7 +48,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
         >
           {/* Front side - Image */}
           <div className="flip-card-front absolute inset-0 w-full h-full backface-hidden">
-            <Card className="h-full bg-gray-900/50 border-gray-700 backdrop-blur overflow-hidden">
+            <Card className="h-full bg-black border-gray-700 backdrop-blur overflow-hidden">
               <div className="relative h-full">
                 <img 
                   src={post.mediaUrls?.[0] || ''} 
@@ -97,7 +97,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
 
           {/* Back side - Details */}
           <div className="flip-card-back absolute inset-0 w-full h-full backface-hidden rotate-y-180">
-            <Card className="h-full bg-gray-900/90 border-gray-700 backdrop-blur">
+            <Card className="h-full bg-black border-gray-700 backdrop-blur">
               <CardHeader className="pb-3">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-10 w-10">
@@ -151,7 +151,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                    className="w-full bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = `/post/${post.id}`;
@@ -173,7 +173,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
 
   // Regular ministry post layout for non-event posts or events without media
   return (
-    <Card className="bg-gray-900/50 border-gray-700 backdrop-blur hover:bg-gray-900/70 transition-all duration-300">
+    <Card className="bg-black border-gray-700 backdrop-blur hover:bg-gray-900/70 transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-3">
           <Avatar className="h-10 w-10">
@@ -254,7 +254,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
           <Button
             variant="outline"
             size="sm"
-            className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+            className="w-full bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black"
             onClick={() => window.location.href = `/post/${post.id}`}
           >
             <ExternalLink className="w-4 h-4 mr-2" />
