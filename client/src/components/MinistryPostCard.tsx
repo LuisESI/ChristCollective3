@@ -219,7 +219,11 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
           
           {/* Event Content */}
           <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+            {post.content
+              .replace(/📅\s*Beach & Bonfire \(Young Adults\)/gi, '')
+              .replace(/all are welcome/gi, '')
+              .replace(/!/g, '')
+              .trim()}
           </div>
           
           {/* Event Image - Full Size */}
@@ -304,7 +308,11 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
         )}
         
         <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-          {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+          {post.content
+            .replace(/📅\s*Beach & Bonfire \(Young Adults\)/gi, '')
+            .replace(/all are welcome/gi, '')
+            .replace(/!/g, '')
+            .trim()}
         </div>
         
         {post.mediaUrls && post.mediaUrls.length > 0 && (
