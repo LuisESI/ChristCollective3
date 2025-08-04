@@ -146,16 +146,7 @@ export default function MinistriesPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="text-2xl font-bold text-black">Found {filteredMinistries.length} Ministries</h2>
-                  <p className="text-gray-600 mt-1">
-                    {searchQuery && `Searching for "${searchQuery}"`}
-                    {searchQuery && denominationFilter && " • "}
-                    {denominationFilter && `Filtered by ${denominationFilter}`}
-                  </p>
-                </div>
-              </div>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMinistries.map((ministry: MinistryProfile) => (

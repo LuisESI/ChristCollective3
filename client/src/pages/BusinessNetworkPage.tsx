@@ -214,16 +214,7 @@ export default function BusinessNetworkPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="text-2xl font-bold text-black">Found {filteredProfiles.length} Businesses</h2>
-                  <p className="text-gray-600 mt-1">
-                    {searchQuery && `Searching for "${searchQuery}"`}
-                    {searchQuery && industryFilter && " • "}
-                    {industryFilter && `Filtered by ${industryFilter}`}
-                  </p>
-                </div>
-              </div>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProfiles.map((profile: BusinessProfile) => (
