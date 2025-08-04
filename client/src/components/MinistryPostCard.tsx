@@ -146,7 +146,11 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   )}
                   
                   <div className="text-gray-300 text-sm leading-relaxed line-clamp-6">
-                    {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+                    {post.content
+                      .replace(/📅\s*Beach & Bonfire \(Young Adults\)/gi, '')
+                      .replace(/all are welcome/gi, '')
+                      .replace(/!/g, '')
+                      .trim()}
                   </div>
                 </div>
                 
