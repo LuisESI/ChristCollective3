@@ -97,7 +97,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
 
           {/* Back side - Details */}
           <div className="flip-card-back absolute inset-0 w-full h-full backface-hidden rotate-y-180">
-            <Card className="h-full bg-black border-gray-700 backdrop-blur">
+            <Card className="h-full bg-black border-gray-700 backdrop-blur flex flex-col">
               <CardHeader className="pb-3">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-10 w-10">
@@ -135,19 +135,21 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0 flex flex-col h-full pb-4">
-                {post.title && (
-                  <h4 className="font-semibold text-white mb-3 text-base">
-                    {post.title.replace('New Event: ', '')}
-                  </h4>
-                )}
-                
-                <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap mb-4">
-                  {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+              <CardContent className="pt-0 flex flex-col h-full p-4">
+                <div className="flex-1 overflow-y-auto">
+                  {post.title && (
+                    <h4 className="font-semibold text-white mb-3 text-base">
+                      {post.title.replace('New Event: ', '')}
+                    </h4>
+                  )}
+                  
+                  <div className="text-gray-300 text-sm leading-relaxed line-clamp-6">
+                    {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
+                  </div>
                 </div>
                 
                 {/* View Post Button */}
-                <div className="mt-auto pt-3 border-t border-gray-600">
+                <div className="pt-3 border-t border-gray-600 mt-3">
                   <Button
                     variant="outline"
                     size="sm"
