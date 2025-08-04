@@ -35,9 +35,9 @@ export default function Header() {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Donate", path: "/donate" },
-    { name: "Business", path: "/business" },
-    { name: "Creators", path: "/creators" },
     { name: "Ministries", path: "/ministries" },
+    { name: "Creators", path: "/creators" },
+    { name: "Business", path: "/business" },
     { name: "About", path: "/about" },
   ];
 
