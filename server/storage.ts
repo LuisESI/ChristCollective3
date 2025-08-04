@@ -158,6 +158,7 @@ export interface IStorage {
   // Post interaction operations
   createPostInteraction(interactionData: InsertPostInteraction): Promise<PostInteraction>;
   getPostInteractions(postId: number): Promise<PostInteraction[]>;
+  getPostComments(postId: number): Promise<PostInteraction[]>;
   getUserPostInteraction(postId: number, userId: string, type: string): Promise<PostInteraction | undefined>;
   deletePostInteraction(id: number): Promise<void>;
 
@@ -878,6 +879,32 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(postInteractions)
       .where(eq(postInteractions.postId, postId))
+      .orderBy(desc(postInteractions.createdAt));
+  }
+
+  async getPostComments(postId: number): Promise<PostInteraction[]> {
+    return await db
+      .select({
+        id: postInteractions.id,
+        postId: postInteractions.postId,
+        userId: postInteractions.userId,
+        type: postInteractions.type,
+        content: postInteractions.content,
+        createdAt: postInteractions.createdAt,
+        user: {
+          id: users.id,
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(postInteractions)
+      .leftJoin(users, eq(postInteractions.userId, users.id))
+      .where(and(
+        eq(postInteractions.postId, postId),
+        eq(postInteractions.type, 'comment')
+      ))
       .orderBy(desc(postInteractions.createdAt));
   }
 

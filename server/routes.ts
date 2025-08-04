@@ -765,6 +765,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get post comments only
+  app.get('/api/platform-posts/:id/comments', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const comments = await storage.getPostComments(postId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching post comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+  
   // File upload route - supports both images and videos
   app.post('/api/upload', isAuthenticated, (req, res, next) => {
     // Create a fields configuration that accepts both 'image', 'video' and 'file' fields

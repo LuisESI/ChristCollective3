@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react";
+import { Link } from "wouter";
 // import { formatDistanceToNow } from "date-fns";
 
 interface PlatformPostProps {
@@ -31,10 +32,11 @@ interface PlatformPostProps {
   };
   currentUserId?: string;
   showActions?: boolean;
+  expandComments?: boolean;
 }
 
-export function PlatformPostCard({ post, currentUserId, showActions = true }: PlatformPostProps) {
-  const [showComments, setShowComments] = useState(false);
+export function PlatformPostCard({ post, currentUserId, showActions = true, expandComments = false }: PlatformPostProps) {
+  const [showComments, setShowComments] = useState(expandComments);
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
@@ -53,6 +55,12 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
       return response.json();
     },
     enabled: !!post.userId,
+  });
+
+  // Fetch comments for the post
+  const { data: comments = [] } = useQuery<any[]>({
+    queryKey: [`/api/platform-posts/${post.id}/comments`],
+    enabled: showComments || expandComments,
   });
 
   const likeMutation = useMutation({
@@ -84,7 +92,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
     onSuccess: () => {
       setNewComment("");
       toast({ title: "Comment added successfully!" });
-      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}/interactions`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}/comments`] });
     },
     onError: (error: any) => {
       toast({
@@ -180,18 +188,20 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={getUserProfileImage()} alt="Profile" />
-              <AvatarFallback className="bg-[#D4AF37] text-black">
-                {getUserInitials()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
-              <p className="text-xs text-gray-400">@{getUserUsername()}</p>
+          <Link href={`/post/${post.id}`}>
+            <div className="flex items-center gap-3 cursor-pointer hover:bg-gray-900/30 -m-2 p-2 rounded transition-colors">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={getUserProfileImage()} alt="Profile" />
+                <AvatarFallback className="bg-[#D4AF37] text-black">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
+                <p className="text-xs text-gray-400">@{getUserUsername()}</p>
+              </div>
             </div>
-          </div>
+          </Link>
           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
             <MoreHorizontal className="w-4 h-4" />
           </Button>
@@ -293,25 +303,55 @@ export function PlatformPostCard({ post, currentUserId, showActions = true }: Pl
         )}
 
         {/* Comments Section */}
-        {showComments && currentUserId && (
+        {(showComments || expandComments) && (
           <div className="space-y-3 pt-3 border-t border-gray-700">
-            <div className="flex gap-2">
-              <Textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                rows={2}
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm"
-              />
-              <Button
-                onClick={handleComment}
-                disabled={commentMutation.isPending || !newComment.trim()}
-                className="bg-[#D4AF37] text-black hover:bg-[#B8941F] self-end"
-                size="sm"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+            {/* Existing Comments */}
+            {Array.isArray(comments) && comments.length > 0 && (
+              <div className="space-y-3 mb-4">
+                {comments.map((comment: any) => (
+                  <div key={comment.id} className="flex gap-2">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={comment.user?.profileImageUrl} alt={comment.user?.firstName} />
+                      <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
+                        {comment.user?.firstName?.[0] || comment.user?.username?.[0] || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="bg-gray-800 rounded-lg px-3 py-2">
+                        <div className="text-xs text-gray-400 mb-1">
+                          {comment.user?.firstName || comment.user?.username || "User"}
+                          <span className="ml-2">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-white">{comment.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Add Comment Form */}
+            {currentUserId && (
+              <div className="flex gap-2">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  rows={2}
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm"
+                />
+                <Button
+                  onClick={handleComment}
+                  disabled={commentMutation.isPending || !newComment.trim()}
+                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] self-end"
+                  size="sm"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

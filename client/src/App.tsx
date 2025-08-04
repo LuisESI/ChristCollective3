@@ -42,6 +42,7 @@ import MinistriesPage from "@/pages/MinistriesPage";
 import MinistryProfileViewPage from "@/pages/MinistryProfileViewPage";
 import EditMinistryProfilePage from "@/pages/EditMinistryProfilePage";
 import EventCreatePage from "@/pages/EventCreatePage";
+import PostPage from "@/pages/PostPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -80,6 +81,7 @@ function Router() {
       <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/feed" component={FeedPage} />
+      <Route path="/post/:id" component={PostPage} />
       <Route path="/explore" component={ExplorePage} />
       <Route path="/create" component={CreatePage} />
       <Route path="/events/create" component={EventCreatePage} />
