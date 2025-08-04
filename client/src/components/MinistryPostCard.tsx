@@ -416,19 +416,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 </Button>
               )}
               
-              {/* View Post Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = `/ministry-post/${post.id}`;
-                }}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Post
-              </Button>
+
             </div>
           </div>
         </CardContent>
