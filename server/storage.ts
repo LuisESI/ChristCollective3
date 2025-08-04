@@ -716,12 +716,31 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(ministryPosts.createdAt));
   }
 
-  async getMinistryPostById(postId: number): Promise<MinistryPost | undefined> {
-    const [post] = await db
-      .select()
+  async getMinistryPostById(postId: number): Promise<any> {
+    const [result] = await db
+      .select({
+        id: ministryPosts.id,
+        ministryId: ministryPosts.ministryId,
+        title: ministryPosts.title,
+        content: ministryPosts.content,
+        type: ministryPosts.type,
+        mediaUrls: ministryPosts.mediaUrls,
+        links: ministryPosts.links,
+        isPublished: ministryPosts.isPublished,
+        createdAt: ministryPosts.createdAt,
+        updatedAt: ministryPosts.updatedAt,
+        ministry: {
+          id: ministryProfiles.id,
+          name: ministryProfiles.name,
+          logo: ministryProfiles.logo,
+          denomination: ministryProfiles.denomination,
+        }
+      })
       .from(ministryPosts)
+      .leftJoin(ministryProfiles, eq(ministryPosts.ministryId, ministryProfiles.id))
       .where(and(eq(ministryPosts.id, postId), eq(ministryPosts.isPublished, true)));
-    return post || undefined;
+    
+    return result || undefined;
   }
 
   // Ministry events operations
