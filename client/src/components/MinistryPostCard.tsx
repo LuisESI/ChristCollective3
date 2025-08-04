@@ -165,8 +165,6 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
             </Card>
           </div>
         </div>
-
-
       </div>
     );
   }
