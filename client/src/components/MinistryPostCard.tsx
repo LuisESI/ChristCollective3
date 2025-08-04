@@ -50,14 +50,14 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
             <Card className="h-full bg-gray-900/50 border-gray-700 backdrop-blur overflow-hidden">
               <div className="relative h-full">
                 <img 
-                  src={post.mediaUrls[0]} 
+                  src={post.mediaUrls?.[0] || ''} 
                   alt="Event flyer"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    console.log('Image failed to load:', post.mediaUrls[0]);
+                    console.log('Image failed to load:', post.mediaUrls?.[0]);
                     e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMUYyOTM3Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDE2MCA5MUwyNDAgOTFMMjAwIDE1MFoiIGZpbGw9IiNENEFGMzciLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSIxODgiIHk9IjEzOCI+CjxwYXRoIGQ9Im0xNSAyLTEgMWg0djJIMHYtMmg0bC0xLTFoMTJabTIuNSA0aC0xMWwyIDExaDdsMi0xMVoiIGZpbGw9IiNENEFGMzciLz4KPHN2Zz4=';
                   }}
-                  onLoad={() => console.log('Image loaded successfully:', post.mediaUrls[0])}
+                  onLoad={() => console.log('Image loaded successfully:', post.mediaUrls?.[0])}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/50" />
                 
@@ -78,7 +78,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                     <h3 className="font-semibold text-white text-sm">
                       {post.ministry?.name || 'Ministry'}
                     </h3>
-                    <Badge variant="outline" className="text-xs bg-purple-900/50 border-purple-400 text-purple-200">
+                    <Badge variant="outline" className="text-xs bg-green-900/50 border-green-400 text-green-200">
                       <Calendar className="h-3 w-3 mr-1" />
                       Event
                     </Badge>
@@ -215,17 +215,20 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
         
         {post.links && Array.isArray(post.links) && post.links.length > 0 && (
           <div className="mt-3 space-y-1">
-            {post.links.map((link: string, index: number) => (
-              <a
-                key={index}
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/90 text-sm break-all"
-              >
-                {link}
-              </a>
-            ))}
+            {post.links.map((link: unknown, index: number) => {
+              const linkStr = String(link);
+              return (
+                <a
+                  key={index}
+                  href={linkStr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:text-primary/90 text-sm break-all"
+                >
+                  {linkStr}
+                </a>
+              );
+            })}
           </div>
         )}
       </CardContent>
