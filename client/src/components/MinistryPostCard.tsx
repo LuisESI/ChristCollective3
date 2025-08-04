@@ -135,19 +135,19 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0 overflow-y-auto h-full pb-4">
+              <CardContent className="pt-0 flex flex-col h-full pb-4">
                 {post.title && (
                   <h4 className="font-semibold text-white mb-3 text-base">
                     {post.title.replace('New Event: ', '')}
                   </h4>
                 )}
                 
-                <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                  {post.content.replace(/all are welcome/gi, '').trim()}
+                <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap mb-4">
+                  {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
                 </div>
                 
                 {/* View Post Button */}
-                <div className="mt-4 pt-3 border-t border-gray-600">
+                <div className="mt-auto pt-3 border-t border-gray-600">
                   <Button
                     variant="outline"
                     size="sm"
@@ -212,7 +212,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
         )}
         
         <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-          {post.content.replace(/all are welcome/gi, '').trim()}
+          {post.content.replace(/all are welcome/gi, '').replace(/!/g, '').trim()}
         </div>
         
         {post.mediaUrls && post.mediaUrls.length > 0 && (
