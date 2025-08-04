@@ -33,9 +33,10 @@ interface PlatformPostProps {
   currentUserId?: string;
   showActions?: boolean;
   expandComments?: boolean;
+  disablePostClick?: boolean;
 }
 
-export function PlatformPostCard({ post, currentUserId, showActions = true, expandComments = false }: PlatformPostProps) {
+export function PlatformPostCard({ post, currentUserId, showActions = true, expandComments = false, disablePostClick = false }: PlatformPostProps) {
   const [showComments, setShowComments] = useState(expandComments);
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
@@ -184,8 +185,8 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   };
 
   const handlePostClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on interactive elements
-    if ((e.target as HTMLElement).closest('button, input, textarea, a')) {
+    // Don't navigate if disabled or clicking on interactive elements
+    if (disablePostClick || (e.target as HTMLElement).closest('button, input, textarea, a')) {
       return;
     }
     window.location.href = `/post/${post.id}`;
@@ -193,7 +194,9 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   return (
     <Card 
-      className="bg-black border-gray-800 w-full cursor-pointer hover:bg-gray-900/20 transition-colors" 
+      className={`bg-black border-gray-800 w-full transition-colors ${
+        disablePostClick ? '' : 'cursor-pointer hover:bg-gray-900/20'
+      }`}
       onClick={handlePostClick}
     >
       <CardContent className="p-6">

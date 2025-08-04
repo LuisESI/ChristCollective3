@@ -83,6 +83,7 @@ export default function PostPage() {
             currentUserId={currentUser?.id}
             showActions={true}
             expandComments={true}
+            disablePostClick={true}
           />
         </div>
       </div>
