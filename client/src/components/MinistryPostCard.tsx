@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Clock, Church, RotateCcw, MousePointer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Clock, Church, RotateCcw, MousePointer, ExternalLink } from "lucide-react";
 import { MinistryPost } from "@shared/schema";
 import { useState } from "react";
 
@@ -142,7 +143,23 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                 )}
                 
                 <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                  {post.content}
+                  {post.content.replace(/all are welcome/gi, '').trim()}
+                </div>
+                
+                {/* View Post Button */}
+                <div className="mt-4 pt-3 border-t border-gray-600">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = `/post/${post.id}`;
+                    }}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Post
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -197,7 +214,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
         )}
         
         <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-          {post.content}
+          {post.content.replace(/all are welcome/gi, '').trim()}
         </div>
         
         {post.mediaUrls && post.mediaUrls.length > 0 && (
@@ -231,6 +248,19 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
             })}
           </div>
         )}
+        
+        {/* View Post Button */}
+        <div className="mt-4 pt-3 border-t border-gray-700">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+            onClick={() => window.location.href = `/post/${post.id}`}
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            View Post
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
