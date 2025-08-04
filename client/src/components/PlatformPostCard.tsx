@@ -331,19 +331,18 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
             
             {/* Add Comment Form */}
             {currentUserId && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
                   rows={1}
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm resize-none"
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm resize-none h-8 min-h-[32px] max-h-[32px] py-1"
                 />
                 <Button
                   onClick={handleComment}
                   disabled={commentMutation.isPending || !newComment.trim()}
-                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] self-end"
-                  size="sm"
+                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] h-8 w-8 p-0 flex items-center justify-center"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
