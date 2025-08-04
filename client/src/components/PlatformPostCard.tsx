@@ -183,26 +183,40 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     return postAuthor?.username || post.userId || "username";
   };
 
+  const handlePostClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    if ((e.target as HTMLElement).closest('button, input, textarea, a')) {
+      return;
+    }
+    window.location.href = `/post/${post.id}`;
+  };
+
   return (
-    <Card className="bg-black border-gray-800 w-full">
+    <Card 
+      className="bg-black border-gray-800 w-full cursor-pointer hover:bg-gray-900/20 transition-colors" 
+      onClick={handlePostClick}
+    >
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <Link href={`/post/${post.id}`}>
-            <div className="flex items-center gap-3 cursor-pointer hover:bg-gray-900/30 -m-2 p-2 rounded transition-colors">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={getUserProfileImage()} alt="Profile" />
-                <AvatarFallback className="bg-[#D4AF37] text-black">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
-                <p className="text-xs text-gray-400">@{getUserUsername()}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={getUserProfileImage()} alt="Profile" />
+              <AvatarFallback className="bg-[#D4AF37] text-black">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
+              <p className="text-xs text-gray-400">@{getUserUsername()}</p>
             </div>
-          </Link>
-          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-gray-400 hover:text-white z-10 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreHorizontal className="w-4 h-4" />
           </Button>
         </div>
@@ -265,7 +279,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleLike}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLike();
+                }}
                 disabled={likeMutation.isPending}
                 className={`flex items-center gap-2 ${
                   isLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"
@@ -278,7 +295,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowComments(!showComments)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowComments(!showComments);
+                }}
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
               >
                 <MessageCircle className="w-4 h-4" />
@@ -288,6 +308,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
               >
                 <Share2 className="w-4 h-4" />
