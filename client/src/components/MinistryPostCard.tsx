@@ -156,7 +156,7 @@ export function MinistryPostCard({ post }: MinistryPostCardProps) {
                     className="w-full bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black"
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.location.href = `/post/${post.id}`;
+                      window.location.href = `/ministry-post/${post.id}`;
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />

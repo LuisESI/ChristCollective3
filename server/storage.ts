@@ -716,6 +716,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(ministryPosts.createdAt));
   }
 
+  async getMinistryPostById(postId: number): Promise<MinistryPost | undefined> {
+    const [post] = await db
+      .select()
+      .from(ministryPosts)
+      .where(and(eq(ministryPosts.id, postId), eq(ministryPosts.isPublished, true)));
+    return post || undefined;
+  }
+
   // Ministry events operations
   async createMinistryEvent(eventData: InsertMinistryEvent & { ministryId: number }): Promise<MinistryEvent> {
     const [event] = await db

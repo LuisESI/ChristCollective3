@@ -82,6 +82,7 @@ function Router() {
       <Route path="/about" component={AboutPage} />
       <Route path="/feed" component={FeedPage} />
       <Route path="/post/:id" component={PostPage} />
+      <Route path="/ministry-post/:id" component={PostPage} />
       <Route path="/explore" component={ExplorePage} />
       <Route path="/create" component={CreatePage} />
       <Route path="/events/create" component={EventCreatePage} />

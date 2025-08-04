@@ -1,16 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
+import { MinistryPostCard } from "@/components/MinistryPostCard";
 
 export default function PostPage() {
   const { id } = useParams();
+  const [location] = useLocation();
   const postId = parseInt(id || '0');
-
+  
+  // Determine if this is a ministry post based on the URL
+  const isMinistryPost = location.startsWith('/ministry-post/');
+  
   const { data: post, isLoading, error } = useQuery({
-    queryKey: [`/api/platform-posts/${postId}`],
+    queryKey: isMinistryPost ? [`/api/ministry-posts/${postId}`] : [`/api/platform-posts/${postId}`],
     enabled: !!postId && !isNaN(postId),
   });
 
@@ -78,13 +83,20 @@ export default function PostPage() {
         </Link>
         
         <div className="max-w-2xl mx-auto">
-          <PlatformPostCard 
-            post={post} 
-            currentUserId={currentUser?.id}
-            showActions={true}
-            expandComments={true}
-            disablePostClick={true}
-          />
+          {isMinistryPost ? (
+            <MinistryPostCard 
+              post={post} 
+              disableClick={true}
+            />
+          ) : (
+            <PlatformPostCard 
+              post={post} 
+              currentUserId={currentUser?.id}
+              showActions={true}
+              expandComments={true}
+              disablePostClick={true}
+            />
+          )}
         </div>
       </div>
     </div>

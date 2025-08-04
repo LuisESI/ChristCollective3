@@ -2445,6 +2445,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual ministry post by ID
+  app.get('/api/ministry-posts/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      
+      if (!postId || isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      const post = await storage.getMinistryPostById(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Ministry post not found" });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching ministry post:", error);
+      res.status(500).json({ message: "Failed to fetch ministry post" });
+    }
+  });
+
   app.post('/api/ministries/:id/posts', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
