@@ -24,7 +24,8 @@ interface MinistryPostCardProps {
 
 export function MinistryPostCard({ post, disableClick = false, flatLayout = false }: MinistryPostCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const queryClient = useQueryClient();
 
   // RSVP functionality for event posts
