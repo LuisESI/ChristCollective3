@@ -194,52 +194,6 @@ export default function ConnectPage() {
       </Helmet>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Hero Header Section */}
-        <div className="text-center mb-12 pt-8">
-          {/* Feature icons row */}
-          <div className="flex items-center justify-center space-x-3 mb-8">
-            {intentionOptions.slice(0, 5).map((option, index) => {
-              const Icon = option.icon;
-              return (
-                <div 
-                  key={option.value}
-                  className={`p-3 rounded-2xl ${option.color} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110`}
-                >
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Main title and description */}
-          <div className="max-w-3xl mx-auto space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Welcome to 
-              <span className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] bg-clip-text text-transparent"> Connect</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-6">
-              Where believers gather for meaningful conversations
-            </p>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              Start a group chat queue and connect with fellow Christians for prayer, Bible study, evangelizing, fellowship, or worship
-            </p>
-          </div>
-
-          {/* Call to action */}
-          <div className="mt-8">
-            <Button 
-              onClick={() => setCreateDialogOpen(true)}
-              className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black hover:from-[#B8941F] hover:to-[#D4AF37] font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Start the First Queue
-            </Button>
-            <p className="text-sm text-gray-500 mt-3">
-              It's free and takes less than a minute • Safe, moderated environment
-            </p>
-          </div>
-        </div>
-
         {/* Create Queue Dialog */}
         <div className="hidden">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
