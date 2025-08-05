@@ -371,7 +371,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get creator's social media posts (only visible ones for public view)
       const posts = await storage.getVisibleSocialMediaPostsByCreator(creatorId);
       
-      res.json({ ...creator, posts });
+      // Get internal follower count from the follow system
+      const totalFollowers = await storage.getUserFollowersCount(creator.userId);
+      
+      res.json({ ...creator, posts, totalFollowers });
     } catch (error) {
       console.error("Error fetching content creator:", error);
       res.status(500).json({ message: "Failed to fetch content creator" });

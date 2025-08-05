@@ -14,6 +14,7 @@ import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_
 
 interface CreatorWithPosts extends ContentCreator {
   posts?: SocialMediaPost[];
+  totalFollowers?: number;
 }
 
 export default function CreatorProfilePage() {
@@ -137,11 +138,7 @@ export default function CreatorProfilePage() {
               </div>
               <div className="text-left">
                 <div className="text-lg font-semibold">
-                  {formatSubscriberCount(
-                    (creator.platforms as any[])?.reduce((total: number, platform: any) => 
-                      total + (platform.subscriberCount || 0), 0
-                    ) || 0
-                  )}
+                  {formatSubscriberCount(creator.totalFollowers || 0)}
                 </div>
                 <div className="text-xs text-gray-400">followers</div>
               </div>
