@@ -375,7 +375,7 @@ export function FollowSuggestions() {
             className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {suggestions.map((suggestion, index) => (
-              <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-gray-900 border-gray-700 hover:border-[#D4AF37]/50 transition-colors flex-shrink-0 w-80">
+              <Card key={`${suggestion.type}-${suggestion.id}-${index}`} className="bg-black border-gray-700 hover:border-[#D4AF37]/50 transition-colors flex-shrink-0 w-80">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="w-12 h-12">
