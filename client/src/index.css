@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Bell Animation Keyframes */
+@keyframes bell-ring {
+  0%, 50%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(10deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(8deg); }
+  40% { transform: rotate(-5deg); }
+}
+
+@keyframes notification-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 30px rgba(212, 175, 55, 0.4); }
+}
+
+@keyframes notification-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.bell-animate {
+  animation: bell-ring 2s ease-in-out infinite;
+}
+
+.notification-glow {
+  animation: notification-glow 2s ease-in-out infinite;
+}
+
+.notification-pop {
+  animation: notification-pop 0.6s ease-in-out;
+}
+
 .hero-section {
   background-image: url('/images/mountain-cross-background.jpg');
   background-size: cover;

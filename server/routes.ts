@@ -3120,6 +3120,28 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // TEST ROUTE: Create single test notification (for animation testing)
+  app.post("/api/notifications/test", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { message = "Test notification", type = "info" } = req.body;
+      
+      await storage.createNotification({
+        userId,
+        type,
+        title: "Test Notification",
+        message,
+        relatedId: null,
+        relatedType: null,
+      });
+      
+      res.json({ message: "Test notification created successfully" });
+    } catch (error) {
+      console.error("Error creating test notification:", error);
+      res.status(500).json({ message: "Failed to create test notification" });
+    }
+  });
+
   // TEST ROUTE: Create sample notifications (for testing only)
   app.post("/api/notifications/create-samples", isAuthenticated, async (req: any, res) => {
     try {

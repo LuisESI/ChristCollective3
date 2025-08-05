@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { Menu, X, Bell } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus";
 import { useQuery } from "@tanstack/react-query";
@@ -17,9 +17,11 @@ import { User } from "@shared/schema";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showNotificationAnimation, setShowNotificationAnimation] = useState(false);
   const [path] = useLocation();
   const { user, isLoading } = useAuth();
   const { data: creatorStatus } = useCreatorStatus();
+  const prevNotificationCount = useRef<number>(0);
   
   // Check if user has a ministry profile
   const { data: ministryProfile } = useQuery({
@@ -32,6 +34,16 @@ export default function Header() {
     queryKey: ["/api/notifications/unread-count"],
     enabled: !!user,
   });
+
+  // Trigger animation when notification count increases
+  useEffect(() => {
+    if (unreadCount.count > prevNotificationCount.current && prevNotificationCount.current > 0) {
+      setShowNotificationAnimation(true);
+      const timer = setTimeout(() => setShowNotificationAnimation(false), 600);
+      return () => clearTimeout(timer);
+    }
+    prevNotificationCount.current = unreadCount.count;
+  }, [unreadCount.count]);
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -74,12 +86,24 @@ export default function Header() {
             <>
               {/* Notifications Bell */}
               <Link href="/notifications">
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell className="h-5 w-5" />
+                <Button variant="ghost" size="sm" className="relative group">
+                  <Bell className={`h-5 w-5 transition-all duration-300 ${
+                    unreadCount.count > 0 
+                      ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'} notification-glow` 
+                      : 'text-gray-400 group-hover:text-[#D4AF37] group-hover:scale-110'
+                  }`} />
                   {unreadCount.count > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-semibold ${
+                      showNotificationAnimation ? 'notification-pop' : 'animate-bounce'
+                    }`}>
                       {unreadCount.count > 9 ? '9+' : unreadCount.count}
                     </span>
+                  )}
+                  {unreadCount.count > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-5 w-5 animate-ping opacity-25"></div>
+                  )}
+                  {unreadCount.count > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-[#D4AF37] rounded-full h-6 w-6 animate-pulse opacity-20"></div>
                   )}
                 </Button>
               </Link>
