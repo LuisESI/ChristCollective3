@@ -700,27 +700,27 @@ export default function ConnectPage() {
               
               {/* Feature highlights */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
                   <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                     <BookOpen className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Bible Study Groups</h4>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Bible Study Groups</h4>
                   <p className="text-sm text-gray-400 text-center leading-relaxed">Deep dive into Scripture with fellow believers</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
                   <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                     <Heart className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Prayer Circles</h4>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Prayer Circles</h4>
                   <p className="text-sm text-gray-400 text-center leading-relaxed">Join others in powerful group prayer</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
                   <div className="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                     <Users className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Fellowship</h4>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Fellowship</h4>
                   <p className="text-sm text-gray-400 text-center leading-relaxed">Build lasting friendships in faith</p>
                 </div>
               </div>
@@ -742,7 +742,7 @@ export default function ConnectPage() {
                 </div>
               </div>
               
-              <div className="mt-12 p-8 bg-gradient-to-br from-black/80 to-gray-900/80 border border-gray-700/50 rounded-2xl">
+              <div className="mt-12 p-8 bg-black border border-gray-700/50 rounded-2xl">
                 <div className="flex items-center justify-center mb-6">
                   <MessageCircle className="w-5 h-5 text-white mr-2" />
                   <span className="text-white font-semibold text-lg">How it works</span>
