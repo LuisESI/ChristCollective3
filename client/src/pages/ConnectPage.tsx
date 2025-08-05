@@ -194,13 +194,8 @@ export default function ConnectPage() {
       </Helmet>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Connect</h1>
-            <p className="text-gray-400">Join group chats for prayer, Bible study, evangelizing, and fellowship</p>
-          </div>
-          
+        {/* Create Queue Dialog */}
+        <div className="hidden">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium">
@@ -404,7 +399,14 @@ export default function ConnectPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-white">Join a Queue</h2>
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
+                <Button 
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Start Queue
+                </Button>
                 <Button variant="outline" size="sm" onClick={scrollLeft} className="border-gray-600">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -564,9 +566,20 @@ export default function ConnectPage() {
                 <h2 className="text-2xl font-bold text-white">Active Chats</h2>
                 <p className="text-gray-400 mt-1">Join ongoing conversations with fellow believers</p>
               </div>
-              <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
-                {activeChats.length} Active
-              </Badge>
+              <div className="flex items-center space-x-3">
+                {queues.length === 0 && (
+                  <Button 
+                    onClick={() => setCreateDialogOpen(true)}
+                    className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Start Queue
+                  </Button>
+                )}
+                <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
+                  {activeChats.length} Active
+                </Badge>
+              </div>
             </div>
             <div className="space-y-4">
               {activeChats.map((chat) => {
