@@ -666,10 +666,10 @@ export default function ConnectPage() {
 
         {/* Empty States */}
         {queues.length === 0 && activeChats.length === 0 && (
-          <div className="text-center py-20">
-            <div className="relative max-w-md mx-auto mb-8">
+          <div className="text-center py-8">
+            <div className="relative max-w-md mx-auto mb-4">
               {/* Icon group */}
-              <div className="flex items-center justify-center space-x-3 mb-6">
+              <div className="flex items-center justify-center space-x-3 mb-4">
                 {intentionOptions.slice(0, 5).map((option, index) => {
                   const Icon = option.icon;
                   return (
@@ -684,7 +684,7 @@ export default function ConnectPage() {
               </div>
             </div>
             
-            <div className="max-w-2xl mx-auto space-y-6">
+            <div className="max-w-2xl mx-auto space-y-4">
               <div>
                 <h3 className="text-3xl font-bold text-white mb-3">
                   Welcome to 
@@ -699,7 +699,7 @@ export default function ConnectPage() {
               </div>
               
               {/* Feature highlights */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
                 <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
                   <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                     <BookOpen className="w-7 h-7 text-white" />
