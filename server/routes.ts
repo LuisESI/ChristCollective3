@@ -12,7 +12,8 @@ import {
   insertSponsorshipApplicationSchema,
   insertMinistryProfileSchema,
   insertMinistryPostSchema,
-  insertMinistryEventSchema
+  insertMinistryEventSchema,
+  insertGroupChatQueueSchema
 } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
@@ -3213,6 +3214,86 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     } catch (error) {
       console.error("Error creating sample notifications:", error);
       res.status(500).json({ message: "Failed to create sample notifications" });
+    }
+  });
+
+  // Group Chat Queue Routes
+  app.post("/api/group-chat-queues", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const queueData = insertGroupChatQueueSchema.parse(req.body);
+      const queue = await storage.createGroupChatQueue({ ...queueData, creatorId: userId });
+      res.json(queue);
+    } catch (error) {
+      console.error("Error creating group chat queue:", error);
+      res.status(500).json({ message: "Failed to create group chat queue" });
+    }
+  });
+
+  app.get("/api/group-chat-queues", async (req, res) => {
+    try {
+      const queues = await storage.listActiveQueues();
+      res.json(queues);
+    } catch (error) {
+      console.error("Error fetching group chat queues:", error);
+      res.status(500).json({ message: "Failed to fetch group chat queues" });
+    }
+  });
+
+  app.post("/api/group-chat-queues/:id/join", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const queueId = parseInt(req.params.id);
+      await storage.joinQueue(queueId, userId);
+      res.json({ message: "Successfully joined queue" });
+    } catch (error) {
+      console.error("Error joining queue:", error);
+      res.status(500).json({ message: "Failed to join queue" });
+    }
+  });
+
+  app.post("/api/group-chat-queues/:id/leave", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const queueId = parseInt(req.params.id);
+      await storage.leaveQueue(queueId, userId);
+      res.json({ message: "Successfully left queue" });
+    } catch (error) {
+      console.error("Error leaving queue:", error);
+      res.status(500).json({ message: "Failed to leave queue" });
+    }
+  });
+
+  app.delete("/api/group-chat-queues/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const queueId = parseInt(req.params.id);
+      await storage.cancelQueue(queueId, userId);
+      res.json({ message: "Successfully cancelled queue" });
+    } catch (error) {
+      console.error("Error cancelling queue:", error);
+      res.status(500).json({ message: "Failed to cancel queue" });
+    }
+  });
+
+  app.get("/api/group-chats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const chats = await storage.getUserGroupChats(userId);
+      res.json(chats);
+    } catch (error) {
+      console.error("Error fetching group chats:", error);
+      res.status(500).json({ message: "Failed to fetch group chats" });
+    }
+  });
+
+  app.get("/api/group-chats/active", async (req, res) => {
+    try {
+      const chats = await storage.listActiveChats();
+      res.json(chats);
+    } catch (error) {
+      console.error("Error fetching active chats:", error);
+      res.status(500).json({ message: "Failed to fetch active chats" });
     }
   });
 

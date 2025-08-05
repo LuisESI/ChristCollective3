@@ -616,3 +616,89 @@ export type PostInteraction = typeof postInteractions.$inferSelect;
 
 export type UserFollow = typeof userFollows.$inferSelect;
 export type InsertUserFollow = typeof userFollows.$inferInsert;
+
+// Group chat queues and chats
+export const groupChatQueues = pgTable("group_chat_queues", {
+  id: serial("id").primaryKey(),
+  creatorId: varchar("creator_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  intention: varchar("intention").notNull(), // prayer, bible_study, evangelizing, fellowship, etc.
+  minPeople: integer("min_people").notNull().default(4),
+  maxPeople: integer("max_people").notNull().default(12),
+  currentCount: integer("current_count").notNull().default(1), // starts with creator
+  status: varchar("status").notNull().default("waiting"), // waiting, active, completed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const groupChats = pgTable("group_chats", {
+  id: serial("id").primaryKey(),
+  queueId: integer("queue_id").notNull().references(() => groupChatQueues.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  intention: varchar("intention").notNull(),
+  memberCount: integer("member_count").notNull(),
+  status: varchar("status").notNull().default("active"), // active, completed, archived
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const groupChatMembers = pgTable("group_chat_members", {
+  id: serial("id").primaryKey(),
+  queueId: integer("queue_id").references(() => groupChatQueues.id),
+  chatId: integer("chat_id").references(() => groupChats.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role").notNull().default("member"), // creator, member
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+// Group chat relations
+export const groupChatQueuesRelations = relations(groupChatQueues, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [groupChatQueues.creatorId],
+    references: [users.id],
+  }),
+  members: many(groupChatMembers),
+  chat: one(groupChats),
+}));
+
+export const groupChatsRelations = relations(groupChats, ({ one, many }) => ({
+  queue: one(groupChatQueues, {
+    fields: [groupChats.queueId],
+    references: [groupChatQueues.id],
+  }),
+  members: many(groupChatMembers),
+}));
+
+export const groupChatMembersRelations = relations(groupChatMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [groupChatMembers.userId],
+    references: [users.id],
+  }),
+  queue: one(groupChatQueues, {
+    fields: [groupChatMembers.queueId],
+    references: [groupChatQueues.id],
+  }),
+  chat: one(groupChats, {
+    fields: [groupChatMembers.chatId],
+    references: [groupChats.id],
+  }),
+}));
+
+// Insert schemas for group chats
+export const insertGroupChatQueueSchema = createInsertSchema(groupChatQueues)
+  .omit({ id: true, creatorId: true, currentCount: true, status: true, createdAt: true, updatedAt: true })
+  .extend({
+    minPeople: z.coerce.number().min(2).max(12),
+    maxPeople: z.coerce.number().min(4).max(12),
+  });
+
+export const insertGroupChatMemberSchema = createInsertSchema(groupChatMembers)
+  .omit({ id: true, joinedAt: true });
+
+export type InsertGroupChatQueue = z.infer<typeof insertGroupChatQueueSchema>;
+export type GroupChatQueue = typeof groupChatQueues.$inferSelect;
+export type GroupChat = typeof groupChats.$inferSelect;
+export type GroupChatMember = typeof groupChatMembers.$inferSelect;
+export type InsertGroupChatMember = z.infer<typeof insertGroupChatMemberSchema>;

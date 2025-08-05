@@ -52,6 +52,14 @@ import {
   type InsertUserFollow,
   businessFollows,
   type BusinessFollow,
+  groupChatQueues,
+  groupChats,
+  groupChatMembers,
+  type GroupChatQueue,
+  type InsertGroupChatQueue,
+  type GroupChat,
+  type GroupChatMember,
+  type InsertGroupChatMember,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -185,6 +193,18 @@ export interface IStorage {
   markAllNotificationsAsRead(userId: string): Promise<void>;
   deleteNotification(id: number): Promise<void>;
   getUnreadNotificationCount(userId: string): Promise<number>;
+
+  // Group chat operations
+  createGroupChatQueue(queueData: InsertGroupChatQueue & { creatorId: string }): Promise<GroupChatQueue>;
+  getGroupChatQueue(id: number): Promise<GroupChatQueue | undefined>;
+  listActiveQueues(): Promise<GroupChatQueue[]>;
+  joinQueue(queueId: number, userId: string): Promise<void>;
+  leaveQueue(queueId: number, userId: string): Promise<void>;
+  cancelQueue(queueId: number, userId: string): Promise<void>;
+  createGroupChatFromQueue(queueId: number): Promise<GroupChat>;
+  listActiveChats(): Promise<GroupChat[]>;
+  getUserGroupChats(userId: string): Promise<GroupChat[]>;
+  getQueueMembers(queueId: number): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1188,6 +1208,208 @@ export class DatabaseStorage implements IStorage {
         eq(notifications.isRead, false)
       ));
     return Number(result[0].count);
+  }
+
+  // Group chat operations
+  async createGroupChatQueue(queueData: InsertGroupChatQueue & { creatorId: string }): Promise<GroupChatQueue> {
+    const [queue] = await db
+      .insert(groupChatQueues)
+      .values({
+        ...queueData,
+        currentCount: 1, // Creator is first member
+      })
+      .returning();
+
+    // Add creator to queue members
+    await db.insert(groupChatMembers).values({
+      queueId: queue.id,
+      userId: queueData.creatorId,
+      role: "creator",
+    });
+
+    return queue;
+  }
+
+  async getGroupChatQueue(id: number): Promise<GroupChatQueue | undefined> {
+    const [queue] = await db
+      .select()
+      .from(groupChatQueues)
+      .where(eq(groupChatQueues.id, id));
+    return queue;
+  }
+
+  async listActiveQueues(): Promise<GroupChatQueue[]> {
+    return db
+      .select()
+      .from(groupChatQueues)
+      .where(eq(groupChatQueues.status, "waiting"))
+      .orderBy(desc(groupChatQueues.createdAt));
+  }
+
+  async joinQueue(queueId: number, userId: string): Promise<void> {
+    // Check if user already in queue
+    const existing = await db
+      .select()
+      .from(groupChatMembers)
+      .where(and(
+        eq(groupChatMembers.queueId, queueId),
+        eq(groupChatMembers.userId, userId)
+      ));
+
+    if (existing.length > 0) return;
+
+    // Get queue info
+    const queue = await this.getGroupChatQueue(queueId);
+    if (!queue || queue.currentCount >= queue.maxPeople) return;
+
+    // Add member
+    await db.insert(groupChatMembers).values({
+      queueId,
+      userId,
+      role: "member",
+    });
+
+    // Update current count
+    const newCount = queue.currentCount + 1;
+    await db
+      .update(groupChatQueues)
+      .set({ 
+        currentCount: newCount,
+        updatedAt: new Date(),
+      })
+      .where(eq(groupChatQueues.id, queueId));
+
+    // If we've reached the minimum, create the chat
+    if (newCount >= queue.minPeople) {
+      await this.createGroupChatFromQueue(queueId);
+    }
+  }
+
+  async leaveQueue(queueId: number, userId: string): Promise<void> {
+    await db
+      .delete(groupChatMembers)
+      .where(and(
+        eq(groupChatMembers.queueId, queueId),
+        eq(groupChatMembers.userId, userId)
+      ));
+
+    // Update current count
+    const queue = await this.getGroupChatQueue(queueId);
+    if (queue) {
+      await db
+        .update(groupChatQueues)
+        .set({ 
+          currentCount: Math.max(0, queue.currentCount - 1),
+          updatedAt: new Date(),
+        })
+        .where(eq(groupChatQueues.id, queueId));
+    }
+  }
+
+  async cancelQueue(queueId: number, userId: string): Promise<void> {
+    // Only creator can cancel
+    const queue = await this.getGroupChatQueue(queueId);
+    if (queue && queue.creatorId === userId) {
+      await db
+        .update(groupChatQueues)
+        .set({ 
+          status: "cancelled",
+          updatedAt: new Date(),
+        })
+        .where(eq(groupChatQueues.id, queueId));
+
+      // Remove all members
+      await db
+        .delete(groupChatMembers)
+        .where(eq(groupChatMembers.queueId, queueId));
+    }
+  }
+
+  async createGroupChatFromQueue(queueId: number): Promise<GroupChat> {
+    const queue = await this.getGroupChatQueue(queueId);
+    if (!queue) throw new Error("Queue not found");
+
+    const [chat] = await db
+      .insert(groupChats)
+      .values({
+        queueId,
+        title: queue.title,
+        description: queue.description,
+        intention: queue.intention,
+        memberCount: queue.currentCount,
+      })
+      .returning();
+
+    // Update queue members to reference the chat
+    await db
+      .update(groupChatMembers)
+      .set({ chatId: chat.id })
+      .where(eq(groupChatMembers.queueId, queueId));
+
+    // Update queue status
+    await db
+      .update(groupChatQueues)
+      .set({ 
+        status: "active",
+        updatedAt: new Date(),
+      })
+      .where(eq(groupChatQueues.id, queueId));
+
+    return chat;
+  }
+
+  async listActiveChats(): Promise<GroupChat[]> {
+    return db
+      .select()
+      .from(groupChats)
+      .where(eq(groupChats.status, "active"))
+      .orderBy(desc(groupChats.createdAt));
+  }
+
+  async getUserGroupChats(userId: string): Promise<GroupChat[]> {
+    return db
+      .select({
+        id: groupChats.id,
+        queueId: groupChats.queueId,
+        title: groupChats.title,
+        description: groupChats.description,
+        intention: groupChats.intention,
+        memberCount: groupChats.memberCount,
+        status: groupChats.status,
+        createdAt: groupChats.createdAt,
+        updatedAt: groupChats.updatedAt,
+      })
+      .from(groupChats)
+      .innerJoin(groupChatMembers, eq(groupChats.id, groupChatMembers.chatId))
+      .where(eq(groupChatMembers.userId, userId));
+  }
+
+  async getQueueMembers(queueId: number): Promise<User[]> {
+    return db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        displayName: users.displayName,
+        profileImageUrl: users.profileImageUrl,
+        stripeCustomerId: users.stripeCustomerId,
+        isAdmin: users.isAdmin,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        bio: users.bio,
+        location: users.location,
+        phone: users.phone,
+        username: users.username,
+        password: users.password,
+        userType: users.userType,
+        showEmail: users.showEmail,
+        showPhone: users.showPhone,
+        showLocation: users.showLocation,
+      })
+      .from(users)
+      .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
+      .where(eq(groupChatMembers.queueId, queueId));
   }
 }
 
