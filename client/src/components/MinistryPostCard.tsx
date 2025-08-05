@@ -65,9 +65,15 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   });
 
   const handleRsvp = (status: string) => {
+    console.log('handleRsvp called with status:', status);
+    console.log('Current userRsvp:', userRsvp);
+    console.log('Mutation pending states - RSVP:', rsvpMutation.isPending, 'Remove:', removeRsvpMutation.isPending);
+    
     if ((userRsvp as any)?.status === status) {
+      console.log('Removing existing RSVP');
       removeRsvpMutation.mutate();
     } else {
+      console.log('Creating/updating RSVP with status:', status);
       rsvpMutation.mutate({ status });
     }
   };
@@ -261,15 +267,27 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                         className={`flex-1 ${(userRsvp as any)?.status ? getRsvpColor((userRsvp as any).status, true) : 'text-gray-400 border-gray-500 hover:border-green-500 hover:text-green-400'}`}
                         onClick={(e) => {
                           e.stopPropagation();
+                          console.log('RSVP button clicked - User authenticated:', isAuthenticated);
+                          console.log('Current RSVP status:', (userRsvp as any)?.status);
+                          
+                          if (!isAuthenticated) {
+                            window.location.href = '/login';
+                            return;
+                          }
+                          
                           // Cycle through RSVP states: null -> going -> maybe -> not_going -> null
                           const currentStatus = (userRsvp as any)?.status;
                           if (!currentStatus) {
+                            console.log('Setting RSVP to going');
                             handleRsvp('going');
                           } else if (currentStatus === 'going') {
+                            console.log('Setting RSVP to maybe');
                             handleRsvp('maybe');
                           } else if (currentStatus === 'maybe') {
+                            console.log('Setting RSVP to not_going');
                             handleRsvp('not_going');
                           } else {
+                            console.log('Removing RSVP');
                             removeRsvpMutation.mutate();
                           }
                         }}
@@ -492,15 +510,27 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 className={`flex-1 ${(userRsvp as any)?.status ? getRsvpColor((userRsvp as any).status, true) : 'text-gray-400 border-gray-500 hover:border-green-500 hover:text-green-400'}`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log('RSVP button clicked - User authenticated:', isAuthenticated);
+                  console.log('Current RSVP status:', (userRsvp as any)?.status);
+                  
+                  if (!isAuthenticated) {
+                    window.location.href = '/login';
+                    return;
+                  }
+                  
                   // Cycle through RSVP states: null -> going -> maybe -> not_going -> null
                   const currentStatus = (userRsvp as any)?.status;
                   if (!currentStatus) {
+                    console.log('Setting RSVP to going');
                     handleRsvp('going');
                   } else if (currentStatus === 'going') {
+                    console.log('Setting RSVP to maybe');
                     handleRsvp('maybe');
                   } else if (currentStatus === 'maybe') {
+                    console.log('Setting RSVP to not_going');
                     handleRsvp('not_going');
                   } else {
+                    console.log('Removing RSVP');
                     removeRsvpMutation.mutate();
                   }
                 }}
