@@ -675,9 +675,9 @@ export default function ConnectPage() {
                   return (
                     <div 
                       key={option.value}
-                      className="p-3 rounded-2xl bg-[#D4AF37]"
+                      className={`p-3 rounded-2xl ${option.color}`}
                     >
-                      <Icon className="w-5 h-5 text-black" />
+                      <Icon className="w-5 h-5 text-white" />
                     </div>
                   );
                 })}
@@ -700,28 +700,28 @@ export default function ConnectPage() {
               
               {/* Feature highlights */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
-                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <BookOpen className="w-7 h-7 text-black" />
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <BookOpen className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Bible Study Groups</h4>
-                  <p className="text-sm text-gray-300 text-center leading-relaxed">Deep dive into Scripture with fellow believers</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Bible Study Groups</h4>
+                  <p className="text-sm text-gray-400 text-center leading-relaxed">Deep dive into Scripture with fellow believers</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <Heart className="w-7 h-7 text-black" />
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <Heart className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Prayer Circles</h4>
-                  <p className="text-sm text-gray-300 text-center leading-relaxed">Join others in powerful group prayer</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Prayer Circles</h4>
+                  <p className="text-sm text-gray-400 text-center leading-relaxed">Join others in powerful group prayer</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <Users className="w-7 h-7 text-black" />
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <Users className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Fellowship</h4>
-                  <p className="text-sm text-gray-300 text-center leading-relaxed">Build lasting friendships in faith</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Fellowship</h4>
+                  <p className="text-sm text-gray-400 text-center leading-relaxed">Build lasting friendships in faith</p>
                 </div>
               </div>
               
@@ -742,22 +742,22 @@ export default function ConnectPage() {
                 </div>
               </div>
               
-              <div className="mt-12 p-8 bg-gradient-to-br from-[#2D2A26] to-[#1A1713] border border-[#D4AF37]/30 rounded-2xl">
+              <div className="mt-12 p-8 bg-gradient-to-br from-black/80 to-gray-900/80 border border-gray-700/50 rounded-2xl">
                 <div className="flex items-center justify-center mb-6">
-                  <MessageCircle className="w-5 h-5 text-[#D4AF37] mr-2" />
-                  <span className="text-[#D4AF37] font-semibold text-lg">How it works</span>
+                  <MessageCircle className="w-5 h-5 text-white mr-2" />
+                  <span className="text-white font-semibold text-lg">How it works</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
                     <p className="text-gray-300 font-medium">Create a queue with your intention</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
                     <p className="text-gray-300 font-medium">Others join your queue</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
                     <p className="text-gray-300 font-medium">Chat starts automatically!</p>
                   </div>
                 </div>
