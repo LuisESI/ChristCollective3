@@ -86,7 +86,7 @@ export default function Header() {
             <>
               {/* Notifications Bell */}
               <Link href="/notifications">
-                <Button variant="ghost" size="sm" className="relative group">
+                <Button variant="ghost" size="sm" className="relative group bg-transparent hover:bg-transparent">
                   <Bell className={`h-5 w-5 transition-all duration-300 ${
                     unreadCount.count > 0 
                       ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'} notification-glow` 
