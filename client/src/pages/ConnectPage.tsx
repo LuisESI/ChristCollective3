@@ -705,28 +705,28 @@ export default function ConnectPage() {
               
               {/* Feature highlights */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
                     <BookOpen className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">Bible Study Groups</h4>
-                  <p className="text-sm text-gray-400">Deep dive into Scripture with fellow believers</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Bible Study Groups</h4>
+                  <p className="text-sm text-gray-400 text-center">Deep dive into Scripture with fellow believers</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
                     <Heart className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">Prayer Circles</h4>
-                  <p className="text-sm text-gray-400">Join others in powerful group prayer</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Prayer Circles</h4>
+                  <p className="text-sm text-gray-400 text-center">Join others in powerful group prayer</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
+                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
                     <Users className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">Fellowship</h4>
-                  <p className="text-sm text-gray-400">Build lasting friendships in faith</p>
+                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Fellowship</h4>
+                  <p className="text-sm text-gray-400 text-center">Build lasting friendships in faith</p>
                 </div>
               </div>
               
