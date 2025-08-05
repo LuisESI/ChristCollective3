@@ -30,12 +30,12 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
 
   // RSVP functionality for event posts
   const { data: userRsvp } = useQuery({
-    queryKey: ['/api/ministry-posts', post.id, 'rsvp'],
-    enabled: post.type === 'event_announcement',
+    queryKey: [`/api/ministry-posts/${post.id}/rsvp`],
+    enabled: post.type === 'event_announcement' && isAuthenticated,
   });
 
   const { data: rsvpCounts } = useQuery({
-    queryKey: ['/api/ministry-posts', post.id, 'rsvps'],
+    queryKey: [`/api/ministry-posts/${post.id}/rsvps`],
     enabled: post.type === 'event_announcement',
   });
 
@@ -47,8 +47,9 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvp'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvps'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvp`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvps`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts'] });
     }
   });
 
@@ -59,21 +60,16 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvp'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts', post.id, 'rsvps'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvp`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvps`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-posts'] });
     }
   });
 
   const handleRsvp = (status: string) => {
-    console.log('handleRsvp called with status:', status);
-    console.log('Current userRsvp:', userRsvp);
-    console.log('Mutation pending states - RSVP:', rsvpMutation.isPending, 'Remove:', removeRsvpMutation.isPending);
-    
     if ((userRsvp as any)?.status === status) {
-      console.log('Removing existing RSVP');
       removeRsvpMutation.mutate();
     } else {
-      console.log('Creating/updating RSVP with status:', status);
       rsvpMutation.mutate({ status });
     }
   };
@@ -267,8 +263,6 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                         className={`flex-1 ${(userRsvp as any)?.status ? getRsvpColor((userRsvp as any).status, true) : 'text-gray-400 border-gray-500 hover:border-green-500 hover:text-green-400'}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('RSVP button clicked - User authenticated:', isAuthenticated);
-                          console.log('Current RSVP status:', (userRsvp as any)?.status);
                           
                           if (!isAuthenticated) {
                             window.location.href = '/login';
@@ -278,16 +272,12 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                           // Cycle through RSVP states: null -> going -> maybe -> not_going -> null
                           const currentStatus = (userRsvp as any)?.status;
                           if (!currentStatus) {
-                            console.log('Setting RSVP to going');
                             handleRsvp('going');
                           } else if (currentStatus === 'going') {
-                            console.log('Setting RSVP to maybe');
                             handleRsvp('maybe');
                           } else if (currentStatus === 'maybe') {
-                            console.log('Setting RSVP to not_going');
                             handleRsvp('not_going');
                           } else {
-                            console.log('Removing RSVP');
                             removeRsvpMutation.mutate();
                           }
                         }}
@@ -510,8 +500,6 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 className={`flex-1 ${(userRsvp as any)?.status ? getRsvpColor((userRsvp as any).status, true) : 'text-gray-400 border-gray-500 hover:border-green-500 hover:text-green-400'}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('RSVP button clicked - User authenticated:', isAuthenticated);
-                  console.log('Current RSVP status:', (userRsvp as any)?.status);
                   
                   if (!isAuthenticated) {
                     window.location.href = '/login';
@@ -521,16 +509,12 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   // Cycle through RSVP states: null -> going -> maybe -> not_going -> null
                   const currentStatus = (userRsvp as any)?.status;
                   if (!currentStatus) {
-                    console.log('Setting RSVP to going');
                     handleRsvp('going');
                   } else if (currentStatus === 'going') {
-                    console.log('Setting RSVP to maybe');
                     handleRsvp('maybe');
                   } else if (currentStatus === 'maybe') {
-                    console.log('Setting RSVP to not_going');
                     handleRsvp('not_going');
                   } else {
-                    console.log('Removing RSVP');
                     removeRsvpMutation.mutate();
                   }
                 }}
