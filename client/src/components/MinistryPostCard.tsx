@@ -238,6 +238,20 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 {/* RSVP and View Post Buttons */}
                 <div className="pt-3 border-t border-gray-600 mt-3">
                   <div className="flex space-x-2">
+                    {/* View Post Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`${post.type === 'event_announcement' ? 'flex-1' : 'w-full'} bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `/ministry-post/${post.id}`;
+                      }}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Post
+                    </Button>
+
                     {/* RSVP Button - Only for event posts */}
                     {post.type === 'event_announcement' && (
                       <Button
@@ -269,20 +283,6 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                         </span>
                       </Button>
                     )}
-                    
-                    {/* View Post Button */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`${post.type === 'event_announcement' ? 'flex-1' : 'w-full'} bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `/ministry-post/${post.id}`;
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      View Post
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -472,6 +472,17 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
         {/* RSVP and View Post Buttons */}
         <div className="mt-4 pt-3 border-t border-gray-700">
           <div className="flex space-x-2">
+            {/* View Post Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className={`${post.type === 'event_announcement' ? 'flex-1' : 'w-full'} bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black`}
+              onClick={() => window.location.href = `/ministry-post/${post.id}`}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View Post
+            </Button>
+
             {/* RSVP Button - Only for event posts */}
             {post.type === 'event_announcement' && (
               <Button
@@ -503,17 +514,6 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 </span>
               </Button>
             )}
-            
-            {/* View Post Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className={`${post.type === 'event_announcement' ? 'flex-1' : 'w-full'} bg-[#D4AF37] border-[#D4AF37] text-black hover:bg-[#B8941F] hover:text-black`}
-              onClick={() => window.location.href = `/ministry-post/${post.id}`}
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              View Post
-            </Button>
           </div>
         </div>
       </CardContent>
