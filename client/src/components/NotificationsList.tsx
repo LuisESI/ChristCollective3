@@ -136,17 +136,9 @@ export function NotificationsList() {
 
   return (
     <div className="space-y-6">
-      {/* Header with actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <h2 className="text-2xl font-bold text-white">Notifications</h2>
-          {unreadCount.count > 0 && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {unreadCount.count}
-            </span>
-          )}
-        </div>
-        {notifications.length > 0 && (
+      {/* Actions header */}
+      {notifications.length > 0 && (
+        <div className="flex justify-end">
           <Button
             onClick={() => markAllAsReadMutation.mutate()}
             disabled={markAllAsReadMutation.isPending}
@@ -157,8 +149,8 @@ export function NotificationsList() {
             <CheckCheck className="h-4 w-4 mr-2" />
             Mark All Read
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Notifications list */}
       {notifications.length === 0 ? (
