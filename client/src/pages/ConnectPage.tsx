@@ -747,23 +747,23 @@ export default function ConnectPage() {
                 </div>
               </div>
               
-              <div className="mt-12 p-6 bg-gradient-to-r from-[#D4AF37]/10 to-[#FFD700]/10 border border-[#D4AF37]/20 rounded-xl">
-                <div className="flex items-center justify-center mb-3">
-                  <MessageCircle className="w-5 h-5 text-[#D4AF37] mr-2" />
-                  <span className="text-[#D4AF37] font-semibold">How it works</span>
+              <div className="mt-12 p-8 bg-gradient-to-br from-black/80 to-gray-900/80 border border-gray-700/50 rounded-xl">
+                <div className="flex items-center justify-center mb-6">
+                  <MessageCircle className="w-5 h-5 text-white mr-2" />
+                  <span className="text-white font-semibold text-lg">How it works</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-2">1</div>
-                    <p className="text-gray-300">Create a queue with your intention</p>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
+                    <p className="text-gray-300 font-medium">Create a queue with your intention</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-2">2</div>
-                    <p className="text-gray-300">Others join your queue</p>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
+                    <p className="text-gray-300 font-medium">Others join your queue</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-2">3</div>
-                    <p className="text-gray-300">Chat starts automatically!</p>
+                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
+                    <p className="text-gray-300 font-medium">Chat starts automatically!</p>
                   </div>
                 </div>
               </div>
