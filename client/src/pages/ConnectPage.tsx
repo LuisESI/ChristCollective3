@@ -668,26 +668,16 @@ export default function ConnectPage() {
         {queues.length === 0 && activeChats.length === 0 && (
           <div className="text-center py-20">
             <div className="relative max-w-md mx-auto mb-8">
-              {/* Animated background circles */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-[#D4AF37]/10 rounded-full animate-pulse"></div>
-                <div className="absolute w-20 h-20 bg-[#D4AF37]/20 rounded-full animate-ping"></div>
-              </div>
-              
               {/* Icon group */}
-              <div className="relative z-10 flex items-center justify-center space-x-2 mb-6">
+              <div className="flex items-center justify-center space-x-3 mb-6">
                 {intentionOptions.slice(0, 5).map((option, index) => {
                   const Icon = option.icon;
                   return (
                     <div 
                       key={option.value}
-                      className={`p-3 rounded-full ${option.color} shadow-lg animate-bounce`}
-                      style={{ 
-                        animationDelay: `${index * 0.2}s`,
-                        animationDuration: '2s'
-                      }}
+                      className="p-3 rounded-2xl bg-[#D4AF37]"
                     >
-                      <Icon className="w-5 h-5 text-white" />
+                      <Icon className="w-5 h-5 text-black" />
                     </div>
                   );
                 })}
@@ -710,64 +700,64 @@ export default function ConnectPage() {
               
               {/* Feature highlights */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
-                    <BookOpen className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <BookOpen className="w-7 h-7 text-black" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Bible Study Groups</h4>
-                  <p className="text-sm text-gray-400 text-center">Deep dive into Scripture with fellow believers</p>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Bible Study Groups</h4>
+                  <p className="text-sm text-gray-300 text-center leading-relaxed">Deep dive into Scripture with fellow believers</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
-                    <Heart className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <Heart className="w-7 h-7 text-black" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Prayer Circles</h4>
-                  <p className="text-sm text-gray-400 text-center">Join others in powerful group prayer</p>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Prayer Circles</h4>
+                  <p className="text-sm text-gray-300 text-center leading-relaxed">Join others in powerful group prayer</p>
                 </div>
                 
-                <div className="bg-gradient-to-br from-black/80 to-gray-900/80 p-6 rounded-xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 mx-auto">
-                    <Users className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-br from-[#2D2A26] to-[#1A1713] p-6 rounded-2xl border border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 group">
+                  <div className="w-14 h-14 bg-[#D4AF37] rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                    <Users className="w-7 h-7 text-black" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2 text-center">Fellowship</h4>
-                  <p className="text-sm text-gray-400 text-center">Build lasting friendships in faith</p>
+                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Fellowship</h4>
+                  <p className="text-sm text-gray-300 text-center leading-relaxed">Build lasting friendships in faith</p>
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button 
                   onClick={() => setCreateDialogOpen(true)}
-                  className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black hover:from-[#B8941F] hover:to-[#D4AF37] font-bold text-lg px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="bg-[#D4AF37] text-black hover:bg-[#C49B2A] font-bold text-lg px-8 py-4 rounded-2xl transition-all duration-300"
                 >
                   <Plus className="w-5 h-5 mr-3" />
                   Start the First Queue
                 </Button>
                 <div className="text-center sm:text-left">
-                  <p className="text-sm text-gray-500">It's free and takes less than a minute</p>
-                  <div className="flex items-center justify-center sm:justify-start mt-1 text-xs text-gray-600">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></div>
+                  <p className="text-sm text-gray-400">It's free and takes less than a minute</p>
+                  <div className="flex items-center justify-center sm:justify-start mt-1 text-xs text-gray-500">
+                    <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full mr-2"></div>
                     <span>Safe, moderated environment</span>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-12 p-8 bg-gradient-to-br from-black/80 to-gray-900/80 border border-gray-700/50 rounded-xl">
+              <div className="mt-12 p-8 bg-gradient-to-br from-[#2D2A26] to-[#1A1713] border border-[#D4AF37]/30 rounded-2xl">
                 <div className="flex items-center justify-center mb-6">
-                  <MessageCircle className="w-5 h-5 text-white mr-2" />
-                  <span className="text-white font-semibold text-lg">How it works</span>
+                  <MessageCircle className="w-5 h-5 text-[#D4AF37] mr-2" />
+                  <span className="text-[#D4AF37] font-semibold text-lg">How it works</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
+                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
                     <p className="text-gray-300 font-medium">Create a queue with your intention</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
+                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
                     <p className="text-gray-300 font-medium">Others join your queue</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-gray-800 border-2 border-gray-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
+                    <div className="w-12 h-12 bg-[#D4AF37] text-black rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
                     <p className="text-gray-300 font-medium">Chat starts automatically!</p>
                   </div>
                 </div>
