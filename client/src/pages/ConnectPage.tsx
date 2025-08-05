@@ -43,24 +43,10 @@ export default function ConnectPage() {
         <meta name="description" content="Stay connected with the Christ Collective community through notifications and connections" />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex gap-8">
-          {/* Notifications Section */}
-          <div className="w-80">
-            <div className="flex items-center space-x-2 mb-4">
-              <Bell className="h-5 w-5 text-[#D4AF37]" />
-              <h2 className="text-lg font-medium text-white">Notifications</h2>
-              {unreadCount.count > 0 && (
-                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  {unreadCount.count}
-                </span>
-              )}
-            </div>
-            <NotificationsList />
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
+      <div className="min-h-screen bg-black text-white pb-20">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Connections Section */}
+          <div className="mb-12">
             <h1 className="text-2xl font-bold text-white mb-6">Connect</h1>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -105,6 +91,20 @@ export default function ConnectPage() {
                 Campaigns
               </Button>
             </div>
+          </div>
+
+          {/* Notifications Section */}
+          <div>
+            <div className="flex items-center space-x-2 mb-4">
+              <Bell className="h-5 w-5 text-[#D4AF37]" />
+              <h2 className="text-lg font-medium text-white">Notifications</h2>
+              {unreadCount.count > 0 && (
+                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                  {unreadCount.count}
+                </span>
+              )}
+            </div>
+            <NotificationsList />
           </div>
         </div>
       </div>
