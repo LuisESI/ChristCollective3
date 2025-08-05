@@ -3051,6 +3051,149 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Notification routes
+  app.get("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const notifications = await storage.getUserNotifications(userId, limit);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const notificationId = parseInt(id);
+      
+      if (isNaN(notificationId)) {
+        return res.status(400).json({ message: "Invalid notification ID" });
+      }
+
+      await storage.markNotificationAsRead(notificationId);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/mark-all-read", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const notificationId = parseInt(id);
+      
+      if (isNaN(notificationId)) {
+        return res.status(400).json({ message: "Invalid notification ID" });
+      }
+
+      await storage.deleteNotification(notificationId);
+      res.json({ message: "Notification deleted" });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  // TEST ROUTE: Create sample notifications (for testing only)
+  app.post("/api/notifications/create-samples", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const sampleNotifications = [
+        {
+          userId,
+          type: "like",
+          title: "New like on your post",
+          message: "Someone liked your recent post about faith and community.",
+          relatedId: "1",
+          relatedType: "platform_post",
+          isRead: false,
+          actorName: "John Doe",
+          actorImage: "/uploads/sample-avatar.jpg"
+        },
+        {
+          userId,
+          type: "comment",
+          title: "New comment on your ministry event",
+          message: "Sarah Johnson commented on your Beach & Bonfire event.",
+          relatedId: "1",
+          relatedType: "ministry_post",
+          isRead: false,
+          actorName: "Sarah Johnson"
+        },
+        {
+          userId,
+          type: "follow",
+          title: "New follower",
+          message: "Michael Brown started following you.",
+          relatedId: userId,
+          relatedType: "user",
+          isRead: false,
+          actorName: "Michael Brown"
+        },
+        {
+          userId,
+          type: "rsvp",
+          title: "Event RSVP update",
+          message: "5 new people RSVPed to your upcoming ministry event.",
+          relatedId: "1",
+          relatedType: "ministry_post",
+          isRead: false
+        },
+        {
+          userId,
+          type: "ministry_post",
+          title: "New ministry post",
+          message: "Grace Community Church shared a new event you might be interested in.",
+          relatedId: "2",
+          relatedType: "ministry_post",
+          isRead: true,
+          actorName: "Grace Community Church"
+        }
+      ];
+
+      const createdNotifications = [];
+      for (const notificationData of sampleNotifications) {
+        const notification = await storage.createNotification(notificationData);
+        createdNotifications.push(notification);
+      }
+
+      res.json({ 
+        message: "Sample notifications created", 
+        notifications: createdNotifications 
+      });
+    } catch (error) {
+      console.error("Error creating sample notifications:", error);
+      res.status(500).json({ message: "Failed to create sample notifications" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

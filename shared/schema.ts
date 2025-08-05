@@ -456,6 +456,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   ministryFollowers: many(ministryFollowers),
   eventRegistrations: many(eventRegistrations),
   businessFollows: many(businessFollows),
+  notifications: many(notifications),
 }));
 
 export const businessFollowsRelations = relations(businessFollows, ({ one }) => ({
@@ -538,6 +539,45 @@ export type MinistryPost = typeof ministryPosts.$inferSelect;
 
 export type InsertMinistryEvent = z.infer<typeof insertMinistryEventSchema>;
 export type MinistryEvent = typeof ministryEvents.$inferSelect;
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  type: varchar("type", { 
+    enum: ["like", "comment", "follow", "post", "rsvp", "campaign_update", "ministry_post"] 
+  }).notNull(),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  relatedId: varchar("related_id"), // ID of the related entity (post, comment, etc.)
+  relatedType: varchar("related_type", { 
+    enum: ["platform_post", "ministry_post", "comment", "campaign", "user", "ministry"] 
+  }),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  // Optional metadata for rich notifications
+  actorId: varchar("actor_id").references(() => users.id), // Who performed the action
+  actorName: varchar("actor_name"),
+  actorImage: varchar("actor_image"),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  actor: one(users, {
+    fields: [notifications.actorId],
+    references: [users.id],
+  }),
+}));
+
+// Notification insert schema
+export const insertNotificationSchema = createInsertSchema(notifications)
+  .omit({ id: true, createdAt: true });
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
 
 // Ministry post RSVP schemas
 export const insertMinistryPostRsvpSchema = createInsertSchema(ministryPostRsvps)

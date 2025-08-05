@@ -13,6 +13,7 @@ import {
   ministryFollowers,
   ministryPostRsvps,
   eventRegistrations,
+  notifications,
   type User,
   type UpsertUser,
   type Campaign,
@@ -38,6 +39,8 @@ import {
   type MinistryPostRsvp,
   type InsertMinistryPostRsvp,
   type EventRegistration,
+  type Notification,
+  type InsertNotification,
   platformPosts,
   postInteractions,
   type PlatformPost,
@@ -174,6 +177,14 @@ export interface IStorage {
   getUserFollowersCount(userId: string): Promise<number>;
   getUserFollowingCount(userId: string): Promise<number>;
   getFollowedUsersPosts(userId: string, limit?: number): Promise<PlatformPost[]>;
+
+  // Notification operations
+  createNotification(notificationData: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  deleteNotification(id: number): Promise<void>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1128,6 +1139,55 @@ export class DatabaseStorage implements IStorage {
         eq(businessFollows.businessId, businessId)
       ));
     return !!follow;
+  }
+
+  // Notification operations
+  async createNotification(notificationData: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(notificationData)
+      .returning();
+    return notification;
+  }
+
+  async getUserNotifications(userId: string, limit = 50): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
+  }
+
+  async deleteNotification(id: number): Promise<void> {
+    await db
+      .delete(notifications)
+      .where(eq(notifications.id, id));
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, false)
+      ));
+    return Number(result[0].count);
   }
 }
 
