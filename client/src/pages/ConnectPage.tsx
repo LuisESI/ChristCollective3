@@ -58,7 +58,7 @@ export default function ConnectPage() {
     defaultValues: {
       title: "",
       description: "",
-      intention: "",
+      intention: "prayer",
       minPeople: 4,
       maxPeople: 8,
     },
@@ -81,7 +81,7 @@ export default function ConnectPage() {
     mutationFn: async (data: CreateQueueForm) => {
       return apiRequest("/api/group-chat-queues", {
         method: "POST",
-        body: data,
+        data: data,
       });
     },
     onSuccess: () => {
@@ -203,7 +203,7 @@ export default function ConnectPage() {
                 Start Chat Queue
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white border border-[#D4AF37]/20 shadow-2xl max-w-2xl">
+            <DialogContent className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white border border-[#D4AF37]/20 shadow-2xl max-w-lg max-h-[85vh] overflow-y-auto">
               <DialogHeader className="pb-6">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-full flex items-center justify-center shadow-lg">
@@ -247,9 +247,10 @@ export default function ConnectPage() {
                         <FormControl>
                           <Textarea 
                             {...field} 
+                            value={field.value || ""}
                             placeholder="Share what your group will discuss, pray about, or study together..."
                             className="bg-black/50 border border-gray-600 text-white placeholder-gray-500 rounded-lg resize-none transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-black/70"
-                            rows={4}
+                            rows={3}
                           />
                         </FormControl>
                         <FormMessage />
@@ -315,6 +316,8 @@ export default function ConnectPage() {
                                   type="number"
                                   min={2}
                                   max={12}
+                                  value={field.value || ""}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                                   className="bg-black/50 border border-gray-600 text-white h-12 rounded-lg transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 pl-4 pr-8"
                                 />
                                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
@@ -340,6 +343,8 @@ export default function ConnectPage() {
                                   type="number"
                                   min={4}
                                   max={12}
+                                  value={field.value || ""}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                                   className="bg-black/50 border border-gray-600 text-white h-12 rounded-lg transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 pl-4 pr-8"
                                 />
                                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
