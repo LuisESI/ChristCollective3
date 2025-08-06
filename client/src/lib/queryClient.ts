@@ -86,7 +86,7 @@ export const getQueryFn: <T>(options: {
 
       try {
         const res = await fetch(url as string, {
-          credentials: "same-origin",
+          credentials: "include",
           headers: {
             'Content-Type': 'application/json',
           },
