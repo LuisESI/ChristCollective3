@@ -30,20 +30,22 @@ export default function Header() {
   });
 
   // Get notification count
-  const { data: unreadCount = { count: 0 } } = useQuery<{ count: number }>({
+  const { data: unreadCount } = useQuery<{ count: number } | null>({
     queryKey: ["/api/notifications/unread-count"],
     enabled: !!user,
   });
 
+  const notificationCount = unreadCount?.count || 0;
+
   // Trigger animation when notification count increases
   useEffect(() => {
-    if (unreadCount.count > prevNotificationCount.current && prevNotificationCount.current > 0) {
+    if (notificationCount > prevNotificationCount.current && prevNotificationCount.current > 0) {
       setShowNotificationAnimation(true);
       const timer = setTimeout(() => setShowNotificationAnimation(false), 600);
       return () => clearTimeout(timer);
     }
-    prevNotificationCount.current = unreadCount.count;
-  }, [unreadCount.count]);
+    prevNotificationCount.current = notificationCount;
+  }, [notificationCount]);
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -88,21 +90,21 @@ export default function Header() {
               <Link href="/notifications">
                 <Button variant="ghost" size="sm" className="relative group bg-transparent hover:bg-transparent">
                   <Bell className={`h-5 w-5 transition-all duration-300 ${
-                    unreadCount.count > 0 
+                    notificationCount > 0 
                       ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'} notification-glow` 
                       : 'text-gray-400 group-hover:text-[#D4AF37] group-hover:scale-110'
                   }`} />
-                  {unreadCount.count > 0 && (
+                  {notificationCount > 0 && (
                     <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-semibold ${
                       showNotificationAnimation ? 'notification-pop' : 'animate-bounce'
                     }`}>
-                      {unreadCount.count > 9 ? '9+' : unreadCount.count}
+                      {notificationCount > 9 ? '9+' : notificationCount}
                     </span>
                   )}
-                  {unreadCount.count > 0 && (
+                  {notificationCount > 0 && (
                     <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-5 w-5 animate-ping opacity-25"></div>
                   )}
-                  {unreadCount.count > 0 && (
+                  {notificationCount > 0 && (
                     <div className="absolute -top-1 -right-1 bg-[#D4AF37] rounded-full h-6 w-6 animate-pulse opacity-20"></div>
                   )}
                 </Button>
