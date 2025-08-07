@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar } from "lucide-react";
 import { Link } from "wouter";
 // import { formatDistanceToNow } from "date-fns";
 
@@ -56,6 +56,19 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       return response.json();
     },
     enabled: !!post.userId,
+  });
+
+  // Fetch ministry data - try for all posts since platform posts might include ministry content
+  const { data: ministryData } = useQuery({
+    queryKey: ["/api/ministry-posts", post.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/ministry-posts/${post.id}`);
+      if (!response.ok) {
+        return null; // Not a ministry post
+      }
+      return response.json();
+    },
+    enabled: !!post.id, // Enable for all posts to check if they're ministry posts
   });
 
   // Fetch comments for the post
@@ -227,7 +240,24 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
           </Button>
         </div>
         
-        {/* Title (if exists) */}
+        {/* Ministry and Event badges - show at top if available */}
+        {ministryData && (ministryData.ministry?.denomination || ministryData.type === 'event_announcement') && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {ministryData.ministry?.denomination && (
+              <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
+                {ministryData.ministry.denomination}
+              </Badge>
+            )}
+            {ministryData.type === 'event_announcement' && (
+              <Badge variant="outline" className="text-xs bg-green-900/30 border-green-600 text-green-300">
+                <Calendar className="h-3 w-3 mr-1" />
+                Event
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Title */}
         {post.title && (
           <h3 className="font-semibold text-white text-base mb-2">{post.title}</h3>
         )}

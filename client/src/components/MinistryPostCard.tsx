@@ -162,13 +162,22 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                         <Church className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
-                    <h3 className="font-semibold text-white text-sm">
-                      {post.ministry?.name || 'Ministry'}
-                    </h3>
-                    <Badge variant="outline" className="text-xs bg-green-900/50 border-green-400 text-green-200">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Event
-                    </Badge>
+                    <div className="flex flex-col">
+                      <h3 className="font-semibold text-white text-sm">
+                        {post.ministry?.name || 'Ministry'}
+                      </h3>
+                      <div className="flex gap-1 mt-1">
+                        {post.ministry?.denomination && (
+                          <Badge variant="outline" className="text-xs bg-blue-900/50 border-blue-400 text-blue-200">
+                            {post.ministry.denomination}
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="text-xs bg-green-900/50 border-green-400 text-green-200">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Event
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                   <h4 className="font-bold text-white text-lg mb-1">
                     {post.title?.replace('New Event: ', '') || 'Event'}
