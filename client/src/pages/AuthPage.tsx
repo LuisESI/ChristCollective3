@@ -54,6 +54,11 @@ export default function AuthPage() {
       },
       onError: (error) => {
         console.error("Login failed:", error);
+        toast({
+          title: "Login Failed",
+          description: error.message || "An error occurred during login",
+          variant: "destructive",
+        });
       }
     });
   };
