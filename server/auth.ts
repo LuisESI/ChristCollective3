@@ -152,7 +152,7 @@ export function setupAuth(app: Express) {
       }
       if (!user) {
         console.log("Authentication failed for user:", req.body.username);
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Incorrect password" });
       }
       req.logIn(user, (err) => {
         if (err) {
