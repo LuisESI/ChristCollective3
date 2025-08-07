@@ -6,25 +6,25 @@ import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
 import { Plus, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, ReactNode } from "react";
 
 export default function FeedPage() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ["/api/platform-posts"],
   });
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<any>({
     queryKey: ["/api/user"],
   });
 
   // Get posts from followed users when user is logged in
-  const { data: followingPosts } = useQuery({
+  const { data: followingPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/feed/following"],
     enabled: !!user?.id,
   });
 
   // Get ministry posts from followed ministries
-  const { data: ministryPosts = [] } = useQuery({
+  const { data: ministryPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/feed/ministry-posts"],
     enabled: !!user?.id,
   });
@@ -36,8 +36,8 @@ export default function FeedPage() {
     
     // Combine posts and add type identifier
     const combined = [
-      ...userPosts.map((post: any) => ({ ...post, postType: 'user' })),
-      ...ministry.map((post: any) => ({ ...post, postType: 'ministry' }))
+      ...((userPosts as any[]) || []).map((post: any) => ({ ...post, postType: 'user' })),
+      ...((ministry as any[]) || []).map((post: any) => ({ ...post, postType: 'ministry' }))
     ];
     
     // Sort by creation date (newest first)
@@ -67,35 +67,43 @@ export default function FeedPage() {
 
           {/* Posts Grid - Now appears first */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {allPosts.length > 0 ? (
-              allPosts.map((post: any) => (
-                post.postType === 'ministry' ? (
-                  <MinistryPostCard
-                    key={`ministry-${post.id}`}
-                    post={post}
-                  />
-                ) : (
-                  <PlatformPostCard
-                    key={`user-${post.id}`}
-                    post={post}
-                    currentUserId={user?.id}
-                    showActions={true}
-                  />
-                )
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
-                  <p>Start following members and ministries to see their inspiring content in your feed!</p>
-                </div>
-              </div>
-            )}
+            {(() => {
+              if (allPosts.length === 0) {
+                return (
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
+                      <p>Start following members and ministries to see their inspiring content in your feed!</p>
+                    </div>
+                  </div>
+                );
+              }
+
+              return allPosts.map((post: any) => {
+                if (post.postType === 'ministry') {
+                  return (
+                    <MinistryPostCard
+                      key={`ministry-${post.id}`}
+                      post={post}
+                    />
+                  );
+                } else {
+                  return (
+                    <PlatformPostCard
+                      key={`user-${post.id}`}
+                      post={post}
+                      currentUserId={user?.id}
+                      showActions={true}
+                    />
+                  );
+                }
+              });
+            })()}
           </div>
 
           {/* Load More Button */}
-          {posts && posts.length >= 50 && (
+          {posts && (posts as any[]).length >= 50 && (
             <div className="text-center mb-8">
               <Button 
                 variant="outline" 
