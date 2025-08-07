@@ -314,7 +314,15 @@ export default function MinistryProfileViewPage() {
                   ) : (
                     <div className="space-y-4">
                       {events.map((event: MinistryEvent) => (
-                        <div key={event.id} className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
+                        <div 
+                          key={event.id} 
+                          className="border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors cursor-pointer"
+                          onClick={() => {
+                            // Navigate to the ministry post page for this event
+                            // Events automatically create ministry posts, so we need to find the corresponding post
+                            window.location.href = `/ministry-post/${event.id}`;
+                          }}
+                        >
                           <div className="flex gap-4">
                             {/* Event Flyer */}
                             {event.flyerImage && (

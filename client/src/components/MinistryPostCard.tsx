@@ -382,20 +382,17 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
           {post.links && Array.isArray(post.links) && post.links.length > 0 && (
             <div className="space-y-2">
               <h4 className="font-semibold text-white">Related Links:</h4>
-              {post.links.map((link: unknown, index: number) => {
-                const linkStr = String(link);
-                return (
+              {post.links.map((link: string, index: number) => (
                   <a
                     key={index}
-                    href={linkStr}
+                    href={link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/90 block break-all"
                   >
-                    {linkStr}
+                    {link}
                   </a>
-                );
-              })}
+                ))}
             </div>
           )}
 
@@ -470,20 +467,17 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
         
         {post.links && Array.isArray(post.links) && post.links.length > 0 && (
           <div className="mt-3 space-y-1">
-            {post.links.map((link: unknown, index: number) => {
-              const linkStr = String(link);
-              return (
+            {post.links.map((link: string, index: number) => (
                 <a
                   key={index}
-                  href={linkStr}
+                  href={link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:text-primary/90 text-sm break-all"
                 >
-                  {linkStr}
+                  {link}
                 </a>
-              );
-            })}
+              ))}
           </div>
         )}
         
