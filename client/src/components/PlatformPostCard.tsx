@@ -167,7 +167,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     if (postAuthor?.username) {
       return postAuthor.username.charAt(0).toUpperCase();
     }
-    return post.authorType.charAt(0).toUpperCase();
+    if (post.authorType) {
+      return post.authorType.charAt(0).toUpperCase();
+    }
+    return "U"; // Default fallback
   };
 
   const getUserDisplayName = () => {
