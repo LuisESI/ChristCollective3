@@ -54,6 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
         data: credentials,
       });
+      
+      // Check if login failed
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Login failed" }));
+        throw new Error(errorData.message || "Incorrect password");
+      }
+      
       return await res.json();
     },
     onSuccess: (user: User) => {
