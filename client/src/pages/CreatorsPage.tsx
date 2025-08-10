@@ -200,7 +200,7 @@ export default function CreatorsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {creators.map((creator) => (
-              <Card key={creator.id} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+              <Card key={creator.id} className="bg-black shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-16 h-16">
