@@ -234,7 +234,7 @@ export default function CreatorsPage() {
                     {creator.audience && (
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-yellow-600" />
-                        <span className="text-sm text-gray-700 font-medium">Audience:</span>
+                        <span className="text-sm text-white font-medium">Audience:</span>
                         <span className="text-sm text-gray-600">{creator.audience}</span>
                       </div>
                     )}
