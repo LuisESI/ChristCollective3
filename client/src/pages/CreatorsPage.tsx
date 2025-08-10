@@ -228,7 +228,7 @@ export default function CreatorsPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Play className="w-4 h-4 text-yellow-600" />
-                      <span className="text-sm text-gray-700 font-medium">Content:</span>
+                      <span className="text-sm text-white font-medium">Content:</span>
                       <span className="text-sm text-white">{creator.content}</span>
                     </div>
                     {creator.audience && (
