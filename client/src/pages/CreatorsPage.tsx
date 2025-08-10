@@ -242,7 +242,7 @@ export default function CreatorsPage() {
 
                   {/* Platforms */}
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Platforms:</p>
+                    <p className="text-sm font-medium text-white">Platforms:</p>
                     <div className="flex flex-wrap gap-2">
                       {(creator.platforms as any[])?.map((platform, index) => (
                         <div key={index} className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1">
