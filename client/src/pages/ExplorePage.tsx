@@ -42,6 +42,11 @@ export default function ExplorePage() {
     enabled: !!user,
   });
 
+  const { data: allUsers, isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/users"],
+    enabled: !!user,
+  });
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -56,6 +61,7 @@ export default function ExplorePage() {
     { id: "creators", label: "Creators", icon: Star },
     { id: "businesses", label: "Businesses", icon: Users },
     { id: "ministries", label: "Ministries", icon: Star },
+    { id: "users", label: "Members", icon: Users },
   ];
 
   const filteredCampaigns = campaigns && Array.isArray(campaigns) ? campaigns.filter((campaign: any) =>
@@ -79,6 +85,13 @@ export default function ExplorePage() {
     ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
 
+  const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((user: any) =>
+    user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) : [];
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -92,7 +105,7 @@ export default function ExplorePage() {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search campaigns, creators, businesses..."
+              placeholder="Search campaigns, creators, businesses, members..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -356,6 +369,67 @@ export default function ExplorePage() {
                             <span className="text-sm text-gray-300 ml-2">
                               {ministry.location}
                             </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Users/Members Section */}
+        {(selectedCategory === "all" || selectedCategory === "users") && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Community Members</h3>
+            {usersLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredUsers?.slice(0, 9).map((member: any) => (
+                  <Card key={member.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
+                        onClick={() => navigate(`/profile/${member.username}`)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={member.profileImageUrl} />
+                          <AvatarFallback>{member.firstName?.[0] || member.username?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-yellow-400">
+                            {member.firstName && member.lastName 
+                              ? `${member.firstName} ${member.lastName}`
+                              : member.username}
+                          </h4>
+                          <p className="text-xs text-gray-400">@{member.username}</p>
+                          {member.bio && (
+                            <p className="text-sm text-white mt-1">{member.bio.substring(0, 50)}...</p>
+                          )}
+                          <div className="flex items-center mt-2">
+                            {member.userType && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none capitalize">
+                                {member.userType}
+                              </Badge>
+                            )}
+                            {member.location && (
+                              <span className="text-xs text-gray-400 ml-2">{member.location}</span>
+                            )}
                           </div>
                         </div>
                       </div>
