@@ -844,7 +844,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="ministries" className="space-y-6">
-            <div>
+            <div className="mt-8">
               <h2 className="text-2xl font-bold text-primary mb-4">Ministry Profile Approvals</h2>
               {ministriesLoading ? (
                 <div className="space-y-4">
