@@ -621,7 +621,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="campaigns" className="space-y-6">
-            <div>
+            <div className="mt-8">
               <h2 className="text-2xl font-bold text-primary mb-4">All Campaigns</h2>
               {campaignsLoading ? (
                 <div className="space-y-4">
