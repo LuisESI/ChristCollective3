@@ -589,7 +589,6 @@ export type MinistryPostRsvp = typeof ministryPostRsvps.$inferSelect;
 export type MinistryFollower = typeof ministryFollowers.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type BusinessFollow = typeof businessFollows.$inferSelect;
-export type UserFollow = typeof userFollows.$inferSelect;
 
 // Platform posts schemas
 export const insertPlatformPostSchema = createInsertSchema(platformPosts).omit({

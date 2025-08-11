@@ -164,9 +164,9 @@ export default function ConnectPage() {
     return intentionOptions.find(opt => opt.value === intention) || intentionOptions[0];
   };
 
-  const formatTimeAgo = (date: string) => {
+  const formatTimeAgo = (date: string | Date) => {
     const now = new Date();
-    const created = new Date(date);
+    const created = typeof date === 'string' ? new Date(date) : date;
     const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 1) return "Just now";
