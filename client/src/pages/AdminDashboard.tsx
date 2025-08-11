@@ -409,39 +409,39 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900 border-gray-800 text-xs">
-            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
-              <div className="flex flex-col items-center">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900 border-gray-800 text-xs gap-1">
+            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">Ministries</span>
                 <span className="text-xs opacity-70">({Array.isArray(pendingMinistries) ? pendingMinistries.length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
-              <div className="flex flex-col items-center">
+            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">Campaigns</span>
                 <span className="text-xs opacity-70">({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3">
-              <div className="flex flex-col items-center">
+            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">Sponsors</span>
                 <span className="text-xs opacity-70">({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
-              <div className="flex flex-col items-center">
+            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">All Campaigns</span>
                 <span className="text-xs opacity-70">Manage</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
-              <div className="flex flex-col items-center">
+            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">Transactions</span>
                 <span className="text-xs opacity-70">View</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-2 py-3 hidden lg:flex">
-              <div className="flex flex-col items-center">
+            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+              <div className="flex flex-col items-center gap-1">
                 <span className="font-medium">Users</span>
                 <span className="text-xs opacity-70">Manage</span>
               </div>
