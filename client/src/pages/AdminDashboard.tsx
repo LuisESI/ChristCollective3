@@ -75,7 +75,7 @@ export default function AdminDashboard() {
 
   const approveMutation = useMutation({
     mutationFn: async (campaignId: string) => {
-      await apiRequest("POST", `/api/admin/campaigns/${campaignId}/approve`);
+      await apiRequest(`/api/admin/campaigns/${campaignId}/approve`, { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
 
   const rejectMutation = useMutation({
     mutationFn: async (campaignId: string) => {
-      await apiRequest("POST", `/api/admin/campaigns/${campaignId}/reject`);
+      await apiRequest(`/api/admin/campaigns/${campaignId}/reject`, { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: async (campaignId: string) => {
-      await apiRequest("DELETE", `/api/admin/campaigns/${campaignId}`);
+      await apiRequest(`/api/admin/campaigns/${campaignId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
   // Sponsorship application mutations
   const approveApplicationMutation = useMutation({
     mutationFn: async (applicationId: number) => {
-      await apiRequest("POST", `/api/admin/sponsorship-applications/${applicationId}/approve`);
+      await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/approve`, { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
 
   const rejectApplicationMutation = useMutation({
     mutationFn: async (applicationId: number) => {
-      await apiRequest("POST", `/api/admin/sponsorship-applications/${applicationId}/reject`);
+      await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/reject`, { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
   // Ministry approval mutations
   const approveMinistryMutation = useMutation({
     mutationFn: async (ministryId: number) => {
-      await apiRequest("PATCH", `/api/ministries/${ministryId}/approve`);
+      await apiRequest(`/api/ministries/${ministryId}/approve`, { method: "PATCH" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
 
   const rejectMinistryMutation = useMutation({
     mutationFn: async (ministryId: number) => {
-      await apiRequest("PATCH", `/api/ministries/${ministryId}/reject`);
+      await apiRequest(`/api/ministries/${ministryId}/reject`, { method: "PATCH" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
