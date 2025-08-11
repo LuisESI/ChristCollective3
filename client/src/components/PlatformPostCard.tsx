@@ -240,23 +240,6 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
           </Button>
         </div>
         
-        {/* Ministry and Event badges - show at top if available */}
-        {ministryData && (ministryData.ministry?.denomination || ministryData.type === 'event_announcement') && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {ministryData.ministry?.denomination && (
-              <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
-                {ministryData.ministry.denomination}
-              </Badge>
-            )}
-            {ministryData.type === 'event_announcement' && (
-              <Badge variant="outline" className="text-xs bg-green-900/30 border-green-600 text-green-300">
-                <Calendar className="h-3 w-3 mr-1" />
-                Event
-              </Badge>
-            )}
-          </div>
-        )}
-
         {/* Title */}
         {post.title && (
           <h3 className="font-semibold text-white text-base mb-2">{post.title}</h3>
