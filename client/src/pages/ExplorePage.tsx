@@ -439,7 +439,7 @@ export default function ExplorePage() {
                                 {member.userType === "business_owner" ? "Business" : member.userType}
                               </Badge>
                             )}
-                            {member.location && (
+                            {member.location && member.showLocation && (
                               <span className="text-xs text-gray-400 ml-2">{member.location}</span>
                             )}
                           </div>
