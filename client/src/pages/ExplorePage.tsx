@@ -47,6 +47,12 @@ export default function ExplorePage() {
     enabled: !!user,
   });
 
+  // Get current user's following list to prioritize unfollowed users
+  const { data: userFollowing } = useQuery({
+    queryKey: [`/api/users/${user?.id}/following`],
+    enabled: !!user?.id,
+  });
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -86,23 +92,51 @@ export default function ExplorePage() {
   ) : [];
 
   // Filter users but exclude those who should be in other categories
-  const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((user: any) => {
+  const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((targetUser: any) => {
+    // Don't show current user in the list
+    if (targetUser.id === user?.id) return false;
+    
     // Check if user has ministry profile, creator profile, or business profile
-    const hasMinistryProfile = ministries && ministries.some((ministry: any) => ministry.userId === user.id);
-    const hasCreatorProfile = creators && creators.some((creator: any) => creator.userId === user.id);
-    const hasBusinessProfile = businesses && businesses.some((business: any) => business.userId === user.id);
+    const hasMinistryProfile = ministries && ministries.some((ministry: any) => ministry.userId === targetUser.id);
+    const hasCreatorProfile = creators && creators.some((creator: any) => creator.userId === targetUser.id);
+    const hasBusinessProfile = businesses && businesses.some((business: any) => business.userId === targetUser.id);
     
     // Only show regular users (those without special profiles)
     const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
     
     // Apply search filter
-    const matchesSearch = user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.bio?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      targetUser.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      targetUser.bio?.toLowerCase().includes(searchTerm.toLowerCase());
       
     return isRegularUser && matchesSearch;
   }) : [];
+
+  // Randomize and prioritize unfollowed users
+  const randomizedUsers = filteredUsers.length > 0 ? (() => {
+    const followingIds = userFollowing ? userFollowing.map((follow: any) => follow.id) : [];
+    
+    // Separate followed and unfollowed users
+    const unfollowedUsers = filteredUsers.filter((targetUser: any) => !followingIds.includes(targetUser.id));
+    const followedUsers = filteredUsers.filter((targetUser: any) => followingIds.includes(targetUser.id));
+    
+    // Shuffle both arrays
+    const shuffleArray = (array: any[]) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
+    const shuffledUnfollowed = shuffleArray(unfollowedUsers);
+    const shuffledFollowed = shuffleArray(followedUsers);
+    
+    // Prioritize unfollowed users, then followed users
+    return [...shuffledUnfollowed, ...shuffledFollowed];
+  })() : [];
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -414,7 +448,7 @@ export default function ExplorePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredUsers?.slice(0, 9).map((member: any) => (
+                {randomizedUsers?.slice(0, 9).map((member: any) => (
                   <Card key={member.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
                         onClick={() => navigate(`/profile/${member.username}`)}>
                     <CardContent className="p-4">
