@@ -54,9 +54,15 @@ export default function ProfilePage() {
     enabled: !!displayUser,
   });
 
-  // Get user's following count
+  // Get user's following count and follower stats
   const { data: followingData } = useQuery({
     queryKey: [`/api/users/${displayUser?.id}/following`],
+    enabled: !!displayUser?.id,
+  });
+
+  // Get user's stats (follower and following counts)
+  const { data: userStats } = useQuery({
+    queryKey: [`/api/users/${displayUser?.id}/stats`],
     enabled: !!displayUser?.id,
   });
 
@@ -186,15 +192,13 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-left">
                   <div className="text-lg font-semibold">
-                    {creator?.totalFollowers ? 
-                      formatSubscriberCount(creator.totalFollowers) : 
-                      "0"}
+                    {userStats?.followersCount || creator?.totalFollowers || 0}
                   </div>
                   <div className="text-xs text-gray-400">followers</div>
                 </div>
                 <div className="text-left">
                   <div className="text-lg font-semibold">
-                    {followingData?.length || 0}
+                    {userStats?.followingCount || followingData?.length || 0}
                   </div>
                   <div className="text-xs text-gray-400">following</div>
                 </div>

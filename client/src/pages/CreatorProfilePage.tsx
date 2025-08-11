@@ -29,6 +29,18 @@ export default function CreatorProfilePage() {
     }
   });
 
+  // Fetch user stats (followers/following counts) 
+  const { data: userStats } = useQuery({
+    queryKey: ['/api/users', creator?.userId, 'stats'],
+    queryFn: async () => {
+      if (!creator?.userId) return null;
+      const response = await fetch(`/api/users/${creator.userId}/stats`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!creator?.userId
+  });
+
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'youtube': return <img src={youtubeIconPath} alt="YouTube" className="w-6 h-6" />;
@@ -144,7 +156,7 @@ export default function CreatorProfilePage() {
               </div>
               <div className="text-left">
                 <div className="text-lg font-semibold">
-                  0
+                  {userStats?.followingCount || 0}
                 </div>
                 <div className="text-xs text-gray-400">following</div>
               </div>
