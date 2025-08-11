@@ -193,7 +193,7 @@ export default function ConnectPage() {
         <meta name="description" content="Join group chats for prayer, Bible study, evangelizing, and fellowship with other believers" />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Create Queue Dialog */}
         <div className="hidden">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
