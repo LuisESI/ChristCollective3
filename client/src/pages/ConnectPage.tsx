@@ -432,9 +432,9 @@ export default function ConnectPage() {
                 const isNearFull = progressPercent >= 80;
                 
                 return (
-                  <Card key={queue.id} className="bg-black border border-gray-700/50 flex-shrink-0 w-80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden">
+                  <Card key={queue.id} className="bg-black border border-gray-700/50 flex-shrink-0 w-80 min-h-[400px] hover:shadow-2xl transition-all duration-300 group relative overflow-hidden">
                     
-                    <CardHeader className="pb-3 relative z-10">
+                    <CardHeader className="pb-4 pt-6 relative z-10">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg group-hover:shadow-xl transition-all duration-300 relative`}>
@@ -468,15 +468,15 @@ export default function ConnectPage() {
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="space-y-4 relative z-10">
+                    <CardContent className="space-y-6 relative z-10 px-6 pb-6 flex flex-col h-full">
                       {queue.description && (
-                        <div className="bg-black/20 rounded-lg p-3 border border-gray-700/50">
-                          <p className="text-sm text-gray-300 line-clamp-2">{queue.description}</p>
+                        <div className="bg-black/20 rounded-lg p-4 border border-gray-700/50">
+                          <p className="text-sm text-gray-300 line-clamp-2 leading-relaxed">{queue.description}</p>
                         </div>
                       )}
                       
                       <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center space-x-2 text-gray-400">
+                        <div className="flex items-center space-x-3 text-gray-400">
                           <div className="flex items-center space-x-1">
                             <Users className="w-4 h-4" />
                             <span className="font-medium">{queue.currentCount}/{queue.maxPeople}</span>
@@ -495,7 +495,7 @@ export default function ConnectPage() {
                         )}
                       </div>
                       
-                      <div className="space-y-2">
+                      <div className="space-y-3 flex-grow">
                         <div className="flex justify-between text-xs text-gray-400">
                           <span>Progress</span>
                           <span>{Math.round(progressPercent)}%</span>
@@ -506,7 +506,7 @@ export default function ConnectPage() {
                             style={{ width: `${progressPercent}%` }}
                           />
                         </div>
-                        <div className="text-xs text-gray-500 text-center">
+                        <div className="text-xs text-gray-500 text-center py-2">
                           {queue.minPeople - queue.currentCount > 0 
                             ? `${queue.minPeople - queue.currentCount} more needed to start chat`
                             : 'Ready to chat!'
@@ -514,39 +514,41 @@ export default function ConnectPage() {
                         </div>
                       </div>
                       
-                      {!isOwner && (
-                        <Button
-                          onClick={() => joinQueueMutation.mutate(queue.id)}
-                          disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                          className="w-full bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold py-3 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {joinQueueMutation.isPending ? (
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2" />
-                              Joining...
+                      <div className="mt-auto pt-4">
+                        {!isOwner && (
+                          <Button
+                            onClick={() => joinQueueMutation.mutate(queue.id)}
+                            disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                            className="w-full bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold py-4 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                          >
+                            {joinQueueMutation.isPending ? (
+                              <div className="flex items-center justify-center">
+                                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2" />
+                                Joining...
+                              </div>
+                            ) : queue.currentCount >= queue.maxPeople ? (
+                              <div className="flex items-center justify-center">
+                                <Users className="w-4 h-4 mr-2" />
+                                Queue Full
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center">
+                                <UserPlus className="w-4 h-4 mr-2" />
+                                Join Queue
+                              </div>
+                            )}
+                          </Button>
+                        )}
+                        
+                        {isOwner && (
+                          <div className="text-center p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-lg">
+                            <div className="flex items-center justify-center space-x-2 text-[#D4AF37]">
+                              <Users className="w-4 h-4" />
+                              <span className="text-sm font-medium">You created this queue</span>
                             </div>
-                          ) : queue.currentCount >= queue.maxPeople ? (
-                            <div className="flex items-center">
-                              <Users className="w-4 h-4 mr-2" />
-                              Queue Full
-                            </div>
-                          ) : (
-                            <div className="flex items-center">
-                              <UserPlus className="w-4 h-4 mr-2" />
-                              Join Queue
-                            </div>
-                          )}
-                        </Button>
-                      )}
-                      
-                      {isOwner && (
-                        <div className="text-center p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-lg">
-                          <div className="flex items-center justify-center space-x-2 text-[#D4AF37]">
-                            <Users className="w-4 h-4" />
-                            <span className="text-sm font-medium">You created this queue</span>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 );
