@@ -519,7 +519,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
-            <div>
+            <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-primary">User Management</h2>
                 <div className="relative w-64">
