@@ -203,14 +203,14 @@ export default function ConnectPage() {
                 Start Chat Queue
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white border border-[#D4AF37]/20 shadow-2xl max-w-lg max-h-[85vh] overflow-y-auto">
+            <DialogContent className="bg-black text-white border border-[#D4AF37]/20 shadow-2xl max-w-lg max-h-[85vh] overflow-y-auto">
               <DialogHeader className="pb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-full flex items-center justify-center shadow-lg">
+                  <div className="w-10 h-10 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-lg">
                     <Users className="w-5 h-5 text-black" />
                   </div>
                   <div>
-                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFD700] bg-clip-text text-transparent">
+                    <DialogTitle className="text-2xl font-bold text-[#D4AF37]">
                       Create Group Chat Queue
                     </DialogTitle>
                     <p className="text-sm text-gray-400 mt-1">Bring believers together for meaningful connection</p>
@@ -285,9 +285,7 @@ export default function ConnectPage() {
                                 <span className={`text-xs font-medium transition-all duration-300 ${isSelected ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
                                   {option.label}
                                 </span>
-                                {isSelected && (
-                                  <div className="absolute inset-0 rounded-xl bg-white/10 animate-pulse" />
-                                )}
+
                               </button>
                             );
                           })}
@@ -378,7 +376,7 @@ export default function ConnectPage() {
                     <Button 
                       type="submit" 
                       disabled={createQueueMutation.isPending}
-                      className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black hover:from-[#B8941F] hover:to-[#D4AF37] font-semibold px-8 h-12 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold px-8 h-12 shadow-lg transition-all duration-300"
                     >
                       {createQueueMutation.isPending ? (
                         <div className="flex items-center">
@@ -434,9 +432,7 @@ export default function ConnectPage() {
                 const isNearFull = progressPercent >= 80;
                 
                 return (
-                  <Card key={queue.id} className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700/50 flex-shrink-0 w-80 hover:shadow-2xl hover:shadow-[#D4AF37]/10 transition-all duration-300 hover:scale-105 group relative overflow-hidden">
-                    {/* Animated background glow */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Card key={queue.id} className="bg-black border border-gray-700/50 flex-shrink-0 w-80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden">
                     
                     <CardHeader className="pb-3 relative z-10">
                       <div className="flex items-center justify-between">
@@ -444,7 +440,7 @@ export default function ConnectPage() {
                           <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg group-hover:shadow-xl transition-all duration-300 relative`}>
                             <Icon className="w-5 h-5 text-white" />
                             {isNearFull && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#D4AF37] rounded-full" />
                             )}
                           </div>
                           <div>
@@ -493,7 +489,7 @@ export default function ConnectPage() {
                         </div>
                         
                         {isNearFull && (
-                          <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37] text-xs animate-pulse">
+                          <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37] text-xs">
                             Almost Full!
                           </Badge>
                         )}
@@ -506,11 +502,7 @@ export default function ConnectPage() {
                         </div>
                         <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden shadow-inner">
                           <div 
-                            className={`h-3 rounded-full transition-all duration-500 ease-out ${
-                              isNearFull 
-                                ? 'bg-gradient-to-r from-[#D4AF37] to-[#FFD700] shadow-lg animate-pulse' 
-                                : 'bg-gradient-to-r from-[#D4AF37] to-[#B8941F]'
-                            }`}
+                            className="h-3 rounded-full transition-all duration-500 ease-out bg-[#D4AF37]"
                             style={{ width: `${progressPercent}%` }}
                           />
                         </div>
@@ -526,7 +518,7 @@ export default function ConnectPage() {
                         <Button
                           onClick={() => joinQueueMutation.mutate(queue.id)}
                           disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                          className="w-full bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-black hover:from-[#B8941F] hover:to-[#D4AF37] font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold py-3 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {joinQueueMutation.isPending ? (
                             <div className="flex items-center">
@@ -592,10 +584,10 @@ export default function ConnectPage() {
                 const Icon = intentionInfo.icon;
                 
                 return (
-                  <Card key={chat.id} className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/5 group relative overflow-hidden">
+                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 hover:shadow-xl group relative overflow-hidden">
                     {/* Live indicator */}
                     <div className="absolute top-4 right-4 flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs text-green-400 font-medium">LIVE</span>
                     </div>
                     
@@ -604,7 +596,7 @@ export default function ConnectPage() {
                         <div className="flex items-center space-x-4">
                           <div className={`p-4 rounded-xl ${intentionInfo.color} shadow-lg group-hover:shadow-xl transition-all duration-300 relative`}>
                             <Icon className="w-6 h-6 text-white" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse border-2 border-gray-900"></div>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900"></div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
@@ -633,11 +625,11 @@ export default function ConnectPage() {
                             {/* Activity indicators */}
                             <div className="flex items-center space-x-4 text-xs text-gray-500">
                               <div className="flex items-center space-x-1">
-                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                                 <span>Messages active</span>
                               </div>
                               <div className="flex items-center space-x-1">
-                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
                                 <span>Members online</span>
                               </div>
                             </div>
@@ -646,7 +638,7 @@ export default function ConnectPage() {
                         
                         <div className="flex flex-col space-y-3">
                           <Button
-                            className="bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 font-semibold px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-3 shadow-lg transition-all duration-300"
                           >
                             <MessageCircle className="w-4 h-4 mr-2" />
                             Join Chat
@@ -688,7 +680,7 @@ export default function ConnectPage() {
               <div>
                 <h3 className="text-3xl font-bold text-white mb-3">
                   Welcome to 
-                  <span className="bg-gradient-to-r from-[#D4AF37] to-[#FFD700] bg-clip-text text-transparent"> Connect</span>
+                  <span className="text-[#D4AF37]"> Connect</span>
                 </h3>
                 <p className="text-xl text-gray-300 mb-2">
                   Where believers gather for meaningful conversations
