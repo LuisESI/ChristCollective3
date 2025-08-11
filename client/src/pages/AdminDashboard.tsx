@@ -449,7 +449,7 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-6">
-            <div>
+            <div className="mt-8">
               <h2 className="text-2xl font-bold text-primary mb-4">All Transactions</h2>
               {transactionsLoading ? (
                 <Card className="bg-gray-900 border-gray-800">
