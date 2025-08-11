@@ -409,40 +409,40 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900 border-gray-800 text-xs gap-1">
-            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900 border-gray-800 text-xs gap-2 p-2">
+            <TabsTrigger value="ministries" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">Ministries</span>
+                <span className="font-medium text-xs">Ministries</span>
                 <span className="text-xs opacity-70">({Array.isArray(pendingMinistries) ? pendingMinistries.length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+            <TabsTrigger value="pending" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">Campaigns</span>
+                <span className="font-medium text-xs">Campaigns</span>
                 <span className="text-xs opacity-70">({Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1">
+            <TabsTrigger value="sponsorships" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">Sponsors</span>
+                <span className="font-medium text-xs">Sponsors</span>
                 <span className="text-xs opacity-70">({Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0})</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+            <TabsTrigger value="campaigns" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md hidden lg:flex">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">All Campaigns</span>
+                <span className="font-medium text-xs">All Campaigns</span>
                 <span className="text-xs opacity-70">Manage</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md hidden lg:flex">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">Transactions</span>
+                <span className="font-medium text-xs">Transactions</span>
                 <span className="text-xs opacity-70">View</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-4 py-4 mx-1 hidden lg:flex">
+            <TabsTrigger value="users" className="text-white data-[state=active]:bg-primary data-[state=active]:text-black px-3 py-3 rounded-md hidden lg:flex">
               <div className="flex flex-col items-center gap-1">
-                <span className="font-medium">Users</span>
+                <span className="font-medium text-xs">Users</span>
                 <span className="text-xs opacity-70">Manage</span>
               </div>
             </TabsTrigger>
