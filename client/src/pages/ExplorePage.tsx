@@ -85,12 +85,24 @@ export default function ExplorePage() {
     ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
 
-  const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((user: any) =>
-    user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  // Filter users but exclude those who should be in other categories
+  const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((user: any) => {
+    // Check if user has ministry profile, creator profile, or business profile
+    const hasMinistryProfile = ministries && ministries.some((ministry: any) => ministry.userId === user.id);
+    const hasCreatorProfile = creators && creators.some((creator: any) => creator.userId === user.id);
+    const hasBusinessProfile = businesses && businesses.some((business: any) => business.userId === user.id);
+    
+    // Only show regular users (those without special profiles)
+    const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
+    
+    // Apply search filter
+    const matchesSearch = user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.bio?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    return isRegularUser && matchesSearch;
+  }) : [];
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -422,9 +434,9 @@ export default function ExplorePage() {
                             <p className="text-sm text-white mt-1">{member.bio.substring(0, 50)}...</p>
                           )}
                           <div className="flex items-center mt-2">
-                            {member.userType && (
+                            {member.userType && member.userType !== "ministry" && (
                               <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none capitalize">
-                                {member.userType}
+                                {member.userType === "business_owner" ? "Business" : member.userType}
                               </Badge>
                             )}
                             {member.location && (
