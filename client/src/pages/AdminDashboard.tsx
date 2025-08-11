@@ -712,7 +712,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="sponsorships" className="space-y-6">
-            <div>
+            <div className="mt-8">
               <h2 className="text-2xl font-bold text-primary mb-4">Sponsorship Applications</h2>
               {applicationsLoading ? (
                 <div className="space-y-4">
