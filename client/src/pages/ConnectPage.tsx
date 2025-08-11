@@ -312,7 +312,7 @@ export default function ConnectPage() {
                                 <Input 
                                   {...field} 
                                   type="number"
-                                  min={2}
+                                  min={4}
                                   max={12}
                                   value={field.value || ""}
                                   onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
@@ -339,7 +339,7 @@ export default function ConnectPage() {
                                 <Input 
                                   {...field} 
                                   type="number"
-                                  min={2}
+                                  min={4}
                                   max={12}
                                   value={field.value || ""}
                                   onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
