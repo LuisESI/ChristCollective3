@@ -84,8 +84,17 @@ export default function ChatRoom() {
   const Icon = getIntentionIcon();
   const onlineCount = members?.length || 3;
 
+  // Mock member profile pictures for display
+  const mockMembers = [
+    { id: "1", username: "Sarah", initials: "SA", color: "bg-blue-500" },
+    { id: "2", username: "John", initials: "JN", color: "bg-green-500" },
+    { id: "3", username: "Mary", initials: "MY", color: "bg-purple-500" },
+    { id: "4", username: "David", initials: "DV", color: "bg-orange-500" },
+    { id: "5", username: "Admin", initials: "AD", color: "bg-yellow-500" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
       <div className="bg-black border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
@@ -111,7 +120,25 @@ export default function ChatRoom() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
+            {/* User Profile Pictures */}
+            <div className="flex items-center -space-x-2 mr-2">
+              {mockMembers.slice(0, 4).map((member, index) => (
+                <Avatar key={member.id} className="w-8 h-8 border-2 border-black">
+                  <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
+                    {member.initials}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {mockMembers.length > 4 && (
+                <Avatar className="w-8 h-8 border-2 border-black">
+                  <AvatarFallback className="bg-gray-600 text-white text-xs">
+                    +{mockMembers.length - 4}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+            
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
               <Phone className="w-5 h-5" />
             </Button>
@@ -126,7 +153,7 @@ export default function ChatRoom() {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 bg-black">
         <div className="space-y-4">
           {messages.length === 0 ? (
             <div className="text-center py-8">
@@ -169,7 +196,7 @@ export default function ChatRoom() {
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-700 bg-gray-900">
+      <div className="p-4 border-t border-gray-700 bg-black">
         <div className="flex items-center space-x-3">
           <Input
             value={message}
