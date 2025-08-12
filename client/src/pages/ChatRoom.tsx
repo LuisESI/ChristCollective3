@@ -51,13 +51,13 @@ export default function ChatRoom() {
     enabled: !!id
   }) as { data?: Array<{ id: string; firstName?: string; lastName?: string; displayName?: string; username?: string; profileImageUrl?: string }> };
 
-  console.log('Members data:', members);
-  console.log('Messages data:', messages);
-
   const { data: messages = [] } = useQuery({
     queryKey: ['/api/group-chats', id, 'messages'],
     enabled: !!id
   }) as { data?: ChatMessage[] };
+
+  console.log('Members data:', members);
+  console.log('Messages data:', messages);
 
   const { data: currentUser } = useQuery({
     queryKey: ['/api/user']
@@ -68,10 +68,10 @@ export default function ChatRoom() {
       console.log('Sending message:', { message: messageText, type: 'message' });
       return apiRequest(`/api/group-chats/${id}/messages`, {
         method: 'POST',
-        body: JSON.stringify({
+        data: {
           message: messageText,
           type: 'message'
-        })
+        }
       });
     },
     onSuccess: () => {
