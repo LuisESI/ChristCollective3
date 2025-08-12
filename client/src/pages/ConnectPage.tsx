@@ -574,22 +574,10 @@ export default function ConnectPage() {
                                 <span>Started {formatTimeAgo(chat.createdAt!)}</span>
                               </div>
                             </div>
-                            
-                            {/* Activity indicators */}
-                            <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
-                              <div className="flex items-center space-x-1">
-                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                                <span>Messages active</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                                <span>Members online</span>
-                              </div>
-                            </div>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col items-center space-y-1">
+                        <div className="flex items-center">
                           <Button
                             className="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 text-sm shadow-lg transition-all duration-300"
                             onClick={() => {
@@ -600,9 +588,6 @@ export default function ConnectPage() {
                             <MessageCircle className="w-4 h-4 mr-2" />
                             Join
                           </Button>
-                          <div className="text-center text-xs text-gray-500">
-                            Free to join
-                          </div>
                         </div>
                       </div>
                     </CardContent>
