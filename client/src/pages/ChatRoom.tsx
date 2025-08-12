@@ -166,9 +166,9 @@ export default function ChatRoom() {
   }));
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="h-screen bg-black flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-black border-b border-gray-800 p-3">
+      <div className="flex-shrink-0 bg-black border-b border-gray-800 p-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <Link href="/connect">
@@ -226,58 +226,64 @@ export default function ChatRoom() {
         </div>
       </div>
 
-      {/* Messages Area */}
-      <ScrollArea className="flex-1 bg-black">
-        <div className="px-4 py-6 space-y-6">
-          {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
-                <Icon className="w-8 h-8 text-blue-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
-              <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
-              <div className="mt-4 text-xs text-gray-500">
-                {members.length} members in this chat
-              </div>
-            </div>
-          ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
-                <Avatar className="w-9 h-9 flex-shrink-0">
-                  {msg.user?.profileImageUrl && (
-                    <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
-                  )}
-                  <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
-                    {msg.user ? getUserDisplayName(msg.user).slice(0, 2).toUpperCase() : "??"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-semibold text-white">
-                      {msg.user ? getUserDisplayName(msg.user) : "Unknown User"}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {formatTime(msg.createdAt)}
-                    </span>
-                    {msg.type === 'prayer_request' && (
-                      <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
-                        Prayer Request
-                      </Badge>
-                    )}
+      {/* Messages Area - Fixed height with scroll */}
+      <div className="flex-1 bg-black flex flex-col min-h-0">
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="px-4 py-6 space-y-4 min-h-full flex flex-col justify-end">
+              {messages.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
+                    <Icon className="w-8 h-8 text-blue-400" />
                   </div>
-                  <p className="text-sm text-gray-200 leading-relaxed">
-                    {msg.message}
-                  </p>
+                  <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
+                  <div className="mt-4 text-xs text-gray-500">
+                    {members.length} members in this chat
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
+                      <Avatar className="w-9 h-9 flex-shrink-0">
+                        {msg.user?.profileImageUrl && (
+                          <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
+                        )}
+                        <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
+                          {msg.user ? getUserDisplayName(msg.user).slice(0, 2).toUpperCase() : "??"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="text-sm font-semibold text-white">
+                            {msg.user ? getUserDisplayName(msg.user) : "Unknown User"}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatTime(msg.createdAt)}
+                          </span>
+                          {msg.type === 'prayer_request' && (
+                            <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
+                              Prayer Request
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-200 leading-relaxed">
+                          {msg.message}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-800 bg-black">
+      <div className="flex-shrink-0 p-4 border-t border-gray-800 bg-black">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-end space-x-3">
             <div className="flex-1">
