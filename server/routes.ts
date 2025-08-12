@@ -3301,20 +3301,6 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.get("/api/group-chats/:id", async (req, res) => {
-    try {
-      const chatId = parseInt(req.params.id);
-      const chat = await storage.getGroupChatById(chatId);
-      if (!chat) {
-        return res.status(404).json({ message: "Chat not found" });
-      }
-      res.json(chat);
-    } catch (error) {
-      console.error("Error fetching chat:", error);
-      res.status(500).json({ message: "Failed to fetch chat" });
-    }
-  });
-
   app.get("/api/group-chats/:id/members", async (req, res) => {
     try {
       const chatId = parseInt(req.params.id);
@@ -3337,13 +3323,24 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  app.get("/api/group-chats/:id", async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const chat = await storage.getGroupChatById(chatId);
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+      res.json(chat);
+    } catch (error) {
+      console.error("Error fetching chat:", error);
+      res.status(500).json({ message: "Failed to fetch chat" });
+    }
+  });
+
   app.post("/api/group-chats/:id/messages", isAuthenticated, async (req: any, res) => {
     try {
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
-      
-      console.log('Received message data:', req.body);
-      console.log('Chat ID:', chatId, 'User ID:', userId);
       
       const result = insertGroupChatMessageSchema.safeParse({
         ...req.body,
@@ -3351,10 +3348,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         userId
       });
       
-      console.log('Validation result:', result);
-      
       if (!result.success) {
-        console.error('Validation errors:', result.error.errors);
         return res.status(400).json({ 
           message: "Invalid message data", 
           errors: result.error.errors 

@@ -56,8 +56,7 @@ export default function ChatRoom() {
     enabled: !!id
   }) as { data?: ChatMessage[] };
 
-  console.log('Members data:', members);
-  console.log('Messages data:', messages);
+
 
   const { data: currentUser } = useQuery({
     queryKey: ['/api/user']
@@ -65,7 +64,6 @@ export default function ChatRoom() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
-      console.log('Sending message:', { message: messageText, type: 'message' });
       return apiRequest(`/api/group-chats/${id}/messages`, {
         method: 'POST',
         data: {
@@ -123,8 +121,8 @@ export default function ChatRoom() {
   const Icon = getIntentionIcon();
   const onlineCount = members?.length || 0;
 
-  // Show actual chat members only
-  const chatMembers = members.map((member) => ({
+  // Show actual chat members only - with null check
+  const chatMembers = (members || []).map((member) => ({
     id: member.id,
     username: member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "User"),
     initials: (member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "U")).slice(0, 2).toUpperCase(),
