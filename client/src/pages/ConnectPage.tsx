@@ -193,16 +193,16 @@ export default function ConnectPage() {
         <meta name="description" content="Join group chats for prayer, Bible study, evangelizing, and fellowship with other believers" />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-4 py-4 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Active Chats</h1>
-            <p className="text-gray-400 mt-1">Join ongoing conversations with fellow believers</p>
+            <h1 className="text-2xl font-bold text-white">Active Chats</h1>
+            <p className="text-gray-400 text-sm mt-1">Join ongoing conversations with fellow believers</p>
           </div>
           <Button 
             onClick={() => setCreateDialogOpen(true)}
-            className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium px-6 py-2"
+            className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium px-4 py-2 text-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             Start Queue
@@ -414,11 +414,11 @@ export default function ConnectPage() {
 
         {/* Chat Queues Section - Top */}
         {(queues.length > 0 || activeChats.length === 0) && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="text-xl font-semibold text-white">Chat Queues</h2>
-                <p className="text-sm text-gray-400">Available queues waiting for people to join</p>
+                <h2 className="text-lg font-semibold text-white">Chat Queues</h2>
+                <p className="text-xs text-gray-400">Available queues waiting for people to join</p>
               </div>
               {queues.length > 0 && (
                 <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]">
@@ -437,7 +437,7 @@ export default function ConnectPage() {
                   
                   return (
                     <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
-                      <CardContent className="p-4">
+                      <CardContent className="p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg`}>
@@ -445,21 +445,21 @@ export default function ConnectPage() {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
-                                <h3 className="text-lg font-bold text-white">{queue.title}</h3>
+                                <h3 className="text-base font-bold text-white">{queue.title}</h3>
                                 <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
                                   {intentionInfo.label}
                                 </Badge>
                               </div>
-                              <div className="flex items-center space-x-4 text-sm text-gray-400">
+                              <div className="flex items-center space-x-3 text-xs text-gray-400">
                                 <div className="flex items-center space-x-1">
-                                  <Users className="w-4 h-4" />
+                                  <Users className="w-3 h-3" />
                                   <span>{queue.currentCount}</span>
                                   <span className="text-gray-600">members</span>
                                   <span className="text-gray-600">•</span>
                                   <span>active</span>
                                 </div>
                                 <div className="flex items-center space-x-1">
-                                  <Clock className="w-4 h-4" />
+                                  <Clock className="w-3 h-3" />
                                   <span>Started {formatTimeAgo(queue.createdAt!)}</span>
                                 </div>
                               </div>
@@ -506,14 +506,14 @@ export default function ConnectPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8 bg-black border border-gray-700/50 rounded-lg">
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-[#D4AF37]/20 rounded-full">
-                    <Users className="w-6 h-6 text-[#D4AF37]" />
+              <div className="text-center py-6 bg-black border border-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-center mb-2">
+                  <div className="p-2 bg-[#D4AF37]/20 rounded-full">
+                    <Users className="w-5 h-5 text-[#D4AF37]" />
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">No active queues</h3>
-                <p className="text-gray-400 text-sm">Start a queue to connect with other believers</p>
+                <h3 className="text-base font-semibold text-white mb-1">No active queues</h3>
+                <p className="text-gray-400 text-xs">Start a queue to connect with other believers</p>
               </div>
             )}
           </div>
@@ -521,10 +521,10 @@ export default function ConnectPage() {
 
         {/* Active Chats Section - Bottom */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-xl font-semibold text-white">Chats & Chat Queues</h2>
-              <p className="text-sm text-gray-400">Your joined chats and queues</p>
+              <h2 className="text-lg font-semibold text-white">Chats & Chat Queues</h2>
+              <p className="text-xs text-gray-400">Your joined chats and queues</p>
             </div>
             {activeChats.length > 0 && (
               <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
@@ -542,12 +542,12 @@ export default function ConnectPage() {
                 return (
                   <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 relative overflow-hidden">
                     {/* Live indicator */}
-                    <div className="absolute top-4 right-4 flex items-center space-x-2">
+                    <div className="absolute top-3 right-3 flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs text-green-400 font-medium">LIVE</span>
                     </div>
                     
-                    <CardContent className="p-4">
+                    <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative`}>
@@ -556,27 +556,27 @@ export default function ConnectPage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-bold text-white">{chat.title}</h3>
+                              <h3 className="text-base font-bold text-white">{chat.title}</h3>
                               <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
                                 {intentionInfo.label}
                               </Badge>
                             </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-400">
+                            <div className="flex items-center space-x-3 text-xs text-gray-400">
                               <div className="flex items-center space-x-1">
-                                <Users className="w-4 h-4" />
+                                <Users className="w-3 h-3" />
                                 <span>{chat.memberCount}</span>
                                 <span className="text-gray-600">members</span>
                                 <span className="text-gray-600">•</span>
                                 <span>active</span>
                               </div>
                               <div className="flex items-center space-x-1">
-                                <Clock className="w-4 h-4" />
+                                <Clock className="w-3 h-3" />
                                 <span>Started {formatTimeAgo(chat.createdAt!)}</span>
                               </div>
                             </div>
                             
                             {/* Activity indicators */}
-                            <div className="flex items-center space-x-4 text-xs text-gray-500 mt-2">
+                            <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
                               <div className="flex items-center space-x-1">
                                 <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                                 <span>Messages active</span>
@@ -589,9 +589,9 @@ export default function ConnectPage() {
                           </div>
                         </div>
                         
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-1">
                           <Button
-                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-2 shadow-lg transition-all duration-300"
+                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 text-sm shadow-lg transition-all duration-300"
                             onClick={() => {
                               // Navigate to chat room - placeholder for now
                               window.location.href = `/chat/${chat.id}`;
@@ -611,14 +611,14 @@ export default function ConnectPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 bg-black border border-gray-700/50 rounded-lg">
-              <div className="flex items-center justify-center mb-3">
-                <div className="p-3 bg-green-500/20 rounded-full">
-                  <MessageCircle className="w-6 h-6 text-green-400" />
+            <div className="text-center py-6 bg-black border border-gray-700/50 rounded-lg">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-green-500/20 rounded-full">
+                  <MessageCircle className="w-5 h-5 text-green-400" />
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No active chats</h3>
-              <p className="text-gray-400 text-sm">Join a queue to start chatting with other believers</p>
+              <h3 className="text-base font-semibold text-white mb-1">No active chats</h3>
+              <p className="text-gray-400 text-xs">Join a queue to start chatting with other believers</p>
             </div>
           )}
         </div>
