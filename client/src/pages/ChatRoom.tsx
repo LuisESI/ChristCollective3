@@ -51,6 +51,9 @@ export default function ChatRoom() {
     enabled: !!id
   }) as { data?: Array<{ id: string; firstName?: string; lastName?: string; displayName?: string; username?: string; profileImageUrl?: string }> };
 
+  console.log('Members data:', members);
+  console.log('Messages data:', messages);
+
   const { data: messages = [] } = useQuery({
     queryKey: ['/api/group-chats', id, 'messages'],
     enabled: !!id
@@ -200,6 +203,9 @@ export default function ChatRoom() {
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
               <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
+              <div className="mt-4 text-xs text-gray-500">
+                {members.length} members in this chat
+              </div>
             </div>
           ) : (
             messages.map((msg) => (
