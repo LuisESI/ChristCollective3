@@ -33,6 +33,7 @@ import FeedPage from "@/pages/FeedPage";
 import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
 import ConnectPage from "@/pages/ConnectPage";
+import ChatRoom from "@/pages/ChatRoom";
 import NotificationsPage from "@/pages/NotificationsPage";
 import MinistryProfilePage from "@/pages/MinistryProfilePage";
 import MinistryCreatePage from "@/pages/MinistryCreatePage";
@@ -90,6 +91,7 @@ function Router() {
       <Route path="/creators/share" component={CreatorSocialSharePage} />
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />
+      <Route path="/chat/:id" component={ChatRoom} />
       <Route path="/notifications" component={NotificationsPage} />
 
       <Route path="/privacy-settings" component={PrivacySettingsPage} />

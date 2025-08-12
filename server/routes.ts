@@ -3300,6 +3300,33 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  app.get("/api/group-chats/:id", isAuthenticated, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const chat = await storage.getGroupChatById(chatId);
+      
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+      
+      res.json(chat);
+    } catch (error) {
+      console.error("Error fetching chat:", error);
+      res.status(500).json({ message: "Failed to fetch chat" });
+    }
+  });
+
+  app.get("/api/group-chats/:id/members", isAuthenticated, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const members = await storage.getGroupChatMembers(chatId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching chat members:", error);
+      res.status(500).json({ message: "Failed to fetch chat members" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

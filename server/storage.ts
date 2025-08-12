@@ -1421,6 +1421,38 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
       .where(eq(groupChatMembers.queueId, queueId));
   }
+
+  async getGroupChatById(chatId: number): Promise<GroupChat | undefined> {
+    const [chat] = await db
+      .select()
+      .from(groupChats)
+      .where(eq(groupChats.id, chatId));
+    return chat;
+  }
+
+  async getGroupChatMembers(chatId: number): Promise<User[]> {
+    return db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        displayName: users.displayName,
+        profileImageUrl: users.profileImageUrl,
+        username: users.username,
+        bio: users.bio,
+        location: users.location,
+        phone: users.phone,
+        userType: users.userType,
+        showEmail: users.showEmail,
+        showPhone: users.showPhone,
+        showLocation: users.showLocation,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
+      .where(eq(groupChatMembers.chatId, chatId));
+  }
 }
 
 export const storage = new DatabaseStorage();
