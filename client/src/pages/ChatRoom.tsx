@@ -62,6 +62,7 @@ export default function ChatRoom() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
+      console.log('Sending message:', { message: messageText, type: 'message' });
       return apiRequest(`/api/group-chats/${id}/messages`, {
         method: 'POST',
         body: JSON.stringify({
@@ -73,6 +74,9 @@ export default function ChatRoom() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/group-chats', id, 'messages'] });
       setMessage("");
+    },
+    onError: (error) => {
+      console.error('Error sending message:', error);
     }
   });
 

@@ -3342,13 +3342,19 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
       
+      console.log('Received message data:', req.body);
+      console.log('Chat ID:', chatId, 'User ID:', userId);
+      
       const result = insertGroupChatMessageSchema.safeParse({
         ...req.body,
         chatId,
         userId
       });
       
+      console.log('Validation result:', result);
+      
       if (!result.success) {
+        console.error('Validation errors:', result.error.errors);
         return res.status(400).json({ 
           message: "Invalid message data", 
           errors: result.error.errors 
