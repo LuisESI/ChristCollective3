@@ -3368,6 +3368,17 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Admin route to make all users follow Christ Collective Ministry
+  app.post("/api/admin/auto-follow-christ-collective", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.makeAllUsersFollowChristCollective();
+      res.json({ message: "Successfully made all users follow Christ Collective Ministry" });
+    } catch (error) {
+      console.error("Error making all users follow Christ Collective:", error);
+      res.status(500).json({ error: "Failed to make all users follow Christ Collective Ministry" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

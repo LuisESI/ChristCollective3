@@ -65,7 +65,7 @@ import {
   type InsertGroupChatMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
+import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -825,6 +825,53 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(ministryFollowers)
       .where(and(eq(ministryFollowers.userId, userId), eq(ministryFollowers.ministryId, ministryId)));
+  }
+
+  async autoFollowChristCollectiveMinistry(userId: string): Promise<void> {
+    const CHRIST_COLLECTIVE_MINISTRY_ID = 1; // ID of Christ Collective Ministry profile
+    try {
+      await db
+        .insert(ministryFollowers)
+        .values({ userId, ministryId: CHRIST_COLLECTIVE_MINISTRY_ID })
+        .onConflictDoNothing();
+    } catch (error) {
+      console.error('Failed to auto-follow Christ Collective Ministry:', error);
+    }
+  }
+
+  async makeAllUsersFollowChristCollective(): Promise<void> {
+    const CHRIST_COLLECTIVE_MINISTRY_ID = 1;
+    try {
+      // Get all users who are not already following Christ Collective
+      const usersNotFollowing = await db
+        .select({ id: users.id })
+        .from(users)
+        .leftJoin(ministryFollowers, 
+          and(
+            eq(ministryFollowers.userId, users.id),
+            eq(ministryFollowers.ministryId, CHRIST_COLLECTIVE_MINISTRY_ID)
+          )
+        )
+        .where(isNull(ministryFollowers.id));
+
+      // Add follows for all users who aren't already following
+      if (usersNotFollowing.length > 0) {
+        const followValues = usersNotFollowing.map(user => ({
+          userId: user.id,
+          ministryId: CHRIST_COLLECTIVE_MINISTRY_ID
+        }));
+        
+        await db
+          .insert(ministryFollowers)
+          .values(followValues)
+          .onConflictDoNothing();
+        
+        console.log(`Auto-followed Christ Collective Ministry for ${followValues.length} users`);
+      }
+    } catch (error) {
+      console.error('Failed to make all users follow Christ Collective:', error);
+      throw error;
+    }
   }
 
   // Ministry post RSVP operations

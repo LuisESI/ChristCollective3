@@ -115,6 +115,9 @@ export function setupAuth(app: Express) {
         userType: userType || null,
       });
 
+      // Automatically follow Christ Collective Ministry
+      await storage.autoFollowChristCollectiveMinistry(user.id);
+
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json({ 
