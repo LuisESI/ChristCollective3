@@ -13,7 +13,8 @@ import {
   insertMinistryProfileSchema,
   insertMinistryPostSchema,
   insertMinistryEventSchema,
-  insertGroupChatQueueSchema
+  insertGroupChatQueueSchema,
+  insertGroupChatMessageSchema
 } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
@@ -3297,6 +3298,59 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     } catch (error) {
       console.error("Error fetching active chats:", error);
       res.status(500).json({ message: "Failed to fetch active chats" });
+    }
+  });
+
+  app.get("/api/group-chats/:id/members", async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const members = await storage.getChatMembers(chatId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching chat members:", error);
+      res.status(500).json({ message: "Failed to fetch chat members" });
+    }
+  });
+
+  app.get("/api/group-chats/:id/messages", async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const messages = await storage.getChatMessages(chatId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  app.post("/api/group-chats/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      const result = insertGroupChatMessageSchema.safeParse({
+        ...req.body,
+        chatId,
+        userId
+      });
+      
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Invalid message data", 
+          errors: result.error.errors 
+        });
+      }
+      
+      const message = await storage.createGroupChatMessage(result.data);
+      
+      // Get the full message with user data for response
+      const messages = await storage.getChatMessages(chatId);
+      const newMessage = messages.find(m => m.id === message.id);
+      
+      res.json(newMessage);
+    } catch (error) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Failed to create chat message" });
     }
   });
 

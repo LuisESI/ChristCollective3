@@ -55,11 +55,14 @@ import {
   groupChatQueues,
   groupChats,
   groupChatMembers,
+  groupChatMessages,
   type GroupChatQueue,
   type InsertGroupChatQueue,
   type GroupChat,
   type GroupChatMember,
   type InsertGroupChatMember,
+  type GroupChatMessage,
+  type InsertGroupChatMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql } from "drizzle-orm";
@@ -206,6 +209,12 @@ export interface IStorage {
   listActiveChats(): Promise<GroupChat[]>;
   getUserGroupChats(userId: string): Promise<GroupChat[]>;
   getQueueMembers(queueId: number): Promise<User[]>;
+  getChatMembers(chatId: number): Promise<User[]>;
+  
+  // Group chat message operations
+  createGroupChatMessage(messageData: InsertGroupChatMessage): Promise<GroupChatMessage>;
+  getChatMessages(chatId: number): Promise<(GroupChatMessage & { user: User })[]>;
+  deleteGroupChatMessage(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1430,7 +1439,7 @@ export class DatabaseStorage implements IStorage {
     return chat;
   }
 
-  async getGroupChatMembers(chatId: number): Promise<User[]> {
+  async getChatMembers(chatId: number): Promise<User[]> {
     return db
       .select({
         id: users.id,
@@ -1448,10 +1457,66 @@ export class DatabaseStorage implements IStorage {
         showPhone: users.showPhone,
         showLocation: users.showLocation,
         createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        stripeCustomerId: users.stripeCustomerId,
+        isAdmin: users.isAdmin,
+        password: users.password,
       })
       .from(users)
       .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
       .where(eq(groupChatMembers.chatId, chatId));
+  }
+
+  // Group chat message operations
+  async createGroupChatMessage(messageData: InsertGroupChatMessage): Promise<GroupChatMessage> {
+    const [message] = await db
+      .insert(groupChatMessages)
+      .values(messageData)
+      .returning();
+    return message;
+  }
+
+  async getChatMessages(chatId: number): Promise<(GroupChatMessage & { user: User })[]> {
+    return db
+      .select({
+        id: groupChatMessages.id,
+        chatId: groupChatMessages.chatId,
+        userId: groupChatMessages.userId,
+        message: groupChatMessages.message,
+        type: groupChatMessages.type,
+        createdAt: groupChatMessages.createdAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          displayName: users.displayName,
+          profileImageUrl: users.profileImageUrl,
+          username: users.username,
+          email: users.email,
+          bio: users.bio,
+          location: users.location,
+          phone: users.phone,
+          userType: users.userType,
+          showEmail: users.showEmail,
+          showPhone: users.showPhone,
+          showLocation: users.showLocation,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          stripeCustomerId: users.stripeCustomerId,
+          isAdmin: users.isAdmin,
+          password: users.password,
+        }
+      })
+      .from(groupChatMessages)
+      .innerJoin(users, eq(groupChatMessages.userId, users.id))
+      .where(eq(groupChatMessages.chatId, chatId))
+      .orderBy(groupChatMessages.createdAt);
+  }
+
+  async deleteGroupChatMessage(id: number): Promise<void> {
+    await db
+      .delete(groupChatMessages)
+      .where(eq(groupChatMessages.id, id));
   }
 }
 

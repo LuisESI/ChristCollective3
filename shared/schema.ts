@@ -668,6 +668,7 @@ export const groupChatsRelations = relations(groupChats, ({ one, many }) => ({
     references: [groupChatQueues.id],
   }),
   members: many(groupChatMembers),
+  messages: many(groupChatMessages),
 }));
 
 export const groupChatMembersRelations = relations(groupChatMembers, ({ one }) => ({
@@ -685,6 +686,27 @@ export const groupChatMembersRelations = relations(groupChatMembers, ({ one }) =
   }),
 }));
 
+// Group chat messages
+export const groupChatMessages = pgTable("group_chat_messages", {
+  id: serial("id").primaryKey(),
+  chatId: integer("chat_id").notNull().references(() => groupChats.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  message: text("message").notNull(),
+  type: varchar("type").notNull().default("message"), // message, prayer_request, system
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const groupChatMessagesRelations = relations(groupChatMessages, ({ one }) => ({
+  chat: one(groupChats, {
+    fields: [groupChatMessages.chatId],
+    references: [groupChats.id],
+  }),
+  user: one(users, {
+    fields: [groupChatMessages.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas for group chats
 export const insertGroupChatQueueSchema = createInsertSchema(groupChatQueues)
   .omit({ id: true, creatorId: true, currentCount: true, status: true, createdAt: true, updatedAt: true })
@@ -696,8 +718,13 @@ export const insertGroupChatQueueSchema = createInsertSchema(groupChatQueues)
 export const insertGroupChatMemberSchema = createInsertSchema(groupChatMembers)
   .omit({ id: true, joinedAt: true });
 
+export const insertGroupChatMessageSchema = createInsertSchema(groupChatMessages)
+  .omit({ id: true, createdAt: true });
+
 export type InsertGroupChatQueue = z.infer<typeof insertGroupChatQueueSchema>;
 export type GroupChatQueue = typeof groupChatQueues.$inferSelect;
 export type GroupChat = typeof groupChats.$inferSelect;
 export type GroupChatMember = typeof groupChatMembers.$inferSelect;
+export type GroupChatMessage = typeof groupChatMessages.$inferSelect;
 export type InsertGroupChatMember = z.infer<typeof insertGroupChatMemberSchema>;
+export type InsertGroupChatMessage = z.infer<typeof insertGroupChatMessageSchema>;

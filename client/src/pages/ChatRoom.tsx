@@ -1,5 +1,5 @@
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,36 +16,65 @@ import {
   Video
 } from "lucide-react";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ChatMessage {
-  id: string;
+  id: number;
+  chatId: number;
   userId: string;
-  username: string;
   message: string;
-  timestamp: string;
-  type: 'message' | 'prayer_request';
-  profileImageUrl?: string;
+  type: 'message' | 'prayer_request' | 'system';
+  createdAt: string;
+  user: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    displayName?: string;
+    profileImageUrl?: string;
+    username?: string;
+  };
 }
 
 export default function ChatRoom() {
   const { id } = useParams<{ id: string }>();
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: chat } = useQuery({
     queryKey: ['/api/group-chats', id],
     enabled: !!id
   }) as { data?: { id: number; title: string; memberCount: number; intention: string; createdAt: string } };
 
-  const { data: members } = useQuery({
+  const { data: members = [] } = useQuery({
     queryKey: ['/api/group-chats', id, 'members'],
     enabled: !!id
-  });
+  }) as { data?: Array<{ id: string; firstName?: string; lastName?: string; displayName?: string; username?: string; profileImageUrl?: string }> };
+
+  const { data: messages = [] } = useQuery({
+    queryKey: ['/api/group-chats', id, 'messages'],
+    enabled: !!id
+  }) as { data?: ChatMessage[] };
 
   const { data: currentUser } = useQuery({
     queryKey: ['/api/user']
   }) as { data?: { id: string; username: string; firstName?: string; lastName?: string; profileImageUrl?: string } };
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async (messageText: string) => {
+      return apiRequest(`/api/group-chats/${id}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({
+          message: messageText,
+          type: 'message'
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-chats', id, 'messages'] });
+      setMessage("");
+    }
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,24 +85,9 @@ export default function ChatRoom() {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || sendMessageMutation.isPending) return;
     
-    const displayName = currentUser?.firstName && currentUser?.lastName 
-      ? `${currentUser.firstName} ${currentUser.lastName}`
-      : currentUser?.username || "You";
-    
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      userId: currentUser?.id || "current_user",
-      username: displayName,
-      message: message.trim(),
-      timestamp: new Date().toISOString(),
-      type: 'message',
-      profileImageUrl: currentUser?.profileImageUrl
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    setMessage("");
+    sendMessageMutation.mutate(message.trim());
   };
 
   const formatTime = (timestamp: string) => {
@@ -81,6 +95,13 @@ export default function ChatRoom() {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+  };
+
+  const getUserDisplayName = (user: ChatMessage['user']) => {
+    if (user.displayName) return user.displayName;
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
+    if (user.firstName) return user.firstName;
+    return user.username || "Unknown User";
   };
 
   const getIntentionIcon = () => {
@@ -92,22 +113,16 @@ export default function ChatRoom() {
   };
 
   const Icon = getIntentionIcon();
-  const onlineCount = members?.length || 3;
+  const onlineCount = members?.length || 0;
 
-  // Mock member profile pictures for display (including current user)
-  const mockMembers = [
-    { 
-      id: currentUser?.id || "current", 
-      username: currentUser?.firstName || currentUser?.username || "You", 
-      initials: ((currentUser?.firstName?.[0] || "") + (currentUser?.lastName?.[0] || "")).toUpperCase() || currentUser?.username?.slice(0, 2).toUpperCase() || "YO", 
-      color: "bg-[#D4AF37]",
-      profileImage: currentUser?.profileImageUrl
-    },
-    { id: "2", username: "John", initials: "JN", color: "bg-green-500" },
-    { id: "3", username: "Mary", initials: "MY", color: "bg-purple-500" },
-    { id: "4", username: "David", initials: "DV", color: "bg-orange-500" },
-    { id: "5", username: "Sarah", initials: "SA", color: "bg-blue-500" },
-  ];
+  // Show actual chat members only
+  const chatMembers = members.map((member) => ({
+    id: member.id,
+    username: member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "User"),
+    initials: (member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "U")).slice(0, 2).toUpperCase(),
+    color: member.id === currentUser?.id ? "bg-[#D4AF37]" : "bg-blue-500",
+    profileImage: member.profileImageUrl
+  }));
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
@@ -152,7 +167,7 @@ export default function ChatRoom() {
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-400 font-medium">Members:</span>
             <div className="flex items-center -space-x-2">
-              {mockMembers.map((member, index) => (
+              {chatMembers.map((member, index) => (
                 <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
                   {member.profileImage && (
                     <AvatarImage src={member.profileImage} alt={member.username} />
@@ -185,20 +200,20 @@ export default function ChatRoom() {
             messages.map((msg) => (
               <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
                 <Avatar className="w-9 h-9 flex-shrink-0">
-                  {msg.profileImageUrl && (
-                    <AvatarImage src={msg.profileImageUrl} alt={msg.username} />
+                  {msg.user.profileImageUrl && (
+                    <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
                   )}
                   <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
-                    {msg.username.slice(0, 2).toUpperCase()}
+                    {getUserDisplayName(msg.user).slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="text-sm font-semibold text-white">
-                      {msg.username}
+                      {getUserDisplayName(msg.user)}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {formatTime(msg.timestamp)}
+                      {formatTime(msg.createdAt)}
                     </span>
                     {msg.type === 'prayer_request' && (
                       <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
@@ -233,7 +248,7 @@ export default function ChatRoom() {
             <Button 
               onClick={handleSendMessage}
               className="bg-[#D4AF37] hover:bg-[#B8941F] text-black px-4 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200 min-w-[50px]"
-              disabled={!message.trim()}
+              disabled={!message.trim() || sendMessageMutation.isPending}
             >
               <Send className="w-4 h-4" />
             </Button>
