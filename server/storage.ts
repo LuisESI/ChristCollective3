@@ -947,6 +947,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(ministryFollowers.createdAt));
   }
 
+  async getMinistryFollowersCount(ministryId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(ministryFollowers)
+      .where(eq(ministryFollowers.ministryId, ministryId));
+    return Number(result[0].count);
+  }
+
   async getMinistryFeedPosts(userId: string): Promise<MinistryPost[]> {
     return await db
       .select({

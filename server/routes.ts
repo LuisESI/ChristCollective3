@@ -2316,7 +2316,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Ministry not found" });
       }
       
-      res.json(ministry);
+      // Get follower count
+      const followersCount = await storage.getMinistryFollowersCount(parseInt(id));
+      
+      res.json({
+        ...ministry,
+        followersCount
+      });
     } catch (error) {
       console.error("Error fetching ministry:", error);
       res.status(500).json({ message: "Failed to fetch ministry" });

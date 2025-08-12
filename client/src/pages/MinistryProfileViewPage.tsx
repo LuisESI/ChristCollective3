@@ -460,7 +460,7 @@ export default function MinistryProfileViewPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Followers</span>
-                    <span className="text-white font-semibold">0</span>
+                    <span className="text-white font-semibold">{ministry.followersCount || 0}</span>
                   </div>
                   <Separator className="bg-gray-700" />
                   <div className="flex justify-between items-center">
