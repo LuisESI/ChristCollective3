@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Send, 
   Users, 
@@ -24,6 +24,7 @@ interface ChatMessage {
   message: string;
   timestamp: string;
   type: 'message' | 'prayer_request';
+  profileImageUrl?: string;
 }
 
 export default function ChatRoom() {
@@ -42,6 +43,10 @@ export default function ChatRoom() {
     enabled: !!id
   });
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/user']
+  }) as { data?: { id: string; username: string; firstName?: string; lastName?: string; profileImageUrl?: string } };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -53,13 +58,18 @@ export default function ChatRoom() {
   const handleSendMessage = () => {
     if (!message.trim()) return;
     
+    const displayName = currentUser?.firstName && currentUser?.lastName 
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : currentUser?.username || "You";
+    
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
-      userId: "current_user",
-      username: "You",
+      userId: currentUser?.id || "current_user",
+      username: displayName,
       message: message.trim(),
       timestamp: new Date().toISOString(),
-      type: 'message'
+      type: 'message',
+      profileImageUrl: currentUser?.profileImageUrl
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -84,13 +94,19 @@ export default function ChatRoom() {
   const Icon = getIntentionIcon();
   const onlineCount = members?.length || 3;
 
-  // Mock member profile pictures for display
+  // Mock member profile pictures for display (including current user)
   const mockMembers = [
-    { id: "1", username: "Sarah", initials: "SA", color: "bg-blue-500" },
+    { 
+      id: currentUser?.id || "current", 
+      username: currentUser?.firstName || currentUser?.username || "You", 
+      initials: ((currentUser?.firstName?.[0] || "") + (currentUser?.lastName?.[0] || "")).toUpperCase() || currentUser?.username?.slice(0, 2).toUpperCase() || "YO", 
+      color: "bg-[#D4AF37]",
+      profileImage: currentUser?.profileImageUrl
+    },
     { id: "2", username: "John", initials: "JN", color: "bg-green-500" },
     { id: "3", username: "Mary", initials: "MY", color: "bg-purple-500" },
     { id: "4", username: "David", initials: "DV", color: "bg-orange-500" },
-    { id: "5", username: "Admin", initials: "AD", color: "bg-yellow-500" },
+    { id: "5", username: "Sarah", initials: "SA", color: "bg-blue-500" },
   ];
 
   return (
@@ -138,6 +154,9 @@ export default function ChatRoom() {
             <div className="flex items-center -space-x-2">
               {mockMembers.map((member, index) => (
                 <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
+                  {member.profileImage && (
+                    <AvatarImage src={member.profileImage} alt={member.username} />
+                  )}
                   <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
                     {member.initials}
                   </AvatarFallback>
@@ -166,6 +185,9 @@ export default function ChatRoom() {
             messages.map((msg) => (
               <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
                 <Avatar className="w-9 h-9 flex-shrink-0">
+                  {msg.profileImageUrl && (
+                    <AvatarImage src={msg.profileImageUrl} alt={msg.username} />
+                  )}
                   <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
                     {msg.username.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
