@@ -193,7 +193,22 @@ export default function ConnectPage() {
         <meta name="description" content="Join group chats for prayer, Bible study, evangelizing, and fellowship with other believers" />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Active Chats</h1>
+            <p className="text-gray-400 mt-1">Join ongoing conversations with fellow believers</p>
+          </div>
+          <Button 
+            onClick={() => setCreateDialogOpen(true)}
+            className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium px-6 py-2"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Start Queue
+          </Button>
+        </div>
+
         {/* Create Queue Dialog */}
         <div className="hidden">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -397,233 +412,171 @@ export default function ConnectPage() {
           </Dialog>
         </div>
 
-        {/* Active Queues Horizontal Slider */}
-        {queues.length > 0 && (
+        {/* Chat Queues Section - Top */}
+        {(queues.length > 0 || activeChats.length === 0) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Join a Queue</h2>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Start Queue
-                </Button>
-                <Button variant="outline" size="sm" onClick={scrollLeft} className="border-gray-600">
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={scrollRight} className="border-gray-600">
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+              <div>
+                <h2 className="text-xl font-semibold text-white">Chat Queues</h2>
+                <p className="text-sm text-gray-400">Available queues waiting for people to join</p>
               </div>
+              {queues.length > 0 && (
+                <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]">
+                  {queues.length} Available
+                </Badge>
+              )}
             </div>
             
-            <div 
-              ref={scrollContainerRef}
-              className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {queues.map((queue) => {
-                const intentionInfo = getIntentionInfo(queue.intention);
-                const Icon = intentionInfo.icon;
-                const isOwner = queue.creatorId === user.id;
-                const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
-                const isNearFull = progressPercent >= 80;
-                
-                return (
-                  <Card key={queue.id} className="bg-black border border-gray-700/50 flex-shrink-0 w-80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden">
-                    
-                    <CardHeader className="pb-3 relative z-10">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg group-hover:shadow-xl transition-all duration-300 relative`}>
-                            <Icon className="w-5 h-5 text-white" />
-                            {isNearFull && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#D4AF37] rounded-full" />
+            {queues.length > 0 ? (
+              <div className="space-y-3">
+                {queues.map((queue) => {
+                  const intentionInfo = getIntentionInfo(queue.intention);
+                  const Icon = intentionInfo.icon;
+                  const isOwner = queue.creatorId === user.id;
+                  const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
+                  
+                  return (
+                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg`}>
+                              <Icon className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className="text-lg font-bold text-white">{queue.title}</h3>
+                                <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
+                                  {intentionInfo.label}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center space-x-4 text-sm text-gray-400">
+                                <div className="flex items-center space-x-1">
+                                  <Users className="w-4 h-4" />
+                                  <span>{queue.currentCount}</span>
+                                  <span className="text-gray-600">members</span>
+                                  <span className="text-gray-600">•</span>
+                                  <span>active</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>Started {formatTimeAgo(queue.createdAt!)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-3">
+                            {!isOwner ? (
+                              <Button
+                                onClick={() => joinQueueMutation.mutate(queue.id)}
+                                disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                                className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-2 shadow-lg transition-all duration-300 disabled:opacity-50"
+                              >
+                                {joinQueueMutation.isPending ? (
+                                  <div className="flex items-center">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                                    Joining...
+                                  </div>
+                                ) : queue.currentCount >= queue.maxPeople ? (
+                                  "Queue Full"
+                                ) : (
+                                  <>
+                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    Join
+                                  </>
+                                )}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => cancelQueueMutation.mutate(queue.id)}
+                                disabled={cancelQueueMutation.isPending}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
                             )}
                           </div>
-                          <div>
-                            <CardTitle className="text-white text-lg font-bold group-hover:text-[#D4AF37] transition-colors duration-200">
-                              {queue.title}
-                            </CardTitle>
-                            <Badge 
-                              className={`mt-1 ${intentionInfo.color} text-white border-none shadow-sm`}
-                            >
-                              {intentionInfo.label}
-                            </Badge>
-                          </div>
                         </div>
-                        {isOwner && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => cancelQueueMutation.mutate(queue.id)}
-                            disabled={cancelQueueMutation.isPending}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-all duration-200 rounded-lg"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4 relative z-10">
-                      {queue.description && (
-                        <div className="bg-black/20 rounded-lg p-3 border border-gray-700/50">
-                          <p className="text-sm text-gray-300 line-clamp-2">{queue.description}</p>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center space-x-2 text-gray-400">
-                          <div className="flex items-center space-x-1">
-                            <Users className="w-4 h-4" />
-                            <span className="font-medium">{queue.currentCount}/{queue.maxPeople}</span>
-                          </div>
-                          <span className="text-gray-600">•</span>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{formatTimeAgo(queue.createdAt!)}</span>
-                          </div>
-                        </div>
-                        
-                        {isNearFull && (
-                          <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37] text-xs">
-                            Almost Full!
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-gray-400">
-                          <span>Progress</span>
-                          <span>{Math.round(progressPercent)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden shadow-inner">
-                          <div 
-                            className="h-3 rounded-full transition-all duration-500 ease-out bg-[#D4AF37]"
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                        <div className="text-xs text-gray-500 text-center">
-                          {queue.minPeople - queue.currentCount > 0 
-                            ? `${queue.minPeople - queue.currentCount} more needed to start chat`
-                            : 'Ready to chat!'
-                          }
-                        </div>
-                      </div>
-                      
-                      {!isOwner && (
-                        <Button
-                          onClick={() => joinQueueMutation.mutate(queue.id)}
-                          disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                          className="w-full bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold py-3 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {joinQueueMutation.isPending ? (
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2" />
-                              Joining...
-                            </div>
-                          ) : queue.currentCount >= queue.maxPeople ? (
-                            <div className="flex items-center">
-                              <Users className="w-4 h-4 mr-2" />
-                              Queue Full
-                            </div>
-                          ) : (
-                            <div className="flex items-center">
-                              <UserPlus className="w-4 h-4 mr-2" />
-                              Join Queue
-                            </div>
-                          )}
-                        </Button>
-                      )}
-                      
-                      {isOwner && (
-                        <div className="text-center p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-lg">
-                          <div className="flex items-center justify-center space-x-2 text-[#D4AF37]">
-                            <Users className="w-4 h-4" />
-                            <span className="text-sm font-medium">You created this queue</span>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-black border border-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="p-3 bg-[#D4AF37]/20 rounded-full">
+                    <Users className="w-6 h-6 text-[#D4AF37]" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">No active queues</h3>
+                <p className="text-gray-400 text-sm">Start a queue to connect with other believers</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Active Chats Vertical List */}
-        {activeChats.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white">Active Chats</h2>
-                <p className="text-gray-400 mt-1">Join ongoing conversations with fellow believers</p>
-              </div>
-              <div className="flex items-center space-x-3">
-                {queues.length === 0 && (
-                  <Button 
-                    onClick={() => setCreateDialogOpen(true)}
-                    className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Start Queue
-                  </Button>
-                )}
-                <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
-                  {activeChats.length} Active
-                </Badge>
-              </div>
+        {/* Active Chats Section - Bottom */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Chats & Chat Queues</h2>
+              <p className="text-sm text-gray-400">Your joined chats and queues</p>
             </div>
-            <div className="space-y-4">
+            {activeChats.length > 0 && (
+              <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
+                {activeChats.length} Active
+              </Badge>
+            )}
+          </div>
+          
+          {activeChats.length > 0 ? (
+            <div className="space-y-3">
               {activeChats.map((chat) => {
                 const intentionInfo = getIntentionInfo(chat.intention);
                 const Icon = intentionInfo.icon;
                 
                 return (
-                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 hover:shadow-xl group relative overflow-hidden">
+                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 relative overflow-hidden">
                     {/* Live indicator */}
                     <div className="absolute top-4 right-4 flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs text-green-400 font-medium">LIVE</span>
                     </div>
                     
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className={`p-4 rounded-xl ${intentionInfo.color} shadow-lg group-hover:shadow-xl transition-all duration-300 relative`}>
-                            <Icon className="w-6 h-6 text-white" />
+                          <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative`}>
+                            <Icon className="w-5 h-5 text-white" />
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900"></div>
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="text-xl font-bold text-white group-hover:text-[#D4AF37] transition-colors duration-200">{chat.title}</h3>
-                              <Badge className={`${intentionInfo.color} text-white border-none`}>
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h3 className="text-lg font-bold text-white">{chat.title}</h3>
+                              <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
                                 {intentionInfo.label}
                               </Badge>
                             </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+                            <div className="flex items-center space-x-4 text-sm text-gray-400">
                               <div className="flex items-center space-x-1">
                                 <Users className="w-4 h-4" />
-                                <span className="font-medium">{chat.memberCount} members active</span>
+                                <span>{chat.memberCount}</span>
+                                <span className="text-gray-600">members</span>
+                                <span className="text-gray-600">•</span>
+                                <span>active</span>
                               </div>
-                              <span className="text-gray-600">•</span>
                               <div className="flex items-center space-x-1">
                                 <Clock className="w-4 h-4" />
                                 <span>Started {formatTimeAgo(chat.createdAt!)}</span>
                               </div>
                             </div>
-                            {chat.description && (
-                              <div className="bg-black/20 rounded-lg p-3 border border-gray-700/50 mb-4">
-                                <p className="text-sm text-gray-300">{chat.description}</p>
-                              </div>
-                            )}
                             
                             {/* Activity indicators */}
-                            <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <div className="flex items-center space-x-4 text-xs text-gray-500 mt-2">
                               <div className="flex items-center space-x-1">
                                 <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                                 <span>Messages active</span>
@@ -636,12 +589,16 @@ export default function ConnectPage() {
                           </div>
                         </div>
                         
-                        <div className="flex flex-col space-y-3">
+                        <div className="flex flex-col items-center space-y-2">
                           <Button
-                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-3 shadow-lg transition-all duration-300"
+                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-2 shadow-lg transition-all duration-300"
+                            onClick={() => {
+                              // Navigate to chat room - placeholder for now
+                              window.location.href = `/chat/${chat.id}`;
+                            }}
                           >
                             <MessageCircle className="w-4 h-4 mr-2" />
-                            Join Chat
+                            Join
                           </Button>
                           <div className="text-center text-xs text-gray-500">
                             Free to join
@@ -653,110 +610,20 @@ export default function ConnectPage() {
                 );
               })}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-8 bg-black border border-gray-700/50 rounded-lg">
+              <div className="flex items-center justify-center mb-3">
+                <div className="p-3 bg-green-500/20 rounded-full">
+                  <MessageCircle className="w-6 h-6 text-green-400" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">No active chats</h3>
+              <p className="text-gray-400 text-sm">Join a queue to start chatting with other believers</p>
+            </div>
+          )}
+        </div>
 
-        {/* Empty States */}
-        {queues.length === 0 && activeChats.length === 0 && (
-          <div className="text-center py-8">
-            <div className="relative max-w-md mx-auto mb-4">
-              {/* Icon group */}
-              <div className="flex items-center justify-center space-x-3 mb-4">
-                {intentionOptions.slice(0, 5).map((option, index) => {
-                  const Icon = option.icon;
-                  return (
-                    <div 
-                      key={option.value}
-                      className={`p-3 rounded-2xl ${option.color}`}
-                    >
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            <div className="max-w-2xl mx-auto space-y-4">
-              <div>
-                <h3 className="text-3xl font-bold text-white mb-3">
-                  Welcome to 
-                  <span className="text-[#D4AF37]"> Connect</span>
-                </h3>
-                <p className="text-xl text-gray-300 mb-2">
-                  Where believers gather for meaningful conversations
-                </p>
-                <p className="text-gray-400">
-                  Start a group chat queue and connect with fellow Christians for prayer, Bible study, evangelizing, fellowship, or worship
-                </p>
-              </div>
-              
-              {/* Feature highlights */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
-                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <BookOpen className="w-7 h-7 text-white" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Bible Study Groups</h4>
-                  <p className="text-sm text-gray-400 text-center leading-relaxed">Deep dive into Scripture with fellow believers</p>
-                </div>
-                
-                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <Heart className="w-7 h-7 text-white" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Prayer Circles</h4>
-                  <p className="text-sm text-gray-400 text-center leading-relaxed">Join others in powerful group prayer</p>
-                </div>
-                
-                <div className="bg-black p-6 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 group">
-                  <div className="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                    <Users className="w-7 h-7 text-white" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-[#D4AF37] mb-2 text-center">Fellowship</h4>
-                  <p className="text-sm text-gray-400 text-center leading-relaxed">Build lasting friendships in faith</p>
-                </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="bg-[#D4AF37] text-black hover:bg-[#C49B2A] font-bold text-lg px-8 py-4 rounded-2xl transition-all duration-300"
-                >
-                  <Plus className="w-5 h-5 mr-3" />
-                  Start the First Queue
-                </Button>
-                <div className="text-center sm:text-left">
-                  <p className="text-sm text-gray-400">It's free and takes less than a minute</p>
-                  <div className="flex items-center justify-center sm:justify-start mt-1 text-xs text-gray-500">
-                    <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full mr-2"></div>
-                    <span>Safe, moderated environment</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-12 p-8 bg-black border border-gray-700/50 rounded-2xl">
-                <div className="flex items-center justify-center mb-6">
-                  <MessageCircle className="w-5 h-5 text-white mr-2" />
-                  <span className="text-white font-semibold text-lg">How it works</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-black border-2 border-[#D4AF37] text-[#D4AF37] rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">1</div>
-                    <p className="text-gray-300 font-medium">Create a queue with your intention</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-black border-2 border-[#D4AF37] text-[#D4AF37] rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">2</div>
-                    <p className="text-gray-300 font-medium">Others join your queue</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-black border-2 border-[#D4AF37] text-[#D4AF37] rounded-full flex items-center justify-center font-bold mx-auto mb-4 text-lg">3</div>
-                    <p className="text-gray-300 font-medium">Chat starts automatically!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
