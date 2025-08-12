@@ -96,49 +96,29 @@ export default function ChatRoom() {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <div className="bg-black border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-black border-b border-gray-800 p-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <Link href="/connect">
               <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <Icon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">
-                  {chat?.title || "Bible Study Circle"}
-                </h1>
-                <div className="flex items-center space-x-1 text-sm text-gray-400">
-                  <Users className="w-4 h-4" />
-                  <span>{onlineCount} online</span>
-                </div>
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <Icon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">
+                {chat?.title || "Bible Study Circle"}
+              </h1>
+              <div className="flex items-center space-x-1 text-sm text-gray-400">
+                <Users className="w-4 h-4" />
+                <span>{onlineCount} online</span>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            {/* User Profile Pictures */}
-            <div className="flex items-center -space-x-2 mr-2">
-              {mockMembers.slice(0, 4).map((member, index) => (
-                <Avatar key={member.id} className="w-8 h-8 border-2 border-black">
-                  <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
-                    {member.initials}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {mockMembers.length > 4 && (
-                <Avatar className="w-8 h-8 border-2 border-black">
-                  <AvatarFallback className="bg-gray-600 text-white text-xs">
-                    +{mockMembers.length - 4}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-            
+          <div className="flex items-center space-x-1">
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
               <Phone className="w-5 h-5" />
             </Button>
@@ -150,28 +130,48 @@ export default function ChatRoom() {
             </Button>
           </div>
         </div>
+        
+        {/* Member Profile Pictures Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-400 font-medium">Members:</span>
+            <div className="flex items-center -space-x-2">
+              {mockMembers.map((member, index) => (
+                <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
+                  <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
+                    {member.initials}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          </div>
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+            Active Chat
+          </Badge>
+        </div>
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4 bg-black">
-        <div className="space-y-4">
+      {/* Messages Area */}
+      <ScrollArea className="flex-1 bg-black">
+        <div className="px-4 py-6 space-y-6">
           {messages.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="p-3 bg-blue-600/20 rounded-full w-fit mx-auto mb-3">
-                <Icon className="w-6 h-6 text-blue-400" />
+            <div className="text-center py-12">
+              <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
+                <Icon className="w-8 h-8 text-blue-400" />
               </div>
-              <p className="text-gray-400 text-sm">Start the conversation with your fellow believers</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
+              <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
             </div>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} className="flex items-start space-x-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-gray-700 text-white text-xs">
+              <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
+                <Avatar className="w-9 h-9 flex-shrink-0">
+                  <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
                     {msg.username.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-2">
                     <span className="text-sm font-semibold text-white">
                       {msg.username}
                     </span>
@@ -179,12 +179,12 @@ export default function ChatRoom() {
                       {formatTime(msg.timestamp)}
                     </span>
                     {msg.type === 'prayer_request' && (
-                      <Badge className="bg-purple-600 text-white text-xs">
+                      <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
                         Prayer Request
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-300 leading-relaxed">
+                  <p className="text-sm text-gray-200 leading-relaxed">
                     {msg.message}
                   </p>
                 </div>
@@ -196,22 +196,26 @@ export default function ChatRoom() {
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-700 bg-black">
-        <div className="flex items-center space-x-3">
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Share your thoughts, prayers, or questions..."
-            className="flex-1 bg-gray-800 border-gray-600 text-white placeholder-gray-400 text-sm"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-          />
-          <Button 
-            onClick={handleSendMessage}
-            className="bg-[#D4AF37] hover:bg-[#B8941F] text-black p-2"
-            disabled={!message.trim()}
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+      <div className="p-4 border-t border-gray-800 bg-black">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-end space-x-3">
+            <div className="flex-1">
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Share your thoughts, prayers, or questions..."
+                className="bg-gray-900 border-gray-700 text-white placeholder-gray-400 text-sm min-h-[44px] rounded-xl px-4 py-3 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+            </div>
+            <Button 
+              onClick={handleSendMessage}
+              className="bg-[#D4AF37] hover:bg-[#B8941F] text-black px-4 py-3 rounded-xl font-semibold shadow-lg transition-all duration-200 min-w-[50px]"
+              disabled={!message.trim()}
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
