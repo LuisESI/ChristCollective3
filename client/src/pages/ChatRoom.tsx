@@ -97,7 +97,8 @@ export default function ChatRoom() {
     });
   };
 
-  const getUserDisplayName = (user: ChatMessage['user']) => {
+  const getUserDisplayName = (user?: ChatMessage['user']) => {
+    if (!user) return "Unknown User";
     if (user.displayName) return user.displayName;
     if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
     if (user.firstName) return user.firstName;
@@ -200,17 +201,17 @@ export default function ChatRoom() {
             messages.map((msg) => (
               <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
                 <Avatar className="w-9 h-9 flex-shrink-0">
-                  {msg.user.profileImageUrl && (
+                  {msg.user?.profileImageUrl && (
                     <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
                   )}
                   <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
-                    {getUserDisplayName(msg.user).slice(0, 2).toUpperCase()}
+                    {msg.user ? getUserDisplayName(msg.user).slice(0, 2).toUpperCase() : "??"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="text-sm font-semibold text-white">
-                      {getUserDisplayName(msg.user)}
+                      {msg.user ? getUserDisplayName(msg.user) : "Unknown User"}
                     </span>
                     <span className="text-xs text-gray-500">
                       {formatTime(msg.createdAt)}
