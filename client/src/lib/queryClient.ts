@@ -74,10 +74,14 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      // Handle case where queryKey might not be a string
-      const url = Array.isArray(queryKey) && queryKey.length > 0 
-        ? queryKey[0] 
-        : "/";
+      // Construct URL from queryKey array segments
+      let url: string;
+      if (Array.isArray(queryKey) && queryKey.length > 0) {
+        // Join array elements to create the full URL path
+        url = queryKey.filter(Boolean).join('/');
+      } else {
+        url = "/";
+      }
 
       if (typeof url !== 'string') {
         console.warn("Invalid queryKey, expected string but got:", typeof url);
