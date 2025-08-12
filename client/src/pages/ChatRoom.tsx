@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessage {
   id: number;
@@ -40,6 +41,7 @@ export default function ChatRoom() {
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: chat } = useQuery({
     queryKey: ['/api/group-chats', id],
@@ -64,20 +66,42 @@ export default function ChatRoom() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
-      return apiRequest(`/api/group-chats/${id}/messages`, {
+      const response = await apiRequest(`/api/group-chats/${id}/messages`, {
         method: 'POST',
         data: {
           message: messageText,
           type: 'message'
         }
       });
+      
+      // Check if the response was successful
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expired. Please log in again.');
+        }
+        throw new Error('Failed to send message. Please try again.');
+      }
+      
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/group-chats', id, 'messages'] });
       setMessage("");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error sending message:', error);
+      toast({
+        title: "Message Failed",
+        description: error.message || "Could not send your message. Please try again.",
+        variant: "destructive",
+      });
+      
+      // If it's an auth error, redirect to login
+      if (error.message.includes('Session expired')) {
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 2000);
+      }
     }
   });
 
@@ -88,6 +112,17 @@ export default function ChatRoom() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-refresh messages every 10 seconds to catch new messages from other users
+  useEffect(() => {
+    if (!id) return;
+    
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-chats', id, 'messages'] });
+    }, 10000); // 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [id, queryClient]);
 
   const handleSendMessage = () => {
     if (!message.trim() || sendMessageMutation.isPending) return;
