@@ -52,7 +52,7 @@ export default function MinistryProfileViewPage() {
     },
     enabled: !!ministryId,
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   // Check if user is authenticated
