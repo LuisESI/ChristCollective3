@@ -705,6 +705,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updatePlatformPost(postId, { 
           likesCount: (post.likesCount || 0) + 1 
         });
+        
+        // Create notification for like
+        await storage.createNotificationForLike(userId, postId, post.userId);
+        
         res.json({ liked: true, likesCount: (post.likesCount || 0) + 1 });
       }
     } catch (error) {
@@ -744,6 +748,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updatePlatformPost(postId, { 
         commentsCount: (post.commentsCount || 0) + 1 
       });
+      
+      // Create notification for comment
+      await storage.createNotificationForComment(userId, postId, post.userId, content.trim());
       
       res.status(201).json(comment);
     } catch (error) {

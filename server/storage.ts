@@ -1107,6 +1107,12 @@ export class DatabaseStorage implements IStorage {
       .values({ followerId, followingId })
       .onConflictDoNothing()
       .returning();
+    
+    // Create notification for follow
+    if (follow) {
+      await this.createNotificationForFollow(followerId, followingId);
+    }
+    
     return follow;
   }
 
@@ -1528,6 +1534,12 @@ export class DatabaseStorage implements IStorage {
       .insert(groupChatMessages)
       .values(messageData)
       .returning();
+    
+    // Create notifications for chat message
+    if (message) {
+      await this.createNotificationForChatMessage(message.userId, message.chatId, message.message);
+    }
+    
     return message;
   }
 
@@ -1572,6 +1584,104 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(groupChatMessages)
       .where(eq(groupChatMessages.id, id));
+  }
+
+  // Notification helper functions
+  async createNotificationForFollow(followerId: string, followingId: string): Promise<void> {
+    // Get follower details
+    const follower = await this.getUser(followerId);
+    if (!follower) return;
+
+    await this.createNotification({
+      userId: followingId,
+      type: "follow",
+      title: "New Follower",
+      message: `${follower.displayName || follower.firstName || follower.username} started following you`,
+      relatedId: followerId,
+      relatedType: "user",
+      actorId: followerId,
+      actorName: follower.displayName || follower.firstName || follower.username,
+      actorImage: follower.profileImageUrl,
+      isRead: false,
+    });
+  }
+
+  async createNotificationForLike(likerId: string, postId: number, postOwnerId: string): Promise<void> {
+    // Don't notify if someone likes their own post
+    if (likerId === postOwnerId) return;
+
+    // Get liker details
+    const liker = await this.getUser(likerId);
+    if (!liker) return;
+
+    await this.createNotification({
+      userId: postOwnerId,
+      type: "like",
+      title: "Someone liked your post",
+      message: `${liker.displayName || liker.firstName || liker.username} liked your post`,
+      relatedId: postId.toString(),
+      relatedType: "platform_post",
+      actorId: likerId,
+      actorName: liker.displayName || liker.firstName || liker.username,
+      actorImage: liker.profileImageUrl,
+      isRead: false,
+    });
+  }
+
+  async createNotificationForComment(commenterId: string, postId: number, postOwnerId: string, comment: string): Promise<void> {
+    // Don't notify if someone comments on their own post
+    if (commenterId === postOwnerId) return;
+
+    // Get commenter details
+    const commenter = await this.getUser(commenterId);
+    if (!commenter) return;
+
+    // Truncate comment if too long
+    const truncatedComment = comment.length > 50 ? comment.slice(0, 50) + "..." : comment;
+
+    await this.createNotification({
+      userId: postOwnerId,
+      type: "comment",
+      title: "New comment on your post",
+      message: `${commenter.displayName || commenter.firstName || commenter.username} commented: "${truncatedComment}"`,
+      relatedId: postId.toString(),
+      relatedType: "platform_post",
+      actorId: commenterId,
+      actorName: commenter.displayName || commenter.firstName || commenter.username,
+      actorImage: commenter.profileImageUrl,
+      isRead: false,
+    });
+  }
+
+  async createNotificationForChatMessage(senderId: string, chatId: number, message: string): Promise<void> {
+    // Get chat details and members
+    const chat = await this.getGroupChatById(chatId);
+    if (!chat) return;
+
+    const members = await this.getChatMembers(chatId);
+    const sender = await this.getUser(senderId);
+    if (!sender) return;
+
+    // Notify all chat members except the sender
+    for (const member of members) {
+      if (member.id !== senderId) {
+        // Truncate message if too long
+        const truncatedMessage = message.length > 50 ? message.slice(0, 50) + "..." : message;
+
+        await this.createNotification({
+          userId: member.id,
+          type: "chat_message",
+          title: `New message in ${chat.title}`,
+          message: `${sender.displayName || sender.firstName || sender.username}: ${truncatedMessage}`,
+          relatedId: chatId.toString(),
+          relatedType: "group_chat",
+          actorId: senderId,
+          actorName: sender.displayName || sender.firstName || sender.username,
+          actorImage: sender.profileImageUrl,
+          isRead: false,
+        });
+      }
+    }
   }
 }
 

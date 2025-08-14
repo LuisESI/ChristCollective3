@@ -93,6 +93,8 @@ export function NotificationsList() {
         return <Church className="h-5 w-5 text-[#D4AF37]" />;
       case 'post':
         return <Bell className="h-5 w-5 text-gray-400" />;
+      case 'chat_message':
+        return <MessageCircle className="h-5 w-5 text-cyan-400" />;
       default:
         return <Bell className="h-5 w-5 text-gray-400" />;
     }

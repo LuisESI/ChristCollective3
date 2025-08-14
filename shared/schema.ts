@@ -545,13 +545,13 @@ export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   type: varchar("type", { 
-    enum: ["like", "comment", "follow", "post", "rsvp", "campaign_update", "ministry_post"] 
+    enum: ["like", "comment", "follow", "post", "rsvp", "campaign_update", "ministry_post", "chat_message"] 
   }).notNull(),
   title: varchar("title").notNull(),
   message: text("message").notNull(),
   relatedId: varchar("related_id"), // ID of the related entity (post, comment, etc.)
   relatedType: varchar("related_type", { 
-    enum: ["platform_post", "ministry_post", "comment", "campaign", "user", "ministry"] 
+    enum: ["platform_post", "ministry_post", "comment", "campaign", "user", "ministry", "group_chat", "chat_message"] 
   }),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
