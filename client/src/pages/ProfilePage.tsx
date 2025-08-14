@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Hea
 import { useLocation, useParams } from "wouter";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
@@ -17,6 +19,8 @@ export default function ProfilePage() {
   const [, navigate] = useLocation();
   const params = useParams();
   const username = params.username;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // If no username in URL, viewing current user's profile
   const isOwnProfile = !username;
@@ -49,22 +53,96 @@ export default function ProfilePage() {
   // Determine which user data to use
   const displayUser = isOwnProfile ? user : fetchedUser;
 
-  const { data: creatorProfile, isLoading: creatorLoading } = useQuery({
+  const { data: creatorProfile = {}, isLoading: creatorLoading } = useQuery({
     queryKey: isOwnProfile ? ["/api/user/creator-status"] : ["/api/users/creator-status", displayUser?.id],
     enabled: !!displayUser,
   });
 
   // Get user's following count and follower stats
-  const { data: followingData } = useQuery({
+  const { data: followingData = [] } = useQuery({
     queryKey: [`/api/users/${displayUser?.id}/following`],
     enabled: !!displayUser?.id,
   });
 
   // Get user's stats (follower and following counts)
-  const { data: userStats } = useQuery({
+  const { data: userStats = {} } = useQuery({
     queryKey: [`/api/users/${displayUser?.id}/stats`],
     enabled: !!displayUser?.id,
   });
+
+  // Check if current user is following this profile user
+  const { data: isFollowingData } = useQuery({
+    queryKey: [`/api/users/${displayUser?.id}/is-following`],
+    queryFn: async () => {
+      if (!user || !displayUser?.id || isOwnProfile) return { isFollowing: false };
+      const response = await fetch(`/api/users/${displayUser.id}/is-following`);
+      if (!response.ok) return { isFollowing: false };
+      return response.json();
+    },
+    enabled: !!user && !!displayUser?.id && !isOwnProfile,
+  });
+
+  const isFollowing = isFollowingData?.isFollowing || false;
+
+  // Follow mutation
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to follow user');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${displayUser?.id}/is-following`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${displayUser?.id}/stats`] });
+      toast({
+        title: "Success",
+        description: `You are now following ${displayUser?.firstName || displayUser?.username}!`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to follow user. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Unfollow mutation
+  const unfollowMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to unfollow user');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${displayUser?.id}/is-following`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${displayUser?.id}/stats`] });
+      toast({
+        title: "Success",
+        description: `You have unfollowed ${displayUser?.firstName || displayUser?.username}.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to unfollow user. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFollowToggle = () => {
+    if (isFollowing) {
+      unfollowMutation.mutate();
+    } else {
+      followMutation.mutate();
+    }
+  };
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -117,7 +195,7 @@ export default function ProfilePage() {
     );
   }
 
-  const creator = creatorProfile?.creatorProfile;
+  const creator = (creatorProfile as any)?.creatorProfile;
 
   return (
     <>
@@ -175,7 +253,7 @@ export default function ProfilePage() {
                     : displayUser?.username}
                 </h2>
                 <p className="text-gray-400 text-sm">@{displayUser?.username}</p>
-                {creatorProfile?.isCreator && (
+                {(creatorProfile as any)?.isCreator && (
                   <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
                     ✨ Sponsored Creator
                   </Badge>
@@ -192,13 +270,13 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-left">
                   <div className="text-lg font-semibold">
-                    {userStats?.followersCount || creator?.totalFollowers || 0}
+                    {(userStats as any)?.followersCount || creator?.totalFollowers || 0}
                   </div>
                   <div className="text-xs text-gray-400">followers</div>
                 </div>
                 <div className="text-left">
                   <div className="text-lg font-semibold">
-                    {userStats?.followingCount || followingData?.length || 0}
+                    {(userStats as any)?.followingCount || (followingData as any)?.length || 0}
                   </div>
                   <div className="text-xs text-gray-400">following</div>
                 </div>
@@ -216,7 +294,7 @@ export default function ProfilePage() {
           )}
           
           {/* Content Type and Audience - Single line */}
-          {creatorProfile?.isCreator && (
+          {(creatorProfile as any)?.isCreator && (
             <div className="text-sm text-gray-400 mb-6 text-left">
               <div>
                 Content: {creator?.content || "Biblical Education / Podcast"}
@@ -256,10 +334,19 @@ export default function ProfilePage() {
                   Message
                 </Button>
                 <Button 
-                  className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
+                  onClick={handleFollowToggle}
+                  disabled={followMutation.isPending || unfollowMutation.isPending}
+                  className={`flex-1 font-medium ${
+                    isFollowing 
+                      ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                      : 'bg-[#D4AF37] text-black hover:bg-[#B8941F]'
+                  }`}
                 >
                   <User className="w-4 h-4 mr-2" />
-                  Follow
+                  {followMutation.isPending || unfollowMutation.isPending 
+                    ? '...' 
+                    : isFollowing ? 'Unfollow' : 'Follow'
+                  }
                 </Button>
               </>
             )}
@@ -291,7 +378,7 @@ export default function ProfilePage() {
           )}
 
           {/* Welcome message for new users without creator profile - only show for own profile */}
-          {isOwnProfile && !creatorProfile?.isCreator && (
+          {isOwnProfile && !(creatorProfile as any)?.isCreator && (
             <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
               <p className="text-gray-400 text-sm mb-4">
@@ -325,7 +412,7 @@ export default function ProfilePage() {
           )}
 
           {/* Empty state for creators without platforms - only show for own profile */}
-          {isOwnProfile && creatorProfile?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
+          {isOwnProfile && (creatorProfile as any)?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
             <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Connect Your Platforms</h3>
               <p className="text-gray-400 text-sm mb-4">
