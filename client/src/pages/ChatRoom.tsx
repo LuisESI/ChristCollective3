@@ -294,7 +294,7 @@ export default function ChatRoom() {
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Share your thoughts, prayers, or questions..."
+                placeholder="Send a message..."
                 className="bg-gray-900 border-gray-700 text-white placeholder-gray-400 text-sm min-h-[44px] rounded-xl px-4 py-3 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               />
