@@ -3160,6 +3160,62 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // TEST ROUTE: Create test notifications for all types
+  app.post("/api/notifications/test-all", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Create test notifications for each type
+      const testNotifications = [
+        {
+          type: "follow",
+          title: "New Follower",
+          message: "TestUser started following you",
+          actorName: "TestUser",
+        },
+        {
+          type: "like",
+          title: "Someone liked your post",
+          message: "TestUser liked your post",
+          actorName: "TestUser",
+          relatedType: "platform_post",
+        },
+        {
+          type: "comment",
+          title: "New comment on your post",
+          message: 'TestUser commented: "Great post!"',
+          actorName: "TestUser",
+          relatedType: "platform_post",
+        },
+        {
+          type: "chat_message",
+          title: "New message in Bible Study",
+          message: "TestUser: Hello everyone!",
+          actorName: "TestUser",
+          relatedType: "group_chat",
+        }
+      ];
+
+      for (const notification of testNotifications) {
+        await storage.createNotification({
+          userId,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          relatedId: null,
+          relatedType: notification.relatedType || null,
+          actorName: notification.actorName,
+          isRead: false,
+        });
+      }
+      
+      res.json({ message: "All test notifications created successfully" });
+    } catch (error) {
+      console.error("Error creating test notifications:", error);
+      res.status(500).json({ message: "Failed to create test notifications" });
+    }
+  });
+
   // TEST ROUTE: Create sample notifications (for testing only)
   app.post("/api/notifications/create-samples", isAuthenticated, async (req: any, res) => {
     try {

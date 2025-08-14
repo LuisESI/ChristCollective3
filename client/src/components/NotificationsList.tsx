@@ -77,6 +77,22 @@ export function NotificationsList() {
     },
   });
 
+  const createTestNotificationsMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('/api/notifications/test-all', {
+        method: 'POST',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      toast({
+        title: "Success",
+        description: "Test notifications created! Check your notifications.",
+      });
+    },
+  });
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'like':
@@ -139,8 +155,19 @@ export function NotificationsList() {
   return (
     <div className="space-y-6">
       {/* Actions header */}
-      {notifications.length > 0 && (
-        <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={() => createTestNotificationsMutation.mutate()}
+          disabled={createTestNotificationsMutation.isPending}
+          variant="outline"
+          size="sm"
+          className="text-blue-400 border-blue-600 hover:bg-blue-700/20"
+        >
+          <Bell className="h-4 w-4 mr-2" />
+          Test Notifications
+        </Button>
+        
+        {notifications.length > 0 && (
           <Button
             onClick={() => markAllAsReadMutation.mutate()}
             disabled={markAllAsReadMutation.isPending}
@@ -151,8 +178,8 @@ export function NotificationsList() {
             <CheckCheck className="h-4 w-4 mr-2" />
             Mark All Read
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Notifications list */}
       {notifications.length === 0 ? (
