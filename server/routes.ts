@@ -776,6 +776,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch interactions" });
     }
   });
+
+  // Delete platform post
+  app.delete('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      // Check if post exists and user owns it
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      if (post.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this post" });
+      }
+      
+      // Delete the post
+      await storage.deletePlatformPost(postId);
+      
+      res.json({ message: "Post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting platform post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
   
   // Get post comments only
   app.get('/api/platform-posts/:id/comments', async (req: any, res) => {

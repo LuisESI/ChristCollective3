@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
 // import { formatDistanceToNow } from "date-fns";
 
@@ -117,6 +118,29 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     },
   });
 
+  const deletePostMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest(`/api/platform-posts/${post.id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feed/following"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${post.userId}/posts`] });
+      toast({
+        title: "Post deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error deleting post",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLike = () => {
     if (!currentUserId) {
       toast({
@@ -149,6 +173,30 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     }
 
     commentMutation.mutate(newComment.trim());
+  };
+
+  const handleDeletePost = () => {
+    if (!currentUserId) {
+      toast({
+        title: "Login required",
+        description: "Please log in to delete posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (post.userId !== currentUserId) {
+      toast({
+        title: "Not authorized",
+        description: "You can only delete your own posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+      deletePostMutation.mutate();
+    }
   };
 
 
@@ -230,14 +278,33 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <p className="text-xs text-gray-400">@{getUserUsername()}</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-gray-400 hover:text-white z-10 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-400 hover:text-white z-10 relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+              {currentUserId && post.userId === currentUserId && (
+                <DropdownMenuItem 
+                  className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletePost();
+                  }}
+                  disabled={deletePostMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Post
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Title */}
