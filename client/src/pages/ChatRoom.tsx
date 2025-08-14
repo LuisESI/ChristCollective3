@@ -169,60 +169,62 @@ export default function ChatRoom() {
     <div className="h-screen bg-black flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 bg-black border-b border-gray-800 p-3">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <Link href="/connect">
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Icon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">
-                {chat?.title || "Bible Study Circle"}
-              </h1>
-              <div className="flex items-center space-x-1 text-sm text-gray-400">
-                <Users className="w-4 h-4" />
-                <span>{onlineCount} online</span>
+        <div className="max-w-2xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <Link href="/connect">
+                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Icon className="w-6 h-6 text-white" />
               </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">
+                  {chat?.title || "Bible Study Circle"}
+                </h1>
+                <div className="flex items-center space-x-1 text-sm text-gray-400">
+                  <Users className="w-4 h-4" />
+                  <span>{onlineCount} online</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Phone className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Video className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Settings className="w-5 h-5" />
+              </Button>
             </div>
           </div>
           
-          <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
-              <Phone className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
-              <Video className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-        
-        {/* Member Profile Pictures Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-400 font-medium">Members:</span>
-            <div className="flex items-center -space-x-2">
-              {chatMembers.map((member, index) => (
-                <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
-                  {member.profileImage && (
-                    <AvatarImage src={member.profileImage} alt={member.username} />
-                  )}
-                  <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
-                    {member.initials}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
+          {/* Member Profile Pictures Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-400 font-medium">Members:</span>
+              <div className="flex items-center -space-x-2">
+                {chatMembers.map((member, index) => (
+                  <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
+                    {member.profileImage && (
+                      <AvatarImage src={member.profileImage} alt={member.username} />
+                    )}
+                    <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
+                      {member.initials}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
             </div>
+            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+              Active Chat
+            </Badge>
           </div>
-          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-            Active Chat
-          </Badge>
         </div>
       </div>
 
@@ -230,7 +232,7 @@ export default function ChatRoom() {
       <div className="flex-1 bg-black flex flex-col min-h-0">
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="px-4 py-6 min-h-full flex flex-col justify-end">
+            <div className="px-4 pb-2 pt-6 min-h-full flex flex-col justify-end">
               <div className="max-w-2xl mx-auto w-full space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-12">
@@ -285,8 +287,8 @@ export default function ChatRoom() {
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-800 bg-black">
-        <div className="max-w-4xl mx-auto">
+      <div className="flex-shrink-0 p-4 bg-black">
+        <div className="max-w-2xl mx-auto">
           <div className="flex items-end space-x-3">
             <div className="flex-1">
               <Input
