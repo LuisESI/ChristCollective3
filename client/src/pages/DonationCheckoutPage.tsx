@@ -122,13 +122,16 @@ export default function DonationCheckoutPage() {
 
   const createPaymentIntentMutation = useMutation({
     mutationFn: async (donationAmount: number) => {
-      const response = await apiRequest('POST', '/api/donations/create-payment-intent', {
-        campaignId,
-        amount: donationAmount + tip,
-        guestInfo: {
-          firstName,
-          lastName,
-          email
+      const response = await apiRequest('/api/donations/create-payment-intent', {
+        method: 'POST',
+        data: {
+          campaignId,
+          amount: donationAmount + tip,
+          guestInfo: {
+            firstName,
+            lastName,
+            email
+          }
         }
       });
       return response.json();
