@@ -230,53 +230,55 @@ export default function ChatRoom() {
       <div className="flex-1 bg-black flex flex-col min-h-0">
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="px-4 py-6 space-y-4 min-h-full flex flex-col justify-end">
-              {messages.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
-                    <Icon className="w-8 h-8 text-blue-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
-                  <div className="mt-4 text-xs text-gray-500">
-                    {members.length} members in this chat
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
-                      <Avatar className="w-9 h-9 flex-shrink-0">
-                        {msg.user?.profileImageUrl && (
-                          <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
-                        )}
-                        <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
-                          {msg.user ? getUserDisplayName(msg.user).slice(0, 2).toUpperCase() : "??"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-sm font-semibold text-white">
-                            {msg.user ? getUserDisplayName(msg.user) : "Unknown User"}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatTime(msg.createdAt)}
-                          </span>
-                          {msg.type === 'prayer_request' && (
-                            <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
-                              Prayer Request
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-200 leading-relaxed">
-                          {msg.message}
-                        </p>
-                      </div>
+            <div className="px-4 py-6 min-h-full flex flex-col justify-end">
+              <div className="max-w-2xl mx-auto w-full space-y-4">
+                {messages.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
+                      <Icon className="w-8 h-8 text-blue-400" />
                     </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
+                    <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
+                    <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
+                    <div className="mt-4 text-xs text-gray-500">
+                      {members.length} members in this chat
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((msg) => (
+                      <div key={msg.id} className="flex items-start space-x-3 group hover:bg-gray-900/30 p-2 rounded-lg transition-colors">
+                        <Avatar className="w-9 h-9 flex-shrink-0">
+                          {msg.user?.profileImageUrl && (
+                            <AvatarImage src={msg.user.profileImageUrl} alt={getUserDisplayName(msg.user)} />
+                          )}
+                          <AvatarFallback className="bg-gray-700 text-white text-sm font-semibold">
+                            {msg.user ? getUserDisplayName(msg.user).slice(0, 2).toUpperCase() : "??"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="text-sm font-semibold text-white">
+                              {msg.user ? getUserDisplayName(msg.user) : "Unknown User"}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatTime(msg.createdAt)}
+                            </span>
+                            {msg.type === 'prayer_request' && (
+                              <Badge className="bg-purple-600/20 text-purple-300 border-purple-500/30 text-xs">
+                                Prayer Request
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-200 leading-relaxed">
+                            {msg.message}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+              </div>
             </div>
           </ScrollArea>
         </div>
