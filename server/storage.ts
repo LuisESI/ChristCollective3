@@ -1100,6 +1100,26 @@ export class DatabaseStorage implements IStorage {
       .where(eq(postInteractions.id, id));
   }
 
+  async getPostComment(id: number): Promise<PostInteraction | undefined> {
+    const [comment] = await db
+      .select()
+      .from(postInteractions)
+      .where(and(
+        eq(postInteractions.id, id),
+        eq(postInteractions.type, 'comment')
+      ));
+    return comment;
+  }
+
+  async deletePostComment(id: number): Promise<void> {
+    await db
+      .delete(postInteractions)
+      .where(and(
+        eq(postInteractions.id, id),
+        eq(postInteractions.type, 'comment')
+      ));
+  }
+
   // User follow operations
   async followUser(followerId: string, followingId: string): Promise<UserFollow> {
     const [follow] = await db

@@ -141,6 +141,28 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     },
   });
 
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      return await apiRequest(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}/comments`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      toast({
+        title: "Comment deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error deleting comment",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLike = () => {
     if (!currentUserId) {
       toast({
@@ -196,6 +218,12 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
     if (confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
       deletePostMutation.mutate();
+    }
+  };
+
+  const handleDeleteComment = (commentId: number) => {
+    if (confirm("Are you sure you want to delete this comment? This action cannot be undone.")) {
+      deleteCommentMutation.mutate(commentId);
     }
   };
 
@@ -416,7 +444,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
             {Array.isArray(comments) && comments.length > 0 && (
               <div className="space-y-3 mb-4">
                 {comments.map((comment: any) => (
-                  <div key={comment.id} className="flex gap-2 items-start">
+                  <div 
+                    key={comment.id} 
+                    className="flex gap-2 items-start group hover:bg-gray-800/30 rounded-md p-1 -m-1 transition-colors"
+                  >
                     <Avatar className="w-6 h-6">
                       <AvatarImage src={comment.user?.profileImageUrl} alt={comment.user?.firstName} />
                       <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
@@ -431,6 +462,20 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                         <span className="text-gray-300 ml-2">{comment.content}</span>
                       </div>
                     </div>
+                    {currentUserId && comment.userId === currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-900/20 h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteComment(comment.id);
+                        }}
+                        disabled={deleteCommentMutation.isPending}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

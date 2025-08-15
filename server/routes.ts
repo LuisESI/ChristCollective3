@@ -807,6 +807,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete post" });
     }
   });
+
+  // Delete comment
+  app.delete('/api/comments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const commentId = parseInt(id);
+      const userId = req.user.id;
+      
+      if (isNaN(commentId)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+      
+      // Check if comment exists and user owns it
+      const comment = await storage.getPostComment(commentId);
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      
+      if (comment.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this comment" });
+      }
+      
+      // Get the post to update comment count
+      const post = await storage.getPlatformPost(comment.postId);
+      if (post) {
+        await storage.updatePlatformPost(comment.postId, { 
+          commentsCount: Math.max((post.commentsCount || 1) - 1, 0)
+        });
+      }
+      
+      // Delete the comment
+      await storage.deletePostComment(commentId);
+      
+      res.json({ message: "Comment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ message: "Failed to delete comment" });
+    }
+  });
   
   // Get post comments only
   app.get('/api/platform-posts/:id/comments', async (req: any, res) => {
