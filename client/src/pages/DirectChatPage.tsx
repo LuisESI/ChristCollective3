@@ -62,16 +62,23 @@ export default function DirectChatPage() {
 
   // Fetch chat details
   const { data: chat } = useQuery<DirectChat>({
-    queryKey: [`/api/direct-chats/${chatId}`],
+    queryKey: ['/api/direct-chats', chatId],
     enabled: !!chatId,
   });
 
   // Fetch messages
-  const { data: messages = [] } = useQuery<DirectMessage[]>({
-    queryKey: [`/api/direct-chats/${chatId}/messages`],
+  const { data: messages = [], error, isLoading } = useQuery<DirectMessage[]>({
+    queryKey: ['/api/direct-chats', chatId, 'messages'],
     enabled: !!chatId,
     refetchInterval: 3000, // Refresh every 3 seconds
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Messages data:', messages);
+    console.log('Messages error:', error);
+    console.log('Messages loading:', isLoading);
+  }, [messages, error, isLoading]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -80,12 +87,14 @@ export default function DirectChatPage() {
         method: "POST",
         data: { message: messageText },
       });
-      return response;
+      return await response.json();
     },
     onSuccess: () => {
       setMessage("");
-      queryClient.invalidateQueries({ queryKey: [`/api/direct-chats/${chatId}/messages`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/direct-chats"] });
+      // Force refetch of messages
+      queryClient.invalidateQueries({ queryKey: ['/api/direct-chats', chatId, 'messages'] });
+      queryClient.refetchQueries({ queryKey: ['/api/direct-chats', chatId, 'messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/direct-chats'] });
       scrollToBottom();
     },
     onError: () => {
