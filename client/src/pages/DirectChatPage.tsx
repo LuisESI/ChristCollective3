@@ -150,8 +150,8 @@ export default function DirectChatPage() {
       </Helmet>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-black border-b border-gray-800 px-4 py-3">
-        <div className="flex items-center space-x-3">
+      <div className="sticky top-0 z-10 bg-black border-b border-gray-800 px-4 py-2">
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
@@ -163,21 +163,21 @@ export default function DirectChatPage() {
           
           {otherUser && (
             <>
-              <Avatar className="w-10 h-10">
+              <Avatar className="w-8 h-8">
                 <AvatarImage src={otherUser.profileImageUrl || ""} />
                 <AvatarFallback className="bg-[#D4AF37] text-black">
                   {otherUserName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h1 className="text-lg font-semibold">{otherUserName}</h1>
-                <p className="text-sm text-gray-400">@{otherUser.username}</p>
+                <h1 className="text-base font-semibold">{otherUserName}</h1>
+                <p className="text-xs text-gray-400">@{otherUser.username}</p>
               </div>
             </>
           )}
           
           <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
-            <MoreVertical className="w-5 h-5" />
+            <MoreVertical className="w-4 h-4" />
           </Button>
         </div>
       </div>
