@@ -151,7 +151,7 @@ export default function DirectChatPage() {
 
       {/* Header */}
       <div className="sticky top-0 z-10 bg-black border-b border-gray-800 px-4 py-2">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <Button
             variant="ghost"
             size="sm"
