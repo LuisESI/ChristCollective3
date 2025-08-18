@@ -3530,6 +3530,24 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  app.get("/api/direct-chats/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Get chat and verify user is participant
+      const chat = await storage.getDirectChatById(chatId, userId);
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+      
+      res.json(chat);
+    } catch (error) {
+      console.error("Error fetching direct chat:", error);
+      res.status(500).json({ message: "Failed to fetch direct chat" });
+    }
+  });
+
   app.post("/api/direct-chats", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;

@@ -1806,6 +1806,37 @@ export class DatabaseStorage implements IStorage {
     return chatsWithMessages;
   }
 
+  async getDirectChatById(chatId: number, userId: string): Promise<any | null> {
+    try {
+      const chat = await db
+        .select({
+          id: directChats.id,
+          user1Id: directChats.user1Id,
+          user2Id: directChats.user2Id,
+          lastMessageAt: directChats.lastMessageAt,
+          createdAt: directChats.createdAt,
+          otherUser: users,
+        })
+        .from(directChats)
+        .leftJoin(
+          users,
+          sql`${users.id} = CASE WHEN ${directChats.user1Id} = ${userId} THEN ${directChats.user2Id} ELSE ${directChats.user1Id} END`
+        )
+        .where(
+          and(
+            eq(directChats.id, chatId),
+            sql`${directChats.user1Id} = ${userId} OR ${directChats.user2Id} = ${userId}`
+          )
+        )
+        .limit(1);
+
+      return chat[0] || null;
+    } catch (error) {
+      console.error("Error fetching direct chat by ID:", error);
+      throw error;
+    }
+  }
+
   async createDirectMessage(messageData: InsertDirectMessage): Promise<DirectMessage> {
     const [message] = await db
       .insert(directMessages)

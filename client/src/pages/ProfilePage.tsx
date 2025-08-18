@@ -330,21 +330,42 @@ export default function ProfilePage() {
                   variant="outline"
                   className="flex-1 border-gray-600 text-white hover:bg-gray-800"
                   onClick={() => {
+                    if (!displayUser?.id) {
+                      toast({
+                        title: "Error",
+                        description: "Unable to start chat. Please try again.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
                     // Create or navigate to direct chat
                     const createDirectChat = async () => {
                       try {
                         const response = await fetch('/api/direct-chats', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ recipientId: profileUser?.id })
+                          body: JSON.stringify({ recipientId: displayUser.id })
                         });
                         
                         if (response.ok) {
                           const chat = await response.json();
-                          window.location.href = `/direct-chat/${chat.id}`;
+                          navigate(`/direct-chat/${chat.id}`);
+                        } else {
+                          const errorData = await response.json();
+                          toast({
+                            title: "Error",
+                            description: errorData.message || "Failed to start chat",
+                            variant: "destructive",
+                          });
                         }
                       } catch (error) {
                         console.error('Error creating direct chat:', error);
+                        toast({
+                          title: "Error",
+                          description: "Failed to start chat. Please try again.",
+                          variant: "destructive",
+                        });
                       }
                     };
                     createDirectChat();
