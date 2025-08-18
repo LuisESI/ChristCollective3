@@ -590,19 +590,15 @@ export default function ConnectPage() {
                             </Badge>
                           </div>
                           
+                          <div className="text-xs text-gray-500 mb-1">
+                            <span>@{otherUser?.username}</span>
+                          </div>
+                          
                           {lastMessage && (
-                            <p className="text-xs text-gray-400 truncate mb-1">
+                            <p className="text-xs text-gray-400 truncate">
                               {lastMessage.message}
                             </p>
                           )}
-                          
-                          <div className="flex items-center space-x-1 text-xs text-gray-500">
-                            <span>@{otherUser?.username}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex-shrink-0 opacity-60">
-                          <MessageCircle className="w-5 h-5 text-blue-400" />
                         </div>
                       </div>
                     </CardContent>
