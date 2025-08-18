@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,7 @@ const intentionOptions = [
 
 export default function ConnectPage() {
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -591,7 +593,7 @@ export default function ConnectPage() {
                           <Button
                             className="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
                             onClick={() => {
-                              window.location.href = `/direct-chat/${chat.id}`;
+                              navigate(`/direct-chat/${chat.id}`);
                             }}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
@@ -637,7 +639,7 @@ export default function ConnectPage() {
                           <Button
                             className="bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
                             onClick={() => {
-                              window.location.href = `/chat/${chat.id}`;
+                              navigate(`/chat/${chat.id}`);
                             }}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />

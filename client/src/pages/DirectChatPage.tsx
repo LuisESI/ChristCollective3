@@ -73,12 +73,7 @@ export default function DirectChatPage() {
     refetchInterval: 3000, // Refresh every 3 seconds
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Messages data:', messages);
-    console.log('Messages error:', error);
-    console.log('Messages loading:', isLoading);
-  }, [messages, error, isLoading]);
+
 
   // Send message mutation
   const sendMessageMutation = useMutation({
