@@ -184,7 +184,7 @@ export default function DirectChatPage() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="max-w-2xl mx-auto space-y-4">
           {messages.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-2">No messages yet</div>
@@ -233,7 +233,7 @@ export default function DirectChatPage() {
 
       {/* Message Input */}
       <div className="flex-shrink-0 bg-black border-t border-gray-800 px-4 py-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <Input
               ref={inputRef}
