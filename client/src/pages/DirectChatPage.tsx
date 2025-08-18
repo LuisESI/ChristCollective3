@@ -140,7 +140,7 @@ export default function DirectChatPage() {
   const otherUserName = otherUser?.displayName || otherUser?.firstName || otherUser?.username || "User";
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="h-screen bg-black text-white flex flex-col">
       <Helmet>
         <title>Direct Message - {otherUserName} | Christ Collective</title>
       </Helmet>
@@ -179,7 +179,7 @@ export default function DirectChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 pb-24">
+      <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.length === 0 ? (
             <div className="text-center py-12">
@@ -228,7 +228,7 @@ export default function DirectChatPage() {
       </div>
 
       {/* Message Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 px-4 py-4">
+      <div className="flex-shrink-0 bg-black border-t border-gray-800 px-4 py-4">
         <div className="max-w-4xl mx-auto">
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <Input
