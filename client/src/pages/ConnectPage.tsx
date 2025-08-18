@@ -436,7 +436,7 @@ export default function ConnectPage() {
             </div>
             
             {queues.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {queues.map((queue) => {
                   const intentionInfo = getIntentionInfo(queue.intention);
                   const Icon = intentionInfo.icon;
@@ -444,30 +444,30 @@ export default function ConnectPage() {
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                   
                   return (
-                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 flex flex-col">
-                      <CardContent className="p-2 flex flex-col">
+                    <Card key={queue.id} className="bg-gradient-to-br from-gray-900 to-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-[#D4AF37]/10">
+                      <CardContent className="p-6 flex flex-col">
                         <div className="flex flex-col items-center text-center">
-                          <div className={`p-2 rounded-xl ${intentionInfo.color} shadow-lg mb-2`}>
-                            <Icon className="w-5 h-5 text-white" />
+                          <div className={`p-4 rounded-2xl ${intentionInfo.color} shadow-lg mb-4 transform hover:scale-105 transition-transform duration-200`}>
+                            <Icon className="w-8 h-8 text-white" />
                           </div>
                           
-                          <div className="mb-2">
-                            <h3 className="text-sm font-bold text-white mb-1 line-clamp-2 leading-tight">{queue.title}</h3>
-                            <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
+                          <div className="mb-4">
+                            <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 leading-tight">{queue.title}</h3>
+                            <Badge className={`${intentionInfo.color} text-white text-sm border-none px-3 py-1`}>
                               {intentionInfo.label}
                             </Badge>
                           </div>
                           
-                          <div className="space-y-2 text-xs text-gray-400 mb-3">
+                          <div className="space-y-3 text-sm text-gray-400 mb-4 w-full">
                             {/* Members Slider */}
                             <div className="w-full">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-gray-500">Members</span>
-                                <span className="text-xs text-gray-400 ml-4">{queue.currentCount}/{queue.maxPeople}</span>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-400 font-medium">Members</span>
+                                <span className="text-sm text-white font-semibold">{queue.currentCount}/{queue.maxPeople}</span>
                               </div>
-                              <div className="w-full bg-gray-700 rounded-full h-1.5">
+                              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                                 <div 
-                                  className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                                  className="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full transition-all duration-500 ease-out"
                                   style={{ width: `${progressPercent}%` }}
                                 ></div>
                               </div>
@@ -479,33 +479,33 @@ export default function ConnectPage() {
                               <Button
                                 onClick={() => joinQueueMutation.mutate(queue.id)}
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                                className="w-full bg-green-600 text-white hover:bg-green-700 font-semibold px-2 py-1.5 text-xs shadow-lg transition-all duration-300 disabled:opacity-50"
-                                size="sm"
+                                className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 font-semibold px-4 py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
+                                size="lg"
                               >
                                 {joinQueueMutation.isPending ? (
                                   <div className="flex items-center justify-center">
-                                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                                     Joining...
                                   </div>
                                 ) : queue.currentCount >= queue.maxPeople ? (
                                   "Queue Full"
                                 ) : (
                                   <>
-                                    <MessageCircle className="w-3 h-3 mr-1" />
-                                    Join
+                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    Join Queue
                                   </>
                                 )}
                               </Button>
                             ) : (
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="lg"
                                 onClick={() => cancelQueueMutation.mutate(queue.id)}
                                 disabled={cancelQueueMutation.isPending}
-                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 px-2 py-1.5 text-xs"
+                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
                               >
-                                <X className="w-3 h-3 mr-1" />
-                                Cancel
+                                <X className="w-4 h-4 mr-2" />
+                                Cancel Queue
                               </Button>
                             )}
                           </div>
