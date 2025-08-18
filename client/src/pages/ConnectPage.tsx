@@ -461,7 +461,7 @@ export default function ConnectPage() {
                           <div className="space-y-2 text-xs text-gray-400 mb-3">
                             {/* Members Slider */}
                             <div className="w-full">
-                              <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center justify-between mb-1 px-1">
                                 <span className="text-xs text-gray-500">Members</span>
                                 <span className="text-xs text-gray-400">{queue.currentCount}/{queue.maxPeople}</span>
                               </div>
