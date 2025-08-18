@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useParams, useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft, 
   Send, 
-  MoreVertical
+  MoreVertical,
+  Phone,
+  Video,
+  Settings,
+  Users
 } from "lucide-react";
 import { Helmet } from "react-helmet";
 
@@ -150,35 +155,70 @@ export default function DirectChatPage() {
       </Helmet>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-black border-b border-gray-800 px-4 py-2">
-        <div className="flex items-center space-x-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/connect")}
-            className="text-white hover:bg-gray-800"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          
-          {otherUser && (
-            <>
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={otherUser.profileImageUrl || ""} />
-                <AvatarFallback className="bg-[#D4AF37] text-black">
-                  {otherUserName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h1 className="text-base font-semibold">{otherUserName}</h1>
-                <p className="text-xs text-gray-400">@{otherUser.username}</p>
+      <div className="flex-shrink-0 bg-black border-b border-gray-800 p-3">
+        <div className="max-w-2xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/connect")}
+                className="text-gray-400 hover:text-white p-1"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <MoreVertical className="w-6 h-6 text-white" />
               </div>
-            </>
-          )}
+              <div>
+                <h1 className="text-lg font-bold text-white">
+                  {otherUserName}
+                </h1>
+                <div className="flex items-center space-x-1 text-sm text-gray-400">
+                  <Users className="w-4 h-4" />
+                  <span>2 members</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Phone className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Video className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
           
-          <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
-            <MoreVertical className="w-4 h-4" />
-          </Button>
+          {/* Member Profile Pictures Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-400 font-medium">Members:</span>
+              <div className="flex items-center -space-x-2">
+                <Avatar className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
+                  <AvatarImage src={user.profileImageUrl || ""} />
+                  <AvatarFallback className="bg-[#D4AF37] text-black text-xs font-semibold">
+                    {(user.displayName || user.firstName || user.username).charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {otherUser && (
+                  <Avatar className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
+                    <AvatarImage src={otherUser.profileImageUrl || ""} />
+                    <AvatarFallback className="bg-blue-500 text-white text-xs font-semibold">
+                      {otherUserName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </div>
+            </div>
+            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+              Direct Message
+            </Badge>
+          </div>
         </div>
       </div>
 
