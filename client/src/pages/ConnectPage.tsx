@@ -428,7 +428,7 @@ export default function ConnectPage() {
             </div>
             
             {queues.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {queues.map((queue) => {
                   const intentionInfo = getIntentionInfo(queue.intention);
                   const Icon = intentionInfo.icon;
@@ -436,53 +436,52 @@ export default function ConnectPage() {
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                   
                   return (
-                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg`}>
-                              <Icon className="w-5 h-5 text-white" />
+                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 aspect-[3/4] flex flex-col">
+                      <CardContent className="p-3 flex flex-col h-full">
+                        <div className="flex flex-col items-center text-center flex-1">
+                          <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg mb-3`}>
+                            <Icon className="w-6 h-6 text-white" />
+                          </div>
+                          
+                          <div className="flex-1 flex flex-col justify-between min-h-0">
+                            <div className="mb-3">
+                              <h3 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-tight">{queue.title}</h3>
+                              <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
+                                {intentionInfo.label}
+                              </Badge>
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <h3 className="text-base font-bold text-white">{queue.title}</h3>
-                                <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
-                                  {intentionInfo.label}
-                                </Badge>
+                            
+                            <div className="space-y-2 text-xs text-gray-400">
+                              <div className="flex items-center justify-center space-x-1">
+                                <Users className="w-3 h-3" />
+                                <span>{queue.currentCount}</span>
+                                <span className="text-gray-600">members</span>
                               </div>
-                              <div className="flex items-center space-x-3 text-xs text-gray-400">
-                                <div className="flex items-center space-x-1">
-                                  <Users className="w-3 h-3" />
-                                  <span>{queue.currentCount}</span>
-                                  <span className="text-gray-600">members</span>
-                                  <span className="text-gray-600">•</span>
-                                  <span>active</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-3 h-3" />
-                                  <span>Started {formatTimeAgo(queue.createdAt!)}</span>
-                                </div>
+                              <div className="flex items-center justify-center space-x-1">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatTimeAgo(queue.createdAt!)}</span>
                               </div>
                             </div>
                           </div>
                           
-                          <div className="flex items-center space-x-3">
+                          <div className="mt-3 w-full">
                             {!isOwner ? (
                               <Button
                                 onClick={() => joinQueueMutation.mutate(queue.id)}
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                                className="bg-green-600 text-white hover:bg-green-700 font-semibold px-6 py-2 shadow-lg transition-all duration-300 disabled:opacity-50"
+                                className="w-full bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-xs shadow-lg transition-all duration-300 disabled:opacity-50"
+                                size="sm"
                               >
                                 {joinQueueMutation.isPending ? (
-                                  <div className="flex items-center">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                                  <div className="flex items-center justify-center">
+                                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />
                                     Joining...
                                   </div>
                                 ) : queue.currentCount >= queue.maxPeople ? (
                                   "Queue Full"
                                 ) : (
                                   <>
-                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    <MessageCircle className="w-3 h-3 mr-1" />
                                     Join
                                   </>
                                 )}
@@ -493,9 +492,10 @@ export default function ConnectPage() {
                                 size="sm"
                                 onClick={() => cancelQueueMutation.mutate(queue.id)}
                                 disabled={cancelQueueMutation.isPending}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30"
                               >
-                                <X className="w-4 h-4" />
+                                <X className="w-3 h-3 mr-1" />
+                                Cancel
                               </Button>
                             )}
                           </div>
@@ -534,43 +534,44 @@ export default function ConnectPage() {
           </div>
           
           {activeChats.length > 0 ? (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {activeChats.map((chat) => {
                 const intentionInfo = getIntentionInfo(chat.intention);
                 const Icon = intentionInfo.icon;
                 
                 return (
-                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
-                    <CardContent className="p-3">
-                      <div className="flex items-start space-x-3">
-                        <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative flex-shrink-0`}>
-                          <Icon className="w-5 h-5 text-white" />
+                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 aspect-[3/4] flex flex-col">
+                    <CardContent className="p-3 flex flex-col h-full">
+                      <div className="flex flex-col items-center text-center flex-1">
+                        <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative mb-3`}>
+                          <Icon className="w-6 h-6 text-white" />
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900"></div>
                         </div>
                         
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="text-base font-bold text-white truncate">{chat.title}</h3>
-                            <Badge className={`${intentionInfo.color} text-white text-xs border-none flex-shrink-0`}>
+                        <div className="flex-1 flex flex-col justify-between min-h-0">
+                          <div className="mb-3">
+                            <h3 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-tight">{chat.title}</h3>
+                            <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
                               {intentionInfo.label}
                             </Badge>
                           </div>
                           
-                          <div className="flex items-center space-x-1 text-xs text-gray-400 mb-2">
+                          <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
                             <Users className="w-3 h-3" />
                             <span>{chat.memberCount}</span>
                             <span className="text-gray-600">members</span>
                           </div>
                         </div>
                         
-                        <div className="flex-shrink-0">
+                        <div className="mt-3 w-full">
                           <Button
-                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
+                            className="w-full bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-xs shadow-lg transition-all duration-300"
+                            size="sm"
                             onClick={() => {
                               window.location.href = `/chat/${chat.id}`;
                             }}
                           >
-                            <MessageCircle className="w-4 h-4 mr-1" />
+                            <MessageCircle className="w-3 h-3 mr-1" />
                             Join
                           </Button>
                         </div>
