@@ -612,7 +612,11 @@ export default function ConnectPage() {
                 const Icon = intentionInfo.icon;
                 
                 return (
-                  <Card key={`group-${chat.id}`} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
+                  <Card 
+                    key={`group-${chat.id}`} 
+                    className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 cursor-pointer hover:bg-gray-900/50"
+                    onClick={() => navigate(`/chat/${chat.id}`)}
+                  >
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
                         <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative flex-shrink-0`}>
@@ -633,18 +637,6 @@ export default function ConnectPage() {
                             <span>{chat.memberCount}</span>
                             <span className="text-gray-600">members</span>
                           </div>
-                        </div>
-                        
-                        <div className="flex-shrink-0">
-                          <Button
-                            className="bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
-                            onClick={() => {
-                              navigate(`/chat/${chat.id}`);
-                            }}
-                          >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            Join
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
