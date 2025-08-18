@@ -558,7 +558,11 @@ export default function ConnectPage() {
                 const lastMessage = chat.lastMessage;
                 
                 return (
-                  <Card key={`direct-${chat.id}`} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
+                  <Card 
+                    key={`direct-${chat.id}`} 
+                    className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 cursor-pointer hover:bg-gray-900/50"
+                    onClick={() => navigate(`/direct-chat/${chat.id}`)}
+                  >
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
                         <div className="relative flex-shrink-0">
@@ -597,16 +601,8 @@ export default function ConnectPage() {
                           </div>
                         </div>
                         
-                        <div className="flex-shrink-0">
-                          <Button
-                            className="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
-                            onClick={() => {
-                              navigate(`/direct-chat/${chat.id}`);
-                            }}
-                          >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            Chat
-                          </Button>
+                        <div className="flex-shrink-0 opacity-60">
+                          <MessageCircle className="w-5 h-5 text-blue-400" />
                         </div>
                       </div>
                     </CardContent>
