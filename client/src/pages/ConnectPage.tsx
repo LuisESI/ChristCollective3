@@ -444,50 +444,48 @@ export default function ConnectPage() {
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                   
                   return (
-                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 aspect-[3/4] flex flex-col">
-                      <CardContent className="p-3 flex flex-col h-full">
-                        <div className="flex flex-col items-center text-center flex-1">
-                          <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg mb-3`}>
-                            <Icon className="w-6 h-6 text-white" />
+                    <Card key={queue.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 flex flex-col">
+                      <CardContent className="p-2 flex flex-col">
+                        <div className="flex flex-col items-center text-center">
+                          <div className={`p-2 rounded-xl ${intentionInfo.color} shadow-lg mb-2`}>
+                            <Icon className="w-5 h-5 text-white" />
                           </div>
                           
-                          <div className="flex-1 flex flex-col justify-between min-h-0">
-                            <div className="mb-3">
-                              <h3 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-tight">{queue.title}</h3>
-                              <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
-                                {intentionInfo.label}
-                              </Badge>
+                          <div className="mb-2">
+                            <h3 className="text-sm font-bold text-white mb-1 line-clamp-2 leading-tight">{queue.title}</h3>
+                            <Badge className={`${intentionInfo.color} text-white text-xs border-none`}>
+                              {intentionInfo.label}
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2 text-xs text-gray-400 mb-3">
+                            <div className="flex items-center justify-center space-x-1">
+                              <Users className="w-3 h-3" />
+                              <span>{queue.currentCount}</span>
+                              <span className="text-gray-600">members</span>
                             </div>
                             
-                            <div className="space-y-3 text-xs text-gray-400">
-                              <div className="flex items-center justify-center space-x-1">
-                                <Users className="w-3 h-3" />
-                                <span>{queue.currentCount}</span>
-                                <span className="text-gray-600">members</span>
+                            {/* Capacity Slider */}
+                            <div className="w-full">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs text-gray-500">Capacity</span>
+                                <span className="text-xs text-gray-400">{queue.currentCount}/{queue.maxPeople}</span>
                               </div>
-                              
-                              {/* Capacity Slider */}
-                              <div className="w-full">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-gray-500">Capacity</span>
-                                  <span className="text-xs text-gray-400">{queue.currentCount}/{queue.maxPeople}</span>
-                                </div>
-                                <div className="w-full bg-gray-700 rounded-full h-2">
-                                  <div 
-                                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${progressPercent}%` }}
-                                  ></div>
-                                </div>
+                              <div className="w-full bg-gray-700 rounded-full h-1.5">
+                                <div 
+                                  className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                                  style={{ width: `${progressPercent}%` }}
+                                ></div>
                               </div>
                             </div>
                           </div>
                           
-                          <div className="mt-3 w-full">
+                          <div className="w-full">
                             {!isOwner ? (
                               <Button
                                 onClick={() => joinQueueMutation.mutate(queue.id)}
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                                className="w-full bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-2 text-xs shadow-lg transition-all duration-300 disabled:opacity-50"
+                                className="w-full bg-green-600 text-white hover:bg-green-700 font-semibold px-2 py-1.5 text-xs shadow-lg transition-all duration-300 disabled:opacity-50"
                                 size="sm"
                               >
                                 {joinQueueMutation.isPending ? (
@@ -510,7 +508,7 @@ export default function ConnectPage() {
                                 size="sm"
                                 onClick={() => cancelQueueMutation.mutate(queue.id)}
                                 disabled={cancelQueueMutation.isPending}
-                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 px-2 py-1.5 text-xs"
                               >
                                 <X className="w-3 h-3 mr-1" />
                                 Cancel
