@@ -563,9 +563,19 @@ export default function ConnectPage() {
                   <Card key={`direct-${chat.id}`} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
-                        <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg">
-                            <MessageCircle className="w-6 h-6 text-black" />
+                        <div className="p-3 rounded-xl bg-blue-500 shadow-lg relative flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                            {otherUser?.profileImageUrl ? (
+                              <img 
+                                src={otherUser.profileImageUrl} 
+                                alt={otherUserName}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-white text-xs font-bold">
+                                {otherUserName.charAt(0).toUpperCase()}
+                              </span>
+                            )}
                           </div>
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full border-2 border-gray-900"></div>
                         </div>
