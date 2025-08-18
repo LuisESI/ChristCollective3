@@ -459,16 +459,10 @@ export default function ConnectPage() {
                           </div>
                           
                           <div className="space-y-2 text-xs text-gray-400 mb-3">
-                            <div className="flex items-center justify-center space-x-1">
-                              <Users className="w-3 h-3" />
-                              <span>{queue.currentCount}</span>
-                              <span className="text-gray-600">members</span>
-                            </div>
-                            
-                            {/* Capacity Slider */}
+                            {/* Members Slider */}
                             <div className="w-full">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-gray-500">Capacity</span>
+                                <span className="text-xs text-gray-500">Members</span>
                                 <span className="text-xs text-gray-400">{queue.currentCount}/{queue.maxPeople}</span>
                               </div>
                               <div className="w-full bg-gray-700 rounded-full h-1.5">
