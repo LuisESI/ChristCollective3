@@ -545,13 +545,13 @@ export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   type: varchar("type", { 
-    enum: ["like", "comment", "follow", "post", "rsvp", "campaign_update", "ministry_post", "chat_message"] 
+    enum: ["like", "comment", "follow", "post", "rsvp", "campaign_update", "ministry_post", "chat_message", "direct_message"] 
   }).notNull(),
   title: varchar("title").notNull(),
   message: text("message").notNull(),
   relatedId: varchar("related_id"), // ID of the related entity (post, comment, etc.)
   relatedType: varchar("related_type", { 
-    enum: ["platform_post", "ministry_post", "comment", "campaign", "user", "ministry", "group_chat", "chat_message"] 
+    enum: ["platform_post", "ministry_post", "comment", "campaign", "user", "ministry", "group_chat", "chat_message", "direct_chat"] 
   }),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
@@ -728,3 +728,53 @@ export type GroupChatMember = typeof groupChatMembers.$inferSelect;
 export type GroupChatMessage = typeof groupChatMessages.$inferSelect;
 export type InsertGroupChatMember = z.infer<typeof insertGroupChatMemberSchema>;
 export type InsertGroupChatMessage = z.infer<typeof insertGroupChatMessageSchema>;
+
+// Direct Messages / 1-on-1 Chats
+export const directChats = pgTable("direct_chats", {
+  id: serial("id").primaryKey(),
+  user1Id: varchar("user1_id").notNull().references(() => users.id),
+  user2Id: varchar("user2_id").notNull().references(() => users.id),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const directMessages = pgTable("direct_messages", {
+  id: serial("id").primaryKey(),
+  chatId: integer("chat_id").notNull().references(() => directChats.id, { onDelete: "cascade" }),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Direct chat relations
+export const directChatsRelations = relations(directChats, ({ one, many }) => ({
+  user1: one(users, {
+    fields: [directChats.user1Id],
+    references: [users.id],
+  }),
+  user2: one(users, {
+    fields: [directChats.user2Id],
+    references: [users.id],
+  }),
+  messages: many(directMessages),
+}));
+
+export const directMessagesRelations = relations(directMessages, ({ one }) => ({
+  chat: one(directChats, {
+    fields: [directMessages.chatId],
+    references: [directChats.id],
+  }),
+  sender: one(users, {
+    fields: [directMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// Insert schemas for direct messages
+export const insertDirectMessageSchema = createInsertSchema(directMessages)
+  .omit({ id: true, createdAt: true });
+
+export type DirectChat = typeof directChats.$inferSelect;
+export type DirectMessage = typeof directMessages.$inferSelect;
+export type InsertDirectMessage = z.infer<typeof insertDirectMessageSchema>;

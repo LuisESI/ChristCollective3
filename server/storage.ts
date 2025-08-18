@@ -63,6 +63,11 @@ import {
   type InsertGroupChatMember,
   type GroupChatMessage,
   type InsertGroupChatMessage,
+  directChats,
+  directMessages,
+  type DirectChat,
+  type DirectMessage,
+  type InsertDirectMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -215,6 +220,14 @@ export interface IStorage {
   createGroupChatMessage(messageData: InsertGroupChatMessage): Promise<GroupChatMessage>;
   getChatMessages(chatId: number): Promise<(GroupChatMessage & { user: User })[]>;
   deleteGroupChatMessage(id: number): Promise<void>;
+  
+  // Direct message operations
+  getOrCreateDirectChat(user1Id: string, user2Id: string): Promise<DirectChat>;
+  getUserDirectChats(userId: string): Promise<(DirectChat & { otherUser: User; lastMessage?: DirectMessage })[]>;
+  createDirectMessage(messageData: InsertDirectMessage): Promise<DirectMessage>;
+  getDirectChatMessages(chatId: number): Promise<(DirectMessage & { sender: User })[]>;
+  markDirectMessageAsRead(messageId: number): Promise<void>;
+  getUnreadDirectMessagesCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1718,6 +1731,169 @@ export class DatabaseStorage implements IStorage {
         });
       }
     }
+  }
+
+  // Direct message operations
+  async getOrCreateDirectChat(user1Id: string, user2Id: string): Promise<DirectChat> {
+    // Ensure consistent ordering (smaller ID first)
+    const [firstUserId, secondUserId] = [user1Id, user2Id].sort();
+    
+    // Try to find existing chat
+    const existingChat = await db
+      .select()
+      .from(directChats)
+      .where(
+        and(
+          eq(directChats.user1Id, firstUserId),
+          eq(directChats.user2Id, secondUserId)
+        )
+      )
+      .limit(1);
+
+    if (existingChat.length > 0) {
+      return existingChat[0];
+    }
+
+    // Create new chat
+    const [newChat] = await db
+      .insert(directChats)
+      .values({
+        user1Id: firstUserId,
+        user2Id: secondUserId,
+      })
+      .returning();
+
+    return newChat;
+  }
+
+  async getUserDirectChats(userId: string): Promise<(DirectChat & { otherUser: User; lastMessage?: DirectMessage })[]> {
+    const chats = await db
+      .select({
+        id: directChats.id,
+        user1Id: directChats.user1Id,
+        user2Id: directChats.user2Id,
+        lastMessageAt: directChats.lastMessageAt,
+        createdAt: directChats.createdAt,
+        otherUser: users,
+      })
+      .from(directChats)
+      .leftJoin(
+        users,
+        sql`${users.id} = CASE WHEN ${directChats.user1Id} = ${userId} THEN ${directChats.user2Id} ELSE ${directChats.user1Id} END`
+      )
+      .where(
+        sql`${directChats.user1Id} = ${userId} OR ${directChats.user2Id} = ${userId}`
+      )
+      .orderBy(desc(directChats.lastMessageAt));
+
+    // Get last message for each chat
+    const chatsWithMessages = await Promise.all(
+      chats.map(async (chat) => {
+        const lastMessage = await db
+          .select()
+          .from(directMessages)
+          .where(eq(directMessages.chatId, chat.id))
+          .orderBy(desc(directMessages.createdAt))
+          .limit(1);
+
+        return {
+          ...chat,
+          lastMessage: lastMessage[0] || undefined,
+        };
+      })
+    );
+
+    return chatsWithMessages;
+  }
+
+  async createDirectMessage(messageData: InsertDirectMessage): Promise<DirectMessage> {
+    const [message] = await db
+      .insert(directMessages)
+      .values(messageData)
+      .returning();
+
+    // Update chat's lastMessageAt
+    await db
+      .update(directChats)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(directChats.id, messageData.chatId));
+
+    // Create notification for the recipient
+    const chat = await db
+      .select()
+      .from(directChats)
+      .where(eq(directChats.id, messageData.chatId))
+      .limit(1);
+
+    if (chat[0]) {
+      const recipientId = chat[0].user1Id === messageData.senderId ? chat[0].user2Id : chat[0].user1Id;
+      await this.createNotificationForDirectMessage(messageData.senderId, recipientId, messageData.message);
+    }
+
+    return message;
+  }
+
+  async getDirectChatMessages(chatId: number): Promise<(DirectMessage & { sender: User })[]> {
+    const messages = await db
+      .select({
+        id: directMessages.id,
+        chatId: directMessages.chatId,
+        senderId: directMessages.senderId,
+        message: directMessages.message,
+        readAt: directMessages.readAt,
+        createdAt: directMessages.createdAt,
+        sender: users,
+      })
+      .from(directMessages)
+      .leftJoin(users, eq(directMessages.senderId, users.id))
+      .where(eq(directMessages.chatId, chatId))
+      .orderBy(directMessages.createdAt);
+
+    return messages;
+  }
+
+  async markDirectMessageAsRead(messageId: number): Promise<void> {
+    await db
+      .update(directMessages)
+      .set({ readAt: new Date() })
+      .where(eq(directMessages.id, messageId));
+  }
+
+  async getUnreadDirectMessagesCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(directMessages)
+      .leftJoin(directChats, eq(directMessages.chatId, directChats.id))
+      .where(
+        and(
+          sql`${directChats.user1Id} = ${userId} OR ${directChats.user2Id} = ${userId}`,
+          sql`${directMessages.senderId} != ${userId}`,
+          isNull(directMessages.readAt)
+        )
+      );
+
+    return result[0]?.count || 0;
+  }
+
+  async createNotificationForDirectMessage(senderId: string, recipientId: string, message: string): Promise<void> {
+    const sender = await this.getUser(senderId);
+    if (!sender) return;
+
+    // Truncate message if too long
+    const truncatedMessage = message.length > 50 ? message.slice(0, 50) + "..." : message;
+
+    await this.createNotification({
+      userId: recipientId,
+      type: "direct_message",
+      title: "New direct message",
+      message: `${sender.displayName || sender.firstName || sender.username}: ${truncatedMessage}`,
+      relatedId: recipientId,
+      relatedType: "direct_chat",
+      actorId: senderId,
+      actorName: sender.displayName || sender.firstName || sender.username,
+      actorImage: sender.profileImageUrl,
+      isRead: false,
+    });
   }
 }
 

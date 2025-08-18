@@ -3518,6 +3518,84 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Direct messaging routes
+  app.get("/api/direct-chats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const chats = await storage.getUserDirectChats(userId);
+      res.json(chats);
+    } catch (error) {
+      console.error("Error fetching direct chats:", error);
+      res.status(500).json({ message: "Failed to fetch direct chats" });
+    }
+  });
+
+  app.post("/api/direct-chats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { recipientId } = req.body;
+      
+      if (!recipientId) {
+        return res.status(400).json({ message: "Recipient ID is required" });
+      }
+      
+      const chat = await storage.getOrCreateDirectChat(userId, recipientId);
+      res.json(chat);
+    } catch (error) {
+      console.error("Error creating direct chat:", error);
+      res.status(500).json({ message: "Failed to create direct chat" });
+    }
+  });
+
+  app.get("/api/direct-chats/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const messages = await storage.getDirectChatMessages(chatId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching direct chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch direct chat messages" });
+    }
+  });
+
+  app.post("/api/direct-chats/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { message } = req.body;
+      
+      if (!message || !message.trim()) {
+        return res.status(400).json({ message: "Message cannot be empty" });
+      }
+      
+      const newMessage = await storage.createDirectMessage({
+        chatId,
+        senderId: userId,
+        message: message.trim()
+      });
+      
+      // Get the full message with sender data for response
+      const messages = await storage.getDirectChatMessages(chatId);
+      const fullMessage = messages.find(m => m.id === newMessage.id);
+      
+      res.json(fullMessage);
+    } catch (error) {
+      console.error("Error creating direct message:", error);
+      res.status(500).json({ message: "Failed to create direct message" });
+    }
+  });
+
+  app.patch("/api/direct-messages/:id/read", isAuthenticated, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      await storage.markDirectMessageAsRead(messageId);
+      res.json({ message: "Message marked as read" });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

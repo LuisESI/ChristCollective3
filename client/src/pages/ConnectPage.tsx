@@ -76,6 +76,12 @@ export default function ConnectPage() {
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
+  // Fetch direct chats
+  const { data: directChats = [] } = useQuery<any[]>({
+    queryKey: ["/api/direct-chats"],
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
   // Create queue mutation
   const createQueueMutation = useMutation({
     mutationFn: async (data: CreateQueueForm) => {
@@ -534,23 +540,77 @@ export default function ConnectPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <h2 className="text-lg font-semibold text-white">Chats</h2>
-              <p className="text-xs text-gray-400">Your joined chats and queues</p>
+              <p className="text-xs text-gray-400">Your active group chats and direct messages</p>
             </div>
-            {activeChats.length > 0 && (
+            {(activeChats.length > 0 || directChats.length > 0) && (
               <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
-                {activeChats.length} Active
+                {activeChats.length + directChats.length} Active
               </Badge>
             )}
           </div>
           
-          {activeChats.length > 0 ? (
+          {(activeChats.length > 0 || directChats.length > 0) ? (
             <div className="space-y-3">
+              {/* Direct Chats */}
+              {directChats.map((chat: any) => {
+                const otherUser = chat.otherUser;
+                const otherUserName = otherUser?.displayName || otherUser?.firstName || otherUser?.username || "User";
+                const lastMessage = chat.lastMessage;
+                
+                return (
+                  <Card key={`direct-${chat.id}`} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
+                    <CardContent className="p-3">
+                      <div className="flex items-start space-x-3">
+                        <div className="relative flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-[#D4AF37] flex items-center justify-center shadow-lg">
+                            <MessageCircle className="w-6 h-6 text-black" />
+                          </div>
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full border-2 border-gray-900"></div>
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="text-base font-bold text-white truncate">{otherUserName}</h3>
+                            <Badge className="bg-blue-500 text-white text-xs border-none flex-shrink-0">
+                              Direct
+                            </Badge>
+                          </div>
+                          
+                          {lastMessage && (
+                            <p className="text-xs text-gray-400 truncate mb-1">
+                              {lastMessage.message}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center space-x-1 text-xs text-gray-500">
+                            <span>@{otherUser?.username}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex-shrink-0">
+                          <Button
+                            className="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-3 py-2 text-sm shadow-lg transition-all duration-300"
+                            onClick={() => {
+                              window.location.href = `/direct-chat/${chat.id}`;
+                            }}
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            Chat
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              
+              {/* Group Chats */}
               {activeChats.map((chat) => {
                 const intentionInfo = getIntentionInfo(chat.intention);
                 const Icon = intentionInfo.icon;
                 
                 return (
-                  <Card key={chat.id} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
+                  <Card key={`group-${chat.id}`} className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300">
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
                         <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative flex-shrink-0`}>
@@ -598,7 +658,7 @@ export default function ConnectPage() {
                 </div>
               </div>
               <h3 className="text-base font-semibold text-white mb-1">No active chats</h3>
-              <p className="text-gray-400 text-xs">Join a queue to start chatting with other believers</p>
+              <p className="text-gray-400 text-xs">Join a queue or message someone to start chatting</p>
             </div>
           )}
         </div>

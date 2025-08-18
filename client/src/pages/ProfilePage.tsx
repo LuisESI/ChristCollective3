@@ -329,6 +329,26 @@ export default function ProfilePage() {
                 <Button 
                   variant="outline"
                   className="flex-1 border-gray-600 text-white hover:bg-gray-800"
+                  onClick={() => {
+                    // Create or navigate to direct chat
+                    const createDirectChat = async () => {
+                      try {
+                        const response = await fetch('/api/direct-chats', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ recipientId: profileUser?.id })
+                        });
+                        
+                        if (response.ok) {
+                          const chat = await response.json();
+                          window.location.href = `/direct-chat/${chat.id}`;
+                        }
+                      } catch (error) {
+                        console.error('Error creating direct chat:', error);
+                      }
+                    };
+                    createDirectChat();
+                  }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Message

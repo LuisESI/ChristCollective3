@@ -45,6 +45,7 @@ import MinistryProfileViewPage from "@/pages/MinistryProfileViewPage";
 import EditMinistryProfilePage from "@/pages/EditMinistryProfilePage";
 import EventCreatePage from "@/pages/EventCreatePage";
 import PostPage from "@/pages/PostPage";
+import DirectChatPage from "@/pages/DirectChatPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -92,6 +93,7 @@ function Router() {
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />
       <Route path="/chat/:id" component={ChatRoom} />
+      <Route path="/direct-chat/:chatId" component={DirectChatPage} />
       <Route path="/notifications" component={NotificationsPage} />
 
       <Route path="/privacy-settings" component={PrivacySettingsPage} />
