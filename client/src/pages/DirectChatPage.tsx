@@ -78,7 +78,7 @@ export default function DirectChatPage() {
     mutationFn: async (messageText: string) => {
       const response = await apiRequest(`/api/direct-chats/${chatId}/messages`, {
         method: "POST",
-        body: JSON.stringify({ message: messageText }),
+        data: { message: messageText },
       });
       return response;
     },
