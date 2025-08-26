@@ -444,8 +444,8 @@ export default function ConnectPage() {
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                   
                   return (
-                    <Card key={queue.id} className="bg-gradient-to-br from-gray-900 to-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-[#D4AF37]/10">
-                      <CardContent className="p-6 flex flex-col bg-transparent">
+                    <div key={queue.id} className="rounded-lg bg-gradient-to-br from-gray-900 to-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm">
+                      <div className="p-6 flex flex-col">
                         <div className="flex flex-col items-center text-center">
                           <div className={`p-4 rounded-2xl ${intentionInfo.color} shadow-lg mb-4 transform hover:scale-105 transition-transform duration-200`}>
                             <Icon className="w-8 h-8 text-white" />
@@ -510,8 +510,8 @@ export default function ConnectPage() {
                             )}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
