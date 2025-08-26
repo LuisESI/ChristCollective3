@@ -486,7 +486,15 @@ export default function ConnectPage() {
                           <div className="mb-4">
                             <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 leading-tight">{queue.title}</h3>
                             {queue.description && (
-                              <p className="text-sm text-gray-300 mb-3 line-clamp-2 leading-relaxed">{queue.description}</p>
+                              <p className="text-sm text-gray-300 mb-3 leading-relaxed break-words overflow-hidden" 
+                                 style={{
+                                   display: '-webkit-box',
+                                   WebkitLineClamp: 2,
+                                   WebkitBoxOrient: 'vertical',
+                                   maxHeight: '2.5rem'
+                                 }}>
+                                {queue.description}
+                              </p>
                             )}
                             <Badge className={`${intentionInfo.color} text-white text-sm border-none px-3 py-1`}>
                               {intentionInfo.label}
