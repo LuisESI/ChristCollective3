@@ -54,6 +54,7 @@ export default function ConnectPage() {
   const queryClient = useQueryClient();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [joinedQueues, setJoinedQueues] = useState<Set<number>>(new Set());
 
   const form = useForm<CreateQueueForm>({
     resolver: zodResolver(createQueueSchema),
@@ -117,7 +118,8 @@ export default function ConnectPage() {
         method: "POST",
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, queueId) => {
+      setJoinedQueues(prev => new Set([...prev, queueId]));
       queryClient.invalidateQueries({ queryKey: ["/api/group-chat-queues"] });
       toast({
         title: "Joined queue!",
@@ -151,6 +153,34 @@ export default function ConnectPage() {
       toast({
         title: "Error",
         description: "Failed to cancel queue. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Exit queue mutation
+  const exitQueueMutation = useMutation({
+    mutationFn: async (queueId: number) => {
+      return apiRequest(`/api/group-chat-queues/${queueId}/leave`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (_, queueId) => {
+      setJoinedQueues(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(queueId);
+        return newSet;
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/group-chat-queues"] });
+      toast({
+        title: "Left queue",
+        description: "You have left the queue.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to leave queue. Please try again.",
         variant: "destructive",
       });
     },
@@ -442,6 +472,8 @@ export default function ConnectPage() {
                   const Icon = intentionInfo.icon;
                   const isOwner = queue.creatorId === user.id;
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
+                  // Check if user is already a member of this queue
+                  const isMember = joinedQueues.has(queue.id);
                   
                   return (
                     <div key={queue.id} className="rounded-lg bg-gradient-to-br from-gray-900 to-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm">
@@ -475,7 +507,38 @@ export default function ConnectPage() {
                           </div>
                           
                           <div className="w-full">
-                            {!isOwner ? (
+                            {isOwner ? (
+                              <Button
+                                variant="ghost"
+                                size="lg"
+                                onClick={() => cancelQueueMutation.mutate(queue.id)}
+                                disabled={cancelQueueMutation.isPending}
+                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Cancel Queue
+                              </Button>
+                            ) : isMember ? (
+                              <Button
+                                variant="ghost"
+                                size="lg"
+                                onClick={() => exitQueueMutation.mutate(queue.id)}
+                                disabled={exitQueueMutation.isPending}
+                                className="w-full text-orange-400 hover:text-orange-300 hover:bg-orange-900/30 border border-orange-500/30 hover:border-orange-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
+                              >
+                                {exitQueueMutation.isPending ? (
+                                  <div className="flex items-center justify-center">
+                                    <div className="w-4 h-4 border-2 border-orange-300/30 border-t-orange-300 rounded-full animate-spin mr-2" />
+                                    Leaving...
+                                  </div>
+                                ) : (
+                                  <>
+                                    <X className="w-4 h-4 mr-2" />
+                                    Exit Queue
+                                  </>
+                                )}
+                              </Button>
+                            ) : (
                               <Button
                                 onClick={() => joinQueueMutation.mutate(queue.id)}
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
@@ -495,17 +558,6 @@ export default function ConnectPage() {
                                     Join Queue
                                   </>
                                 )}
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="lg"
-                                onClick={() => cancelQueueMutation.mutate(queue.id)}
-                                disabled={cancelQueueMutation.isPending}
-                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Cancel Queue
                               </Button>
                             )}
                           </div>
