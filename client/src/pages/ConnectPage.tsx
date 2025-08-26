@@ -298,14 +298,25 @@ export default function ConnectPage() {
                       <FormItem>
                         <FormLabel className="text-[#D4AF37] font-medium text-sm">Description (Optional)</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            {...field} 
-                            value={field.value || ""}
-                            placeholder="Share what your group will discuss, pray about, or study together..."
-                            className="bg-black/50 border border-gray-600 text-white placeholder-gray-500 rounded-lg resize-none transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-black/70"
-                            rows={3}
-                            maxLength={130}
-                          />
+                          <div className="relative">
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ""}
+                              placeholder="Share what your group will discuss, pray about, or study together..."
+                              className="bg-black/50 border border-gray-600 text-white placeholder-gray-500 rounded-lg resize-none transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-black/70"
+                              rows={3}
+                              maxLength={130}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value.length <= 130) {
+                                  field.onChange(value);
+                                }
+                              }}
+                            />
+                            <div className="absolute bottom-2 right-3 text-xs text-gray-500">
+                              {(field.value || "").length}/130
+                            </div>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
