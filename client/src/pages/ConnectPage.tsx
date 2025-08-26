@@ -305,16 +305,16 @@ export default function ConnectPage() {
                               placeholder="Share what your group will discuss, pray about, or study together..."
                               className="bg-black/50 border border-gray-600 text-white placeholder-gray-500 rounded-lg resize-none transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-black/70"
                               rows={3}
-                              maxLength={130}
+                              maxLength={70}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                if (value.length <= 130) {
+                                if (value.length <= 70) {
                                   field.onChange(value);
                                 }
                               }}
                             />
                             <div className="absolute bottom-2 right-3 text-xs text-gray-500">
-                              {(field.value || "").length}/130
+                              {(field.value || "").length}/70
                             </div>
                           </div>
                         </FormControl>
