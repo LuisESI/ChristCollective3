@@ -501,13 +501,13 @@ export default function ConnectPage() {
                               <p className="text-sm text-gray-300 mb-3 leading-relaxed break-words overflow-hidden w-full max-w-full" 
                                  style={{
                                    display: '-webkit-box',
-                                   WebkitLineClamp: 2,
+                                   WebkitLineClamp: 3,
                                    WebkitBoxOrient: 'vertical',
-                                   maxHeight: '2.5rem',
+                                   maxHeight: '4rem',
                                    wordBreak: 'break-word',
                                    overflowWrap: 'break-word'
                                  }}>
-                                {queue.description.length > 130 ? `${queue.description.substring(0, 130)}...` : queue.description}
+                                {queue.description}
                               </p>
                             )}
                             <Badge className={`${intentionInfo.color} text-white text-sm border-none px-3 py-1`}>
