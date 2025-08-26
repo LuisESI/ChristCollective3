@@ -495,7 +495,7 @@ export default function ConnectPage() {
                                    wordBreak: 'break-word',
                                    overflowWrap: 'break-word'
                                  }}>
-                                {queue.description.length > 100 ? `${queue.description.substring(0, 100)}...` : queue.description}
+                                {queue.description.length > 130 ? `${queue.description.substring(0, 130)}...` : queue.description}
                               </p>
                             )}
                             <Badge className={`${intentionInfo.color} text-white text-sm border-none px-3 py-1`}>
