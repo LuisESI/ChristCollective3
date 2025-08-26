@@ -304,6 +304,7 @@ export default function ConnectPage() {
                             placeholder="Share what your group will discuss, pray about, or study together..."
                             className="bg-black/50 border border-gray-600 text-white placeholder-gray-500 rounded-lg resize-none transition-all duration-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 focus:bg-black/70"
                             rows={3}
+                            maxLength={130}
                           />
                         </FormControl>
                         <FormMessage />
