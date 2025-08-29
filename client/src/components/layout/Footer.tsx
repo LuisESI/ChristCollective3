@@ -17,7 +17,7 @@ export default function Footer() {
               <a href="#" className="text-gray-400 hover:text-primary transition-colors">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <a href="https://www.instagram.com/christcollective369/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary transition-colors">
                 <Instagram size={20} />
               </a>
               <a href="#" className="text-gray-400 hover:text-primary transition-colors">
