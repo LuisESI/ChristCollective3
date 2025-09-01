@@ -478,7 +478,7 @@ export default function ConnectPage() {
             </div>
             
             {queues.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-4">
                 {queues.map((queue) => {
                   const intentionInfo = getIntentionInfo(queue.intention);
                   const Icon = intentionInfo.icon;
@@ -486,106 +486,105 @@ export default function ConnectPage() {
                   const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                   // Check if user is already a member of this queue
                   const isMember = joinedQueues.has(queue.id);
+                  const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
                   
                   return (
-                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm">
-                      <div className="p-6 flex flex-col">
-                        <div className="flex flex-col items-center text-center">
-                          <div className={`p-4 rounded-2xl ${intentionInfo.color} shadow-lg mb-4 transform hover:scale-105 transition-transform duration-200`}>
-                            <Icon className="w-8 h-8 text-white" />
+                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm">
+                      <div className="p-4 flex items-center justify-between">
+                        {/* Left Section - Icon, Title, and Meta Info */}
+                        <div className="flex items-center space-x-4 flex-1">
+                          <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg`}>
+                            <Icon className="w-6 h-6 text-white" />
                           </div>
                           
-                          <div className="mb-4">
-                            <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 leading-tight">{queue.title}</h3>
-                            {queue.description && (
-                              <p className="text-sm text-gray-300 mb-3 leading-relaxed break-words overflow-hidden w-full max-w-full" 
-                                 style={{
-                                   display: '-webkit-box',
-                                   WebkitLineClamp: 3,
-                                   WebkitBoxOrient: 'vertical',
-                                   maxHeight: '4rem',
-                                   wordBreak: 'break-word',
-                                   overflowWrap: 'break-word'
-                                 }}>
-                                {queue.description}
-                              </p>
-                            )}
-                            <Badge className={`${intentionInfo.color} text-white text-sm border-none px-3 py-1`}>
-                              {intentionInfo.label}
-                            </Badge>
-                          </div>
-                          
-                          <div className="space-y-3 text-sm text-gray-400 mb-4 w-full">
-                            {/* Members Slider */}
-                            <div className="w-full">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-400 font-medium">Members</span>
-                                <span className="text-sm text-white font-semibold">{queue.currentCount}/{queue.maxPeople}</span>
-                              </div>
-                              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                <div 
-                                  className="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full transition-all duration-500 ease-out"
-                                  style={{ width: `${progressPercent}%` }}
-                                ></div>
-                              </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-1">
+                              <h3 className="text-base font-bold text-white">{queue.title}</h3>
+                              <Badge className={`${intentionInfo.color} text-white text-xs border-none px-2 py-1`}>
+                                {intentionInfo.label}
+                              </Badge>
                             </div>
-                          </div>
-                          
-                          <div className="w-full">
-                            {isOwner ? (
-                              <Button
-                                variant="ghost"
-                                size="lg"
-                                onClick={() => cancelQueueMutation.mutate(queue.id)}
-                                disabled={cancelQueueMutation.isPending}
-                                className="w-full text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Cancel Queue
-                              </Button>
-                            ) : isMember ? (
-                              <Button
-                                variant="ghost"
-                                size="lg"
-                                onClick={() => exitQueueMutation.mutate(queue.id)}
-                                disabled={exitQueueMutation.isPending}
-                                className="w-full text-orange-400 hover:text-orange-300 hover:bg-orange-900/30 border border-orange-500/30 hover:border-orange-400/50 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300"
-                              >
-                                {exitQueueMutation.isPending ? (
-                                  <div className="flex items-center justify-center">
-                                    <div className="w-4 h-4 border-2 border-orange-300/30 border-t-orange-300 rounded-full animate-spin mr-2" />
-                                    Leaving...
-                                  </div>
-                                ) : (
-                                  <>
-                                    <X className="w-4 h-4 mr-2" />
-                                    Exit Queue
-                                  </>
-                                )}
-                              </Button>
-                            ) : (
-                              <Button
-                                onClick={() => joinQueueMutation.mutate(queue.id)}
-                                disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                                className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 font-semibold px-4 py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
-                                size="lg"
-                              >
-                                {joinQueueMutation.isPending ? (
-                                  <div className="flex items-center justify-center">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                                    Joining...
-                                  </div>
-                                ) : queue.currentCount >= queue.maxPeople ? (
-                                  "Queue Full"
-                                ) : (
-                                  <>
-                                    <MessageCircle className="w-4 h-4 mr-2" />
-                                    Join Queue
-                                  </>
-                                )}
-                              </Button>
+                            
+                            <div className="flex items-center space-x-4 text-sm text-gray-400">
+                              <span>Created {createdDate}</span>
+                              <span>•</span>
+                              <span>{queue.currentCount}/{queue.maxPeople} members</span>
+                            </div>
+                            
+                            {queue.description && (
+                              <p className="text-sm text-gray-300 mt-2 line-clamp-1">{queue.description}</p>
                             )}
                           </div>
+                        </div>
+                        
+                        {/* Middle Section - Member Profile Pictures */}
+                        <div className="flex items-center space-x-2 mx-4">
+                          <div className="flex -space-x-2">
+                            {/* Mock profile pictures for now - in real app would fetch actual member data */}
+                            {Array.from({ length: Math.min(queue.currentCount, 4) }).map((_, index) => (
+                              <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-900 flex items-center justify-center">
+                                <span className="text-xs text-white font-bold">
+                                  {String.fromCharCode(65 + index)}
+                                </span>
+                              </div>
+                            ))}
+                            {queue.currentCount > 4 && (
+                              <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-900 flex items-center justify-center">
+                                <span className="text-xs text-white font-bold">+{queue.currentCount - 4}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Right Section - Action Button */}
+                        <div className="flex-shrink-0">
+                          {isOwner ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => cancelQueueMutation.mutate(queue.id)}
+                              disabled={cancelQueueMutation.isPending}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              Cancel
+                            </Button>
+                          ) : isMember ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => exitQueueMutation.mutate(queue.id)}
+                              disabled={exitQueueMutation.isPending}
+                              className="text-orange-400 hover:text-orange-300 hover:bg-orange-900/30 border border-orange-500/30 hover:border-orange-400/50 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300"
+                            >
+                              {exitQueueMutation.isPending ? (
+                                <div className="w-4 h-4 border-2 border-orange-300/30 border-t-orange-300 rounded-full animate-spin" />
+                              ) : (
+                                <>
+                                  <X className="w-4 h-4 mr-2" />
+                                  Exit
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => joinQueueMutation.mutate(queue.id)}
+                              disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                              className="bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 font-semibold px-4 py-2 text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
+                              size="sm"
+                            >
+                              {joinQueueMutation.isPending ? (
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              ) : queue.currentCount >= queue.maxPeople ? (
+                                "Full"
+                              ) : (
+                                <>
+                                  <MessageCircle className="w-4 h-4 mr-2" />
+                                  Join
+                                </>
+                              )}
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -681,37 +680,69 @@ export default function ConnectPage() {
               {activeChats.map((chat) => {
                 const intentionInfo = getIntentionInfo(chat.intention);
                 const Icon = intentionInfo.icon;
+                const startDate = new Date().toLocaleDateString(); // Since we don't have startedAt, using current date
                 
                 return (
-                  <Card 
+                  <div 
                     key={`group-${chat.id}`} 
-                    className="bg-black border border-gray-700/50 hover:border-[#D4AF37]/30 transition-all duration-300 cursor-pointer hover:bg-gray-900/50"
+                    className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm cursor-pointer"
                     onClick={() => navigate(`/chat/${chat.id}`)}
                   >
-                    <CardContent className="p-3">
-                      <div className="flex items-start space-x-3">
-                        <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative flex-shrink-0`}>
-                          <Icon className="w-5 h-5 text-white" />
+                    <div className="p-4 flex items-center justify-between">
+                      {/* Left Section - Icon, Title, and Meta Info */}
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative`}>
+                          <Icon className="w-6 h-6 text-white" />
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900"></div>
                         </div>
                         
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="text-base font-bold text-white truncate">{chat.title}</h3>
-                            <Badge className={`${intentionInfo.color} text-white text-xs border-none flex-shrink-0`}>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-1">
+                            <h3 className="text-base font-bold text-white">{chat.title}</h3>
+                            <Badge className={`${intentionInfo.color} text-white text-xs border-none px-2 py-1`}>
                               {intentionInfo.label}
                             </Badge>
                           </div>
                           
-                          <div className="flex items-center space-x-1 text-xs text-gray-400 mb-2">
-                            <Users className="w-3 h-3" />
-                            <span>{chat.memberCount}</span>
-                            <span className="text-gray-600">members</span>
+                          <div className="flex items-center space-x-4 text-sm text-gray-400">
+                            <span>Started {startDate}</span>
+                            <span>•</span>
+                            <span>{chat.memberCount} members</span>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      {/* Middle Section - Member Profile Pictures */}
+                      <div className="flex items-center space-x-2 mx-4">
+                        <div className="flex -space-x-2">
+                          {/* Mock profile pictures for now - in real app would fetch actual member data */}
+                          {Array.from({ length: Math.min(chat.memberCount, 4) }).map((_, index) => (
+                            <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-900 flex items-center justify-center">
+                              <span className="text-xs text-white font-bold">
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                            </div>
+                          ))}
+                          {chat.memberCount > 4 && (
+                            <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-900 flex items-center justify-center">
+                              <span className="text-xs text-white font-bold">+{chat.memberCount - 4}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Right Section - Open Chat Button */}
+                      <div className="flex-shrink-0">
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 font-semibold px-4 py-2 text-sm shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Open Chat
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
