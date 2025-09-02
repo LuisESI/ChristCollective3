@@ -206,12 +206,12 @@ export interface IStorage {
   // Group chat operations
   createGroupChatQueue(queueData: InsertGroupChatQueue & { creatorId: string }): Promise<GroupChatQueue>;
   getGroupChatQueue(id: number): Promise<GroupChatQueue | undefined>;
-  listActiveQueues(): Promise<GroupChatQueue[]>;
+  listActiveQueues(): Promise<(GroupChatQueue & { members?: User[] })[]>;
   joinQueue(queueId: number, userId: string): Promise<void>;
   leaveQueue(queueId: number, userId: string): Promise<void>;
   cancelQueue(queueId: number, userId: string): Promise<void>;
   createGroupChatFromQueue(queueId: number): Promise<GroupChat>;
-  listActiveChats(): Promise<GroupChat[]>;
+  listActiveChats(): Promise<(GroupChat & { members?: User[] })[]>;
   getUserGroupChats(userId: string): Promise<GroupChat[]>;
   getQueueMembers(queueId: number): Promise<User[]>;
   getChatMembers(chatId: number): Promise<User[]>;
@@ -1367,13 +1367,25 @@ export class DatabaseStorage implements IStorage {
     return queue;
   }
 
-  async listActiveQueues(): Promise<GroupChatQueue[]> {
-    return db
+  async listActiveQueues(): Promise<(GroupChatQueue & { members?: User[] })[]> {
+    const queues = await db
       .select()
       .from(groupChatQueues)
       .where(eq(groupChatQueues.status, "waiting"))
       .orderBy(desc(groupChatQueues.createdAt));
+
+    // For each queue, fetch member profile information
+    const queuesWithMembers = await Promise.all(
+      queues.map(async (queue) => {
+        const members = await this.getQueueMembers(queue.id);
+        return { ...queue, members };
+      })
+    );
+
+    return queuesWithMembers;
   }
+
+
 
   async joinQueue(queueId: number, userId: string): Promise<void> {
     // Check if user already in queue
@@ -1487,12 +1499,22 @@ export class DatabaseStorage implements IStorage {
     return chat;
   }
 
-  async listActiveChats(): Promise<GroupChat[]> {
-    return db
+  async listActiveChats(): Promise<(GroupChat & { members?: User[] })[]> {
+    const chats = await db
       .select()
       .from(groupChats)
       .where(eq(groupChats.status, "active"))
       .orderBy(desc(groupChats.createdAt));
+
+    // For each chat, fetch member profile information
+    const chatsWithMembers = await Promise.all(
+      chats.map(async (chat) => {
+        const members = await this.getChatMembers(chat.id);
+        return { ...chat, members };
+      })
+    );
+
+    return chatsWithMembers;
   }
 
   async getUserGroupChats(userId: string): Promise<GroupChat[]> {

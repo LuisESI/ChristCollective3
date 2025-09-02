@@ -511,7 +511,23 @@ export default function ConnectPage() {
                         
                         {/* Profile Pictures Row */}
                         <div className="flex space-x-2 ml-11 mb-4">
-                          {Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
+                          {queue.members?.slice(0, 5).map((member, index) => (
+                            <div key={member.id} className="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center overflow-hidden">
+                              {member.profileImageUrl ? (
+                                <img 
+                                  src={member.profileImageUrl} 
+                                  alt={member.displayName || member.username || `User ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                                  <span className="text-xs text-white font-medium">
+                                    {(member.displayName || member.username || 'U').charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )) || Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
                             <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
                               <span className="text-xs text-white font-medium">
                                 {String.fromCharCode(65 + index)}
@@ -677,7 +693,23 @@ export default function ConnectPage() {
                       
                       {/* Profile Pictures Row */}
                       <div className="flex space-x-2 ml-11 mb-4">
-                        {Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
+                        {chat.members?.slice(0, 5).map((member, index) => (
+                          <div key={member.id} className="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center overflow-hidden">
+                            {member.profileImageUrl ? (
+                              <img 
+                                src={member.profileImageUrl} 
+                                alt={member.displayName || member.username || `User ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">
+                                  {(member.displayName || member.username || 'U').charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )) || Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
                           <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
                             <span className="text-xs text-white font-medium">
                               {String.fromCharCode(65 + index)}
