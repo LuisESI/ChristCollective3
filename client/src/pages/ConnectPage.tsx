@@ -498,14 +498,15 @@ export default function ConnectPage() {
                         
                         {/* Middle Section - Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="text-sm font-semibold text-white truncate">{queue.title}</h3>
-                            <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
-                              {intentionInfo.label}
-                            </Badge>
+                          <h3 className="text-sm font-semibold text-white truncate mb-1">{queue.title}</h3>
+                          <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium mb-1 inline-block`}>
+                            {intentionInfo.label}
+                          </Badge>
+                          <div className="text-xs text-gray-400 mb-0.5">
+                            {createdDate}
                           </div>
                           <div className="text-xs text-gray-400">
-                            {createdDate} • {queue.currentCount}/{queue.maxPeople} members
+                            {queue.currentCount}/{queue.maxPeople} members
                           </div>
                         </div>
                         
@@ -685,14 +686,15 @@ export default function ConnectPage() {
                       
                       {/* Middle Section - Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="text-sm font-semibold text-white truncate">{chat.title}</h3>
-                          <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
-                            {intentionInfo.label}
-                          </Badge>
+                        <h3 className="text-sm font-semibold text-white truncate mb-1">{chat.title}</h3>
+                        <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium mb-1 inline-block`}>
+                          {intentionInfo.label}
+                        </Badge>
+                        <div className="text-xs text-gray-400 mb-0.5">
+                          Started {startDate}
                         </div>
                         <div className="text-xs text-gray-400">
-                          Started {startDate} • {chat.memberCount} members
+                          {chat.memberCount} members
                         </div>
                       </div>
                       
