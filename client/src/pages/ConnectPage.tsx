@@ -511,18 +511,18 @@ export default function ConnectPage() {
                         </div>
                         
                         {/* Right Section - Member Avatars and Action Button */}
-                        <div className="flex items-center space-x-3 flex-shrink-0">
-                          <div className="flex -space-x-1.5">
-                            {Array.from({ length: Math.min(queue.currentCount, 3) }).map((_, index) => (
-                              <div key={index} className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-black flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">
+                        <div className="flex items-center space-x-4 flex-shrink-0">
+                          <div className="flex space-x-2">
+                            {Array.from({ length: Math.min(queue.currentCount, 4) }).map((_, index) => (
+                              <div key={index} className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-sm text-white font-semibold">
                                   {String.fromCharCode(65 + index)}
                                 </span>
                               </div>
                             ))}
-                            {queue.currentCount > 3 && (
-                              <div className="w-7 h-7 rounded-full bg-gray-600 border-2 border-black flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">+{queue.currentCount - 3}</span>
+                            {queue.currentCount > 4 && (
+                              <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-sm text-white font-semibold">+{queue.currentCount - 4}</span>
                               </div>
                             )}
                           </div>
@@ -699,18 +699,18 @@ export default function ConnectPage() {
                       </div>
                       
                       {/* Right Section - Member Avatars and Button */}
-                      <div className="flex items-center space-x-3 flex-shrink-0">
-                        <div className="flex -space-x-1.5">
-                          {Array.from({ length: Math.min(chat.memberCount, 3) }).map((_, index) => (
-                            <div key={index} className="w-7 h-7 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-black flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">
+                      <div className="flex items-center space-x-4 flex-shrink-0">
+                        <div className="flex space-x-2">
+                          {Array.from({ length: Math.min(chat.memberCount, 4) }).map((_, index) => (
+                            <div key={index} className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-sm text-white font-semibold">
                                 {String.fromCharCode(65 + index)}
                               </span>
                             </div>
                           ))}
-                          {chat.memberCount > 3 && (
-                            <div className="w-7 h-7 rounded-full bg-gray-600 border-2 border-black flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">+{chat.memberCount - 3}</span>
+                          {chat.memberCount > 4 && (
+                            <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-sm text-white font-semibold">+{chat.memberCount - 4}</span>
                             </div>
                           )}
                         </div>
