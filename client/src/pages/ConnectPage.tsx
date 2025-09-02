@@ -489,8 +489,8 @@ export default function ConnectPage() {
                   const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
                   
                   return (
-                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm">
-                      <div className="p-4 flex items-center justify-between">
+                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm w-full">
+                      <div className="px-4 py-3 flex items-center justify-between min-h-[72px]">
                         {/* Left Section - Icon, Title, and Meta Info */}
                         <div className="flex items-center space-x-4 flex-1">
                           <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg`}>
@@ -685,10 +685,10 @@ export default function ConnectPage() {
                 return (
                   <div 
                     key={`group-${chat.id}`} 
-                    className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm cursor-pointer"
+                    className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#D4AF37]/10 shadow-sm cursor-pointer w-full"
                     onClick={() => navigate(`/chat/${chat.id}`)}
                   >
-                    <div className="p-4 flex items-center justify-between">
+                    <div className="px-4 py-3 flex items-center justify-between min-h-[72px]">
                       {/* Left Section - Icon, Title, and Meta Info */}
                       <div className="flex items-center space-x-4 flex-1">
                         <div className={`p-3 rounded-xl ${intentionInfo.color} shadow-lg relative`}>
