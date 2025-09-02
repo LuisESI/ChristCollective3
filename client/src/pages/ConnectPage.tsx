@@ -511,53 +511,49 @@ export default function ConnectPage() {
                         </div>
                         
                         {/* Profile Pictures Row */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex space-x-2 ml-11">
-                            {Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
-                              <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">
-                                  {String.fromCharCode(65 + index)}
-                                </span>
-                              </div>
-                            ))}
-                            {queue.currentCount > 5 && (
-                              <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {isOwner ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => cancelQueueMutation.mutate(queue.id)}
-                              disabled={cancelQueueMutation.isPending}
-                              className="text-red-400 border-red-400/50 hover:bg-red-400/10 px-4 py-2 text-xs rounded-lg"
-                            >
-                              Cancel
-                            </Button>
-                          ) : isMember ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => exitQueueMutation.mutate(queue.id)}
-                              disabled={exitQueueMutation.isPending}
-                              className="text-orange-400 border-orange-400/50 hover:bg-orange-400/10 px-4 py-2 text-xs rounded-lg"
-                            >
-                              {exitQueueMutation.isPending ? "Leaving..." : "Exit"}
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={() => joinQueueMutation.mutate(queue.id)}
-                              disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                              className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium px-4 py-2 text-xs rounded-lg"
-                              size="sm"
-                            >
-                              {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Full" : "Join"}
-                            </Button>
+                        <div className="flex space-x-2 ml-11 mb-4">
+                          {Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
+                            <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-xs text-white font-medium">
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                            </div>
+                          ))}
+                          {queue.currentCount > 5 && (
+                            <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
+                            </div>
                           )}
                         </div>
+                        
+                        {/* Action Button - Full Width at Bottom */}
+                        {isOwner ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => cancelQueueMutation.mutate(queue.id)}
+                            disabled={cancelQueueMutation.isPending}
+                            className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 py-2 text-sm rounded-lg"
+                          >
+                            Cancel Queue
+                          </Button>
+                        ) : isMember ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => exitQueueMutation.mutate(queue.id)}
+                            disabled={exitQueueMutation.isPending}
+                            className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 py-2 text-sm rounded-lg"
+                          >
+                            {exitQueueMutation.isPending ? "Leaving Queue..." : "Exit Queue"}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => joinQueueMutation.mutate(queue.id)}
+                            disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                            className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium py-2 text-sm rounded-lg"
+                          >
+                            {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Queue Full" : "Join Queue"}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
@@ -682,33 +678,31 @@ export default function ConnectPage() {
                       </div>
                       
                       {/* Profile Pictures Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2 ml-11">
-                          {Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
-                            <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">
-                                {String.fromCharCode(65 + index)}
-                              </span>
-                            </div>
-                          ))}
-                          {chat.memberCount > 5 && (
-                            <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">+{chat.memberCount - 5}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/chat/${chat.id}`);
-                          }}
-                          className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium px-4 py-2 text-xs rounded-lg"
-                        >
-                          Open Chat
-                        </Button>
+                      <div className="flex space-x-2 ml-11 mb-4">
+                        {Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
+                          <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
+                            <span className="text-xs text-white font-medium">
+                              {String.fromCharCode(65 + index)}
+                            </span>
+                          </div>
+                        ))}
+                        {chat.memberCount > 5 && (
+                          <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                            <span className="text-xs text-white font-medium">+{chat.memberCount - 5}</span>
+                          </div>
+                        )}
                       </div>
+                      
+                      {/* Open Chat Button - Full Width at Bottom */}
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/chat/${chat.id}`);
+                        }}
+                        className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium py-2 text-sm rounded-lg"
+                      >
+                        Open Chat
+                      </Button>
                     </div>
                   </div>
                 );
