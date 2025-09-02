@@ -489,89 +489,72 @@ export default function ConnectPage() {
                   const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
                   
                   return (
-                    <div key={queue.id} className="rounded-xl bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 w-full">
-                      <div className="p-4 flex items-center space-x-4">
-                        {/* Left Section - Icon */}
-                        <div className={`p-2.5 rounded-lg ${intentionInfo.color} flex-shrink-0`}>
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                        
-                        {/* Middle Section - Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-white truncate mb-1">{queue.title}</h3>
-                          <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium mb-1 inline-block`}>
-                            {intentionInfo.label}
-                          </Badge>
-                          <div className="text-xs text-gray-400 mb-0.5">
-                            {createdDate}
+                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 w-full">
+                      <div className="p-4">
+                        {/* Top Row - Icon, Title and Badge */}
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className={`p-2 rounded-lg ${intentionInfo.color} flex-shrink-0`}>
+                            <Icon className="w-5 h-5 text-white" />
                           </div>
-                          <div className="text-xs text-gray-400">
-                            {queue.currentCount}/{queue.maxPeople} members
+                          <div className="flex items-center space-x-2 flex-1">
+                            <h3 className="text-sm font-semibold text-white">{queue.title}</h3>
+                            <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
+                              {intentionInfo.label}
+                            </Badge>
                           </div>
                         </div>
                         
-                        {/* Right Section - Member Avatars and Action Button */}
-                        <div className="flex items-center space-x-4 flex-shrink-0">
-                          <div className="flex space-x-2">
-                            {Array.from({ length: Math.min(queue.currentCount, 4) }).map((_, index) => (
-                              <div key={index} className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-sm text-white font-semibold">
+                        {/* Date and Member Count */}
+                        <div className="text-xs text-gray-400 mb-3 ml-11">
+                          <div>{createdDate}</div>
+                          <div>{queue.currentCount}/{queue.maxPeople} members</div>
+                        </div>
+                        
+                        {/* Profile Pictures Row */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex space-x-2 ml-11">
+                            {Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
+                              <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">
                                   {String.fromCharCode(65 + index)}
                                 </span>
                               </div>
                             ))}
-                            {queue.currentCount > 4 && (
-                              <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-sm text-white font-semibold">+{queue.currentCount - 4}</span>
+                            {queue.currentCount > 5 && (
+                              <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
                               </div>
                             )}
                           </div>
                           
                           {isOwner ? (
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => cancelQueueMutation.mutate(queue.id)}
                               disabled={cancelQueueMutation.isPending}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-900/30 border border-red-500/30 hover:border-red-400/50 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300"
+                              className="text-red-400 border-red-400/50 hover:bg-red-400/10 px-4 py-2 text-xs rounded-lg"
                             >
-                              <X className="w-3 h-3 mr-1" />
                               Cancel
                             </Button>
                           ) : isMember ? (
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => exitQueueMutation.mutate(queue.id)}
                               disabled={exitQueueMutation.isPending}
-                              className="text-orange-400 hover:text-orange-300 hover:bg-orange-900/30 border border-orange-500/30 hover:border-orange-400/50 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300"
+                              className="text-orange-400 border-orange-400/50 hover:bg-orange-400/10 px-4 py-2 text-xs rounded-lg"
                             >
-                              {exitQueueMutation.isPending ? (
-                                <div className="w-3 h-3 border-2 border-orange-300/30 border-t-orange-300 rounded-full animate-spin" />
-                              ) : (
-                                <>
-                                  <X className="w-3 h-3 mr-1" />
-                                  Exit
-                                </>
-                              )}
+                              {exitQueueMutation.isPending ? "Leaving..." : "Exit"}
                             </Button>
                           ) : (
                             <Button
                               onClick={() => joinQueueMutation.mutate(queue.id)}
                               disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                              className="bg-gradient-to-r from-green-600 to-green-500 text-white hover:from-green-700 hover:to-green-600 font-medium px-3 py-1.5 text-xs shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
+                              className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium px-4 py-2 text-xs rounded-lg"
                               size="sm"
                             >
-                              {joinQueueMutation.isPending ? (
-                                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              ) : queue.currentCount >= queue.maxPeople ? (
-                                "Full"
-                              ) : (
-                                <>
-                                  <MessageCircle className="w-3 h-3 mr-1" />
-                                  Join
-                                </>
-                              )}
+                              {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Full" : "Join"}
                             </Button>
                           )}
                         </div>
@@ -674,43 +657,43 @@ export default function ConnectPage() {
                 return (
                   <div 
                     key={`group-${chat.id}`} 
-                    className="rounded-xl bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 cursor-pointer w-full"
+                    className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer w-full"
                     onClick={() => navigate(`/chat/${chat.id}`)}
                   >
-                    <div className="p-4 flex items-center space-x-4">
-                      {/* Left Section - Icon */}
-                      <div className={`p-2.5 rounded-lg ${intentionInfo.color} flex-shrink-0 relative`}>
-                        <Icon className="w-5 h-5 text-white" />
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-black"></div>
-                      </div>
-                      
-                      {/* Middle Section - Content */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-white truncate mb-1">{chat.title}</h3>
-                        <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium mb-1 inline-block`}>
-                          {intentionInfo.label}
-                        </Badge>
-                        <div className="text-xs text-gray-400 mb-0.5">
-                          Started {startDate}
+                    <div className="p-4">
+                      {/* Top Row - Icon, Title and Badge */}
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className={`p-2 rounded-lg ${intentionInfo.color} flex-shrink-0 relative`}>
+                          <Icon className="w-5 h-5 text-white" />
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-black"></div>
                         </div>
-                        <div className="text-xs text-gray-400">
-                          {chat.memberCount} members
+                        <div className="flex items-center space-x-2 flex-1">
+                          <h3 className="text-sm font-semibold text-white">{chat.title}</h3>
+                          <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
+                            {intentionInfo.label}
+                          </Badge>
                         </div>
                       </div>
                       
-                      {/* Right Section - Member Avatars and Button */}
-                      <div className="flex items-center space-x-4 flex-shrink-0">
-                        <div className="flex space-x-2">
-                          {Array.from({ length: Math.min(chat.memberCount, 4) }).map((_, index) => (
-                            <div key={index} className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-sm text-white font-semibold">
+                      {/* Date and Member Count */}
+                      <div className="text-xs text-gray-400 mb-3 ml-11">
+                        <div>Started {startDate}</div>
+                        <div>{chat.memberCount} members</div>
+                      </div>
+                      
+                      {/* Profile Pictures Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-2 ml-11">
+                          {Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
+                            <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-blue-500 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-xs text-white font-medium">
                                 {String.fromCharCode(65 + index)}
                               </span>
                             </div>
                           ))}
-                          {chat.memberCount > 4 && (
-                            <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-sm text-white font-semibold">+{chat.memberCount - 4}</span>
+                          {chat.memberCount > 5 && (
+                            <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                              <span className="text-xs text-white font-medium">+{chat.memberCount - 5}</span>
                             </div>
                           )}
                         </div>
@@ -721,10 +704,9 @@ export default function ConnectPage() {
                             e.stopPropagation();
                             navigate(`/chat/${chat.id}`);
                           }}
-                          className="bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 font-medium px-3 py-1.5 text-xs shadow-md hover:shadow-lg transition-all duration-300 rounded-md"
+                          className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium px-4 py-2 text-xs rounded-lg"
                         >
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          Open
+                          Open Chat
                         </Button>
                       </div>
                     </div>
