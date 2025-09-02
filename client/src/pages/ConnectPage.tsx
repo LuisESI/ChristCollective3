@@ -506,8 +506,7 @@ export default function ConnectPage() {
                         
                         {/* Date and Member Count */}
                         <div className="text-xs text-gray-400 mb-3 ml-11">
-                          <div>{createdDate}</div>
-                          <div>{queue.currentCount}/{queue.maxPeople} members</div>
+                          {createdDate} • {queue.currentCount}/{queue.maxPeople} members
                         </div>
                         
                         {/* Profile Pictures Row */}
@@ -673,8 +672,7 @@ export default function ConnectPage() {
                       
                       {/* Date and Member Count */}
                       <div className="text-xs text-gray-400 mb-3 ml-11">
-                        <div>Started {startDate}</div>
-                        <div>{chat.memberCount} members</div>
+                        Started {startDate} • {chat.memberCount} members
                       </div>
                       
                       {/* Profile Pictures Row */}
