@@ -193,12 +193,6 @@ export default function ChatRoom() {
             
             <div className="flex items-center space-x-1">
               <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
-                <Phone className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
-                <Video className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-2">
                 <Settings className="w-5 h-5" />
               </Button>
             </div>
