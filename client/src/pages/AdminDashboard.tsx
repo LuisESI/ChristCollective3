@@ -409,7 +409,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 gap-2 shadow-lg shadow-black/20 min-h-[80px] items-start">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-2 gap-2 shadow-lg shadow-black/20 items-center">
             <TabsTrigger value="ministries" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20">
               <div className="flex flex-col items-center justify-center gap-2">
                 <span className="font-semibold text-xs">Ministries</span>
