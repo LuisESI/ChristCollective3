@@ -409,49 +409,49 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 gap-2 shadow-lg shadow-black/20 items-center">
-            <TabsTrigger value="ministries" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20">
-              <div className="flex flex-col items-center justify-center gap-2">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 gap-3 shadow-lg shadow-black/20 items-center min-h-[90px]">
+            <TabsTrigger value="ministries" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Ministries</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   {Array.isArray(pendingMinistries) ? pendingMinistries.length : 0}
                 </span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20">
-              <div className="flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="pending" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Campaigns</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   {Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0}
                 </span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20">
-              <div className="flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="sponsorships" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Sponsors</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   {Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0}
                 </span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex">
-              <div className="flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="campaigns" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">All Campaigns</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   Manage
                 </span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex">
-              <div className="flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="transactions" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Transactions</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   View
                 </span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="users" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-4 py-4 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex">
-              <div className="flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="users" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Users</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   Manage
