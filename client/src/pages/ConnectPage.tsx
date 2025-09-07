@@ -55,6 +55,8 @@ export default function ConnectPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [joinedQueues, setJoinedQueues] = useState<Set<number>>(new Set());
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const form = useForm<CreateQueueForm>({
     resolver: zodResolver(createQueueSchema),
@@ -186,6 +188,14 @@ export default function ConnectPage() {
     },
   });
 
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
@@ -197,6 +207,20 @@ export default function ConnectPage() {
       scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
+
+  // Check scroll position when queues change or component mounts
+  useEffect(() => {
+    checkScrollPosition();
+  }, [queues]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollPosition);
+      return () => container.removeEventListener('scroll', checkScrollPosition);
+    }
+  }, []);
 
   const getIntentionInfo = (intention: string) => {
     return intentionOptions.find(opt => opt.value === intention) || intentionOptions[0];
@@ -480,25 +504,25 @@ export default function ConnectPage() {
             {queues.length > 0 ? (
               <div className="relative">
                 {/* Navigation Arrows */}
-                {queues.length > 1 && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={scrollLeft}
-                      className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={scrollRight}
-                      className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </>
+                {canScrollLeft && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={scrollLeft}
+                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                )}
+                {canScrollRight && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={scrollRight}
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 )}
                 
                 {/* Horizontal Scroll Container */}
