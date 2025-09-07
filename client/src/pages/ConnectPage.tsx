@@ -40,11 +40,11 @@ const createQueueSchema = insertGroupChatQueueSchema.extend({
 type CreateQueueForm = z.infer<typeof createQueueSchema>;
 
 const intentionOptions = [
-  { value: "prayer", label: "Prayer", icon: Heart, color: "bg-red-500" },
-  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-blue-500" },
-  { value: "evangelizing", label: "Evangelizing", icon: MessageCircle, color: "bg-green-500" },
-  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500" },
-  { value: "worship", label: "Worship", icon: Calendar, color: "bg-[#D4AF37]" },
+  { value: "prayer", label: "Prayer", icon: Heart, color: "bg-red-500", badgeColor: "bg-red-500/20" },
+  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-blue-500", badgeColor: "bg-blue-500/20" },
+  { value: "evangelizing", label: "Evangelizing", icon: MessageCircle, color: "bg-green-500", badgeColor: "bg-green-500/20" },
+  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
+  { value: "worship", label: "Worship", icon: Calendar, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
 ];
 
 export default function ConnectPage() {
@@ -550,7 +550,7 @@ export default function ConnectPage() {
                             </div>
                             <div className="flex items-center space-x-2 flex-1">
                               <h3 className="text-sm font-semibold text-white">{queue.title}</h3>
-                              <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
+                              <Badge className={`${intentionInfo.badgeColor} text-white text-xs px-2 py-0.5 font-medium`}>
                                 {intentionInfo.label}
                               </Badge>
                             </div>
@@ -733,7 +733,7 @@ export default function ConnectPage() {
                         </div>
                         <div className="flex items-center space-x-2 flex-1">
                           <h3 className="text-sm font-semibold text-white">{chat.title}</h3>
-                          <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
+                          <Badge className={`${intentionInfo.badgeColor} text-white text-xs px-2 py-0.5 font-medium`}>
                             {intentionInfo.label}
                           </Badge>
                         </div>
