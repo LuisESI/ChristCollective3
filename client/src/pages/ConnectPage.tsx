@@ -478,7 +478,7 @@ export default function ConnectPage() {
             </div>
             
             {queues.length > 0 ? (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {queues.map((queue) => {
                   const intentionInfo = getIntentionInfo(queue.intention);
                   const Icon = intentionInfo.icon;
@@ -489,7 +489,7 @@ export default function ConnectPage() {
                   const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
                   
                   return (
-                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 w-full">
+                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300">
                       <div className="p-4">
                         {/* Top Row - Icon, Title and Badge */}
                         <div className="flex items-center space-x-3 mb-3">
