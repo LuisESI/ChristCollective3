@@ -478,101 +478,130 @@ export default function ConnectPage() {
             </div>
             
             {queues.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {queues.map((queue) => {
-                  const intentionInfo = getIntentionInfo(queue.intention);
-                  const Icon = intentionInfo.icon;
-                  const isOwner = queue.creatorId === user.id;
-                  const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
-                  // Check if user is already a member of this queue
-                  const isMember = joinedQueues.has(queue.id);
-                  const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
-                  
-                  return (
-                    <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300">
-                      <div className="p-4">
-                        {/* Top Row - Icon, Title and Badge */}
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className={`p-2 rounded-lg ${intentionInfo.color} flex-shrink-0`}>
-                            <Icon className="w-5 h-5 text-white" />
+              <div className="relative">
+                {/* Navigation Arrows */}
+                {queues.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={scrollLeft}
+                      className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={scrollRight}
+                      className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+                
+                {/* Horizontal Scroll Container */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {queues.map((queue) => {
+                    const intentionInfo = getIntentionInfo(queue.intention);
+                    const Icon = intentionInfo.icon;
+                    const isOwner = queue.creatorId === user.id;
+                    const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
+                    // Check if user is already a member of this queue
+                    const isMember = joinedQueues.has(queue.id);
+                    const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
+                    
+                    return (
+                      <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex-shrink-0 w-80">
+                        <div className="p-4">
+                          {/* Top Row - Icon, Title and Badge */}
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className={`p-2 rounded-lg ${intentionInfo.color} flex-shrink-0`}>
+                              <Icon className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="flex items-center space-x-2 flex-1">
+                              <h3 className="text-sm font-semibold text-white">{queue.title}</h3>
+                              <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
+                                {intentionInfo.label}
+                              </Badge>
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-1">
-                            <h3 className="text-sm font-semibold text-white">{queue.title}</h3>
-                            <Badge className={`${intentionInfo.color} text-white text-xs px-2 py-0.5 font-medium`}>
-                              {intentionInfo.label}
-                            </Badge>
+                          
+                          {/* Date and Member Count */}
+                          <div className="text-xs text-gray-400 mb-3 ml-11">
+                            {createdDate} • {queue.currentCount}/{queue.maxPeople} members
                           </div>
-                        </div>
-                        
-                        {/* Date and Member Count */}
-                        <div className="text-xs text-gray-400 mb-3 ml-11">
-                          {createdDate} • {queue.currentCount}/{queue.maxPeople} members
-                        </div>
-                        
-                        {/* Profile Pictures Row */}
-                        <div className="flex space-x-2 ml-11 mb-4">
-                          {queue.members?.slice(0, 5).map((member, index) => (
-                            <div key={member.id} className="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center overflow-hidden">
-                              {member.profileImageUrl ? (
-                                <img 
-                                  src={member.profileImageUrl} 
-                                  alt={member.displayName || member.username || `User ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                                  <span className="text-xs text-white font-medium">
-                                    {(member.displayName || member.username || 'U').charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )) || Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
-                            <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">
-                                {String.fromCharCode(65 + index)}
-                              </span>
-                            </div>
-                          ))}
-                          {queue.currentCount > 5 && (
-                            <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
-                            </div>
+                          
+                          {/* Profile Pictures Row */}
+                          <div className="flex space-x-2 ml-11 mb-4">
+                            {queue.members?.slice(0, 5).map((member: any, index: number) => (
+                              <div key={member.id} className="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center overflow-hidden">
+                                {member.profileImageUrl ? (
+                                  <img 
+                                    src={member.profileImageUrl} 
+                                    alt={member.displayName || member.username || `User ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                                    <span className="text-xs text-white font-medium">
+                                      {(member.displayName || member.username || 'U').charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )) || Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
+                              <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">
+                                  {String.fromCharCode(65 + index)}
+                                </span>
+                              </div>
+                            ))}
+                            {queue.currentCount > 5 && (
+                              <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Action Button - Full Width at Bottom */}
+                          {isOwner ? (
+                            <Button
+                              variant="outline"
+                              onClick={() => cancelQueueMutation.mutate(queue.id)}
+                              disabled={cancelQueueMutation.isPending}
+                              className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 py-2 text-sm rounded-lg"
+                            >
+                              Cancel Queue
+                            </Button>
+                          ) : isMember ? (
+                            <Button
+                              variant="outline"
+                              onClick={() => exitQueueMutation.mutate(queue.id)}
+                              disabled={exitQueueMutation.isPending}
+                              className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 py-2 text-sm rounded-lg"
+                            >
+                              {exitQueueMutation.isPending ? "Leaving Queue..." : "Exit Queue"}
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => joinQueueMutation.mutate(queue.id)}
+                              disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                              className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium py-2 text-sm rounded-lg"
+                            >
+                              {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Queue Full" : "Join Queue"}
+                            </Button>
                           )}
                         </div>
-                        
-                        {/* Action Button - Full Width at Bottom */}
-                        {isOwner ? (
-                          <Button
-                            variant="outline"
-                            onClick={() => cancelQueueMutation.mutate(queue.id)}
-                            disabled={cancelQueueMutation.isPending}
-                            className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 py-2 text-sm rounded-lg"
-                          >
-                            Cancel Queue
-                          </Button>
-                        ) : isMember ? (
-                          <Button
-                            variant="outline"
-                            onClick={() => exitQueueMutation.mutate(queue.id)}
-                            disabled={exitQueueMutation.isPending}
-                            className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 py-2 text-sm rounded-lg"
-                          >
-                            {exitQueueMutation.isPending ? "Leaving Queue..." : "Exit Queue"}
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => joinQueueMutation.mutate(queue.id)}
-                            disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                            className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium py-2 text-sm rounded-lg"
-                          >
-                            {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Queue Full" : "Join Queue"}
-                          </Button>
-                        )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             ) : (
               <div className="text-center py-6 bg-black border border-gray-700/50 rounded-lg">
