@@ -64,23 +64,36 @@ export default function FeedPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Header with Create Post Button */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Community Feed</h1>
+              <p className="text-gray-400">Share your faith journey and inspire others</p>
+            </div>
+            {user && (
+              <CreatePostModal 
+                trigger={
+                  <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]" data-testid="button-create-post">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Post
+                  </Button>
+                }
+              />
+            )}
+          </div>
 
           {/* Posts Grid - Now appears first */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {(() => {
-              if (allPosts.length === 0) {
-                return (
-                  <div className="col-span-full text-center py-12">
-                    <div className="text-gray-400 mb-4">
-                      <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
-                      <p>Start following members and ministries to see their inspiring content in your feed!</p>
-                    </div>
-                  </div>
-                );
-              }
-
-              return allPosts.map((post: any) => {
+            {allPosts.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-semibold mb-2">No Posts Yet</h3>
+                  <p>Start following members and ministries to see their inspiring content in your feed!</p>
+                </div>
+              </div>
+            ) : (
+              allPosts.map((post: any) => {
                 if (post.postType === 'ministry') {
                   return (
                     <MinistryPostCard
@@ -98,8 +111,8 @@ export default function FeedPage() {
                     />
                   );
                 }
-              });
-            })()}
+              })
+            )}
           </div>
 
           {/* Load More Button */}
