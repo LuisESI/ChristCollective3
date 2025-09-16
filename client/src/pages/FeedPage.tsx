@@ -111,7 +111,7 @@ export default function FeedPage() {
                     />
                   );
                 }
-              })
+              }) as React.ReactNode[]
             )}
           </div>
 

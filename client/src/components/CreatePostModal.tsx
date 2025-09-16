@@ -142,11 +142,12 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
   const getAuthorOptions = () => {
     const options = [{ value: "user", label: "Personal Account", id: null }];
 
-    if (creatorStatus?.isCreator && creatorStatus?.creatorProfile) {
+    if (creatorStatus && typeof creatorStatus === 'object' && 'isCreator' in creatorStatus && creatorStatus.isCreator && 'creatorProfile' in creatorStatus && creatorStatus.creatorProfile) {
+      const creatorProfile = creatorStatus.creatorProfile as any;
       options.push({
         value: "creator",
-        label: `Creator: ${creatorStatus.creatorProfile.name}`,
-        id: creatorStatus.creatorProfile.id,
+        label: `Creator: ${creatorProfile.name}`,
+        id: creatorProfile.id,
       });
     }
 
@@ -160,11 +161,11 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
       });
     }
 
-    if (ministryProfile && ministryProfile.name) {
+    if (ministryProfile && typeof ministryProfile === 'object' && 'name' in ministryProfile && ministryProfile.name) {
       options.push({
         value: "ministry",
         label: `Ministry: ${ministryProfile.name}`,
-        id: ministryProfile.id,
+        id: (ministryProfile as any).id,
       });
     }
 
