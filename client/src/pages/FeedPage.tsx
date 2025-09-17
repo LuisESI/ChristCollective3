@@ -71,14 +71,26 @@ export default function FeedPage() {
               <p className="text-gray-400">Share your faith journey and inspire others</p>
             </div>
             {user && (
-              <CreatePostModal 
-                trigger={
-                  <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]" data-testid="button-create-post">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Post
-                  </Button>
-                }
-              />
+              <div>
+                <Button 
+                  onClick={() => {
+                    console.log("Create Post button clicked!");
+                    // Test if this works at all
+                    alert("Button clicked - checking modal...");
+                  }}
+                  className="bg-red-500 text-white hover:bg-red-600 mr-2"
+                >
+                  Debug Click Test
+                </Button>
+                <CreatePostModal 
+                  trigger={
+                    <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]" data-testid="button-create-post">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Post
+                    </Button>
+                  }
+                />
+              </div>
             )}
           </div>
 
