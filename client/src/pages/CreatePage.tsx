@@ -68,7 +68,8 @@ export default function CreatePage() {
       bgColor: "bg-red-500",
       href: "/donate/create",
       badge: "Popular",
-      userType: "all"
+      userType: "all",
+      action: undefined
     },
     {
       id: "creator",
@@ -79,7 +80,8 @@ export default function CreatePage() {
       bgColor: "bg-purple-500",
       href: "/creators/profile/manage",
       badge: null,
-      userType: "all"
+      userType: "all",
+      action: undefined
     },
     {
       id: "business",
@@ -90,7 +92,8 @@ export default function CreatePage() {
       bgColor: "bg-blue-500",
       href: "/business/create",
       badge: null,
-      userType: "all"
+      userType: "all",
+      action: undefined
     },
     {
       id: "ministry",
@@ -101,7 +104,8 @@ export default function CreatePage() {
       bgColor: "bg-green-500",
       href: "/ministry/create",
       badge: null,
-      userType: "all"
+      userType: "all",
+      action: undefined
     },
     {
       id: "post",
@@ -144,7 +148,8 @@ export default function CreatePage() {
       bgColor: "bg-green-600",
       href: "/events/create",
       badge: "Ministry Only",
-      userType: "ministry"
+      userType: "ministry",
+      action: undefined
     }
   ];
 

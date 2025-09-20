@@ -72,16 +72,6 @@ export default function FeedPage() {
             </div>
             {user && (
               <div>
-                <Button 
-                  onClick={() => {
-                    console.log("Create Post button clicked!");
-                    // Test if this works at all
-                    alert("Button clicked - checking modal...");
-                  }}
-                  className="bg-red-500 text-white hover:bg-red-600 mr-2"
-                >
-                  Debug Click Test
-                </Button>
                 <CreatePostModal 
                   trigger={
                     <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F]" data-testid="button-create-post">

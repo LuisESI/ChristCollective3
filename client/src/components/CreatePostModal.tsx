@@ -25,9 +25,6 @@ const MEDIA_TYPES = [
 
 export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps) {
   const [open, setOpen] = useState(false);
-  
-  // Debug logging
-  console.log("CreatePostModal rendered, open state:", open);
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -179,7 +176,6 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
     <div>
       {trigger ? (
         <div onClick={() => {
-          console.log("Custom trigger clicked!");
           setOpen(true);
         }}>
           {trigger}
@@ -187,7 +183,6 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
       ) : (
         <Button 
           onClick={() => {
-            console.log("Default button clicked!");
             setOpen(true);
           }}
           className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
@@ -197,10 +192,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
         </Button>
       )}
     
-      <Dialog open={open} onOpenChange={(newOpen) => {
-        console.log("Dialog onOpenChange called with:", newOpen);
-        setOpen(newOpen);
-      }}>
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white">Create New Post</DialogTitle>
