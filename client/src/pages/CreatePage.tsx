@@ -20,6 +20,7 @@ import {
   Share2
 } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { CreatePostModal } from "@/components/CreatePostModal";
 
 export default function CreatePage() {
   const { user, isLoading } = useAuth();
@@ -219,9 +220,8 @@ export default function CreatePage() {
                   onClick={() => {
                     if (!isComingSoon) {
                       if (option.action === "create-post") {
-                        // Handle create post action - this would trigger the CreatePostModal
-                        // For now, navigate to feed where they can use the post creation
-                        navigate(option.href);
+                        // Handle create post action handled by CreatePostModal
+                        return; // Let the modal handle the click
                       } else if (option.action === "social-share") {
                         // Handle social share - show platform selection
                         navigate("/creators/share/youtube"); // Default to YouTube for now
@@ -259,7 +259,22 @@ export default function CreatePage() {
                           {option.description}
                         </p>
                         
-                        {!isComingSoon && (
+                        {!isComingSoon && option.action === "create-post" ? (
+                          <div className="mt-3">
+                            <CreatePostModal 
+                              trigger={
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-colors"
+                                  data-testid="button-create-post"
+                                >
+                                  Get Started
+                                </Button>
+                              }
+                            />
+                          </div>
+                        ) : !isComingSoon && (
                           <div className="mt-3">
                             <Button 
                               variant="outline" 
