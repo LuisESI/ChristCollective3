@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Christ Collective</string>
+    <string name="title_activity_main">Christ Collective</string>
+    <string name="package_name">com.christcollective.app</string>
+    <string name="custom_url_scheme">com.christcollective.app</string>
+</resources>
