@@ -1,6 +1,7 @@
 {
   "name": "Christ Collective",
   "type": "custom",
+  "id": "4534ef5c",
   "integrations": {
     "capacitor": {}
   }
