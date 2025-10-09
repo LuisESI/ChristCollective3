@@ -3,9 +3,12 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Configure Apify API key for live data extraction
-process.env.TIKTOK_API_KEY = "apify_api_w1R7Q9Ns6isG1ok1VR446cyaTNcNEQ4Ev5dK";
-console.log('Apify API configured for live social media data extraction');
+// Apify API key is configured via environment variables (TIKTOK_API_KEY)
+if (process.env.TIKTOK_API_KEY) {
+  console.log('Apify API configured for live social media data extraction');
+} else {
+  console.warn('Warning: TIKTOK_API_KEY not configured. Social media scraping may not work.');
+}
 
 const app = express();
 app.use(express.json());

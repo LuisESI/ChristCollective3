@@ -1,0 +1,41 @@
+~/workspace$ git push -u origin main
+Enumerating objects: 6332, done.
+Counting objects: 100% (6332/6332), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6267/6267), done.
+Writing objects: 100% (6332/6332), 98.35 MiB | 5.76 MiB/s, done.
+Total 6332 (delta 5107), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (5107/5107), done.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Apify API Token ———————————————————————————————————
+remote:        locations:
+remote:          - blob id: 4edfb4c30f1667892d5eff730a62ef2c8e55fd60
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/LuisESI/ChristCollective2/security/secret-scanning/unblock-secret/33ohDL4APnDcT2iNsEFPIRzc97G
+remote:     
+remote:     
+remote:     ——[ WARNING ]—————————————————————————————————————————
+remote:      Scan incomplete: This push was large and we didn't finish on time.
+remote:      It can still contain undetected secrets.
+remote:     
+remote:      (?) Use the following command to find the path of the detected secret(s):
+remote:          git rev-list --objects --all | grep blobid
+remote:     ——————————————————————————————————————————————————————
+remote: 
+remote: 
+To https://github.com/LuisESI/ChristCollective2.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/LuisESI/ChristCollective2.git'
