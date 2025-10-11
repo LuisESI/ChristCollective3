@@ -129,8 +129,8 @@ export default function CreatorProfileManagePage() {
 
   if (authLoading || creatorLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-amber-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-black dark:bg-background flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -138,12 +138,12 @@ export default function CreatorProfileManagePage() {
   const creatorProfile = creatorStatus?.creatorProfile;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-amber-50">
+    <div className="min-h-screen bg-black dark:bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link href="/creators">
-            <Button variant="ghost" className="mb-4 bg-black text-white hover:bg-gray-800">
+            <Button variant="ghost" className="mb-4 text-white dark:text-foreground hover:bg-gray-800 dark:hover:bg-gray-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Creators
             </Button>
@@ -152,19 +152,19 @@ export default function CreatorProfileManagePage() {
           <div className="flex items-center gap-6 mb-6">
             <Avatar className="w-20 h-20">
               <AvatarImage src={creatorProfile?.profileImage || ""} alt={creatorProfile?.name || "Creator"} />
-              <AvatarFallback className="bg-amber-100 text-amber-800 text-2xl font-bold">
+              <AvatarFallback className="bg-gray-800 text-[#D4AF37] text-2xl font-bold">
                 {creatorProfile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
               </AvatarFallback>
             </Avatar>
             
             <div>
-              <h1 className="text-3xl font-bold text-black">{creatorProfile?.name}</h1>
+              <h1 className="text-3xl font-bold text-white dark:text-foreground">{creatorProfile?.name}</h1>
               <div className="flex items-center gap-2 mt-2">
-                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">
+                <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F]">
                   {creatorProfile?.isSponsored ? 'Sponsored Creator' : 'Creator'}
                 </Badge>
                 {creatorProfile?.isSponsored && (
-                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-1 text-sm text-gray-400">
                     <Calendar className="w-4 h-4" />
                     <span>Since {new Date().toLocaleDateString()}</span>
                   </div>
@@ -178,21 +178,21 @@ export default function CreatorProfileManagePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Stats */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <Users className="w-5 h-5" />
                   Profile Overview
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4 text-amber-600" />
+                  <Play className="w-4 h-4 text-[#D4AF37]" />
                   <span className="text-sm text-white">Content: {creatorProfile?.content}</span>
                 </div>
                 {creatorProfile?.audience && (
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-amber-600" />
+                    <Users className="w-4 h-4 text-[#D4AF37]" />
                     <span className="text-sm text-white">Audience: {creatorProfile.audience}</span>
                   </div>
                 )}
@@ -224,9 +224,9 @@ export default function CreatorProfileManagePage() {
 
           {/* Edit Form */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <Edit className="w-5 h-5" />
                   Edit Profile
                 </CardTitle>
@@ -390,7 +390,7 @@ export default function CreatorProfileManagePage() {
                       <Button
                         type="submit"
                         disabled={updateProfileMutation.isPending}
-                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                        className="bg-[#D4AF37] hover:bg-[#B8941F] text-black"
                       >
                         {updateProfileMutation.isPending ? (
                           <>
