@@ -116,7 +116,7 @@ function AppContent() {
         <Router />
       </main>
       {!isMobileApp && <Footer />}
-      {user && <BottomNavigation />}
+      {user && isMobileApp && <BottomNavigation />}
       <Toaster />
     </>
   );

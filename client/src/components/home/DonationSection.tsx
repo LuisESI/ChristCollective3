@@ -22,7 +22,7 @@ type Campaign = {
 };
 
 export default function DonationSection() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { requireAuth } = useAuthGuard();
   const [formData, setFormData] = useState({
