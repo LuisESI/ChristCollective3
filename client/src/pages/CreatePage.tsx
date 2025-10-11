@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { CreatePostModal } from "@/components/CreatePostModal";
+import { isNativeApp } from "@/lib/platform";
 
 export default function CreatePage() {
   const { user, isLoading } = useAuth();
@@ -45,7 +46,7 @@ export default function CreatePage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
-      navigate("/auth");
+      navigate(isNativeApp() ? "/auth/mobile" : "/auth");
     }
   }, [isLoading, user, navigate]);
 

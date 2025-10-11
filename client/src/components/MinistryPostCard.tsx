@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthGuard } from "@/lib/auth-guard";
 
 interface MinistryPostCardProps {
   post: MinistryPost & {
@@ -27,6 +28,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   const { user } = useAuth();
   const isAuthenticated = !!user;
   const queryClient = useQueryClient();
+  const { requireAuth } = useAuthGuard();
 
   // RSVP functionality for event posts
   const { data: userRsvp } = useQuery({
@@ -67,11 +69,13 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   });
 
   const handleRsvp = (status: string) => {
-    if ((userRsvp as any)?.status === status) {
-      removeRsvpMutation.mutate();
-    } else {
-      rsvpMutation.mutate({ status });
-    }
+    requireAuth(() => {
+      if ((userRsvp as any)?.status === status) {
+        removeRsvpMutation.mutate();
+      } else {
+        rsvpMutation.mutate({ status });
+      }
+    }, "Please sign in to RSVP for events");
   };
 
   const getRsvpIcon = (status: string) => {

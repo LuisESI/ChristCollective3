@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { ImageIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthGuard } from "@/lib/auth-guard";
 
 type Campaign = {
   id: string;
@@ -23,6 +24,7 @@ type Campaign = {
 export default function DonationSection() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { requireAuth } = useAuthGuard();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -59,17 +61,10 @@ export default function DonationSection() {
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create a campaign",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Redirect to full create campaign page
-    window.location.href = "/campaigns/create";
+    requireAuth(() => {
+      // Redirect to full create campaign page
+      window.location.href = "/donate/create";
+    }, "Please sign in to create a campaign");
   };
 
   function calculateProgress(current: string, goal: string): number {
@@ -145,11 +140,18 @@ export default function DonationSection() {
                           <span>{formatCurrency(campaign.goal)} goal</span>
                         </div>
                       </div>
-                      <Link href={`/donate/checkout/${campaign.id}`}>
-                        <button className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                          <span>Donate Now</span>
-                        </button>
-                      </Link>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          requireAuth(() => {
+                            window.location.href = `/donate/checkout/${campaign.id}`;
+                          }, "Please sign in to donate");
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                        data-testid="button-donate"
+                      >
+                        <span>Donate Now</span>
+                      </button>
                     </CardContent>
                   </Card>
                 ))}

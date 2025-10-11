@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
+import { useAuthGuard } from "@/lib/auth-guard";
 // import { formatDistanceToNow } from "date-fns";
 
 interface PlatformPostProps {
@@ -45,6 +46,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth } = useAuthGuard();
 
   // Fetch user data for the post author
   const { data: postAuthor } = useQuery({
@@ -164,37 +166,32 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   });
 
   const handleLike = () => {
-    if (!currentUserId) {
-      toast({
-        title: "Login required",
-        description: "Please log in to like posts",
-        variant: "destructive",
-      });
-      return;
-    }
-    likeMutation.mutate();
+    requireAuth(() => {
+      likeMutation.mutate();
+    }, "Please sign in to like posts");
   };
 
   const handleComment = () => {
-    if (!currentUserId) {
-      toast({
-        title: "Login required",
-        description: "Please log in to comment",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!newComment.trim()) {
-      toast({
-        title: "Comment required",
-        description: "Please enter a comment",
-        variant: "destructive",
-      });
-      return;
-    }
+    requireAuth(() => {
+      if (!newComment.trim()) {
+        toast({
+          title: "Comment required",
+          description: "Please enter a comment",
+          variant: "destructive",
+        });
+        return;
+      }
+      commentMutation.mutate(newComment.trim());
+    }, "Please sign in to comment");
+  };
 
-    commentMutation.mutate(newComment.trim());
+  const handleShare = () => {
+    requireAuth(() => {
+      toast({
+        title: "Share",
+        description: "Share functionality coming soon!",
+      });
+    }, "Please sign in to share posts");
   };
 
   const handleDeletePost = () => {
@@ -411,9 +408,12 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowComments(!showComments);
+                  requireAuth(() => {
+                    setShowComments(!showComments);
+                  }, "Please sign in to view and add comments");
                 }}
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
+                data-testid="button-comment"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-xs">{post.commentsCount}</span>
@@ -422,8 +422,12 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare();
+                }}
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
+                data-testid="button-share"
               >
                 <Share2 className="w-4 h-4" />
                 <span className="text-xs">{post.sharesCount}</span>
