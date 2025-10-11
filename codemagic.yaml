@@ -32,10 +32,10 @@ workflows:
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
-            -derivedDataPath ../../build
+            -derivedDataPath ../../ios-build
 
     artifacts:
-      - build/Build/Products/Debug-iphonesimulator/*.app
+      - ios-build/Build/Products/Debug-iphonesimulator/*.app
 
     publishing:
       email:

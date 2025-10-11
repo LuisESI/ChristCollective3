@@ -1,0 +1,56 @@
+Build iOS simulator app
+1s
+
+
+
+Show command
+Showing the last 50 lines. Click this button to load the full log
+SendProjectDescription
+
+CreateBuildOperation
+
+** CLEAN SUCCEEDED **
+
+Command line invocation:
+    /Applications/Xcode-16.4.app/Contents/Developer/usr/bin/xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath ../../build
+
+Build settings from command line:
+    SDKROOT = iphonesimulator18.5
+
+2025-10-11 00:48:11.104 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open log store at /Users/builder/clone/build/Logs/Build
+2025-10-11 00:48:11.104 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open Build log store: Error Domain=IDEFoundationErrorDomain Code=1 "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Build/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened." UserInfo={NSLocalizedDescription=Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Build/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened.}. User info: {
+    NSLocalizedDescription = "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Build/LogStoreManifest.plist': (256) The file \U201cLogStoreManifest.plist\U201d couldn\U2019t be opened.";
+}.
+2025-10-11 00:48:11.132 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open log store at /Users/builder/clone/build/Logs/Localization
+2025-10-11 00:48:11.132 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open Localization log store: Error Domain=IDEFoundationErrorDomain Code=1 "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Localization/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened." UserInfo={NSLocalizedDescription=Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Localization/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened.}. User info: {
+    NSLocalizedDescription = "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Localization/LogStoreManifest.plist': (256) The file \U201cLogStoreManifest.plist\U201d couldn\U2019t be opened.";
+}.
+2025-10-11 00:48:11.133 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open log store at /Users/builder/clone/build/Logs/Launch
+2025-10-11 00:48:11.133 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open Launch log store: Error Domain=IDEFoundationErrorDomain Code=1 "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Launch/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened." UserInfo={NSLocalizedDescription=Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Launch/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened.}. User info: {
+    NSLocalizedDescription = "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Launch/LogStoreManifest.plist': (256) The file \U201cLogStoreManifest.plist\U201d couldn\U2019t be opened.";
+}.
+2025-10-11 00:48:11.133 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open log store at /Users/builder/clone/build/Logs/Package
+2025-10-11 00:48:11.133 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open Package log store: Error Domain=IDEFoundationErrorDomain Code=1 "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Package/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened." UserInfo={NSLocalizedDescription=Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Package/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened.}. User info: {
+    NSLocalizedDescription = "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Package/LogStoreManifest.plist': (256) The file \U201cLogStoreManifest.plist\U201d couldn\U2019t be opened.";
+}.
+2025-10-11 00:48:11.149 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open log store at /Users/builder/clone/build/Logs/Test
+2025-10-11 00:48:11.149 xcodebuild[1469:16083] [MT] IDELogStore: Failed to open Test log store: Error Domain=IDEFoundationErrorDomain Code=1 "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Test/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened." UserInfo={NSLocalizedDescription=Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Test/LogStoreManifest.plist': (256) The file “LogStoreManifest.plist” couldn’t be opened.}. User info: {
+    NSLocalizedDescription = "Unable to read log store dictionary file at '/Users/builder/clone/build/Logs/Test/LogStoreManifest.plist': (256) The file \U201cLogStoreManifest.plist\U201d couldn\U2019t be opened.";
+}.
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:0000FE00-343A79319AA17942, name:My Mac }
+{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+Build Preparation
+Couldn't create workspace arena folder '/Users/builder/clone/build': The file “build” couldn’t be saved in the folder “clone” because a file with the same name already exists.
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	Building workspace App with scheme App and configuration Debug
+(1 failure)
+
+
+Build failed :|
+Step 6 script `Build iOS simulator app` exited with status code 65
