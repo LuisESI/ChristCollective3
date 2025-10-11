@@ -1,4 +1,4 @@
-# Pre-Push Checklist for GitHub
+# Pre-Push Checklist for GitHub → CodeMagic
 
 ## ✅ Ready for CodeMagic Build
 
@@ -13,11 +13,19 @@
 - [x] `ios/` directory exists and configured
 - [x] `capacitor.config.ts` configured with app ID
 - [x] `ionic.config.json` configured with Ionic App ID
-- [x] `codemagic.yaml` created for build automation
+- [x] `codemagic.yaml` configured for iOS Simulator (no signing needed!)
+
+### CodeMagic Configuration
+
+**Build Type:** iOS Simulator Preview (No Apple Developer Account Needed!)
+
+Your `codemagic.yaml` builds:
+- ✅ **iOS Simulator app** - Test in CodeMagic's browser preview
+- ✅ **Android APK** - For Android devices/emulators
 
 ### Environment Variables Needed on CodeMagic
 
-You'll need to set these in your CodeMagic project settings:
+Set these in your CodeMagic project settings:
 
 1. **STRIPE_SECRET_KEY** - Your Stripe secret key
 2. **VITE_STRIPE_PUBLIC_KEY** - Your Stripe publishable key
@@ -36,10 +44,9 @@ You'll need to set these in your CodeMagic project settings:
 ```
 ✓ capacitor.config.ts
 ✓ ionic.config.json
-✓ codemagic.yaml
+✓ codemagic.yaml (iOS Simulator build - no signing!)
 ✓ android/
 ✓ ios/
-✓ BUILD.md (build documentation)
 ```
 
 ### Recent Changes Summary
@@ -66,7 +73,7 @@ The mobile app includes:
 
 3. **Commit Changes**
    ```bash
-   git commit -m "Mobile app optimization with platform detection and auth guards"
+   git commit -m "Mobile app optimization with iOS Simulator build"
    ```
 
 4. **Push to GitHub**
@@ -78,55 +85,80 @@ The mobile app includes:
 
 After pushing to GitHub:
 
-1. **Connect Repository**
-   - Link your GitHub repo to CodeMagic
-   - Grant necessary permissions
+### 1. Connect Repository
+- Link your GitHub repo to CodeMagic
+- Grant necessary permissions
+- Select **Ionic** as project type
 
-2. **Configure Environment Variables**
-   - Add all required secrets in CodeMagic settings
-   - Use the environment variable groups feature
+### 2. Configure Environment Variables
+- Add all required secrets in CodeMagic settings
+- Navigate to: Environment variables → Add variable
 
-3. **Set Up Code Signing**
-   - **Android:** Upload keystore file
-   - **iOS:** Configure App Store Connect integration
+### 3. Start Build
+- CodeMagic will use `codemagic.yaml` configuration
+- Build iOS Simulator app (preview in browser!)
+- Build Android APK
+- Artifacts will be available for download
 
-4. **Start Build**
-   - CodeMagic will use `codemagic.yaml` configuration
-   - Build both Android and iOS apps
-   - Artifacts will be available for download
+### 4. Preview iOS App
+- Once built, use CodeMagic's **iOS Simulator preview**
+- Test directly in your browser
+- No iPhone or Mac needed!
 
 ## 📱 Testing After Build
 
-Test these features on built apps:
-
+### iOS Simulator (Browser Preview)
 - [ ] Authentication flow (sign up/sign in)
 - [ ] Platform detection (verify mobile UI)
 - [ ] Bottom navigation (authenticated users only)
 - [ ] Interactive features (like, comment, share)
+- [ ] Navigation and routing
+
+### Android APK (Download & Install)
+- [ ] Download APK from CodeMagic artifacts
+- [ ] Install on Android device/emulator
+- [ ] Test all features listed above
 - [ ] Payment processing (donations)
-- [ ] Social media integration
 
-## 📚 Additional Documentation
+## 🎯 What You Get
 
-- `BUILD.md` - Detailed build instructions
-- `codemagic.yaml` - Build automation configuration
-- `replit.md` - Project documentation and changelog
+### iOS Simulator Build
+- ✅ No Apple Developer account needed
+- ✅ Preview directly in CodeMagic's browser tool
+- ✅ Perfect for testing and demos
+- ✅ Fast iteration and debugging
 
-## ⚠️ Important Notes
+### Android APK
+- ✅ Download and install on any Android device
+- ✅ Test on real devices
+- ✅ Share with testers
 
-- The `android/` and `ios/` folders MUST be committed (not in .gitignore)
-- Environment variables are NOT committed (in .gitignore)
-- CodeMagic will build from the committed native folders
-- Make sure your database is accessible from mobile devices (check CORS/network settings)
+## 📚 Build Output
 
-## 🎯 Next Steps
+After successful build, you'll receive:
 
-1. ✅ Push to GitHub
-2. ⏳ Set up CodeMagic project
-3. ⏳ Configure environment variables
-4. ⏳ Set up code signing
-5. ⏳ Build and test
+**Email Notification** to: `christcollective369@gmail.com`
+
+**Artifacts:**
+- `Debug-iphonesimulator/*.app` - iOS Simulator app
+- `android/app/build/outputs/**/*.apk` - Android APK
+
+## 🔄 Next Steps After Preview
+
+When ready for real devices:
+
+### iOS (Real Devices)
+- Get Apple Developer account ($99/year)
+- Create provisioning profiles
+- Update `codemagic.yaml` to build for device
+- Submit to App Store/TestFlight
+
+### Android (Production)
+- Create release keystore
+- Configure signing in CodeMagic
+- Build release APK/AAB
+- Upload to Google Play Store
 
 ---
 
-**Ready to push!** All security checks passed and build files are properly configured.
+**Ready to push!** Your iOS Simulator build requires no Apple Developer account or code signing. Perfect for testing! 🚀
