@@ -42,9 +42,9 @@ export function setupAuth(app: Express) {
     }),
     cookie: {
       httpOnly: true, // Secure cookie, not accessible via JavaScript
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      secure: true, // Always use secure cookies (Replit is always HTTPS)
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
+      sameSite: 'none', // 'none' for cross-origin (required for mobile app)
       path: '/', // Ensure cookie is available for all paths
     },
   };
