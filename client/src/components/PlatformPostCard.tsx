@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { buildApiUrl } from "@/lib/api-config";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
@@ -52,7 +53,9 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const { data: postAuthor } = useQuery({
     queryKey: ["/api/users/by-id", post.userId],
     queryFn: async () => {
-      const response = await fetch(`/api/users/by-id?userId=${encodeURIComponent(post.userId)}`);
+      const response = await fetch(buildApiUrl(`/api/users/by-id?userId=${encodeURIComponent(post.userId)}`), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('User not found');
       }
@@ -65,7 +68,9 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const { data: ministryData } = useQuery({
     queryKey: ["/api/ministry-posts", post.id],
     queryFn: async () => {
-      const response = await fetch(`/api/ministry-posts/${post.id}`);
+      const response = await fetch(buildApiUrl(`/api/ministry-posts/${post.id}`), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         return null; // Not a ministry post
       }
