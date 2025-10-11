@@ -182,8 +182,9 @@ export default function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setIsOpen(!isOpen)}
+            data-testid="button-mobile-menu"
           >
             {isOpen ? (
               <X className="h-6 w-6" />
@@ -196,7 +197,7 @@ export default function Header() {
       
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-background">
+        <div className="lg:hidden bg-background border-t border-border">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
