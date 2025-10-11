@@ -50,12 +50,15 @@ import DirectChatPage from "@/pages/DirectChatPage";
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import MobileAuthPage from "@/pages/MobileAuthPage";
+import MobileLandingPage from "@/pages/MobileLandingPage";
 import { isNativeApp } from "@/lib/platform";
 
 function Router() {
+  const isMobileApp = isNativeApp();
+
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
+      <Route path="/" component={isMobileApp ? MobileLandingPage : HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/auth/mobile" component={MobileAuthPage} />
       <Route path="/donate" component={DonationsPage} />
@@ -116,7 +119,7 @@ function AppContent() {
         <Router />
       </main>
       {!isMobileApp && <Footer />}
-      {user && <BottomNavigation />}
+      {isMobileApp && <BottomNavigation />}
       <Toaster />
     </>
   );
