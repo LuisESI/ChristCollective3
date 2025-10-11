@@ -78,18 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: RegisterData) => {
-      const response = await fetch("/api/register", {
+      const response = await apiRequest("/api/register", {
         method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
+        data: credentials,
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Registration failed: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ message: "Registration failed" }));
+        throw new Error(errorData.message || `Registration failed: ${response.status}`);
       }
       
       return await response.json();
