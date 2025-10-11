@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { buildApiUrl } from "@/lib/api-config";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
@@ -39,7 +40,9 @@ export default function ProfilePage() {
       if (!username || username === 'null' || username === null) {
         throw new Error('Invalid username');
       }
-      const response = await fetch(`/api/users/by-username?username=${encodeURIComponent(username)}`);
+      const response = await fetch(buildApiUrl(`/api/users/by-username?username=${encodeURIComponent(username)}`), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('User not found');
       }
@@ -74,7 +77,9 @@ export default function ProfilePage() {
     queryKey: [`/api/users/${displayUser?.id}/is-following`],
     queryFn: async () => {
       if (!user || !displayUser?.id || isOwnProfile) return { isFollowing: false };
-      const response = await fetch(`/api/users/${displayUser.id}/is-following`);
+      const response = await fetch(buildApiUrl(`/api/users/${displayUser.id}/is-following`), {
+        credentials: 'include',
+      });
       if (!response.ok) return { isFollowing: false };
       return response.json();
     },

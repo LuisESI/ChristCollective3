@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       refetch(); // Ensure fresh user data
     },
     onError: (error: Error) => {
