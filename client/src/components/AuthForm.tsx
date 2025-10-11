@@ -100,23 +100,23 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
       {/* Logo and welcome section */}
       <div className="flex flex-col items-center mb-8">
         <Logo className="h-16 mb-6" />
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to Christ Collective</h1>
-        <p className="text-gray-600 dark:text-gray-400 text-center">Join our community of faith-driven individuals</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Christ Collective</h1>
+        <p className="text-gray-600 text-center">Join our community of faith-driven individuals</p>
       </div>
 
       {/* Auth content */}
       <div className="w-full max-w-md">
         {/* Toggle buttons */}
-        <div className="flex gap-0 mb-6 bg-black dark:bg-gray-800 rounded-lg p-1">
+        <div className="flex gap-0 mb-6 bg-black rounded-lg p-1">
           <button
             onClick={() => setMode("login")}
             className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
               mode === "login" 
-                ? "bg-white dark:bg-gray-700 text-black dark:text-white" 
+                ? "bg-white text-black" 
                 : "bg-transparent text-white"
             }`}
             data-testid="button-show-login"
@@ -127,7 +127,7 @@ export default function AuthForm() {
             onClick={() => setMode("register")}
             className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
               mode === "register" 
-                ? "bg-white dark:bg-gray-700 text-black dark:text-white" 
+                ? "bg-white text-black" 
                 : "bg-transparent text-white"
             }`}
             data-testid="button-show-register"
@@ -137,7 +137,7 @@ export default function AuthForm() {
         </div>
 
         {/* Auth form container */}
-        <div className="bg-black dark:bg-gray-800 rounded-2xl p-6">
+        <div className="bg-black rounded-2xl p-6">
           {mode === "login" ? (
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
