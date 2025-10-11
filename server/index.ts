@@ -21,10 +21,13 @@ app.use(cors({
       /\.replit\.dev$/,
       /\.codemagic\.app$/,
       /localhost/,
+      /127\.0\.0\.1/,
       'capacitor://localhost',
       'ionic://localhost',
       'http://localhost',
-      'https://localhost'
+      'https://localhost',
+      'http://127.0.0.1:5000',
+      'https://127.0.0.1:5000'
     ];
     
     // Allow requests with no origin (mobile apps, Postman, etc.)
