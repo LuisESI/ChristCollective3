@@ -304,8 +304,15 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!user?.isAdmin) {
-    return null;
+  if (!user || !user.isAdmin) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-primary mb-2">Access Denied</h2>
+          <p className="text-gray-400">You don't have permission to access this page.</p>
+        </div>
+      </div>
+    );
   }
 
   const formatCurrency = (amount: number) => {

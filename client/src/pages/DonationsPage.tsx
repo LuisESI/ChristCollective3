@@ -9,6 +9,7 @@ import { Search, ImageIcon, Plus } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/hooks/useAuth";
 import CTASection from "@/components/home/CTASection";
+import { buildApiUrl } from "@/lib/api-config";
 
 type Campaign = {
   id: string;
@@ -26,14 +27,13 @@ export default function DonationsPage() {
   const isAuthenticated = !!user;
   const [, navigate] = useLocation();
   
-  const { data: campaigns = [], isLoading } = useQuery({
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
     queryKey: ["/api/campaigns", searchQuery],
     queryFn: async () => {
       const url = searchQuery 
         ? `/api/campaigns?search=${encodeURIComponent(searchQuery)}` 
         : "/api/campaigns";
-      const res = await fetch(url, { credentials: "include" });
-      // Don't throw error for 401, just return empty array
+      const res = await fetch(buildApiUrl(url), { credentials: "include" });
       if (res.status === 401) {
         return [];
       }
