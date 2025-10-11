@@ -7,7 +7,7 @@ workflows:
     environment:
       vars:
         NODE_VERSION: 18
-        VITE_API_URL: https://your-app.replit.dev  # Replace with your actual backend URL
+        VITE_API_URL: https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev
       groups:
         - app_credentials
       flutter: stable

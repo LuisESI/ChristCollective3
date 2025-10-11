@@ -8,8 +8,7 @@ import { isNativeApp } from "./platform";
 export function getApiBaseUrl(): string {
   if (isNativeApp()) {
     // Mobile app: use the deployed backend URL
-    // This should be your Replit deployment URL or production backend
-    return import.meta.env.VITE_API_URL || 'https://your-app.replit.dev';
+    return import.meta.env.VITE_API_URL || 'https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev';
   }
   
   // Web: use relative URLs (same origin)
