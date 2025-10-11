@@ -7,6 +7,9 @@ workflows:
     environment:
       vars:
         NODE_VERSION: 18
+        VITE_API_URL: https://your-app.replit.dev  # Replace with your actual backend URL
+      groups:
+        - app_credentials
       flutter: stable
       xcode: latest
 

@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { buildApiUrl } from "./api-config";
 
 // Global flag to prevent error messages during initial load
 let isInitialLoad = true;
@@ -36,7 +37,8 @@ export async function apiRequest(
       headers['Content-Type'] = 'application/json';
     }
 
-    const res = await fetch(url, {
+    const fullUrl = buildApiUrl(url);
+    const res = await fetch(fullUrl, {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,
@@ -89,7 +91,8 @@ export const getQueryFn: <T>(options: {
       }
 
       try {
-        const res = await fetch(url as string, {
+        const fullUrl = buildApiUrl(url as string);
+        const res = await fetch(fullUrl, {
           credentials: "include",
           headers: {
             'Content-Type': 'application/json',
