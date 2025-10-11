@@ -96,9 +96,9 @@ export default function ExplorePage() {
     if (targetUser.id === user?.id) return false;
     
     // Check if user has ministry profile, creator profile, or business profile
-    const hasMinistryProfile = ministries && ministries.some((ministry: any) => ministry.userId === targetUser.id);
-    const hasCreatorProfile = creators && creators.some((creator: any) => creator.userId === targetUser.id);
-    const hasBusinessProfile = businesses && businesses.some((business: any) => business.userId === targetUser.id);
+    const hasMinistryProfile = ministries && Array.isArray(ministries) && ministries.some((ministry: any) => ministry.userId === targetUser.id);
+    const hasCreatorProfile = creators && Array.isArray(creators) && creators.some((creator: any) => creator.userId === targetUser.id);
+    const hasBusinessProfile = businesses && Array.isArray(businesses) && businesses.some((business: any) => business.userId === targetUser.id);
     
     // Only show regular users (those without special profiles)
     const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
@@ -114,7 +114,7 @@ export default function ExplorePage() {
 
   // Randomize and prioritize unfollowed users
   const randomizedUsers = filteredUsers.length > 0 ? (() => {
-    const followingIds = userFollowing ? userFollowing.map((follow: any) => follow.id) : [];
+    const followingIds = userFollowing && Array.isArray(userFollowing) ? userFollowing.map((follow: any) => follow.id) : [];
     
     // Separate followed and unfollowed users
     const unfollowedUsers = filteredUsers.filter((targetUser: any) => !followingIds.includes(targetUser.id));
