@@ -41,10 +41,10 @@ export function setupAuth(app: Express) {
       checkPeriod: 86400000, // prune expired entries every 24h
     }),
     cookie: {
-      httpOnly: false, // Allow JavaScript access for debugging
-      secure: false, // Set to true in production with HTTPS
+      httpOnly: true, // Secure cookie, not accessible via JavaScript
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
-      sameSite: 'lax', // Allow cross-site requests for better compatibility
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
       path: '/', // Ensure cookie is available for all paths
     },
   };

@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -11,6 +12,45 @@ if (process.env.TIKTOK_API_KEY) {
 }
 
 const app = express();
+
+// CORS configuration for mobile app and external previews
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests from Replit, CodeMagic, localhost, and mobile apps
+    const allowedOrigins = [
+      /\.replit\.dev$/,
+      /\.codemagic\.app$/,
+      /localhost/,
+      'capacitor://localhost',
+      'ionic://localhost',
+      'http://localhost',
+      'https://localhost'
+    ];
+    
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin matches any allowed pattern
+    const isAllowed = allowedOrigins.some(pattern => {
+      if (typeof pattern === 'string') {
+        return origin === pattern;
+      }
+      return pattern.test(origin);
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow for now during development
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['set-cookie']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
