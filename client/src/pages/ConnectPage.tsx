@@ -31,6 +31,7 @@ import {
   Calendar
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
+import AuthForm from "@/components/AuthForm";
 
 const createQueueSchema = insertGroupChatQueueSchema.extend({
   minPeople: z.coerce.number().min(2, "Minimum 2 people").max(12, "Maximum 12 people"),
@@ -238,14 +239,7 @@ export default function ConnectPage() {
   };
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
-          <p className="text-gray-400">You need to be signed in to access the Connect page.</p>
-        </div>
-      </div>
-    );
+    return <AuthForm />;
   }
 
   return (

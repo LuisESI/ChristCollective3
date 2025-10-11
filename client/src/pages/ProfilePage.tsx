@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
+import AuthForm from "@/components/AuthForm";
 
 export default function ProfilePage() {
   const { user, isLoading, logoutMutation } = useAuth();
@@ -26,12 +27,10 @@ export default function ProfilePage() {
   const isOwnProfile = !username;
   const profileUser = isOwnProfile ? user : null;
 
-  // Redirect to login if not authenticated and trying to view own profile
-  useEffect(() => {
-    if (!isLoading && !user && isOwnProfile) {
-      navigate("/auth");
-    }
-  }, [isLoading, user, navigate, isOwnProfile]);
+  // Show auth form if not authenticated and trying to view own profile
+  if (!isLoading && !user && isOwnProfile) {
+    return <AuthForm />;
+  }
 
   // Fetch profile user data by username if viewing someone else's profile
   const { data: fetchedUser, isLoading: userLoading, error: userError } = useQuery({

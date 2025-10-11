@@ -114,7 +114,7 @@ function AppContent() {
   
   return (
     <>
-      {!isMobileApp && <Header />}
+      <Header />
       <main className="min-h-screen">
         <Router />
       </main>

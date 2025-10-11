@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, TrendingUp, Users, DollarSign, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import AuthForm from "@/components/AuthForm";
 
 export default function ExplorePage() {
   const { user, isLoading } = useAuth();
@@ -15,12 +16,10 @@ export default function ExplorePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/auth");
-    }
-  }, [isLoading, user, navigate]);
+  // Show auth form if not authenticated
+  if (!isLoading && !user) {
+    return <AuthForm />;
+  }
 
   const { data: campaigns, isLoading: campaignsLoading } = useQuery({
     queryKey: ["/api/campaigns"],
@@ -53,7 +52,7 @@ export default function ExplorePage() {
     enabled: !!user?.id,
   });
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full" />
