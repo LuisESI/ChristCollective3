@@ -71,11 +71,11 @@ export default function CreatorProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-amber-50">
+      <div className="min-h-screen bg-black dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading creator profile...</p>
+            <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-gray-400">Loading creator profile...</p>
           </div>
         </div>
       </div>
@@ -84,14 +84,14 @@ export default function CreatorProfilePage() {
 
   if (error || !creator) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-amber-50">
+      <div className="min-h-screen bg-black dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Creator Not Found</h3>
-              <p className="text-gray-600 mb-4">The creator profile you're looking for doesn't exist.</p>
+            <div className="bg-gray-900 dark:bg-card rounded-lg border border-gray-800 p-8 max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-white dark:text-foreground mb-2">Creator Not Found</h3>
+              <p className="text-gray-400 dark:text-muted-foreground mb-4">The creator profile you're looking for doesn't exist.</p>
               <Link href="/creators">
-                <Button className="bg-amber-600 hover:bg-amber-700">
+                <Button className="bg-[#D4AF37] hover:bg-[#B8941F] text-black">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Creators
                 </Button>
@@ -104,26 +104,16 @@ export default function CreatorProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Modern Header with Navigation */}
-      <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/creators">
-              <Button variant="ghost" className="text-white hover:bg-white/10 p-2">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <h1 className="text-lg font-semibold text-center flex-1">{creator.name}</h1>
-            <Button variant="ghost" className="text-white hover:bg-white/10 p-2">
-              <ExternalLink className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-black dark:bg-background text-white dark:text-foreground">
       {/* Profile Header */}
       <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Back button */}
+        <Link href="/creators">
+          <Button variant="ghost" className="mb-4 text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-gray-800">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Creators
+          </Button>
+        </Link>
         <div className="flex items-start gap-6 mb-4">
           <Avatar className="w-32 h-32 ring-2 ring-gray-700">
             <AvatarImage src={creator.profileImage || ''} alt={creator.name} />

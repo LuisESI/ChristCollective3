@@ -71,10 +71,14 @@ export default function Header() {
         </Link>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden lg:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link key={item.path} href={item.path}>
-              <div className="text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
+              <div className={`transition-colors font-semibold cursor-pointer text-sm ${
+                path === item.path 
+                  ? 'text-[#D4AF37]' 
+                  : 'text-foreground hover:text-[#D4AF37]'
+              }`}>
                 {item.name}
               </div>
             </Link>
