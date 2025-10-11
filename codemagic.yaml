@@ -8,8 +8,6 @@ workflows:
       vars:
         NODE_VERSION: 18
         VITE_API_URL: https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev
-      groups:
-        - app_credentials
       flutter: stable
       xcode: latest
 
@@ -52,8 +50,6 @@ workflows:
     environment:
       android_signing:
         - keystore_reference
-      groups:
-        - app_credentials
       vars:
         PACKAGE_NAME: "com.christcollective.app"
       node: 20.11.0
