@@ -49,12 +49,15 @@ import DirectChatPage from "@/pages/DirectChatPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import MobileAuthPage from "@/pages/MobileAuthPage";
+import { isNativeApp } from "@/lib/platform";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/auth/mobile" component={MobileAuthPage} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />
@@ -104,6 +107,7 @@ function Router() {
 
 function AppContent() {
   const { user } = useAuth();
+  const isMobileApp = isNativeApp();
   
   return (
     <>
@@ -111,7 +115,7 @@ function AppContent() {
       <main className="min-h-screen">
         <Router />
       </main>
-      <Footer />
+      {!isMobileApp && <Footer />}
       {user && <BottomNavigation />}
       <Toaster />
     </>
