@@ -112,14 +112,19 @@ function AppContent() {
   const { user } = useAuth();
   const isMobileApp = isNativeApp();
   
+  // Show bottom navigation if:
+  // 1. Mobile app (always), OR
+  // 2. Web and user is logged in
+  const showBottomNav = isMobileApp || user;
+  
   return (
     <>
       <Header />
       <main className="min-h-screen">
         <Router />
       </main>
-      {!isMobileApp && <Footer />}
-      {isMobileApp && <BottomNavigation />}
+      {!showBottomNav && <Footer />}
+      {showBottomNav && <BottomNavigation />}
       <Toaster />
     </>
   );
