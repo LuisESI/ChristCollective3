@@ -92,12 +92,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
-  // Auth routes
-  app.get('/api/user', (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json(req.user);
-  });
-
   // Update basic user profile
   app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {

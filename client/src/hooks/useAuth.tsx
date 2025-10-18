@@ -65,8 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      refetch(); // Ensure fresh user data
+      // Add delay to ensure session cookie is set before refetching
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        refetch(); 
+      }, 300);
     },
     onError: (error: Error) => {
       toast({
