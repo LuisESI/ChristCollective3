@@ -50,7 +50,10 @@ export default function AuthPage() {
     e.preventDefault();
     loginMutation.mutate(loginData, {
       onSuccess: () => {
-        setLocation("/");
+        // Delay navigation to ensure session cookie is set and auth context updates
+        setTimeout(() => {
+          setLocation("/");
+        }, 400);
       },
       onError: (error) => {
         console.error("Login failed:", error);

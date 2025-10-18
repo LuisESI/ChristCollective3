@@ -39,10 +39,10 @@ export default function AuthForm() {
           title: "Welcome back!",
           description: "You've successfully signed in",
         });
-        // Small delay to ensure auth context updates before redirect
+        // Delay navigation to ensure session cookie is set and auth context updates
         setTimeout(() => {
           setLocation("/feed");
-        }, 300);
+        }, 400);
       },
       onError: (error: any) => {
         toast({

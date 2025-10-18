@@ -55,7 +55,10 @@ export default function MobileAuthPage() {
           title: "Welcome back!",
           description: "You've successfully signed in",
         });
-        setLocation("/feed");
+        // Delay navigation to ensure session cookie is set and auth context updates
+        setTimeout(() => {
+          setLocation("/feed");
+        }, 400);
       },
       onError: (error: any) => {
         console.error("Login failed:", error);
