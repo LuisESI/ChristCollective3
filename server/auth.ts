@@ -7,7 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
-import { sendPasswordResetEmail } from "./email";
+import { emailService } from "./emailService";
 
 declare global {
   namespace Express {
@@ -234,11 +234,11 @@ export function setupAuth(app: Express) {
       await storage.createPasswordResetToken(user.id, hashedToken, expiresAt);
       
       // Send reset email with plaintext token
-      await sendPasswordResetEmail({
-        to: email,
+      await emailService.sendPasswordResetEmail(
+        email,
         resetToken,
-        userName: user.firstName || user.username
-      });
+        user.firstName ?? user.username ?? undefined
+      );
 
       res.json({ message: "If an account with that email exists, a password reset link has been sent." });
     } catch (error) {
