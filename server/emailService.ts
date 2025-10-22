@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { Campaign, Donation } from '@shared/schema';
 
 interface DonationEmailData {
@@ -19,48 +20,44 @@ interface DonationEmailData {
 
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
+  private useResend: boolean = false;
 
   constructor() {
-    // Initialize with a basic transporter that can be configured later
-    this.initializeTransporter();
+    // Initialize with Resend if API key is available, otherwise use Ethereal
+    this.initializeEmailService();
   }
 
-  private async initializeTransporter() {
-    try {
-      // For development, use Ethereal email (test email service)
-      const testAccount = await nodemailer.createTestAccount();
-      
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
+  private async initializeEmailService() {
+    // Check if Resend API key is available
+    if (process.env.RESEND_API_KEY) {
+      this.resend = new Resend(process.env.RESEND_API_KEY);
+      this.useResend = true;
+      console.log('Email service initialized with Resend');
+    } else {
+      // Fallback to Ethereal for development
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        
+        this.transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
 
-      console.log('Email service initialized with test account:', testAccount.user);
-    } catch (error) {
-      console.error('Failed to initialize email service:', error);
-      
-      // Fallback to a simple configuration for development
-      this.transporter = nodemailer.createTransport({
-        host: 'localhost',
-        port: 1025,
-        secure: false,
-        ignoreTLS: true,
-      });
+        console.log('Email service initialized with test account:', testAccount.user);
+      } catch (error) {
+        console.error('Failed to initialize email service:', error);
+      }
     }
   }
 
   async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
     try {
-      if (!this.transporter) {
-        console.error('Email transporter not initialized');
-        return false;
-      }
-
       const baseUrl = process.env.REPLIT_DEPLOYMENT === '1' 
         ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
         : `http://localhost:5000`;
@@ -68,54 +65,80 @@ class EmailService {
       // URL-encode the token to prevent issues with special characters
       const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
 
-      const mailOptions = {
-        from: '"Christ Collective" <noreply@christcollective.info>',
-        to: to,
-        subject: 'Reset Password - Christ Collective',
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background-color: #000; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h1 style="color: #D4AF37; margin: 0;">Christ Collective</h1>
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #000; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="color: #D4AF37; margin: 0;">Christ Collective</h1>
+            </div>
+            <div style="background-color: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+              ${userName ? `<p>Hello ${userName},</p>` : '<p>Hello,</p>'}
+              <p>We have received a request to reset your password at Christ Collective.</p>
+              <p>Click the button below to reset your password:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetLink}" style="background-color: #D4AF37; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
               </div>
-              <div style="background-color: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
-                ${userName ? `<p>Hello ${userName},</p>` : '<p>Hello,</p>'}
-                <p>We have received a request to reset your password at Christ Collective.</p>
-                <p>Click the button below to reset your password:</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${resetLink}" style="background-color: #D4AF37; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
-                </div>
-                <p>Or copy and paste this link into your browser:</p>
-                <p style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 14px;">${resetLink}</p>
-                <p style="color: #e74c3c; font-weight: bold; margin-top: 20px;">⚠️ This link expires after 1 hour</p>
-                <p style="margin-top: 30px; font-size: 14px; color: #666;">
-                  If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
-                </p>
-                <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
-                <p style="font-size: 12px; color: #999; text-align: center;">
-                  © ${new Date().getFullYear()} Christ Collective. All rights reserved.
-                </p>
-              </div>
-            </body>
-          </html>
-        `,
-      };
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 14px;">${resetLink}</p>
+              <p style="color: #e74c3c; font-weight: bold; margin-top: 20px;">⚠️ This link expires after 1 hour</p>
+              <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+              <p style="font-size: 12px; color: #999; text-align: center;">
+                © ${new Date().getFullYear()} Christ Collective. All rights reserved.
+              </p>
+            </div>
+          </body>
+        </html>
+      `;
 
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('Password reset email sent:', info.messageId);
-      
-      // For development with Ethereal email, log the preview URL
-      const previewUrl = nodemailer.getTestMessageUrl(info);
-      if (previewUrl) {
-        console.log('📧 Password reset email preview URL:', previewUrl);
+      if (this.useResend && this.resend) {
+        // Use Resend for production email delivery
+        const { data, error } = await this.resend.emails.send({
+          from: 'Christ Collective <contact@christcollective.info>',
+          to: [to],
+          subject: 'Reset Your Password - Christ Collective',
+          html: emailHtml,
+        });
+
+        if (error) {
+          console.error('Error sending password reset email via Resend:', error);
+          throw new Error(`Failed to send email: ${error.message}`);
+        }
+
+        console.log('Password reset email sent via Resend:', data?.id);
+        return true;
+      } else {
+        // Fallback to Ethereal/Nodemailer for development
+        if (!this.transporter) {
+          console.error('Email transporter not initialized');
+          return false;
+        }
+
+        const mailOptions = {
+          from: '"Christ Collective" <contact@christcollective.info>',
+          to: to,
+          subject: 'Reset Your Password - Christ Collective',
+          html: emailHtml,
+        };
+
+        const info = await this.transporter.sendMail(mailOptions);
+        console.log('Password reset email sent:', info.messageId);
+        
+        // For development with Ethereal email, log the preview URL
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) {
+          console.log('📧 Password reset email preview URL:', previewUrl);
+        }
+        
+        return true;
       }
-      
-      return true;
     } catch (error) {
       console.error('Failed to send password reset email:', error);
       return false;
