@@ -389,14 +389,14 @@ export default function AuthForm() {
       <Dialog open={showForgotPasswordModal} onOpenChange={setShowForgotPasswordModal}>
         <DialogContent className="bg-white">
           <DialogHeader>
-            <DialogTitle className="!text-black !bg-transparent">Reset Password</DialogTitle>
-            <DialogDescription className="!text-black !bg-transparent">
+            <DialogTitle style={{ color: '#000000' }} className="bg-transparent">Reset Password</DialogTitle>
+            <DialogDescription style={{ color: '#000000' }} className="bg-transparent">
               Enter your email address and we'll send you a link to reset your password.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="forgot-email" className="!text-black !bg-transparent text-sm mb-2 block">Email Address</Label>
+              <Label htmlFor="forgot-email" style={{ color: '#000000' }} className="bg-transparent text-sm mb-2 block">Email Address</Label>
               <Input
                 id="forgot-email"
                 type="email"
