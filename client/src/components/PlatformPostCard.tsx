@@ -201,17 +201,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   const editPostMutation = useMutation({
     mutationFn: async (data: { title: string; content: string; tags: string[] }) => {
-      const response = await apiRequest(`/api/platform-posts/${post.id}`, {
+      return await apiRequest(`/api/platform-posts/${post.id}`, {
         method: 'PATCH',
         data,
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update post: ${errorText}`);
-      }
-      
-      return await response.json();
     },
     onSuccess: async (updatedPost) => {
       // Invalidate all relevant queries
