@@ -349,30 +349,32 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (
           <div className="w-full mb-3">
             {post.mediaType === "youtube_channel" ? (
-              <div className="w-full rounded-lg bg-gray-900 border border-gray-800 overflow-hidden">
-                <iframe
-                  src={`https://www.youtube.com/embed?listType=user_uploads&list=${post.mediaUrls[0].includes('@') ? post.mediaUrls[0].split('@')[1] : post.mediaUrls[0].split('/channel/')[1] || post.mediaUrls[0].split('/c/')[1]}`}
-                  className="w-full aspect-video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube Channel"
-                  onError={() => {
-                    console.log("YouTube iframe failed to load, showing fallback");
-                  }}
-                />
-                <div className="p-3 bg-gray-800 border-t border-gray-700">
-                  <a 
-                    href={post.mediaUrls[0]} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-[#D4AF37] hover:text-[#B8941F] flex items-center gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Youtube className="w-4 h-4" />
-                    Visit YouTube Channel
-                  </a>
+              <a 
+                href={post.mediaUrls[0]} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full rounded-lg bg-gradient-to-br from-red-900/20 to-gray-900 border border-red-900/30 hover:border-red-700/50 transition-all overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6 flex flex-col items-center gap-4">
+                  <div className="bg-red-600 p-4 rounded-full">
+                    <Youtube className="w-12 h-12 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-white mb-2">YouTube Channel</h4>
+                    <p className="text-sm text-gray-400 mb-3">Click to visit this exclusive channel</p>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors">
+                      <Youtube className="w-4 h-4" />
+                      <span className="font-medium">Open Channel</span>
+                    </div>
+                  </div>
+                  <div className="w-full pt-3 border-t border-gray-800">
+                    <p className="text-xs text-gray-500 truncate text-center">
+                      {post.mediaUrls[0]}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </a>
             ) : post.mediaType === "video" ? (
               <video
                 controls
