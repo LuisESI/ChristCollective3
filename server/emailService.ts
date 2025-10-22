@@ -58,9 +58,16 @@ class EmailService {
 
   async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
     try {
-      const baseUrl = process.env.REPLIT_DEPLOYMENT === '1' 
-        ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
-        : `http://localhost:5000`;
+      // Determine base URL - use Replit domain if available, otherwise localhost
+      let baseUrl = 'http://localhost:5000';
+      
+      if (process.env.REPLIT_DEPLOYMENT === '1') {
+        // Production deployment
+        baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      } else if (process.env.REPLIT_DEV_DOMAIN) {
+        // Development on Replit
+        baseUrl = `https://${process.env.REPLIT_DEV_DOMAIN}`;
+      }
       
       // URL-encode the token to prevent issues with special characters
       const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
