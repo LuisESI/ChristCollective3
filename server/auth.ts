@@ -24,10 +24,33 @@ export async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    const parts = stored.split(".");
+    if (parts.length !== 2) {
+      console.error("Invalid password format in database");
+      return false;
+    }
+    
+    const [hashed, salt] = parts;
+    if (!hashed || !salt) {
+      console.error("Missing hash or salt in stored password");
+      return false;
+    }
+    
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    
+    // Check buffer lengths match before comparing
+    if (hashedBuf.length !== suppliedBuf.length) {
+      console.error("Password hash length mismatch");
+      return false;
+    }
+    
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    return false;
+  }
 }
 
 // Hash reset token using SHA256 for secure storage
