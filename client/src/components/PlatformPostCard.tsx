@@ -201,21 +201,21 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   const editPostMutation = useMutation({
     mutationFn: async (data: { title: string; content: string; tags: string[] }) => {
-      return await apiRequest(`/api/platform-posts/${post.id}`, {
+      const response = await apiRequest(`/api/platform-posts/${post.id}`, {
         method: 'PATCH',
         data,
       });
+      return await response.json();
     },
-    onSuccess: (updatedPost) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/feed/following"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${post.userId}/posts`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}`] });
+    onSuccess: async (updatedPost) => {
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/feed/following"] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/users/${post.userId}/posts`] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}`] });
       
-      // Force a page reload if we're on the individual post page
-      if (window.location.pathname === `/post/${post.id}`) {
-        window.location.reload();
-      }
+      // Refetch the specific post to update the UI immediately
+      await queryClient.refetchQueries({ queryKey: [`/api/platform-posts/${post.id}`] });
       
       setShowEditModal(false);
       toast({

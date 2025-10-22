@@ -17,6 +17,8 @@ export default function PostPage() {
   const { data: post, isLoading, error } = useQuery({
     queryKey: isMinistryPost ? [`/api/ministry-posts/${postId}`] : [`/api/platform-posts/${postId}`],
     enabled: !!postId && !isNaN(postId),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: currentUser } = useQuery({
