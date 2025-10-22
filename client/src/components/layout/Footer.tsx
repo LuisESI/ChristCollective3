@@ -66,14 +66,6 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-2">
-              <li className="flex items-start">
-                <MapPin className="text-primary mt-1 mr-3" size={18} />
-                <span className="text-gray-400">123 Faith Street, Suite 100<br />Houston, TX 77001</span>
-              </li>
-              <li className="flex items-center">
-                <Phone className="text-primary mr-3" size={18} />
-                <span className="text-gray-400">(123) 456-7890</span>
-              </li>
               <li className="flex items-center">
                 <Mail className="text-primary mr-3" size={18} />
                 <span className="text-gray-400">contact@christcollective.info</span>
