@@ -7,6 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
+import { sendPasswordResetEmail } from "./email";
 
 declare global {
   namespace Express {
@@ -16,7 +17,7 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
@@ -199,31 +200,117 @@ export function setupAuth(app: Express) {
     });
   });
 
-  // Temporary password reset for debugging
-  app.post("/api/reset-password", async (req, res) => {
+  // Forgot password - sends reset link via email
+  app.post("/api/auth/forgot-password", async (req, res) => {
     try {
-      const { username, newPassword } = req.body;
+      const { email } = req.body;
       
-      if (!username || !newPassword) {
-        return res.status(400).json({ message: "Username and new password are required" });
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
       }
 
-      let user = await storage.getUserByUsername(username);
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
       if (!user) {
-        user = await storage.getUserByEmail(username);
+        return res.json({ message: "If an account with that email exists, a password reset link has been sent." });
       }
 
+      // Generate secure random token
+      const resetToken = randomBytes(32).toString('hex');
+      
+      // Token expires in 1 hour
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+      
+      // Store token in database
+      await storage.createPasswordResetToken(user.id, resetToken, expiresAt);
+      
+      // Send reset email
+      await sendPasswordResetEmail({
+        to: email,
+        resetToken,
+        userName: user.firstName || user.username
+      });
+
+      res.json({ message: "If an account with that email exists, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "An error occurred. Please try again later." });
+    }
+  });
+
+  // Reset password with token
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword, confirmPassword } = req.body;
+      
+      if (!token || !newPassword || !confirmPassword) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      // Get token from database
+      const resetToken = await storage.getPasswordResetToken(token);
+      
+      if (!resetToken) {
+        return res.status(400).json({ message: "Invalid or expired reset link" });
+      }
+
+      // Check if token is expired
+      if (new Date() > new Date(resetToken.expiresAt)) {
+        return res.status(400).json({ message: "Reset link has expired" });
+      }
+
+      // Check if token was already used
+      if (resetToken.used) {
+        return res.status(400).json({ message: "This reset link has already been used" });
+      }
+
+      // Get user
+      const user = await storage.getUser(resetToken.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Hash new password and update
       const hashedPassword = await hashPassword(newPassword);
       await storage.updateUserPassword(user.id, hashedPassword);
 
-      res.json({ message: "Password reset successfully" });
+      // Mark token as used
+      await storage.markTokenAsUsed(resetToken.id);
+
+      // Automatically log the user in
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Auto-login after password reset failed:", err);
+          return res.json({ 
+            message: "Password reset successfully. Please log in with your new password.",
+            autoLoginFailed: true
+          });
+        }
+        res.json({ 
+          message: "Password reset successfully",
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            isAdmin: user.isAdmin
+          }
+        });
+      });
     } catch (error) {
       console.error("Password reset error:", error);
-      res.status(500).json({ message: "Password reset failed" });
+      res.status(500).json({ message: "Password reset failed. Please try again." });
     }
   });
 
