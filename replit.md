@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 -   **Authentication**: Passport.js (local strategy, session-based)
 -   **Session Storage**: Express sessions with PostgreSQL store
 -   **API Integration**: YouTube, TikTok, Instagram APIs
--   **Email Service**: Nodemailer
+-   **Email Service**: Resend (production), Ethereal (development) for transactional emails
 -   **File Uploads**: Multer
 
 ### Data Storage
@@ -37,7 +37,7 @@ Preferred communication style: Simple, everyday language.
 -   Reusable AuthForm component with white/gold design for authentication pages.
 
 ### Key Features
--   **Authentication System**: Local username/password, session-based, admin roles, profile management.
+-   **Authentication System**: Local username/password, session-based, admin roles, profile management, password reset via email with secure token-based flow.
 -   **Campaign Management**: Creation, editing, media uploads, goal tracking, admin approval, search/filtering.
 -   **Payment Processing**: Stripe integration for donations and membership subscriptions.
 -   **Business Networking**: Business profiles, membership tiers, industry-based filtering.
@@ -55,6 +55,50 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 -   **Payment Processing**: Stripe, Stripe Elements
 -   **Social Media APIs**: YouTube Data API, Apify (TikTok/Instagram scraping), custom scrapers
--   **Email Services**: Nodemailer, SendGrid (production), Ethereal (development)
+-   **Email Services**: Resend (production & development), Ethereal (development fallback)
 -   **UI and Styling**: Tailwind CSS, shadcn/ui, Radix UI, Lucide React (icons)
 -   **Development Tools**: TypeScript, ESLint, Prettier, Vite
+
+## Password Reset Feature
+### Overview
+Secure password reset functionality with email-based token verification. Users can request a password reset link from the login page, receive an email with a secure token, and set a new password which automatically logs them in.
+
+### Security Implementation
+-   **Token Generation**: 32-byte cryptographically secure random tokens using `crypto.randomBytes`
+-   **Token Storage**: Tokens are hashed with SHA256 before database storage to prevent compromise if database is accessed
+-   **Token Expiry**: Reset tokens expire after 1 hour
+-   **One-Time Use**: Tokens are marked as used after successful password reset
+-   **URL Safety**: Tokens are URL-encoded in email links to prevent truncation issues
+-   **Email Verification**: Password reset only works for registered email addresses (with anti-enumeration protection)
+
+### Database Schema
+`passwordResetTokens` table:
+-   `id`: Serial primary key
+-   `userId`: Reference to users table
+-   `email`: User's email address
+-   `token`: SHA256-hashed reset token
+-   `expiresAt`: Token expiration timestamp (1 hour from creation)
+-   `used`: Boolean flag to prevent token reuse
+
+### User Flow
+1. User clicks "Forgot Password?" on login page
+2. User enters email address in modal dialog
+3. System generates secure token, hashes it, stores it in database
+4. Email sent with reset link containing plaintext token
+5. User clicks link, navigated to `/reset-password?token=xxx`
+6. User enters new password (6+ characters) twice
+7. System validates token (hashes incoming token, checks database)
+8. Password updated, token marked as used, user automatically logged in
+9. User redirected to feed page
+
+### API Endpoints
+-   `POST /api/auth/forgot-password`: Accepts email, generates token, sends reset email
+-   `POST /api/auth/reset-password`: Validates token, updates password, creates session
+
+### Frontend Components
+-   **AuthForm**: Contains "Forgot Password?" button and modal dialog
+-   **ResetPassword**: Dedicated page for password reset with dual password fields
+
+### Known Limitations
+-   Old sessions are not automatically invalidated when password is reset (MemoryStore limitation)
+-   New login session is created after reset, but existing sessions remain valid until expiry

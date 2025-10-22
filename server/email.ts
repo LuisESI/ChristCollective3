@@ -14,7 +14,8 @@ export async function sendPasswordResetEmail({ to, resetToken, userName }: SendP
     ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
     : `http://localhost:5000`;
   
-  const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+  // URL-encode the token to prevent issues with special characters
+  const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
 
   try {
     const { data, error } = await resend.emails.send({

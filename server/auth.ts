@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { scrypt, randomBytes, timingSafeEqual, createHash } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
@@ -28,6 +28,11 @@ async function comparePasswords(supplied: string, stored: string) {
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+
+// Hash reset token using SHA256 for secure storage
+function hashResetToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
 }
 
 export function setupAuth(app: Express) {
@@ -216,16 +221,19 @@ export function setupAuth(app: Express) {
         return res.json({ message: "If an account with that email exists, a password reset link has been sent." });
       }
 
-      // Generate secure random token
+      // Generate secure random token (plaintext for email)
       const resetToken = randomBytes(32).toString('hex');
+      
+      // Hash token for secure storage
+      const hashedToken = hashResetToken(resetToken);
       
       // Token expires in 1 hour
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
       
-      // Store token in database
-      await storage.createPasswordResetToken(user.id, resetToken, expiresAt);
+      // Store HASHED token in database
+      await storage.createPasswordResetToken(user.id, hashedToken, expiresAt);
       
-      // Send reset email
+      // Send reset email with plaintext token
       await sendPasswordResetEmail({
         to: email,
         resetToken,
@@ -256,8 +264,11 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Password must be at least 6 characters" });
       }
 
-      // Get token from database
-      const resetToken = await storage.getPasswordResetToken(token);
+      // Hash the incoming token to compare with stored hash
+      const hashedToken = hashResetToken(token);
+
+      // Get token from database using hashed version
+      const resetToken = await storage.getPasswordResetToken(hashedToken);
       
       if (!resetToken) {
         return res.status(400).json({ message: "Invalid or expired reset link" });
