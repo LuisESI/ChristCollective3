@@ -54,6 +54,16 @@ export const users = pgTable("users", {
 
 // Note: User relations are defined at the bottom of this file after all tables
 
+// Password reset tokens
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Membership tiers
 export const membershipTiers = pgTable("membership_tiers", {
   id: serial("id").primaryKey(),
@@ -153,6 +163,11 @@ export const donationsRelations = relations(donations, ({ one }) => ({
 // Schemas for form validation and inserts
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens)
+  .omit({ id: true, used: true, createdAt: true });
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
 export const insertCampaignSchema = createInsertSchema(campaigns)
   .omit({ id: true, userId: true, currentAmount: true, createdAt: true, updatedAt: true, slug: true })
