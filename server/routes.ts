@@ -654,10 +654,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedPost = await storage.updatePlatformPost(postId, req.body);
-      res.json(updatedPost);
+      
+      // Ensure we're returning valid JSON
+      return res.status(200).json(updatedPost);
     } catch (error) {
       console.error("Error updating platform post:", error);
-      res.status(500).json({ message: "Failed to update post" });
+      return res.status(500).json({ message: "Failed to update post", error: error.message });
     }
   });
 

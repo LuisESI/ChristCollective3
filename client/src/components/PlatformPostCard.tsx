@@ -205,6 +205,12 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         method: 'PATCH',
         data,
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update post: ${errorText}`);
+      }
+      
       return await response.json();
     },
     onSuccess: async (updatedPost) => {
