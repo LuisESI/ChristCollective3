@@ -181,7 +181,22 @@ export default function MobileAuthPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="login-password" className="text-white text-sm mb-2 block">Password</Label>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label htmlFor="login-password" className="text-white text-sm">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toast({
+                          title: "Password Reset",
+                          description: "Please use the web version to reset your password at christcollective.info/auth",
+                        });
+                      }}
+                      className="text-yellow-500 hover:text-yellow-400 text-sm font-medium"
+                      data-testid="button-forgot-password"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <Input
                     id="login-password"
                     type="password"
