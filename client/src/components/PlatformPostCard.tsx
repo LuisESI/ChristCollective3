@@ -206,11 +206,17 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         data,
       });
     },
-    onSuccess: () => {
+    onSuccess: (updatedPost) => {
       queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/feed/following"] });
       queryClient.invalidateQueries({ queryKey: [`/api/users/${post.userId}/posts`] });
       queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}`] });
+      
+      // Force a page reload if we're on the individual post page
+      if (window.location.pathname === `/post/${post.id}`) {
+        window.location.reload();
+      }
+      
       setShowEditModal(false);
       toast({
         title: "Post updated successfully",

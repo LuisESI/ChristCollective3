@@ -632,6 +632,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH endpoint for platform posts (same as PUT but using PATCH method)
+  app.patch('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const postId = parseInt(id);
+      const userId = req.user.id;
+
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      // Check ownership
+      if (post.userId !== userId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updatedPost = await storage.updatePlatformPost(postId, req.body);
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Error updating platform post:", error);
+      res.status(500).json({ message: "Failed to update post" });
+    }
+  });
+
   // Delete platform post
   app.delete('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
     try {
