@@ -389,21 +389,21 @@ export default function AuthForm() {
       <Dialog open={showForgotPasswordModal} onOpenChange={setShowForgotPasswordModal}>
         <DialogContent className="bg-white">
           <DialogHeader>
-            <DialogTitle className="text-black">Reset Password</DialogTitle>
-            <DialogDescription className="text-gray-700">
+            <DialogTitle className="text-black bg-transparent">Reset Password</DialogTitle>
+            <DialogDescription className="text-gray-700 bg-transparent">
               Enter your email address and we'll send you a link to reset your password.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="forgot-email" className="text-black text-sm mb-2 block">Email Address</Label>
+              <Label htmlFor="forgot-email" className="text-black bg-transparent text-sm mb-2 block">Email Address</Label>
               <Input
                 id="forgot-email"
                 type="email"
                 value={forgotPasswordEmail}
                 onChange={(e) => setForgotPasswordEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="h-12"
+                className="h-12 bg-white border-gray-300 text-black"
                 required
                 data-testid="input-forgot-password-email"
               />
