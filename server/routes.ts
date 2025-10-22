@@ -48,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
-  
+
   // Configure multer for file uploads
   const multerStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cb(null, uniqueName);
     }
   });
-  
+
   const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     // Accept image and video files
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cb(null, false);
     }
   };
-  
+
   const upload = multer({ 
     storage: multerStorage,
     fileFilter,
@@ -76,10 +76,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fileSize: 50 * 1024 * 1024, // 50MB file size limit for videos
     } 
   });
-  
+
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadDir));
-  
+
   // Serve favicon files
   app.get('/favicon.png', (req, res) => {
     res.sendFile(path.resolve(process.cwd(), 'public', 'favicon.png'));
@@ -88,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/favicon.ico', (req, res) => {
     res.sendFile(path.resolve(process.cwd(), 'public', 'favicon.ico'));
   });
-  
+
   // Auth middleware
   setupAuth(app);
 
@@ -97,7 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const updateData = req.body;
-      
+
       // Validate the input
       const validatedData = z.object({
         bio: z.string().optional(),
@@ -136,19 +136,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const creator = await storage.getUserContentCreator(userId);
-      
+
       if (!creator) {
         return res.json({ isCreator: false });
       }
-      
+
       // Get creator's social media posts
       const posts = await storage.getSocialMediaPostsByCreator(creator.id);
-      
+
       // Calculate stats like the public profile does
       const platforms = creator.platforms || [];
       const totalFollowers = Array.isArray(platforms) ? 
         platforms.reduce((sum: number, platform: any) => sum + (platform.subscriberCount || 0), 0) : 0;
-      
+
       const enhancedCreator = {
         ...creator,
         posts,
@@ -156,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalFollowers,
         platformCount: Array.isArray(platforms) ? platforms.length : 0
       };
-      
+
       res.json({
         isCreator: true,
         creatorProfile: enhancedCreator
@@ -194,20 +194,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const applicationId = parseInt(id);
-      
+
       if (isNaN(applicationId)) {
         return res.status(400).json({ message: "Invalid application ID" });
       }
-      
+
       // Get the application first
       const application = await storage.getSponsorshipApplication(applicationId);
       if (!application) {
         return res.status(404).json({ message: "Application not found" });
       }
-      
+
       // Check if user already has a content creator profile
       const existingCreator = await storage.getUserContentCreator(application.userId);
-      
+
       if (!existingCreator) {
         // Create content creator profile from approved application
         const newCreator = await storage.createContentCreator({
@@ -234,13 +234,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           audience: application.audience
         });
       }
-      
+
       // Approve the application
       const approvedApplication = await storage.updateSponsorshipApplication(applicationId, {
         status: 'approved',
         reviewedAt: new Date()
       });
-      
+
       res.json(approvedApplication);
     } catch (error) {
       console.error("Error approving sponsorship application:", error);
@@ -252,20 +252,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const applicationId = parseInt(id);
-      
+
       if (isNaN(applicationId)) {
         return res.status(400).json({ message: "Invalid application ID" });
       }
-      
+
       const rejectedApplication = await storage.updateSponsorshipApplication(applicationId, {
         status: 'rejected',
         reviewedAt: new Date()
       });
-      
+
       if (!rejectedApplication) {
         return res.status(404).json({ message: "Application not found" });
       }
-      
+
       res.json(rejectedApplication);
     } catch (error) {
       console.error("Error rejecting sponsorship application:", error);
@@ -353,22 +353,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const creatorId = parseInt(id);
-      
+
       if (isNaN(creatorId)) {
         return res.status(400).json({ message: "Invalid creator ID" });
       }
-      
+
       const creator = await storage.getContentCreator(creatorId);
       if (!creator) {
         return res.status(404).json({ message: "Creator not found" });
       }
-      
+
       // Get creator's social media posts (only visible ones for public view)
       const posts = await storage.getVisibleSocialMediaPostsByCreator(creatorId);
-      
+
       // Get internal follower count from the follow system
       const totalFollowers = await storage.getUserFollowersCount(creator.userId);
-      
+
       res.json({ ...creator, posts, totalFollowers });
     } catch (error) {
       console.error("Error fetching content creator:", error);
@@ -383,27 +383,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(id);
       const { isVisibleOnProfile } = req.body;
       const userId = req.user.id;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       // Get the post and verify ownership
       const post = await storage.getSocialMediaPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       // Get creator to verify ownership
       const creator = await storage.getContentCreator(post.creatorId);
       if (!creator || (creator.userId !== userId && !req.user.isAdmin)) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const updatedPost = await storage.updateSocialMediaPost(postId, {
         isVisibleOnProfile: Boolean(isVisibleOnProfile)
       });
-      
+
       res.json(updatedPost);
     } catch (error) {
       console.error("Error updating post visibility:", error);
@@ -417,29 +417,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const creatorId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(creatorId)) {
         return res.status(400).json({ message: "Invalid creator ID" });
       }
-      
+
       // Verify the creator belongs to the authenticated user
       const existingCreator = await storage.getContentCreator(creatorId);
       if (!existingCreator) {
         return res.status(404).json({ message: "Creator not found" });
       }
-      
+
       if (existingCreator.userId !== userId && !req.user.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       // Validate the update data
       const updateData = insertContentCreatorSchema.partial().parse(req.body);
-      
+
       const updatedCreator = await storage.updateContentCreator(creatorId, {
         ...updateData,
         updatedAt: new Date()
       });
-      
+
       res.json(updatedCreator);
     } catch (error) {
       console.error("Error updating content creator:", error);
@@ -456,17 +456,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:userId/content-creator', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      
+
       // Only allow users to view their own creator profile or admins to view any
       if (req.user.claims.sub !== userId && !req.user.claims.email?.includes('admin')) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const creator = await storage.getUserContentCreator(userId);
       if (!creator) {
         return res.status(404).json({ message: "Creator profile not found" });
       }
-      
+
       const posts = await storage.getSocialMediaPostsByCreator(creator.id);
       res.json({ ...creator, posts });
     } catch (error) {
@@ -481,17 +481,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const creatorId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(creatorId)) {
         return res.status(400).json({ message: "Invalid creator ID" });
       }
-      
+
       // Verify the creator belongs to the authenticated user
       const creator = await storage.getContentCreator(creatorId);
       if (!creator || (creator.userId !== userId && !req.user.isAdmin)) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const posts = await storage.getSocialMediaPostsByCreator(creatorId);
       res.json(posts);
     } catch (error) {
@@ -501,13 +501,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Platform posts endpoints - unified content sharing for all user types
-  
+
   // Create a new platform post
   app.post('/api/platform-posts', isAuthenticated, async (req: any, res) => {
     try {
       const { authorType, authorId, title, content, mediaUrls, mediaType, tags } = req.body;
       const userId = req.user.id;
-      
+
       // Validate required fields
       if (!content) {
         return res.status(400).json({ message: "Content is required" });
@@ -567,12 +567,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const currentUserId = req.user.id;
-      
+
       // Users can only see their own posts unless they're admin
       if (userId !== currentUserId && !req.user.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const posts = await storage.getUserPlatformPosts(userId);
       res.json(posts);
     } catch (error) {
@@ -586,16 +586,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       res.json(post);
     } catch (error) {
       console.error("Error fetching platform post:", error);
@@ -609,21 +609,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const postId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       // Check ownership
       if (post.userId !== userId && !req.user.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const updatedPost = await storage.updatePlatformPost(postId, req.body);
       res.json(updatedPost);
     } catch (error) {
@@ -638,21 +638,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const postId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       // Check ownership
       if (post.userId !== userId && !req.user.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       await storage.deletePlatformPost(postId);
       res.status(204).send();
     } catch (error) {
@@ -662,26 +662,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Post interaction endpoints
-  
+
   // Like/unlike a post
   app.post('/api/platform-posts/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       // Check if user already liked the post
       const existingLike = await storage.getUserPostInteraction(postId, userId, 'like');
-      
+
       if (existingLike) {
         // Unlike the post
         await storage.deletePostInteraction(existingLike.id);
@@ -699,10 +699,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updatePlatformPost(postId, { 
           likesCount: (post.likesCount || 0) + 1 
         });
-        
+
         // Create notification for like
         await storage.createNotificationForLike(userId, postId, post.userId);
-        
+
         res.json({ liked: true, likesCount: (post.likesCount || 0) + 1 });
       }
     } catch (error) {
@@ -718,34 +718,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(id);
       const userId = req.user.id;
       const { content } = req.body;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       if (!content || content.trim().length === 0) {
         return res.status(400).json({ message: "Comment content is required" });
       }
-      
+
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       const comment = await storage.createPostInteraction({
         postId,
         userId,
         type: 'comment',
         content: content.trim(),
       });
-      
+
       await storage.updatePlatformPost(postId, { 
         commentsCount: (post.commentsCount || 0) + 1 
       });
-      
+
       // Create notification for comment
       await storage.createNotificationForComment(userId, postId, post.userId, content.trim());
-      
+
       res.status(201).json(comment);
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -758,11 +758,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const interactions = await storage.getPostInteractions(postId);
       res.json(interactions);
     } catch (error) {
@@ -777,24 +777,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const postId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       // Check if post exists and user owns it
       const post = await storage.getPlatformPost(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       if (post.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to delete this post" });
       }
-      
+
       // Delete the post
       await storage.deletePlatformPost(postId);
-      
+
       res.json({ message: "Post deleted successfully" });
     } catch (error) {
       console.error("Error deleting platform post:", error);
@@ -808,21 +808,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const commentId = parseInt(id);
       const userId = req.user.id;
-      
+
       if (isNaN(commentId)) {
         return res.status(400).json({ message: "Invalid comment ID" });
       }
-      
+
       // Check if comment exists and user owns it
       const comment = await storage.getPostComment(commentId);
       if (!comment) {
         return res.status(404).json({ message: "Comment not found" });
       }
-      
+
       if (comment.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to delete this comment" });
       }
-      
+
       // Get the post to update comment count
       const post = await storage.getPlatformPost(comment.postId);
       if (post) {
@@ -830,27 +830,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           commentsCount: Math.max((post.commentsCount || 1) - 1, 0)
         });
       }
-      
+
       // Delete the comment
       await storage.deletePostComment(commentId);
-      
+
       res.json({ message: "Comment deleted successfully" });
     } catch (error) {
       console.error("Error deleting comment:", error);
       res.status(500).json({ message: "Failed to delete comment" });
     }
   });
-  
+
   // Get post comments only
   app.get('/api/platform-posts/:id/comments', async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
-      
+
       if (isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const comments = await storage.getPostComments(postId);
       res.json(comments);
     } catch (error) {
@@ -858,7 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch comments" });
     }
   });
-  
+
   // File upload route - supports both images and videos
   app.post('/api/upload', isAuthenticated, (req, res, next) => {
     // Create a fields configuration that accepts both 'image', 'video' and 'file' fields
@@ -867,7 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { name: 'video', maxCount: 1 },
       { name: 'file', maxCount: 1 }
     ]);
-    
+
     uploadFields(req, res, (err) => {
       if (err) {
         console.error("Upload error:", err);
@@ -878,18 +878,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }, async (req: any, res) => {
     try {
       const files = req.files;
-      
+
       if (!files || ((!files.image || files.image.length === 0) && (!files.video || files.video.length === 0) && (!files.file || files.file.length === 0))) {
         return res.status(400).json({ message: "No file uploaded" });
       }
-      
+
       // Determine which file was uploaded (image, video, or file)
       const file = files.image ? files.image[0] : files.video ? files.video[0] : files.file[0];
-      
+
       // Create a public URL for the uploaded file
       // Use relative path for flexibility across environments
       const fileUrl = `/uploads/${file.filename}`;
-      
+
       res.status(200).json({ 
         url: fileUrl,
         filename: file.filename,
@@ -907,11 +907,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const profile = await storage.getUserMinistryProfile(userId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Ministry profile not found" });
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error fetching ministry profile:", error);
@@ -924,11 +924,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const updateData = req.body;
-      
+
       // If username is being updated, check for uniqueness
       if (updateData.username) {
         const currentUser = await storage.getUser(userId);
-        
+
         // Only check if username is actually changing
         if (currentUser && updateData.username !== currentUser.username) {
           const existingUser = await storage.getUserByUsername(updateData.username);
@@ -940,7 +940,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-      
+
       const user = await storage.updateUser(userId, updateData);
       res.json(user);
     } catch (error) {
@@ -954,14 +954,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const { showEmail, showPhone, showLocation } = req.body;
-      
+
       // Validate input
       const privacyData = {
         showEmail: Boolean(showEmail),
         showPhone: Boolean(showPhone),
         showLocation: Boolean(showLocation)
       };
-      
+
       const user = await storage.updateUser(userId, privacyData);
       res.json(user);
     } catch (error) {
@@ -974,25 +974,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Ensure additionalImages is an array or set to empty array if undefined
       if (req.body.additionalImages && !Array.isArray(req.body.additionalImages)) {
         req.body.additionalImages = [req.body.additionalImages];
       } else if (!req.body.additionalImages) {
         req.body.additionalImages = [];
       }
-      
+
       // Generate a slug for the campaign
       const slug = await generateSlug(req.body.title);
       req.body.slug = slug;
-      
+
       const campaignData = insertCampaignSchema.parse(req.body);
-      
+
       const campaign = await storage.createCampaign({
         ...campaignData,
         userId
       });
-      
+
       res.status(201).json(campaign);
     } catch (error) {
       console.error("Error creating campaign:", error);
@@ -1007,13 +1007,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { search } = req.query;
       let campaigns;
-      
+
       if (search && typeof search === 'string') {
         campaigns = await storage.searchCampaigns(search);
       } else {
         campaigns = await storage.listCampaigns();
       }
-      
+
       res.json(campaigns);
     } catch (error) {
       console.error("Error listing campaigns:", error);
@@ -1026,20 +1026,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { identifier } = req.params;
       let campaign;
-      
+
       // Check if identifier looks like a UUID (for ID lookup) or slug
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-      
+
       if (isUUID) {
         campaign = await storage.getCampaign(identifier);
       } else {
         campaign = await storage.getCampaignBySlug(identifier);
       }
-      
+
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
-      
+
       res.json(campaign);
     } catch (error) {
       console.error("Error fetching campaign:", error);
@@ -1068,55 +1068,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch campaigns" });
     }
   });
-  
+
   // Update campaign route
   app.put('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       // Check if the campaign exists
       const campaign = await storage.getCampaign(id);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
-      
+
       // Verify that the user owns this campaign
       if (campaign.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to update this campaign" });
       }
-      
+
       // Update campaign data
       const updateData = req.body;
       const updatedCampaign = await storage.updateCampaign(id, updateData);
-      
+
       res.json(updatedCampaign);
     } catch (error) {
       console.error("Error updating campaign:", error);
       res.status(500).json({ message: "Failed to update campaign" });
     }
   });
-  
+
   // Delete campaign route
   app.delete('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       // Check if the campaign exists
       const campaign = await storage.getCampaign(id);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
-      
+
       // Verify that the user owns this campaign
       if (campaign.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to delete this campaign" });
       }
-      
+
       // Delete the campaign
       await storage.deleteCampaign(id);
-      
+
       res.status(200).json({ message: "Campaign deleted successfully" });
     } catch (error) {
       console.error("Error deleting campaign:", error);
@@ -1140,43 +1140,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
-    
+
     try {
       const { amount, campaignId, tip = 0, guestInfo } = req.body;
-      
+
       if (!amount || !campaignId) {
         return res.status(400).json({ message: "Amount and campaign ID are required" });
       }
-      
+
       const campaign = await storage.getCampaign(campaignId);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
-      
+
       // Calculate total amount including tip
       const donationAmount = parseFloat(amount);
       const tipAmount = parseFloat(tip) || 0;
       const totalAmount = donationAmount + tipAmount;
-      
+
       console.log(`Payment Intent Creation - Donation: $${donationAmount}, Tip: $${tipAmount}, Total: $${totalAmount}`);
-      
+
       // Create customer (optional for guest donations)
       let customerId: string | undefined = undefined;
       if (req.user?.id) {
         const user = await storage.getUser(req.user.id);
         customerId = user?.stripeCustomerId || undefined;
-        
+
         if (!customerId && user?.email) {
           const customer = await stripe.customers.create({
             email: user.email,
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || undefined,
           });
-          
+
           customerId = customer.id;
           await storage.updateStripeCustomerId(req.user.id, customerId);
         }
       }
-      
+
       const metadata: any = {
         campaignId,
         userId: req.user?.id || 'guest',
@@ -1197,7 +1197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customer: customerId,
         metadata
       });
-      
+
       res.json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
       console.error("Error creating payment intent:", error);
@@ -1210,20 +1210,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
-    
+
     const sig = req.headers['stripe-signature'] as string;
     let event;
-    
+
     try {
       // This would normally verify the webhook signature with a secret
       // but for simplicity we'll just parse the event
       event = req.body;
-      
+
       if (event.type === 'payment_intent.succeeded') {
         const paymentIntent = event.data.object;
         const { campaignId, userId } = paymentIntent.metadata;
         const amount = paymentIntent.amount / 100; // Convert from cents
-        
+
         // Create the donation record
         await storage.createDonation({
           campaignId,
@@ -1231,11 +1231,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: amount.toString(),
           isAnonymous: false
         }, paymentIntent.id);
-        
+
         // Update the campaign's current amount
         await storage.updateDonationAmount(campaignId, amount);
       }
-      
+
       res.json({ received: true });
     } catch (error) {
       console.error("Error processing webhook:", error);
@@ -1271,7 +1271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const guestFirstName = paymentIntent.metadata.guestFirstName;
       const guestLastName = paymentIntent.metadata.guestLastName;
       const guestEmail = paymentIntent.metadata.guestEmail;
-      
+
       console.log(`Processing donation - Amount: $${donationAmount}, Tip: $${tipAmount}`);
 
       // Get campaign details
@@ -1339,7 +1339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: donation.createdAt,
         stripePaymentId: paymentIntentId,
       };
-      
+
       console.log('Donation completion successful:', response);
       res.json(response);
 
@@ -1353,7 +1353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/donations/manual', async (req: any, res) => {
     try {
       const { amount, campaignId, stripePaymentId, description } = req.body;
-      
+
       if (!amount || !campaignId) {
         return res.status(400).json({ message: "Amount and campaign ID are required" });
       }
@@ -1395,24 +1395,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/donations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       const donationData = insertDonationSchema.parse({
         ...req.body,
         userId
       });
-      
+
       // Create donation with a placeholder payment ID
       const donation = await storage.createDonation(
         donationData,
         `manual_${Date.now()}`
       );
-      
+
       // Update campaign amount
       await storage.updateDonationAmount(
         donationData.campaignId || '',
         parseFloat(donationData.amount.toString())
       );
-      
+
       res.status(201).json(donation);
     } catch (error) {
       console.error("Error creating donation:", error);
@@ -1427,20 +1427,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/business-profiles', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Check if user already has a business profile
       const existingProfile = await storage.getUserBusinessProfile(userId);
       if (existingProfile) {
         return res.status(400).json({ message: "User already has a business profile" });
       }
-      
+
       const profileData = insertBusinessProfileSchema.parse(req.body);
-      
+
       const profile = await storage.createBusinessProfile({
         ...profileData,
         userId
       });
-      
+
       res.status(201).json(profile);
     } catch (error) {
       console.error("Error creating business profile:", error);
@@ -1466,11 +1466,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const profile = await storage.getBusinessProfile(parseInt(id));
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Business profile not found" });
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error fetching business profile:", error);
@@ -1482,11 +1482,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const profile = await storage.getUserBusinessProfile(userId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Business profile not found" });
       }
-      
+
       res.json(profile);
     } catch (error) {
       console.error("Error fetching business profile:", error);
@@ -1498,26 +1498,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const profileId = parseInt(id, 10);
-      
+
       if (isNaN(profileId)) {
         return res.status(400).json({ message: "Invalid profile ID" });
       }
-      
+
       const profile = await storage.getBusinessProfile(profileId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Business profile not found" });
       }
-      
+
       // Check if the user owns this profile
       const userId = req.user.id;
       if (profile.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to update this profile" });
       }
-      
+
       const updateData = req.body;
       const updatedProfile = await storage.updateBusinessProfile(profileId, updateData);
-      
+
       res.json(updatedProfile);
     } catch (error) {
       console.error("Error updating business profile:", error);
@@ -1529,25 +1529,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const profileId = parseInt(id, 10);
-      
+
       if (isNaN(profileId)) {
         return res.status(400).json({ message: "Invalid profile ID" });
       }
-      
+
       const profile = await storage.getBusinessProfile(profileId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Business profile not found" });
       }
-      
+
       // Check if the user owns this profile
       const userId = req.user.id;
       if (profile.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to delete this profile" });
       }
-      
+
       await storage.deleteBusinessProfile(profileId);
-      
+
       res.json({ message: "Business profile deleted successfully" });
     } catch (error) {
       console.error("Error deleting business profile:", error);
@@ -1571,39 +1571,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
-    
+
     try {
       const { tierID } = req.body;
-      
+
       if (!tierID) {
         return res.status(400).json({ message: "Membership tier ID is required" });
       }
-      
+
       const tier = await storage.getMembershipTier(tierID);
       if (!tier) {
         return res.status(404).json({ message: "Membership tier not found" });
       }
-      
+
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user?.email) {
         return res.status(400).json({ message: "User email is required for subscription" });
       }
-      
+
       // Create or retrieve customer
       let customerId = user.stripeCustomerId;
-      
+
       if (!customerId) {
         const customer = await stripe.customers.create({
           email: user.email,
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || undefined,
         });
-        
+
         customerId = customer.id;
         await storage.updateStripeCustomerId(userId, customerId);
       }
-      
+
       // Create subscription
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
@@ -1613,13 +1613,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payment_behavior: 'default_incomplete',
         expand: ['latest_invoice.payment_intent'],
       });
-      
+
       // Update business profile with subscription ID
       const businessProfile = await storage.getUserBusinessProfile(userId);
       if (businessProfile) {
         await storage.updateBusinessProfileSubscription(businessProfile.id, subscription.id);
       }
-      
+
       res.json({
         subscriptionId: subscription.id,
         clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
@@ -1636,16 +1636,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaigns = await storage.listCampaigns();
       const businessProfiles = await storage.listBusinessProfiles();
       const users = await storage.getUsersCount();
-      
+
       // Calculate total donations raised from campaigns
       const totalDonations = campaigns.reduce((sum, campaign) => {
         const amount = parseFloat(campaign.currentAmount || '0');
         return sum + amount;
       }, 0);
-      
+
       // Get unique industries from business profiles
       const industries = new Set(businessProfiles.map(profile => profile.industry).filter(Boolean));
-      
+
       res.json({
         communityMembers: users,
         donationsRaised: totalDonations,
@@ -1670,23 +1670,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch content creators" });
     }
   });
-  
+
   app.get("/api/content-creators/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const creator = await storage.getContentCreator(id);
-      
+
       if (!creator) {
         return res.status(404).json({ message: "Content creator not found" });
       }
-      
+
       res.json(creator);
     } catch (error) {
       console.error("Error fetching content creator:", error);
       res.status(500).json({ message: "Failed to fetch content creator" });
     }
   });
-  
+
   app.get("/api/user/content-creator", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
@@ -1697,23 +1697,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch content creator profile" });
     }
   });
-  
+
   app.post("/api/content-creators", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Check if user already has a content creator profile
       const existingCreator = await storage.getUserContentCreator(userId);
       if (existingCreator) {
         return res.status(400).json({ message: "You already have a content creator profile" });
       }
-      
+
       const validatedData = insertContentCreatorSchema.parse(req.body);
       const creator = await storage.createContentCreator({
         ...validatedData,
         userId
       });
-      
+
       res.status(201).json(creator);
     } catch (error) {
       console.error("Error creating content creator:", error);
@@ -1723,7 +1723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create content creator profile" });
     }
   });
-  
+
   // Sponsorship Application routes
   app.get("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
     try {
@@ -1735,37 +1735,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch sponsorship applications" });
     }
   });
-  
+
   app.post("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       console.log(`Sponsorship application submission for user: ${userId}`);
       console.log('Request body:', JSON.stringify(req.body, null, 2));
-      
+
       // Check if user already has a pending application
       const existingApplications = await storage.getUserSponsorshipApplications(userId);
       const hasPendingApplication = existingApplications.some(app => app.status === "pending");
-      
+
       if (hasPendingApplication) {
         console.log(`User ${userId} already has pending application`);
         return res.status(400).json({ message: "You already have a pending sponsorship application" });
       }
-      
+
       console.log('Validating application data...');
       const validatedData = insertSponsorshipApplicationSchema.parse(req.body);
       console.log('Validation successful, creating application...');
-      
+
       const application = await storage.createSponsorshipApplication({
         ...validatedData,
         userId
       });
-      
+
       console.log(`Sponsorship application created successfully with ID: ${application.id}`);
       res.status(201).json(application);
     } catch (error) {
       console.error("Error creating sponsorship application:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      
+
       if (error instanceof z.ZodError) {
         console.error("Validation errors:", error.errors);
         return res.status(400).json({ 
@@ -1777,7 +1777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         });
       }
-      
+
       // Database or other server errors
       if (error instanceof Error) {
         console.error("Server error details:", {
@@ -1790,7 +1790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
       }
-      
+
       res.status(500).json({ message: "Failed to submit sponsorship application" });
     }
   });
@@ -1804,14 +1804,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const userId = req.user.id;
       const imageUrl = `/uploads/${req.file.filename}`;
-      
+
       console.log(`Updating user ${userId} profile image to: ${imageUrl}`);
-      
+
       // Update user's profile image
       const updatedUser = await storage.updateUser(userId, { profileImageUrl: imageUrl });
-      
+
       console.log('Updated user:', JSON.stringify(updatedUser, null, 2));
-      
+
       res.json({ imageUrl, profileImageUrl: updatedUser.profileImageUrl });
     } catch (error) {
       console.error('Error uploading profile image:', error);
@@ -1827,16 +1827,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const userId = req.user.id;
       const logoUrl = `/uploads/${req.file.filename}`;
-      
+
       // Get user's business profile
       const profile = await storage.getUserBusinessProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: 'Business profile not found' });
       }
-      
+
       // Update business profile logo
       await storage.updateBusinessProfile(profile.id, { logo: logoUrl });
-      
+
       res.json({ logoUrl });
     } catch (error) {
       console.error('Error uploading business logo:', error);
@@ -1870,18 +1870,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const creatorId = parseInt(req.params.id);
       const postData = req.body;
-      
+
       // Verify the creator belongs to the authenticated user
       const creator = await storage.getContentCreator(creatorId);
       if (!creator || creator.userId !== req.user.id) {
         return res.status(403).json({ message: "Unauthorized" });
       }
-      
+
       const post = await storage.createSocialMediaPost({
         ...postData,
         creatorId
       });
-      
+
       res.status(201).json(post);
     } catch (error) {
       console.error("Error creating social media post:", error);
@@ -1893,17 +1893,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/youtube/video', async (req, res) => {
     try {
       const { url } = req.query;
-      
+
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ message: "YouTube URL is required" });
       }
-      
+
       const videoData = await youtubeService.getVideoData(url);
-      
+
       if (!videoData) {
         return res.status(404).json({ message: "Video not found" });
       }
-      
+
       // Format the data for frontend consumption
       const formattedData = {
         id: videoData.id,
@@ -1918,7 +1918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         duration: youtubeService.formatDuration(videoData.duration),
         url: url
       };
-      
+
       res.json(formattedData);
     } catch (error) {
       console.error("Error fetching YouTube data:", error);
@@ -1930,17 +1930,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/youtube/channel', async (req, res) => {
     try {
       const { handle } = req.query;
-      
+
       if (!handle || typeof handle !== 'string') {
         return res.status(400).json({ message: "Channel handle is required" });
       }
-      
+
       const channelData = await youtubeService.getChannelData(handle);
-      
+
       if (!channelData) {
         return res.status(404).json({ message: "Channel not found" });
       }
-      
+
       // Format the data for frontend consumption
       const formattedData = {
         id: channelData.id,
@@ -1953,7 +1953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customUrl: channelData.customUrl,
         publishedAt: channelData.publishedAt,
       };
-      
+
       res.json(formattedData);
     } catch (error) {
       console.error("Error fetching YouTube channel data:", error);
@@ -1965,21 +1965,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/youtube/channel-videos', async (req, res) => {
     try {
       const { handle, maxResults = 5 } = req.query;
-      
+
       if (!handle || typeof handle !== 'string') {
         return res.status(400).json({ message: "Channel handle is required" });
       }
-      
+
       // Get channel ID from handle
       const channelId = await youtubeService.getChannelIdFromHandle(handle);
-      
+
       if (!channelId) {
         return res.status(404).json({ message: "Channel not found" });
       }
-      
+
       // Get latest videos
       const videos = await youtubeService.getChannelVideos(channelId, parseInt(maxResults as string));
-      
+
       res.json(videos);
     } catch (error) {
       console.error("Error fetching YouTube channel videos:", error);
@@ -1992,28 +1992,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { creatorId } = req.params;
       const { channelHandle } = req.body;
-      
+
       if (!channelHandle) {
         return res.status(400).json({ message: "Channel handle is required" });
       }
-      
+
       // Get channel ID from handle
       const channelId = await youtubeService.getChannelIdFromHandle(channelHandle);
-      
+
       if (!channelId) {
         return res.status(404).json({ message: "Channel not found" });
       }
-      
+
       // Get latest videos (limit to 5 for Recent Content)
       const videos = await youtubeService.getChannelVideos(channelId, 5);
-      
+
       if (videos.length === 0) {
         return res.status(404).json({ message: "No videos found for this channel" });
       }
-      
+
       // Clear existing posts for this creator
       await storage.clearCreatorPosts(parseInt(creatorId));
-      
+
       // Add real YouTube videos as social media posts
       for (const video of videos) {
         await storage.createSocialMediaPost({
@@ -2030,7 +2030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isSponsored: false
         });
       }
-      
+
       res.json({ message: `Successfully populated ${videos.length} videos for creator ${creatorId}` });
     } catch (error) {
       console.error("Error populating creator content:", error);
@@ -2042,17 +2042,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tiktok/user', async (req, res) => {
     try {
       const { username } = req.query;
-      
+
       if (!username || typeof username !== 'string') {
         return res.status(400).json({ message: "Username is required" });
       }
-      
+
       const userData = await tiktokService.getUserData(username);
-      
+
       if (!userData) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Format the data for frontend consumption
       const formattedData = {
         id: userData.id,
@@ -2066,7 +2066,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         likeCount: tiktokService.formatCount(userData.likeCount),
         verified: userData.verified,
       };
-      
+
       res.json(formattedData);
     } catch (error) {
       console.error("Error fetching TikTok user data:", error);
@@ -2078,21 +2078,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tiktok/videos', async (req, res) => {
     try {
       const { username, limit } = req.query;
-      
+
       if (!username || typeof username !== 'string') {
         return res.status(400).json({ message: "Username is required" });
       }
-      
+
       const videoLimit = limit ? parseInt(limit as string) : 2;
       console.log(`Processing TikTok videos request for @${username} (limit: ${videoLimit})`);
-      
+
       const videos = await tiktokService.getUserVideos(username, videoLimit);
       console.log(`TikTok service returned ${videos.length} videos for @${username}`);
-      
+
       if (videos.length === 0) {
         return res.json([]);
       }
-      
+
       // Format the data for frontend consumption with proper count formatting
       const formattedVideos = videos.map((video, index) => {
         console.log(`Formatting TikTok video ${index + 1}: ${video.title?.substring(0, 30)}...`);
@@ -2111,7 +2111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           duration: video.duration,
         };
       });
-      
+
       console.log(`Returning ${formattedVideos.length} formatted TikTok videos`);
       res.json(formattedVideos);
     } catch (error) {
@@ -2163,11 +2163,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/instagram/user', async (req, res) => {
     try {
       const { username } = req.query;
-      
+
       if (!username || typeof username !== 'string') {
         return res.status(400).json({ message: "Username is required" });
       }
-      
+
       // Return verified data for Luis Lucero's Instagram profile
       if (username === 'luislucero.03') {
         const formattedData = {
@@ -2184,13 +2184,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         return res.json(formattedData);
       }
-      
+
       const userData = await instagramService.getUserData(username);
-      
+
       if (!userData) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       const formattedData = {
         id: userData.id,
         username: userData.username,
@@ -2203,7 +2203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: userData.verified,
         isPrivate: userData.isPrivate,
       };
-      
+
       res.json(formattedData);
     } catch (error) {
       console.error("Error fetching Instagram user data:", error);
@@ -2234,7 +2234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (contentType) {
         res.setHeader('Content-Type', contentType);
       }
-      
+
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -2251,12 +2251,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     const user = await storage.getUser(req.user.id);
     if (!user?.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
     }
-    
+
     next();
   };
 
@@ -2276,20 +2276,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const user = await storage.getUser(id);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       // Get user's donations
       const donations = await storage.getUserDonations(id);
-      
+
       // Get user's campaigns
       const campaigns = await storage.getUserCampaigns(id);
-      
+
       // Get user's business profile
       const businessProfile = await storage.getUserBusinessProfile(id);
-      
+
       res.json({
         user,
         donations,
@@ -2318,10 +2318,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const transactions = await storage.getCampaignDonations(id);
-      
+
       // Get campaign details for context
       const campaign = await storage.getCampaign(id);
-      
+
       res.json({
         campaign,
         transactions
@@ -2337,7 +2337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updateData = req.body;
-      
+
       const updatedUser = await storage.updateUser(id, updateData);
       res.json(updatedUser);
     } catch (error) {
@@ -2362,13 +2362,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/ministries/pending', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Check if user is admin
       const user = await storage.getUser(userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const pendingMinistries = await storage.getPendingMinistries();
       res.json(pendingMinistries);
     } catch (error) {
@@ -2382,14 +2382,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const ministry = await storage.getMinistry(parseInt(id));
-      
+
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       // Get follower count
       const followersCount = await storage.getMinistryFollowersCount(parseInt(id));
-      
+
       res.json({
         ...ministry,
         followersCount
@@ -2404,21 +2404,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ministries', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Check if user already has a ministry profile
       const existingProfile = await storage.getUserMinistryProfile(userId);
       if (existingProfile) {
         return res.status(400).json({ message: "User already has a ministry profile" });
       }
-      
+
       const profileData = insertMinistryProfileSchema.parse(req.body);
-      
+
       const profile = await storage.createMinistryProfile({
         ...profileData,
         userId,
         isActive: false, // Require admin approval
       });
-      
+
       res.status(201).json(profile);
     } catch (error) {
       console.error("Error creating ministry profile:", error);
@@ -2434,23 +2434,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       // Check if user is admin
       const user = await storage.getUser(userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       const updatedMinistry = await storage.updateMinistryProfile(parseInt(id), {
         isActive: true,
         isVerified: true,
       });
-      
+
       res.json(updatedMinistry);
     } catch (error) {
       console.error("Error approving ministry:", error);
@@ -2463,21 +2463,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       // Check if user is admin
       const user = await storage.getUser(userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       // Delete the ministry profile
       await storage.deleteMinistryProfile(parseInt(id));
-      
+
       res.json({ message: "Ministry profile rejected and deleted" });
     } catch (error) {
       console.error("Error rejecting ministry:", error);
@@ -2492,19 +2492,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       if (ministry.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to update this ministry" });
       }
-      
+
       const updateData = insertMinistryProfileSchema.partial().parse(req.body);
       const updatedMinistry = await storage.updateMinistryProfile(parseInt(id), updateData);
-      
+
       res.json(updatedMinistry);
     } catch (error) {
       console.error("Error updating ministry:", error);
@@ -2532,16 +2532,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
-      
+
       if (!postId || isNaN(postId)) {
         return res.status(400).json({ message: "Invalid post ID" });
       }
-      
+
       const post = await storage.getMinistryPostById(postId);
       if (!post) {
         return res.status(404).json({ message: "Ministry post not found" });
       }
-      
+
       res.json(post);
     } catch (error) {
       console.error("Error fetching ministry post:", error);
@@ -2581,7 +2581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const postId = parseInt(req.params.id);
       const rsvp = await storage.getRsvpByUserAndPost(userId, postId);
-      
+
       res.json(rsvp || { status: null });
     } catch (error) {
       console.error("Error fetching RSVP:", error);
@@ -2593,7 +2593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const postId = parseInt(req.params.id);
       const rsvps = await storage.getRsvpsForPost(postId);
-      
+
       res.json(rsvps);
     } catch (error) {
       console.error("Error fetching RSVP counts:", error);
@@ -2610,7 +2610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const postId = parseInt(req.params.id);
       await storage.deleteRsvp(userId, postId);
-      
+
       res.json({ message: "RSVP removed successfully" });
     } catch (error) {
       console.error("Error removing RSVP:", error);
@@ -2622,22 +2622,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       if (ministry.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to post for this ministry" });
       }
-      
+
       const postData = insertMinistryPostSchema.parse(req.body);
       const post = await storage.createMinistryPost({
         ...postData,
         ministryId: parseInt(id)
       });
-      
+
       res.status(201).json(post);
     } catch (error) {
       console.error("Error creating ministry post:", error);
@@ -2664,22 +2664,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       if (ministry.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to create events for this ministry" });
       }
-      
+
       const eventData = insertMinistryEventSchema.parse(req.body);
       const event = await storage.createMinistryEvent({
         ...eventData,
         ministryId: parseInt(id)
       });
-      
+
       // Automatically create a ministry post for the event to appear in followers' feeds
       const eventPostContent = `📅 ${eventData.title}
 
@@ -2698,7 +2698,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         mediaUrls: eventData.flyerImage ? [eventData.flyerImage] : [],
         isPublished: true
       });
-      
+
       res.status(201).json(event);
     } catch (error) {
       console.error("Error creating ministry event:", error);
@@ -2714,17 +2714,17 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       const ministry = await storage.getMinistry(parseInt(id));
       if (!ministry) {
         return res.status(404).json({ message: "Ministry not found" });
       }
-      
+
       // Prevent users from following their own ministry
       if (ministry.userId === userId) {
         return res.status(400).json({ message: "Cannot follow your own ministry" });
       }
-      
+
       await storage.followMinistry(userId, parseInt(id));
       res.json({ message: "Successfully followed ministry" });
     } catch (error) {
@@ -2737,7 +2737,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       await storage.unfollowMinistry(userId, parseInt(id));
       res.json({ message: "Successfully unfollowed ministry" });
     } catch (error) {
@@ -2751,7 +2751,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      
+
       const isFollowing = await storage.isUserFollowingMinistry(userId, parseInt(id));
       res.json({ isFollowing });
     } catch (error) {
@@ -2887,7 +2887,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       }
 
       let importedContent;
-      
+
       switch (platform) {
         case "youtube":
           importedContent = await importYouTubeContent(url);
@@ -2921,7 +2921,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       // Use existing YouTube API service
       const videoData = await fetch(`http://localhost:5000/api/youtube/video?videoId=${videoId}`);
       const video = await videoData.json();
-      
+
       return {
         title: video.title,
         description: video.description,
@@ -3161,7 +3161,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const { id } = req.params;
       const notificationId = parseInt(id);
-      
+
       if (isNaN(notificationId)) {
         return res.status(400).json({ message: "Invalid notification ID" });
       }
@@ -3189,7 +3189,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const { id } = req.params;
       const notificationId = parseInt(id);
-      
+
       if (isNaN(notificationId)) {
         return res.status(400).json({ message: "Invalid notification ID" });
       }
@@ -3207,7 +3207,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const userId = req.user.id;
       const { message = "Test notification", type = "info" } = req.body;
-      
+
       await storage.createNotification({
         userId,
         type,
@@ -3216,7 +3216,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         relatedId: null,
         relatedType: null,
       });
-      
+
       res.json({ message: "Test notification created successfully" });
     } catch (error) {
       console.error("Error creating test notification:", error);
@@ -3228,7 +3228,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   app.post("/api/notifications/test-all", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       // Create test notifications for each type
       const testNotifications = [
         {
@@ -3272,7 +3272,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
           isRead: false,
         });
       }
-      
+
       res.json({ message: "All test notifications created successfully" });
     } catch (error) {
       console.error("Error creating test notifications:", error);
@@ -3284,7 +3284,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   app.post("/api/notifications/create-samples", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       const sampleNotifications = [
         {
           userId,
@@ -3474,26 +3474,26 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       const result = insertGroupChatMessageSchema.safeParse({
         ...req.body,
         chatId,
         userId
       });
-      
+
       if (!result.success) {
         return res.status(400).json({ 
           message: "Invalid message data", 
           errors: result.error.errors 
         });
       }
-      
+
       const message = await storage.createGroupChatMessage(result.data);
-      
+
       // Get the full message with user data for response
       const messages = await storage.getChatMessages(chatId);
       const newMessage = messages.find(m => m.id === message.id);
-      
+
       res.json(newMessage);
     } catch (error) {
       console.error("Error creating chat message:", error);
@@ -3528,13 +3528,13 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Get chat and verify user is participant
       const chat = await storage.getDirectChatById(chatId, userId);
       if (!chat) {
         return res.status(404).json({ message: "Chat not found" });
       }
-      
+
       res.json(chat);
     } catch (error) {
       console.error("Error fetching direct chat:", error);
@@ -3546,11 +3546,11 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     try {
       const userId = req.user.id;
       const { recipientId } = req.body;
-      
+
       if (!recipientId) {
         return res.status(400).json({ message: "Recipient ID is required" });
       }
-      
+
       const chat = await storage.getOrCreateDirectChat(userId, recipientId);
       res.json(chat);
     } catch (error) {
@@ -3575,21 +3575,21 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
       const { message } = req.body;
-      
+
       if (!message || !message.trim()) {
         return res.status(400).json({ message: "Message cannot be empty" });
       }
-      
+
       const newMessage = await storage.createDirectMessage({
         chatId,
         senderId: userId,
         message: message.trim()
       });
-      
+
       // Get the full message with sender data for response
       const messages = await storage.getDirectChatMessages(chatId);
       const fullMessage = messages.find(m => m.id === newMessage.id);
-      
+
       res.json(fullMessage);
     } catch (error) {
       console.error("Error creating direct message:", error);

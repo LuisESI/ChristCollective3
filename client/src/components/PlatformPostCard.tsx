@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl } from "@/lib/api-config";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { useAuthGuard } from "@/lib/auth-guard";
 // import { formatDistanceToNow } from "date-fns";
@@ -64,6 +66,13 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: post.title || "",
+    content: post.content || "",
+    tags: post.tags || [],
+  });
+  const [newTag, setNewTag] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -190,6 +199,32 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     },
   });
 
+  const editPostMutation = useMutation({
+    mutationFn: async (data: { title: string; content: string; tags: string[] }) => {
+      return await apiRequest(`/api/platform-posts/${post.id}`, {
+        method: 'PATCH',
+        data,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feed/following"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${post.userId}/posts`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}`] });
+      setShowEditModal(false);
+      toast({
+        title: "Post updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating post",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLike = () => {
     requireAuth(() => {
       likeMutation.mutate();
@@ -247,6 +282,44 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     if (confirm("Are you sure you want to delete this comment? This action cannot be undone.")) {
       deleteCommentMutation.mutate(commentId);
     }
+  };
+
+  const handleEditPost = () => {
+    setEditFormData({
+      title: post.title || "",
+      content: post.content || "",
+      tags: post.tags || [],
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editFormData.content.trim()) {
+      toast({
+        title: "Content required",
+        description: "Please enter some content for your post",
+        variant: "destructive",
+      });
+      return;
+    }
+    editPostMutation.mutate(editFormData);
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !editFormData.tags.includes(newTag.trim())) {
+      setEditFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag.trim()]
+      }));
+      setNewTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
 
@@ -341,17 +414,29 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
               {currentUserId && post.userId === currentUserId && (
-                <DropdownMenuItem 
-                  className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeletePost();
-                  }}
-                  disabled={deletePostMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Post
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem 
+                    className="text-gray-300 hover:text-white hover:bg-gray-700"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditPost();
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Post
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePost();
+                    }}
+                    disabled={deletePostMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Post
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -592,6 +677,109 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
           </div>
         )}
       </CardContent>
+
+      {/* Edit Post Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl bg-gray-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Post</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Title */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Title (Optional)</label>
+              <Input
+                value={editFormData.title}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Add a title to your post..."
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              />
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Content *</label>
+              <Textarea
+                value={editFormData.content}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="What would you like to share?"
+                rows={4}
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                required
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Tags</label>
+              <div className="flex gap-2">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add a tag..."
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addTag();
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  onClick={addTag}
+                  className="bg-gray-700 hover:bg-gray-600"
+                >
+                  Add
+                </Button>
+              </div>
+              {editFormData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {editFormData.tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-gray-700 text-white flex items-center gap-1"
+                    >
+                      #{tag}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeTag(tag)}
+                        className="p-0 h-auto text-gray-400 hover:text-white ml-1"
+                      >
+                        <span className="text-xs">×</span>
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Submit Buttons */}
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditModal(false)}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={editPostMutation.isPending}
+                className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+              >
+                {editPostMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
