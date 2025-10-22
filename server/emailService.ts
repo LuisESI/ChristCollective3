@@ -62,7 +62,7 @@ class EmailService {
       }
 
       const mailOptions = {
-        from: '"Christ Collective" <luis@christcollective.info>',
+        from: '"Christ Collective" <contact@christcollective.info>',
         to: data.recipientEmail,
         subject: 'Thank you for your donation to Christ Collective',
         html: this.generateDonationReceiptHTML(data),
@@ -138,7 +138,7 @@ class EmailService {
               <li>Fund community outreach and charitable initiatives</li>
             </ul>
             
-            <p>If you have any questions about your donation, please contact us at luis@christcollective.info.</p>
+            <p>If you have any questions about your donation, please contact us at contact@christcollective.info.</p>
             
             <p>Blessings,<br>The Christ Collective Team</p>
           </div>
@@ -180,7 +180,7 @@ Your support helps us:
 - Enable content creators to share their faith
 - Fund community outreach and charitable initiatives
 
-If you have any questions about your donation, please contact us at luis@christcollective.info.
+If you have any questions about your donation, please contact us at contact@christcollective.info.
 
 Blessings,
 The Christ Collective Team
