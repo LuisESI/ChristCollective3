@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl } from "@/lib/api-config";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
 import { useAuthGuard } from "@/lib/auth-guard";
@@ -348,7 +348,32 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         {/* Media Content - Dynamic aspect ratio like Twitter */}
         {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (
           <div className="w-full mb-3">
-            {post.mediaType === "video" ? (
+            {post.mediaType === "youtube_channel" ? (
+              <div className="w-full rounded-lg bg-gray-900 border border-gray-800 overflow-hidden">
+                <iframe
+                  src={`https://www.youtube.com/embed?listType=user_uploads&list=${post.mediaUrls[0].includes('@') ? post.mediaUrls[0].split('@')[1] : post.mediaUrls[0].split('/channel/')[1] || post.mediaUrls[0].split('/c/')[1]}`}
+                  className="w-full aspect-video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="YouTube Channel"
+                  onError={() => {
+                    console.log("YouTube iframe failed to load, showing fallback");
+                  }}
+                />
+                <div className="p-3 bg-gray-800 border-t border-gray-700">
+                  <a 
+                    href={post.mediaUrls[0]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-[#D4AF37] hover:text-[#B8941F] flex items-center gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Youtube className="w-4 h-4" />
+                    Visit YouTube Channel
+                  </a>
+                </div>
+              </div>
+            ) : post.mediaType === "video" ? (
               <video
                 controls
                 className="w-full rounded-lg bg-gray-900"
