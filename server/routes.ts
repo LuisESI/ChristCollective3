@@ -653,7 +653,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
+      console.log('PATCH /api/platform-posts/:id - Request body:', JSON.stringify(req.body));
+      console.log('PATCH /api/platform-posts/:id - Current post:', JSON.stringify(post));
+      
       const updatedPost = await storage.updatePlatformPost(postId, req.body);
+      
+      console.log('PATCH /api/platform-posts/:id - Updated post:', JSON.stringify(updatedPost));
       
       // Ensure we're returning valid JSON
       return res.status(200).json(updatedPost);
