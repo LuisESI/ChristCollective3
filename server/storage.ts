@@ -68,6 +68,9 @@ import {
   type DirectChat,
   type DirectMessage,
   type InsertDirectMessage,
+  passwordResetTokens,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -228,6 +231,12 @@ export interface IStorage {
   getDirectChatMessages(chatId: number): Promise<(DirectMessage & { sender: User })[]>;
   markDirectMessageAsRead(messageId: number): Promise<void>;
   getUnreadDirectMessagesCount(userId: string): Promise<number>;
+  
+  // Password reset token operations
+  createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markTokenAsUsed(tokenId: number): Promise<void>;
+  deleteExpiredTokens(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1947,6 +1956,37 @@ export class DatabaseStorage implements IStorage {
       actorImage: sender.profileImageUrl,
       isRead: false,
     });
+  }
+
+  // Password reset token operations
+  async createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<PasswordResetToken> {
+    const [resetToken] = await db
+      .insert(passwordResetTokens)
+      .values({ userId, token, expiresAt })
+      .returning();
+    return resetToken;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [resetToken] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token))
+      .limit(1);
+    return resetToken;
+  }
+
+  async markTokenAsUsed(tokenId: number): Promise<void> {
+    await db
+      .update(passwordResetTokens)
+      .set({ used: true })
+      .where(eq(passwordResetTokens.id, tokenId));
+  }
+
+  async deleteExpiredTokens(): Promise<void> {
+    await db
+      .delete(passwordResetTokens)
+      .where(sql`${passwordResetTokens.expiresAt} < NOW()`);
   }
 }
 
