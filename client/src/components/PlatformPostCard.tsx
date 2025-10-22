@@ -39,6 +39,26 @@ interface PlatformPostProps {
   disablePostClick?: boolean;
 }
 
+// Helper function to extract YouTube video ID from various URL formats
+const extractYouTubeVideoId = (url: string): string | null => {
+  if (!url) return null;
+  
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+};
+
 export function PlatformPostCard({ post, currentUserId, showActions = true, expandComments = false, disablePostClick = false }: PlatformPostProps) {
   const [showComments, setShowComments] = useState(expandComments);
   const [newComment, setNewComment] = useState("");
@@ -348,34 +368,73 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         {/* Media Content - Dynamic aspect ratio like Twitter */}
         {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (
           <div className="w-full mb-3">
-            {post.mediaType === "youtube_channel" ? (
-              <a 
-                href={post.mediaUrls[0]} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block w-full rounded-lg bg-gradient-to-br from-red-900/20 to-gray-900 border border-red-900/30 hover:border-red-700/50 transition-all overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="p-6 flex flex-col items-center gap-4">
-                  <div className="bg-red-600 p-4 rounded-full">
-                    <Youtube className="w-12 h-12 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold text-white mb-2">YouTube Channel</h4>
-                    <p className="text-sm text-gray-400 mb-3">Click to visit this exclusive channel</p>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors">
-                      <Youtube className="w-4 h-4" />
-                      <span className="font-medium">Open Channel</span>
+            {post.mediaType === "youtube_channel" ? (() => {
+              const videoId = extractYouTubeVideoId(post.mediaUrls[0]);
+              
+              if (videoId) {
+                // It's a YouTube video - show thumbnail with play button
+                const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                return (
+                  <a 
+                    href={post.mediaUrls[0]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block relative w-full rounded-lg overflow-hidden group"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <img
+                      src={thumbnailUrl}
+                      alt="YouTube video thumbnail"
+                      className="w-full h-auto bg-gray-900"
+                      style={{ maxHeight: '500px', objectFit: 'cover' }}
+                      onError={(e) => {
+                        // Fallback to hqdefault if maxresdefault doesn't exist
+                        const target = e.target as HTMLImageElement;
+                        if (target.src.includes('maxresdefault')) {
+                          target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                        }
+                      }}
+                    />
+                    {/* Play button overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-40 transition-all">
+                      <div className="bg-red-600 rounded-full p-6 group-hover:scale-110 transition-transform">
+                        <Youtube className="w-16 h-16 text-white" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="w-full pt-3 border-t border-gray-800">
-                    <p className="text-xs text-gray-500 truncate text-center">
-                      {post.mediaUrls[0]}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            ) : post.mediaType === "video" ? (
+                  </a>
+                );
+              } else {
+                // It's a YouTube channel - show channel card
+                return (
+                  <a 
+                    href={post.mediaUrls[0]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block w-full rounded-lg bg-gradient-to-br from-red-900/20 to-gray-900 border border-red-900/30 hover:border-red-700/50 transition-all overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="p-6 flex flex-col items-center gap-4">
+                      <div className="bg-red-600 p-4 rounded-full">
+                        <Youtube className="w-12 h-12 text-white" />
+                      </div>
+                      <div className="text-center">
+                        <h4 className="text-lg font-semibold text-white mb-2">YouTube Channel</h4>
+                        <p className="text-sm text-gray-400 mb-3">Click to visit this exclusive channel</p>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors">
+                          <Youtube className="w-4 h-4" />
+                          <span className="font-medium">Open Channel</span>
+                        </div>
+                      </div>
+                      <div className="w-full pt-3 border-t border-gray-800">
+                        <p className="text-xs text-gray-500 truncate text-center">
+                          {post.mediaUrls[0]}
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                );
+              }
+            })() : post.mediaType === "video" ? (
               <video
                 controls
                 className="w-full rounded-lg bg-gray-900"
