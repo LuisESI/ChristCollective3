@@ -29,6 +29,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";
 import AboutPage from "@/pages/AboutPage";
+import ResetPassword from "@/pages/ResetPassword";
 import FeedPage from "@/pages/FeedPage";
 import ExplorePage from "@/pages/ExplorePage";
 import CreatePage from "@/pages/CreatePage";
@@ -61,6 +62,7 @@ function Router() {
       <Route path="/" component={isMobileApp ? MobileLandingPage : HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/auth/mobile" component={MobileAuthPage} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />
