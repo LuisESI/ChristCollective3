@@ -78,7 +78,7 @@ function SponsorshipApplicationPage() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Application submission error:', errorData);
-        
+
         // Handle specific validation errors
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors.map((err: any) => 
@@ -86,7 +86,7 @@ function SponsorshipApplicationPage() {
           ).join(', ');
           throw new Error(`Validation errors: ${errorMessages}`);
         }
-        
+
         throw new Error(errorData.message || "Failed to submit application");
       }
       return response.json();
@@ -100,10 +100,10 @@ function SponsorshipApplicationPage() {
     },
     onError: (error: Error) => {
       console.error('Application submission failed:', error);
-      
+
       // Show more detailed error messages
       let description = error.message;
-      
+
       if (error.message.includes("You already have a pending sponsorship application")) {
         description = "You already have a pending application. Please wait for review before submitting another.";
       } else if (error.message.includes("Invalid data") || error.message.includes("Validation errors")) {
@@ -111,7 +111,7 @@ function SponsorshipApplicationPage() {
       } else if (error.message.includes("Authentication") || error.message.includes("Unauthorized")) {
         description = "Please log in again and try submitting your application.";
       }
-      
+
       toast({
         title: "Submission Failed",
         description,
@@ -133,7 +133,7 @@ function SponsorshipApplicationPage() {
 
     // Pre-submission validation
     const validationErrors: string[] = [];
-    
+
     // Check if all platforms have valid URLs
     data.platforms.forEach((platform, index) => {
       if (!platform.platform) {
@@ -192,7 +192,7 @@ function SponsorshipApplicationPage() {
         <title>Apply for Sponsorship | Christ Collective</title>
         <meta name="description" content="Apply to become a sponsored content creator with Christ Collective and share your faith-based content with our community." />
       </Helmet>
-      
+
       <div className="max-w-2xl mx-auto">
         <Card className="shadow-lg border-[#D4AF37]/20">
           <CardHeader className="text-center bg-gradient-to-r from-black to-gray-800 text-white rounded-t-lg">
@@ -201,7 +201,7 @@ function SponsorshipApplicationPage() {
               Join our community of faith-based content creators
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="p-8">
             {isError && error && (
               <Alert variant="destructive" className="mb-6">
@@ -229,7 +229,7 @@ function SponsorshipApplicationPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="email"
@@ -244,7 +244,7 @@ function SponsorshipApplicationPage() {
                     )}
                   />
                 </div>
-                
+
                 {/* Social Media Platforms Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -277,7 +277,7 @@ function SponsorshipApplicationPage() {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
-                      
+
                       <FormField
                         control={form.control}
                         name={`platforms.${index}.platform` as const}
@@ -292,11 +292,11 @@ function SponsorshipApplicationPage() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="YouTube">YouTube</SelectItem>
-                                <SelectItem value="Instagram">Instagram</SelectItem>
                                 <SelectItem value="TikTok">TikTok</SelectItem>
+                                <SelectItem value="Instagram">Instagram</SelectItem>
+                                <SelectItem value="Facebook">Facebook</SelectItem>
                                 <SelectItem value="Twitter">Twitter/X</SelectItem>
                                 <SelectItem value="Twitch">Twitch</SelectItem>
-                                <SelectItem value="Facebook">Facebook</SelectItem>
                                 <SelectItem value="Podcast">Podcast</SelectItem>
                                 <SelectItem value="Blog">Blog/Website</SelectItem>
                                 <SelectItem value="Other">Other</SelectItem>
@@ -306,7 +306,7 @@ function SponsorshipApplicationPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name={`platforms.${index}.profileUrl` as const}
@@ -336,7 +336,7 @@ function SponsorshipApplicationPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name={`platforms.${index}.subscriberCount` as const}
@@ -359,7 +359,7 @@ function SponsorshipApplicationPage() {
                     </div>
                   ))}
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="content"
@@ -377,7 +377,7 @@ function SponsorshipApplicationPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="audience"
@@ -391,7 +391,7 @@ function SponsorshipApplicationPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="message"

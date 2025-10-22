@@ -33,7 +33,13 @@ import {
 } from "@/components/ui/select";
 
 const platformOptions = [
-  "YouTube", "Instagram", "TikTok", "Twitter", "Facebook", "LinkedIn", "Twitch", "Podcast"
+  "YouTube",
+  "TikTok",
+  "Instagram",
+  "Facebook",
+  "Twitter",
+  "Twitch",
+  "Other",
 ];
 
 const platformSchema = z.object({
@@ -148,7 +154,7 @@ export default function CreatorProfileManagePage() {
               Back to Creators
             </Button>
           </Link>
-          
+
           <div className="flex items-center gap-6 mb-6">
             <Avatar className="w-20 h-20">
               <AvatarImage src={creatorProfile?.profileImage || ""} alt={creatorProfile?.name || "Creator"} />
@@ -156,7 +162,7 @@ export default function CreatorProfileManagePage() {
                 {creatorProfile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
               </AvatarFallback>
             </Avatar>
-            
+
             <div>
               <h1 className="text-3xl font-bold text-white dark:text-foreground">{creatorProfile?.name}</h1>
               <div className="flex items-center gap-2 mt-2">
@@ -249,7 +255,7 @@ export default function CreatorProfileManagePage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="audience"
@@ -368,7 +374,7 @@ export default function CreatorProfileManagePage() {
                                 </FormItem>
                               )}
                             />
-                            
+
                             {fields.length > 1 && (
                               <Button
                                 type="button"
