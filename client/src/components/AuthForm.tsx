@@ -219,7 +219,7 @@ export default function AuthForm() {
                     <button
                       type="button"
                       onClick={() => setShowForgotPasswordModal(true)}
-                      className="text-yellow-500 hover:text-yellow-400 text-sm font-medium"
+                      className="text-yellow-500 hover:text-yellow-400 text-sm font-medium underline"
                       data-testid="button-forgot-password"
                     >
                       Forgot Password?
