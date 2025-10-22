@@ -271,7 +271,7 @@ export const platformPosts = pgTable("platform_posts", {
   title: varchar("title"),
   content: text("content").notNull(),
   mediaUrls: text("media_urls").array(), // Array of image/video URLs
-  mediaType: varchar("media_type").notNull().default("image"), // image, video, text
+  mediaType: varchar("media_type").notNull().default("image"), // image, video, text, youtube_channel
   tags: text("tags").array(), // Array of hashtags
   isPublished: boolean("is_published").default(true),
   likesCount: integer("likes_count").default(0),

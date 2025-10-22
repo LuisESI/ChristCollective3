@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, X, Upload, Image, Video, Type } from "lucide-react";
+import { Plus, X, Upload, Image, Video, Type, Youtube } from "lucide-react";
 
 interface CreatePostModalProps {
   trigger?: React.ReactNode;
@@ -21,6 +21,7 @@ const MEDIA_TYPES = [
   { value: "image", label: "Image", icon: Image },
   { value: "video", label: "Video", icon: Video },
   { value: "text", label: "Text Only", icon: Type },
+  { value: "youtube_channel", label: "YouTube Channel", icon: Youtube },
 ];
 
 export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps) {
@@ -253,7 +254,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
           {/* Media Type */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-white">Media Type</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {MEDIA_TYPES.map((type) => {
                 const Icon = type.icon;
                 return (
@@ -282,56 +283,68 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
           {formData.mediaType !== "text" && (
             <div className="space-y-3">
               <label className="text-sm font-medium text-white">
-                Upload {formData.mediaType === "image" ? "Image" : "Video"}
+                {formData.mediaType === "youtube_channel" 
+                  ? "YouTube Channel Link" 
+                  : `Upload ${formData.mediaType === "image" ? "Image" : "Video"}`}
               </label>
               
-              {/* File Upload Area */}
-              <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-400 mb-2">
-                  Click to upload or drag and drop your {formData.mediaType}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {formData.mediaType === "image" ? "PNG, JPG, GIF up to 10MB" : "MP4, MOV up to 100MB"}
-                </p>
-                <input
-                  type="file"
-                  accept={formData.mediaType === "image" ? "image/*" : "video/*"}
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      // In a real app, you'd upload the file to a storage service
-                      // For now, we'll use a placeholder URL
-                      const fileUrl = URL.createObjectURL(file);
-                      setFormData(prev => ({
-                        ...prev,
-                        mediaUrls: [...prev.mediaUrls, fileUrl]
-                      }));
-                    }
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2 border-gray-600 text-gray-300 hover:bg-gray-800"
-                  onClick={(e) => {
-                    const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
-                    input?.click();
-                  }}
-                >
-                  Choose File
-                </Button>
-              </div>
+              {/* File Upload Area - Only for Image/Video, not YouTube Channel */}
+              {formData.mediaType !== "youtube_channel" && (
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-400 mb-2">
+                    Click to upload or drag and drop your {formData.mediaType}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {formData.mediaType === "image" ? "PNG, JPG, GIF up to 10MB" : "MP4, MOV up to 100MB"}
+                  </p>
+                  <input
+                    type="file"
+                    accept={formData.mediaType === "image" ? "image/*" : "video/*"}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        // In a real app, you'd upload the file to a storage service
+                        // For now, we'll use a placeholder URL
+                        const fileUrl = URL.createObjectURL(file);
+                        setFormData(prev => ({
+                          ...prev,
+                          mediaUrls: [...prev.mediaUrls, fileUrl]
+                        }));
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 border-gray-600 text-gray-300 hover:bg-gray-800"
+                    onClick={(e) => {
+                      const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
+                      input?.click();
+                    }}
+                  >
+                    Choose File
+                  </Button>
+                </div>
+              )}
 
-              {/* Alternative: Add Media URL */}
+              {/* Add Media URL */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-400">Or add media URL:</label>
+                <label className="text-xs font-medium text-gray-400">
+                  {formData.mediaType === "youtube_channel" 
+                    ? "Enter your YouTube channel URL:" 
+                    : "Or add media URL:"}
+                </label>
                 <div className="flex gap-2">
                   <Input
                     value={newMediaUrl}
                     onChange={(e) => setNewMediaUrl(e.target.value)}
-                    placeholder={`https://example.com/${formData.mediaType === "image" ? "image.jpg" : "video.mp4"}`}
+                    placeholder={
+                      formData.mediaType === "youtube_channel" 
+                        ? "https://www.youtube.com/@yourchannel or https://www.youtube.com/channel/UCxxx..."
+                        : `https://example.com/${formData.mediaType === "image" ? "image.jpg" : "video.mp4"}`
+                    }
                     className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
                   />
                   <Button
@@ -351,7 +364,15 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                   <div className="grid gap-3">
                     {formData.mediaUrls.map((url, index) => (
                       <div key={index} className="relative bg-gray-800 rounded-lg overflow-hidden">
-                        {formData.mediaType === "video" ? (
+                        {formData.mediaType === "youtube_channel" ? (
+                          <div className="p-4 flex items-center gap-3">
+                            <Youtube className="w-8 h-8 text-red-500" />
+                            <div className="flex-1">
+                              <p className="text-sm text-white font-medium">YouTube Channel</p>
+                              <p className="text-xs text-gray-400 truncate">{url}</p>
+                            </div>
+                          </div>
+                        ) : formData.mediaType === "video" ? (
                           <video
                             controls
                             className="w-full max-h-64 object-contain"
@@ -384,12 +405,14 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                           <X className="w-4 h-4" />
                         </Button>
                         
-                        {/* URL display */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2">
-                          <p className="text-xs text-gray-300 truncate">
-                            {url}
-                          </p>
-                        </div>
+                        {/* URL display - Only for non-YouTube channel */}
+                        {formData.mediaType !== "youtube_channel" && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2">
+                            <p className="text-xs text-gray-300 truncate">
+                              {url}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
