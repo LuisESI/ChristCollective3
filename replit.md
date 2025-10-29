@@ -102,3 +102,39 @@ Secure password reset functionality with email-based token verification. Users c
 ### Known Limitations
 -   Old sessions are not automatically invalidated when password is reset (MemoryStore limitation)
 -   New login session is created after reset, but existing sessions remain valid until expiry
+
+## Mobile Session Management (Capacitor WebView Fix)
+### Overview
+Capacitor's WebView doesn't reliably persist HTTP-only cookies, which broke session management for the mobile app. Implemented a custom session header solution that works across both web and mobile platforms.
+
+### Implementation
+**Backend Changes:**
+- Modified `/api/login` and `/api/register` endpoints to return `sessionId` in response
+- Added middleware to accept `X-Session-ID` custom header and restore sessions from session store
+- Updated CORS to allow `X-Session-ID` header from mobile origins
+
+**Frontend Changes:**
+- Store `sessionId` in `localStorage` when login/register succeeds
+- Send `X-Session-ID` header with all API requests (GET and POST)
+- Clear `sessionId` from `localStorage` on logout
+
+### Authentication Flow
+1. **Login/Register**: Backend creates session, returns `sessionId` in response body
+2. **Client Storage**: Frontend stores `sessionId` in `localStorage`
+3. **Subsequent Requests**: All API calls include `X-Session-ID` header
+4. **Session Restoration**: Backend middleware checks for header, loads session from store
+5. **Logout**: Frontend clears `localStorage`, backend destroys session
+
+### Mobile Auth Consistency
+Both web and mobile authentication now use the same flow:
+- Login/register redirect to "/" (home page) after 400ms delay
+- MobileLandingPage automatically redirects mobile users to "/feed"
+- This ensures proper session propagation before navigation
+
+### Debugging
+Server logs show session flow:
+- `✅ Login successful for: [username]` - Login succeeded
+- `📝 Session ID: [id]` - Session created  
+- `📱 Mobile app session ID detected: [id]` - Session ID received via header
+- `✅ Session restored from header for user: [username]` - Session successfully restored
+- `❌ User not authenticated` - Session not found or invalid

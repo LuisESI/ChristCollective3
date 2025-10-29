@@ -32,7 +32,7 @@ export default function MobileAuthPage() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      setLocation("/feed");
+      setLocation("/");
     }
   }, [isLoading, user, setLocation]);
 
@@ -50,13 +50,11 @@ export default function MobileAuthPage() {
     
     loginMutation.mutate(loginData, {
       onSuccess: () => {
-        console.log("Login successful - session cookie should be set");
-        toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in",
-        });
-        // Don't navigate manually - let useEffect handle it when user state updates
-        // This ensures proper session propagation for mobile apps
+        console.log("Login successful");
+        // Delay navigation to ensure session is set and auth context updates
+        setTimeout(() => {
+          setLocation("/");
+        }, 400);
       },
       onError: (error: any) => {
         console.error("Login failed:", error);
@@ -99,15 +97,18 @@ export default function MobileAuthPage() {
         description: "Your account has been created successfully",
       });
       
-      if (registerData.userType === "creator") {
-        setLocation("/creator-profile");
-      } else if (registerData.userType === "business_owner") {
-        setLocation("/business");
-      } else if (registerData.userType === "ministry") {
-        setLocation("/ministry-profile");
-      } else {
-        setLocation("/feed");
-      }
+      // Delay navigation to ensure session is set
+      setTimeout(() => {
+        if (registerData.userType === "creator") {
+          setLocation("/creator-profile");
+        } else if (registerData.userType === "business_owner") {
+          setLocation("/business");
+        } else if (registerData.userType === "ministry") {
+          setLocation("/ministry-profile");
+        } else {
+          setLocation("/");
+        }
+      }, 400);
     } catch (error: any) {
       console.error("Registration failed:", error);
       toast({
