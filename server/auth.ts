@@ -73,7 +73,7 @@ export function setupAuth(app: Express) {
       httpOnly: true, // Secure cookie, not accessible via JavaScript
       secure: true, // Always use secure cookies (Replit is always HTTPS)
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
-      sameSite: 'none', // 'none' for cross-origin (required for mobile app)
+      sameSite: 'lax', // Changed from 'none' to 'lax' for better browser compatibility
       path: '/', // Ensure cookie is available for all paths
     },
   };
@@ -133,8 +133,12 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    console.log("🔐 Serializing user:", user.id);
+    done(null, user.id);
+  });
   passport.deserializeUser(async (id: string, done) => {
+    console.log("🔓 Deserializing user ID:", id);
     const user = await storage.getUser(id);
     done(null, user);
   });
