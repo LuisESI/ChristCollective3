@@ -179,15 +179,26 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json({ 
-          id: user.id, 
-          username: user.username, 
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-          isAdmin: user.isAdmin,
-          sessionId: req.sessionID // Return session ID for mobile apps
+        
+        // Force session to save to the store before responding
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Session creation failed" });
+          }
+          
+          console.log("💾 Registration session saved for:", user.username);
+          
+          res.status(201).json({ 
+            id: user.id, 
+            username: user.username, 
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            isAdmin: user.isAdmin,
+            sessionId: req.sessionID // Return session ID for mobile apps
+          });
         });
       });
     } catch (error) {
@@ -222,22 +233,32 @@ export function setupAuth(app: Express) {
           console.error("Login error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
-        const userData = user as SelectUser;
         
-        // Debug logging for mobile session issues
-        console.log("✅ Login successful for:", userData.username);
-        console.log("📝 Session ID:", req.sessionID);
-        console.log("🍪 Session cookie set:", req.session.cookie);
-        
-        res.status(200).json({ 
-          id: userData.id, 
-          username: userData.username, 
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          phone: userData.phone,
-          isAdmin: userData.isAdmin,
-          sessionId: req.sessionID // Return session ID for mobile apps
+        // Force session to save to the store before responding
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Session creation failed" });
+          }
+          
+          const userData = user as SelectUser;
+          
+          // Debug logging for mobile session issues
+          console.log("✅ Login successful for:", userData.username);
+          console.log("📝 Session ID:", req.sessionID);
+          console.log("💾 Session saved to store");
+          console.log("🍪 Session cookie set:", req.session.cookie);
+          
+          res.status(200).json({ 
+            id: userData.id, 
+            username: userData.username, 
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            phone: userData.phone,
+            isAdmin: userData.isAdmin,
+            sessionId: req.sessionID // Return session ID for mobile apps
+          });
         });
       });
     })(req, res, next);
@@ -367,17 +388,31 @@ export function setupAuth(app: Express) {
             autoLoginFailed: true
           });
         }
-        res.json({ 
-          message: "Password reset successfully",
-          user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            phone: user.phone,
-            isAdmin: user.isAdmin
+        
+        // Force session to save to the store before responding
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error after password reset:", saveErr);
+            return res.json({ 
+              message: "Password reset successfully. Please log in with your new password.",
+              autoLoginFailed: true
+            });
           }
+          
+          console.log("💾 Password reset session saved for:", user.username);
+          
+          res.json({ 
+            message: "Password reset successfully",
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              phone: user.phone,
+              isAdmin: user.isAdmin
+            }
+          });
         });
       });
     } catch (error) {
