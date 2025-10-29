@@ -192,6 +192,12 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ message: "Login failed" });
         }
         const userData = user as SelectUser;
+        
+        // Debug logging for mobile session issues
+        console.log("✅ Login successful for:", userData.username);
+        console.log("📝 Session ID:", req.sessionID);
+        console.log("🍪 Session cookie set:", req.session.cookie);
+        
         res.status(200).json({ 
           id: userData.id, 
           username: userData.username, 
@@ -349,8 +355,17 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Debug logging for mobile session issues
+    console.log("🔍 /api/user request - Session ID:", req.sessionID);
+    console.log("🔍 Authenticated:", req.isAuthenticated());
+    console.log("🔍 Cookies received:", req.headers.cookie ? "Yes" : "No");
+    
+    if (!req.isAuthenticated()) {
+      console.log("❌ User not authenticated, returning 401");
+      return res.sendStatus(401);
+    }
     const sessionUser = req.user as SelectUser;
+    console.log("✅ Authenticated user:", sessionUser.username);
     
     // Fetch fresh user data from database to ensure we have the latest updates
     try {
