@@ -106,10 +106,8 @@ export function setupAuth(app: Express) {
         if (session) {
           console.log("✅ Session restored from header for user:", session.passport?.user);
           req.session = session;
-          req.session.touch();
-          store.set(sessionId, req.session, (err: any) => {
-            if (err) console.error("Error saving session:", err);
-          });
+          // Note: session loaded from store is a plain object, doesn't have touch() method
+          // The session will be saved automatically by the session middleware
         } else {
           console.log("⚠️ No session found for ID:", sessionId);
           (req as any).sessionID = originalSessionID;
