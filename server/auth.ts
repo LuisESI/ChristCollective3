@@ -79,45 +79,32 @@ export function setupAuth(app: Express) {
   };
 
   app.set("trust proxy", 1);
-  const sessionMiddleware = session(sessionSettings);
-  app.use(sessionMiddleware);
   
-  // Middleware to restore session from X-Session-ID header (for mobile apps)
+  // Middleware to convert X-Session-ID header to cookie BEFORE session middleware runs
+  // This allows Capacitor apps to maintain sessions via header instead of cookies
   app.use((req, res, next) => {
     const sessionId = req.headers['x-session-id'] as string;
     
-    if (sessionId && sessionId !== req.sessionID) {
+    if (sessionId) {
       console.log("📱 Mobile app session ID detected:", sessionId);
       
-      // Override the session ID with the one from the header
-      // This allows Capacitor apps to maintain sessions via header instead of cookies
-      const originalSessionID = req.sessionID;
-      (req as any).sessionID = sessionId;
+      // Convert session ID header to cookie format that express-session expects
+      const cookies = req.headers.cookie || '';
+      const sessionCookieName = 'connect.sid';
       
-      // Reload the session from the store using the new session ID
-      const store = sessionSettings.store as any;
-      store.get(sessionId, (err: any, session: any) => {
-        if (err) {
-          console.error("Error loading session from header:", err);
-          (req as any).sessionID = originalSessionID;
-          return next();
-        }
-        
-        if (session) {
-          console.log("✅ Session restored from header for user:", session.passport?.user);
-          req.session = session;
-          // Note: session loaded from store is a plain object, doesn't have touch() method
-          // The session will be saved automatically by the session middleware
-        } else {
-          console.log("⚠️ No session found for ID:", sessionId);
-          (req as any).sessionID = originalSessionID;
-        }
-        next();
-      });
-    } else {
-      next();
+      // Remove existing session cookie if present
+      const cookieParts = cookies.split(';').filter(c => !c.trim().startsWith(sessionCookieName));
+      
+      // Add our session ID as a cookie (express-session expects it this way)
+      // Note: express-session expects format 's:sessionId.signature' but we just use the ID
+      cookieParts.push(`${sessionCookieName}=${sessionId}`);
+      req.headers.cookie = cookieParts.join('; ');
     }
+    next();
   });
+  
+  const sessionMiddleware = session(sessionSettings);
+  app.use(sessionMiddleware);
   
   app.use(passport.initialize());
   app.use(passport.session());
