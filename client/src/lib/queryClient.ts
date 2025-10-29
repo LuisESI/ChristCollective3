@@ -36,6 +36,12 @@ export async function apiRequest(
     if (data) {
       headers['Content-Type'] = 'application/json';
     }
+    
+    // Add session ID header for mobile apps
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) {
+      headers['X-Session-ID'] = sessionId;
+    }
 
     const fullUrl = buildApiUrl(url);
     const res = await fetch(fullUrl, {
@@ -92,11 +98,19 @@ export const getQueryFn: <T>(options: {
 
       try {
         const fullUrl = buildApiUrl(url as string);
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        // Add session ID header for mobile apps
+        const sessionId = localStorage.getItem('sessionId');
+        if (sessionId) {
+          headers['X-Session-ID'] = sessionId;
+        }
+        
         const res = await fetch(fullUrl, {
           credentials: "include",
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           cache: 'no-cache',
         });
 

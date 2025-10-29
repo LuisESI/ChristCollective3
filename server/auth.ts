@@ -79,7 +79,48 @@ export function setupAuth(app: Express) {
   };
 
   app.set("trust proxy", 1);
-  app.use(session(sessionSettings));
+  const sessionMiddleware = session(sessionSettings);
+  app.use(sessionMiddleware);
+  
+  // Middleware to restore session from X-Session-ID header (for mobile apps)
+  app.use((req, res, next) => {
+    const sessionId = req.headers['x-session-id'] as string;
+    
+    if (sessionId && sessionId !== req.sessionID) {
+      console.log("📱 Mobile app session ID detected:", sessionId);
+      
+      // Override the session ID with the one from the header
+      // This allows Capacitor apps to maintain sessions via header instead of cookies
+      const originalSessionID = req.sessionID;
+      (req as any).sessionID = sessionId;
+      
+      // Reload the session from the store using the new session ID
+      const store = sessionSettings.store as any;
+      store.get(sessionId, (err: any, session: any) => {
+        if (err) {
+          console.error("Error loading session from header:", err);
+          (req as any).sessionID = originalSessionID;
+          return next();
+        }
+        
+        if (session) {
+          console.log("✅ Session restored from header for user:", session.passport?.user);
+          req.session = session;
+          req.session.touch();
+          store.set(sessionId, req.session, (err: any) => {
+            if (err) console.error("Error saving session:", err);
+          });
+        } else {
+          console.log("⚠️ No session found for ID:", sessionId);
+          (req as any).sessionID = originalSessionID;
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+  
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -156,7 +197,8 @@ export function setupAuth(app: Express) {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
-          isAdmin: user.isAdmin 
+          isAdmin: user.isAdmin,
+          sessionId: req.sessionID // Return session ID for mobile apps
         });
       });
     } catch (error) {
@@ -205,7 +247,8 @@ export function setupAuth(app: Express) {
           firstName: userData.firstName,
           lastName: userData.lastName,
           phone: userData.phone,
-          isAdmin: userData.isAdmin 
+          isAdmin: userData.isAdmin,
+          sessionId: req.sessionID // Return session ID for mobile apps
         });
       });
     })(req, res, next);

@@ -64,7 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user: any) => {
+      // Store session ID for mobile apps
+      if (user.sessionId) {
+        localStorage.setItem('sessionId', user.sessionId);
+        console.log('📱 Session ID stored:', user.sessionId);
+      }
+      
       queryClient.setQueryData(["/api/user"], user);
       // Mobile apps need longer delay for cross-origin session cookie propagation
       const delay = isNativeApp() ? 1000 : 300;
@@ -96,7 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return await response.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user: any) => {
+      // Store session ID for mobile apps
+      if (user.sessionId) {
+        localStorage.setItem('sessionId', user.sessionId);
+        console.log('📱 Session ID stored:', user.sessionId);
+      }
+      
       queryClient.setQueryData(["/api/user"], user);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setTimeout(() => {
@@ -121,6 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("/api/logout", { method: "POST" });
     },
     onSuccess: () => {
+      // Clear session ID for mobile apps
+      localStorage.removeItem('sessionId');
+      
       // Clear all cached data
       queryClient.clear();
       queryClient.setQueryData(["/api/user"], null);
@@ -134,6 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 500);
     },
     onError: (error: Error) => {
+      // Clear session ID for mobile apps
+      localStorage.removeItem('sessionId');
+      
       // Even if logout fails on server, clear local data
       queryClient.clear();
       queryClient.setQueryData(["/api/user"], null);
