@@ -127,6 +127,12 @@ Capacitor's WebView doesn't reliably persist HTTP-only cookies, which broke sess
 4. **Session Restoration**: Backend middleware checks for header, loads session from store
 5. **Logout**: Frontend clears `localStorage`, backend destroys session
 
+### Session Configuration
+- **saveUninitialized: false** - Prevents creating empty sessions on every request (critical for preventing immediate logout)
+- **resave: false** - Only saves sessions when they change
+- **rolling: true** - Refreshes session expiration on each authenticated request
+- **maxAge: 1 year** - Sessions persist for 1 year or until explicit logout
+
 ### Authentication Flow Consolidation
 All login entry points now use a unified authentication system:
 - **Single Auth Surface**: All pages redirect unauthenticated users to `/auth` (web) or `/auth/mobile` (native)

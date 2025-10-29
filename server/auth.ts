@@ -63,8 +63,8 @@ export function setupAuth(app: Express) {
   
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'christ-collective-secret-2024',
-    resave: true, // Force session save even if unmodified
-    saveUninitialized: true, // Save uninitialized sessions
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session until something stored
     rolling: true, // Reset expiration on each request
     store: new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
