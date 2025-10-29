@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { apiRequest, getQueryFn, queryClient } from "../lib/queryClient";
 import { useToast } from "./use-toast";
+import { isNativeApp } from "@/lib/platform";
 
 import { User } from "@shared/schema";
 
@@ -65,11 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
-      // Add delay to ensure session cookie is set before refetching
+      // Mobile apps need longer delay for cross-origin session cookie propagation
+      const delay = isNativeApp() ? 1000 : 300;
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         refetch(); 
-      }, 300);
+      }, delay);
     },
     onError: (error: Error) => {
       toast({

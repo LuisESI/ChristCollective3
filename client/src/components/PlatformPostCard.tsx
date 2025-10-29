@@ -523,14 +523,14 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 controls
                 className="w-full rounded-lg bg-gray-900"
                 style={{ maxHeight: '500px' }}
-                poster={post.mediaUrls[0]}
+                poster={buildApiUrl(post.mediaUrls[0])}
               >
-                <source src={post.mediaUrls[0]} type="video/mp4" />
+                <source src={buildApiUrl(post.mediaUrls[0])} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             ) : (
               <img
-                src={post.mediaUrls[0]}
+                src={buildApiUrl(post.mediaUrls[0])}
                 alt={post.title || "Post media"}
                 className="w-full rounded-lg bg-gray-900"
                 style={{ maxHeight: '500px', objectFit: 'cover' }}

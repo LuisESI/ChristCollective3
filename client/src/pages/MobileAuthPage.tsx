@@ -50,15 +50,13 @@ export default function MobileAuthPage() {
     
     loginMutation.mutate(loginData, {
       onSuccess: () => {
-        console.log("Login successful");
+        console.log("Login successful - session cookie should be set");
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in",
         });
-        // Delay navigation to ensure session cookie is set and auth context updates
-        setTimeout(() => {
-          setLocation("/feed");
-        }, 400);
+        // Don't navigate manually - let useEffect handle it when user state updates
+        // This ensures proper session propagation for mobile apps
       },
       onError: (error: any) => {
         console.error("Login failed:", error);
