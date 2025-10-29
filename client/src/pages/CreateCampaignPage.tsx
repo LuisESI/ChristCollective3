@@ -64,7 +64,7 @@ export default function CreateCampaignPage() {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
-      navigate(`${authRoute}?redirect=/create-campaign`);
+      navigate(`${authRoute}?redirect=/donate/create`);
     }
   }, [isLoading, isAuthenticated, navigate]);
 

@@ -140,7 +140,7 @@ All login entry points now use a unified authentication system:
 **Protected Pages with Auth Guards**:
 - ExplorePage → `/auth?redirect=/explore`
 - ProfilePage (own profile) → `/auth?redirect=/profile`
-- CreateCampaignPage → `/auth?redirect=/create-campaign`
+- CreateCampaignPage → `/auth?redirect=/donate/create`
 - ConnectPage → `/auth?redirect=/connect`
 
 ### Debugging
