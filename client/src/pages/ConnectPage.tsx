@@ -31,7 +31,7 @@ import {
   Calendar
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
-import AuthForm from "@/components/AuthForm";
+import { isNativeApp } from "@/lib/platform";
 
 const createQueueSchema = insertGroupChatQueueSchema.extend({
   minPeople: z.coerce.number().min(2, "Minimum 2 people").max(12, "Maximum 12 people"),
@@ -49,7 +49,7 @@ const intentionOptions = [
 ];
 
 export default function ConnectPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -238,9 +238,13 @@ export default function ConnectPage() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  if (!user) {
-    return <AuthForm />;
-  }
+  // Redirect to auth page if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
+      navigate(`${authRoute}?redirect=/connect`);
+    }
+  }, [isLoading, user, navigate]);
 
   return (
     <div className="min-h-screen bg-black text-white">

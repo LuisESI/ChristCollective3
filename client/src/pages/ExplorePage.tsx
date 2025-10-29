@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, TrendingUp, Users, DollarSign, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import AuthForm from "@/components/AuthForm";
+import { isNativeApp } from "@/lib/platform";
 
 export default function ExplorePage() {
   const { user, isLoading } = useAuth();
@@ -16,10 +16,13 @@ export default function ExplorePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Show auth form if not authenticated
-  if (!isLoading && !user) {
-    return <AuthForm />;
-  }
+  // Redirect to auth page if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
+      navigate(`${authRoute}?redirect=/explore`);
+    }
+  }, [isLoading, user, navigate]);
 
   const { data: campaigns, isLoading: campaignsLoading } = useQuery({
     queryKey: ["/api/campaigns"],

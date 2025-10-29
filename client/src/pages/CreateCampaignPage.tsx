@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useLocation } from "wouter";
+import { useState, useRef, useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageIcon, Upload, X } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { isNativeApp } from "@/lib/platform";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -59,25 +60,13 @@ export default function CreateCampaignPage() {
   const [videoUrl, setVideoUrl] = useState<string>("");
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user is authenticated
-  if (!isLoading && !isAuthenticated) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
-          <p className="text-gray-600 mb-6">
-            You need to be logged in to create a campaign.
-          </p>
-          <a 
-            href="/api/login"
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            Sign In to Continue
-          </a>
-        </div>
-      </div>
-    );
-  }
+  // Redirect to auth page if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
+      navigate(`${authRoute}?redirect=/create-campaign`);
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

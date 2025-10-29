@@ -34,10 +34,10 @@ Preferred communication style: Simple, everyday language.
 -   Platform detects environment (iOS/Android app vs. web browser) for tailored UX.
 -   Mobile app features a dedicated mobile authentication flow, hidden footer, and bottom navigation.
 -   Consistent black/gold color scheme (`#D4AF37`) for branding across the application.
--   Reusable AuthForm component with white/gold design for authentication pages.
+-   Unified authentication system using AuthExperience component with platform-specific layouts (desktop and mobile variants).
 
 ### Key Features
--   **Authentication System**: Local username/password, session-based, admin roles, profile management, password reset via email with secure token-based flow.
+-   **Unified Authentication System**: Single consolidated auth flow for all entry points. Local username/password, session-based, admin roles, profile management, password reset via email with secure token-based flow. All unauthenticated pages redirect to `/auth` (web) or `/auth/mobile` (native app) with query parameter support for post-login redirect.
 -   **Campaign Management**: Creation, editing, media uploads, goal tracking, admin approval, search/filtering.
 -   **Payment Processing**: Stripe integration for donations and membership subscriptions.
 -   **Business Networking**: Business profiles, membership tiers, industry-based filtering.
@@ -96,7 +96,9 @@ Secure password reset functionality with email-based token verification. Users c
 -   `POST /api/auth/reset-password`: Validates token, updates password, creates session
 
 ### Frontend Components
--   **AuthForm**: Contains "Forgot Password?" button and modal dialog
+-   **AuthExperience**: Shared authentication component with desktop and mobile variants, contains login/register forms and "Forgot Password?" modal
+-   **AuthPage**: Desktop authentication page at `/auth` route
+-   **MobileAuthPage**: Mobile authentication page at `/auth/mobile` route  
 -   **ResetPassword**: Dedicated page for password reset with dual password fields
 
 ### Known Limitations
@@ -125,11 +127,21 @@ Capacitor's WebView doesn't reliably persist HTTP-only cookies, which broke sess
 4. **Session Restoration**: Backend middleware checks for header, loads session from store
 5. **Logout**: Frontend clears `localStorage`, backend destroys session
 
-### Mobile Auth Consistency
-Both web and mobile authentication now use the same flow:
-- Login/register redirect to "/" (home page) after 400ms delay
-- MobileLandingPage automatically redirects mobile users to "/feed"
-- This ensures proper session propagation before navigation
+### Authentication Flow Consolidation
+All login entry points now use a unified authentication system:
+- **Single Auth Surface**: All pages redirect unauthenticated users to `/auth` (web) or `/auth/mobile` (native)
+- **Redirect Query Parameters**: Pages pass `?redirect=/path` to return users to their intended destination after login (e.g., `/auth?redirect=/create-campaign`)
+- **Consistent Login Flow**: AuthPage and MobileAuthPage both use AuthExperience component, ensuring identical authentication logic
+- **Platform Detection**: System automatically routes to appropriate auth page based on `isNativeApp()` detection
+- **Loading Guards**: All protected pages check `isLoading` before redirecting to prevent spurious redirects during auth query loading
+- **Post-Login Navigation**: After successful login, users are redirected to the `redirect` query parameter or "/" (home page) by default
+- **Session Propagation**: 400ms delay after login ensures session is set before navigation
+
+**Protected Pages with Auth Guards**:
+- ExplorePage → `/auth?redirect=/explore`
+- ProfilePage (own profile) → `/auth?redirect=/profile`
+- CreateCampaignPage → `/auth?redirect=/create-campaign`
+- ConnectPage → `/auth?redirect=/connect`
 
 ### Debugging
 Server logs show session flow:
