@@ -99,10 +99,10 @@ export function setupAuth(app: Express) {
       const cookieParts = cookies.split(';').filter(c => !c.trim().startsWith(sessionCookieName));
       
       // Add our session ID as a cookie (express-session expects it this way)
-      // express-session expects format 's:sessionId.signature' for signed cookies
-      // We need the 's:' prefix to indicate it's signed
-      cookieParts.push(`${sessionCookieName}=s:${sessionId}`);
+      // We send the raw session ID - express-session will handle unsigned sessions
+      cookieParts.push(`${sessionCookieName}=${sessionId}`);
       req.headers.cookie = cookieParts.join('; ');
+      console.log("   📝 Cookie string:", req.headers.cookie);
       console.log("   ✅ Session header converted to cookie");
     } else if (hasCookie) {
       console.log("🍪 Browser cookie detected (no session header)");
@@ -112,6 +112,17 @@ export function setupAuth(app: Express) {
   
   const sessionMiddleware = session(sessionSettings);
   app.use(sessionMiddleware);
+  
+  // Debug middleware - log session info after session middleware runs
+  app.use((req, res, next) => {
+    if (req.headers['x-session-id']) {
+      console.log("   🔍 After session middleware:");
+      console.log("   - req.sessionID:", req.sessionID);
+      console.log("   - req.session exists:", !!req.session);
+      console.log("   - req.session.passport:", (req.session as any)?.passport);
+    }
+    next();
+  });
   
   app.use(passport.initialize());
   app.use(passport.session());
