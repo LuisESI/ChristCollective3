@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGuard } from "@/lib/auth-guard";
+import { getImageUrl } from "@/lib/api-config";
 
 interface MinistryPostCardProps {
   post: MinistryPost & {
@@ -141,7 +142,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             <Card className="h-full bg-black border-gray-700 backdrop-blur overflow-hidden">
               <div className="relative h-full">
                 <img 
-                  src={post.mediaUrls?.[0] || ''} 
+                  src={getImageUrl(post.mediaUrls?.[0])} 
                   alt="Event flyer"
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -161,7 +162,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <div className="flex items-center space-x-2 mb-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={post.ministry?.logo} alt={post.ministry?.name} />
+                      <AvatarImage src={getImageUrl(post.ministry?.logo)} alt={post.ministry?.name} />
                       <AvatarFallback className="bg-primary text-black">
                         <Church className="h-4 w-4" />
                       </AvatarFallback>
@@ -200,7 +201,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               <CardHeader className="pb-3">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.ministry?.logo} alt={post.ministry?.name} />
+                    <AvatarImage src={getImageUrl(post.ministry?.logo)} alt={post.ministry?.name} />
                     <AvatarFallback className="bg-primary text-black">
                       <Church className="h-4 w-4" />
                     </AvatarFallback>
@@ -322,7 +323,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
         <CardHeader className="pb-3">
           <div className="flex items-start space-x-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={post.ministry?.logo} alt={post.ministry?.name} />
+              <AvatarImage src={getImageUrl(post.ministry?.logo)} alt={post.ministry?.name} />
               <AvatarFallback className="bg-primary text-black">
                 <Church className="h-4 w-4" />
               </AvatarFallback>
@@ -412,7 +413,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={post.ministry?.logo} alt={post.ministry?.name} />
+            <AvatarImage src={getImageUrl(post.ministry?.logo)} alt={post.ministry?.name} />
             <AvatarFallback className="bg-primary text-black text-sm font-bold">
               <Church className="h-4 w-4" />
             </AvatarFallback>

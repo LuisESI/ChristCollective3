@@ -172,3 +172,52 @@ Server logs show session flow:
 - `📱 Mobile app session ID detected: [id]` - Session ID received via header
 - `✅ Session restored from header for user: [username]` - Session successfully restored
 - `❌ User not authenticated` - Session not found or invalid
+
+## Media URL Handling for Mobile Apps (Oct 30, 2025)
+### Problem
+Mobile apps running in Capacitor WebView couldn't load images stored on the Replit server. Images like profile pictures, post images, and event flyers showed as broken/missing in the mobile app while working fine on the web version.
+
+### Root Cause
+- **Database Storage**: Image URLs are stored as relative paths like `/uploads/profile.jpg`
+- **Web Browsers**: Relative paths work because the frontend and backend are on the same origin
+- **Mobile Apps**: The app runs on `capacitor://` protocol, so relative paths don't resolve to the Replit server
+
+### Solution
+Created `getImageUrl()` helper function in `client/src/lib/api-config.ts`:
+- **For Web**: Returns relative paths as-is (e.g., `/uploads/image.jpg`)
+- **For Mobile**: Converts to full URLs (e.g., `https://replit-server.dev/uploads/image.jpg`)
+- **Smart Detection**: Checks if URL is already absolute (http/https) to avoid double-conversion
+
+### Implementation
+**Updated Components**:
+- `ProfilePage.tsx` - Profile pictures
+- `Header.tsx` - User avatar in header
+- `PlatformPostCard.tsx` - Post images, videos, and comment avatars
+- `MinistryPostCard.tsx` - Event flyers and ministry logos
+- `DirectChatPage.tsx` - Chat profile pictures
+
+**Usage Pattern**:
+```typescript
+import { getImageUrl } from "@/lib/api-config";
+
+// Before
+<AvatarImage src={user.profileImageUrl} />
+<img src={post.mediaUrls[0]} />
+
+// After
+<AvatarImage src={getImageUrl(user.profileImageUrl)} />
+<img src={getImageUrl(post.mediaUrls[0])} />
+```
+
+### File Serving
+- Uploaded files stored in `public/uploads` directory
+- Express static middleware serves files at `/uploads` route
+- Multer handles file uploads with generated filenames
+- All uploaded image URLs use `/uploads/` prefix pattern
+
+### Benefits
+- ✅ Images load correctly in both web and mobile apps
+- ✅ No database schema changes required
+- ✅ Backward compatible with existing image URLs
+- ✅ Automatic detection prevents duplicate URL conversion
+- ✅ Works for all media types: images, videos, avatars, event flyers

@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { buildApiUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl } from "@/lib/api-config";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
@@ -246,7 +246,7 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-start gap-6 mb-4">
             <Avatar className="w-32 h-32 ring-2 ring-gray-700">
-              <AvatarImage src={displayUser?.profileImageUrl || creator?.profileImage || ''} alt={displayUser?.firstName || displayUser?.username} />
+              <AvatarImage src={getImageUrl(displayUser?.profileImageUrl || creator?.profileImage)} alt={displayUser?.firstName || displayUser?.username} />
               <AvatarFallback className="bg-gray-800 text-white text-3xl font-bold">
                 {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>

@@ -9,6 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getImageUrl } from "@/lib/api-config";
 import { 
   ArrowLeft, 
   Send, 
@@ -170,7 +171,7 @@ export default function DirectChatPage() {
             {otherUser && (
               <>
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={otherUser.profileImageUrl || ""} />
+                  <AvatarImage src={getImageUrl(otherUser.profileImageUrl)} />
                   <AvatarFallback className="bg-[#D4AF37] text-black">
                     {otherUserName.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -215,7 +216,7 @@ export default function DirectChatPage() {
                     <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${isOwn ? "flex-row-reverse space-x-reverse" : ""}`}>
                       {!isOwn && (
                         <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarImage src={msg.sender.profileImageUrl || ""} />
+                          <AvatarImage src={getImageUrl(msg.sender.profileImageUrl)} />
                           <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
                             {(msg.sender.displayName || msg.sender.firstName || msg.sender.username).charAt(0).toUpperCase()}
                           </AvatarFallback>

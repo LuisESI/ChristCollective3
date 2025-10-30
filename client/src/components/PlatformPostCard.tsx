@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { buildApiUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl } from "@/lib/api-config";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -346,7 +346,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const getUserProfileImage = () => {
     const imageUrl = postAuthor?.profileImageUrl || "";
     console.log("Profile image URL:", imageUrl, "for user:", postAuthor?.username);
-    return imageUrl;
+    return getImageUrl(imageUrl);
   };
 
   const getUserInitials = () => {
@@ -523,14 +523,14 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 controls
                 className="w-full rounded-lg bg-gray-900"
                 style={{ maxHeight: '500px' }}
-                poster={buildApiUrl(post.mediaUrls[0])}
+                poster={getImageUrl(post.mediaUrls[0])}
               >
-                <source src={buildApiUrl(post.mediaUrls[0])} type="video/mp4" />
+                <source src={getImageUrl(post.mediaUrls[0])} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             ) : (
               <img
-                src={buildApiUrl(post.mediaUrls[0])}
+                src={getImageUrl(post.mediaUrls[0])}
                 alt={post.title || "Post media"}
                 className="w-full rounded-lg bg-gray-900"
                 style={{ maxHeight: '500px', objectFit: 'cover' }}
@@ -628,7 +628,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                     className="flex gap-2 items-start group hover:bg-gray-800/30 rounded-md p-1 -m-1 transition-colors"
                   >
                     <Avatar className="w-6 h-6">
-                      <AvatarImage src={comment.user?.profileImageUrl} alt={comment.user?.firstName} />
+                      <AvatarImage src={getImageUrl(comment.user?.profileImageUrl)} alt={comment.user?.firstName} />
                       <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
                         {comment.user?.firstName?.[0] || comment.user?.username?.[0] || "U"}
                       </AvatarFallback>

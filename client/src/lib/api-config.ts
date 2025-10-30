@@ -26,3 +26,27 @@ export function buildApiUrl(path: string): string {
   
   return `${baseUrl}${normalizedPath}`;
 }
+
+/**
+ * Convert image URL to full URL for mobile apps
+ * - Web: returns the URL as-is (relative paths work)
+ * - Mobile: prepends backend URL to relative paths
+ */
+export function getImageUrl(imageUrl: string | null | undefined): string {
+  if (!imageUrl) return '';
+  
+  // If already a full URL (http/https), return as-is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // For mobile apps, convert relative paths to full URLs
+  if (isNativeApp()) {
+    const baseUrl = getApiBaseUrl();
+    const normalizedPath = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+    return `${baseUrl}${normalizedPath}`;
+  }
+  
+  // For web, return relative path as-is
+  return imageUrl;
+}
