@@ -47,6 +47,7 @@ import EditMinistryProfilePage from "@/pages/EditMinistryProfilePage";
 import EventCreatePage from "@/pages/EventCreatePage";
 import PostPage from "@/pages/PostPage";
 import DirectChatPage from "@/pages/DirectChatPage";
+import DebugAuthPage from "@/pages/DebugAuthPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -103,6 +104,7 @@ function Router() {
       <Route path="/chat/:id" component={ChatRoom} />
       <Route path="/direct-chat/:chatId" component={DirectChatPage} />
       <Route path="/notifications" component={NotificationsPage} />
+      <Route path="/debug-auth" component={DebugAuthPage} />
 
       <Route path="/privacy-settings" component={PrivacySettingsPage} />
       <Route component={NotFound} />
