@@ -11,6 +11,7 @@ import { ContentCreator, SocialMediaPost } from "@shared/schema";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
+import { buildApiUrl } from "@/lib/api-config";
 
 interface CreatorWithPosts extends ContentCreator {
   posts?: SocialMediaPost[];
@@ -23,7 +24,9 @@ export default function CreatorProfilePage() {
   const { data: creator, isLoading, error } = useQuery<CreatorWithPosts>({
     queryKey: ['/api/content-creators', id],
     queryFn: async () => {
-      const response = await fetch(`/api/content-creators/${id}`);
+      const response = await fetch(buildApiUrl(`/api/content-creators/${id}`), {
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to fetch creator');
       return response.json();
     }
@@ -34,7 +37,9 @@ export default function CreatorProfilePage() {
     queryKey: ['/api/users', creator?.userId, 'stats'],
     queryFn: async () => {
       if (!creator?.userId) return null;
-      const response = await fetch(`/api/users/${creator.userId}/stats`);
+      const response = await fetch(buildApiUrl(`/api/users/${creator.userId}/stats`), {
+        credentials: 'include',
+      });
       if (!response.ok) return null;
       return response.json();
     },

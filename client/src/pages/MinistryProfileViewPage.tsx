@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { MinistryProfile, MinistryEvent } from "@shared/schema";
+import { buildApiUrl } from "@/lib/api-config";
 
 export default function MinistryProfileViewPage() {
   const [match, params] = useRoute("/ministry/:id");
@@ -35,7 +36,9 @@ export default function MinistryProfileViewPage() {
   const { data: ministry, isLoading } = useQuery({
     queryKey: ["/api/ministries", ministryId],
     queryFn: async () => {
-      const response = await fetch(`/api/ministries/${ministryId}`);
+      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}`), {
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error("Ministry not found");
       return response.json();
     },
@@ -46,7 +49,9 @@ export default function MinistryProfileViewPage() {
   const { data: events = [], isLoading: isLoadingEvents } = useQuery({
     queryKey: ["/api/ministries", ministryId, "events"],
     queryFn: async () => {
-      const response = await fetch(`/api/ministries/${ministryId}/events?t=${Date.now()}`);
+      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/events?t=${Date.now()}`), {
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
@@ -59,7 +64,9 @@ export default function MinistryProfileViewPage() {
   const { data: currentUser } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const response = await fetch("/api/user");
+      const response = await fetch(buildApiUrl("/api/user"), {
+        credentials: 'include',
+      });
       if (!response.ok) return null;
       return response.json();
     },
@@ -70,7 +77,9 @@ export default function MinistryProfileViewPage() {
     queryKey: ["/api/ministries", ministryId, "following"],
     queryFn: async () => {
       if (!currentUser || !ministryId) return false;
-      const response = await fetch(`/api/ministries/${ministryId}/following`);
+      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/following`), {
+        credentials: 'include',
+      });
       if (!response.ok) return false;
       const data = await response.json();
       return data.isFollowing;
@@ -81,9 +90,10 @@ export default function MinistryProfileViewPage() {
   // Follow/unfollow mutations
   const followMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/ministries/${ministryId}/follow`, {
+      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/follow`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to follow ministry');
       return response.json();
@@ -106,9 +116,10 @@ export default function MinistryProfileViewPage() {
 
   const unfollowMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/ministries/${ministryId}/follow`, {
+      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/follow`), {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to unfollow ministry');
       return response.json();

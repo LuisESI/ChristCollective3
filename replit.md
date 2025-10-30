@@ -1,55 +1,51 @@
 # Christ Collective - Replit Project Documentation
 
 ## Overview
-Christ Collective is a full-stack web application aimed at uniting Christians globally through faith, community, and collaborative purpose. The platform enables donations to charitable campaigns, fosters business networking among Christian professionals, and provides sponsorship opportunities for Christian content creators. It is designed to be a comprehensive solution for community building, fundraising, and professional connections within the Christian community.
+Christ Collective is a full-stack web application designed to unite Christians globally through faith, community, and collaborative purpose. The platform facilitates donations to charitable campaigns, fosters business networking among Christian professionals, and provides sponsorship opportunities for Christian content creators. It aims to be a comprehensive solution for community building, fundraising, and professional connections within the Christian community, featuring a unified authentication system, campaign management, payment processing via Stripe, business networking, a content creator platform with social media integration, and an administrative dashboard.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
-### Frontend
+### UI/UX Decisions
+The platform detects the environment (iOS/Android app vs. web browser) for tailored user experience. Mobile apps feature a dedicated authentication flow, hidden footer, and bottom navigation. A consistent black/gold color scheme (`#D4AF37`) is used for branding. A unified authentication system leverages an `AuthExperience` component with platform-specific layouts.
+
+### Technical Implementations
+**Frontend:**
 -   **Framework**: React 18 with TypeScript
 -   **Build Tool**: Vite
 -   **Styling**: Tailwind CSS with shadcn/ui and Radix UI
 -   **Routing**: Wouter
 -   **State Management**: TanStack Query (React Query)
 -   **Forms**: React Hook Form with Zod validation
+-   **Mobile Optimization**: Capacitor for platform detection and UI adjustments. `getImageUrl()` helper function for correct media loading on mobile. `buildApiUrl()` and `credentials: 'include'` for API calls on mobile profile pages.
 
-### Backend
+**Backend:**
 -   **Runtime**: Node.js with Express.js
 -   **Language**: TypeScript
 -   **Authentication**: Passport.js (local strategy, session-based)
--   **Session Storage**: Express sessions with PostgreSQL store
--   **API Integration**: YouTube, TikTok, Instagram APIs
--   **Email Service**: Resend (production), Ethereal (development) for transactional emails
--   **File Uploads**: Multer
+-   **Session Storage**: Express sessions with PostgreSQL store, enhanced for Capacitor WebView by returning `sessionId` in login/register responses and using a custom `X-Session-ID` header for mobile. Session configuration includes `saveUninitialized: false`, `resave: false`, `rolling: true`, `maxAge: 1 year`, `httpOnly: true`, and `secure: production only`.
+-   **File Uploads**: Multer, with files served from `public/uploads` via Express static middleware.
+-   **Password Reset**: Secure, email-based token verification using 32-byte cryptographically secure tokens, SHA256 hashing for storage, 1-hour expiry, and one-time use.
 
-### Data Storage
+**Data Storage:**
 -   **Database**: PostgreSQL (Neon serverless hosting)
 -   **ORM**: Drizzle ORM
 -   **Migrations**: Drizzle Kit
 -   **Connection**: @neondatabase/serverless for connection pooling
 
-### UI/UX Decisions
--   Platform detects environment (iOS/Android app vs. web browser) for tailored UX.
--   Mobile app features a dedicated mobile authentication flow, hidden footer, and bottom navigation.
--   Consistent black/gold color scheme (`#D4AF37`) for branding across the application.
--   Unified authentication system using AuthExperience component with platform-specific layouts (desktop and mobile variants).
-
-### Key Features
--   **Unified Authentication System**: Single consolidated auth flow for all entry points. Local username/password, session-based, admin roles, profile management, password reset via email with secure token-based flow. All unauthenticated pages redirect to `/auth` (web) or `/auth/mobile` (native app) with query parameter support for post-login redirect.
+### Feature Specifications
+-   **Unified Authentication System**: Centralized login/registration, session-based, admin roles, profile management, password reset. Unauthenticated pages redirect to `/auth` (web) or `/auth/mobile` (native app) with query parameter support for post-login redirect.
 -   **Campaign Management**: Creation, editing, media uploads, goal tracking, admin approval, search/filtering.
 -   **Payment Processing**: Stripe integration for donations and membership subscriptions.
 -   **Business Networking**: Business profiles, membership tiers, industry-based filtering.
 -   **Content Creator Platform**: Creator profiles, social media integration (YouTube, TikTok, Instagram verification), sponsorship applications.
--   **Platform Posts**: Users can create posts with multiple media types (image, video, text, YouTube channel links). YouTube channel posts display as clickable cards that open the channel in a new tab, perfect for sharing exclusive or unlisted channels with the community.
+-   **Platform Posts**: Users can create posts with multiple media types (image, video, text, YouTube channel links).
 -   **Administrative Dashboard**: Campaign/user management, donation tracking, sponsorship review.
--   **Notification System**: Real-time notifications for user interactions (follows, likes, comments, chat), with read/unread status and smart self-notification prevention.
--   **Mobile Optimization**: Capacitor platform detection, mobile-optimized authentication flow, safe area padding, and specific UI adjustments for mobile devices.
+-   **Notification System**: Real-time notifications with read/unread status.
 
-### Deployment Strategy
--   **Development**: Local environment with HMR, SQLite/PostgreSQL, Vite dev server.
--   **Production**: Optimized static assets, Express server, automatic database migrations, environment-specific configuration.
+### System Design Choices
+-   **Deployment**: Development uses local environment with HMR, Vite dev server. Production uses optimized static assets, Express server, automatic database migrations, and environment-specific configuration.
 -   **Database Management**: Drizzle migrations, automated backups, connection pooling, query optimization.
 
 ## External Dependencies
@@ -58,166 +54,3 @@ Preferred communication style: Simple, everyday language.
 -   **Email Services**: Resend (production & development), Ethereal (development fallback)
 -   **UI and Styling**: Tailwind CSS, shadcn/ui, Radix UI, Lucide React (icons)
 -   **Development Tools**: TypeScript, ESLint, Prettier, Vite
-
-## Password Reset Feature
-### Overview
-Secure password reset functionality with email-based token verification. Users can request a password reset link from the login page, receive an email with a secure token, and set a new password which automatically logs them in.
-
-### Security Implementation
--   **Token Generation**: 32-byte cryptographically secure random tokens using `crypto.randomBytes`
--   **Token Storage**: Tokens are hashed with SHA256 before database storage to prevent compromise if database is accessed
--   **Token Expiry**: Reset tokens expire after 1 hour
--   **One-Time Use**: Tokens are marked as used after successful password reset
--   **URL Safety**: Tokens are URL-encoded in email links to prevent truncation issues
--   **Email Verification**: Password reset only works for registered email addresses (with anti-enumeration protection)
-
-### Database Schema
-`passwordResetTokens` table:
--   `id`: Serial primary key
--   `userId`: Reference to users table
--   `email`: User's email address
--   `token`: SHA256-hashed reset token
--   `expiresAt`: Token expiration timestamp (1 hour from creation)
--   `used`: Boolean flag to prevent token reuse
-
-### User Flow
-1. User clicks "Forgot Password?" on login page
-2. User enters email address in modal dialog
-3. System generates secure token, hashes it, stores it in database
-4. Email sent with reset link containing plaintext token
-5. User clicks link, navigated to `/reset-password?token=xxx`
-6. User enters new password (6+ characters) twice
-7. System validates token (hashes incoming token, checks database)
-8. Password updated, token marked as used, user automatically logged in
-9. User redirected to feed page
-
-### API Endpoints
--   `POST /api/auth/forgot-password`: Accepts email, generates token, sends reset email
--   `POST /api/auth/reset-password`: Validates token, updates password, creates session
-
-### Frontend Components
--   **AuthExperience**: Shared authentication component with desktop and mobile variants, contains login/register forms and "Forgot Password?" modal
--   **AuthPage**: Desktop authentication page at `/auth` route
--   **MobileAuthPage**: Mobile authentication page at `/auth/mobile` route  
--   **ResetPassword**: Dedicated page for password reset with dual password fields
-
-### Known Limitations
--   Old sessions are not automatically invalidated when password is reset (MemoryStore limitation)
--   New login session is created after reset, but existing sessions remain valid until expiry
-
-## Mobile Session Management (Capacitor WebView Fix)
-### Overview
-Capacitor's WebView doesn't reliably persist HTTP-only cookies, which broke session management for the mobile app. Implemented a custom session header solution that works across both web and mobile platforms.
-
-### Implementation
-**Backend Changes:**
-- Modified `/api/login` and `/api/register` endpoints to return `sessionId` in response
-- Added middleware to accept `X-Session-ID` custom header and restore sessions from session store
-- Updated CORS to allow `X-Session-ID` header from mobile origins
-
-**Frontend Changes:**
-- Store `sessionId` in `localStorage` when login/register succeeds
-- Send `X-Session-ID` header with all API requests (GET and POST)
-- Clear `sessionId` from `localStorage` on logout
-
-### Authentication Flow
-1. **Login/Register**: Backend creates session using `req.session.save()` to ensure persistence, returns `sessionId` in response body
-2. **Client Storage**: Frontend stores `sessionId` in `localStorage` (for mobile apps)
-3. **Subsequent Requests**: 
-   - Mobile apps: Send `X-Session-ID` header with stored sessionId
-   - Web browsers: Send standard session cookies automatically
-4. **Session Restoration**: 
-   - Backend middleware converts X-Session-ID header to cookie format for mobile
-   - Standard cookie sessions work for web browsers
-5. **Logout**: Frontend clears `localStorage`, backend destroys session
-
-### Critical Auth Fixes (Oct 30, 2025)
-**Problem:** Users logging in for 2-3 seconds then immediately logged out
-**Root Cause:** Race condition - after login, frontend was calling `refetch()` with 300ms-1000ms delay, which created a NEW session instead of using the logged-in session
-**Solution:** 
-- Removed unnecessary `refetch()` call after login - immediately use user data from login response
-- Added `req.session.save()` callback to ensure session is persisted before responding
-- Improved session debugging with detailed logs
-
-### Session Configuration
-- **saveUninitialized: false** - Prevents creating empty sessions on every request (critical for preventing immediate logout)
-- **resave: false** - Only saves sessions when they change
-- **rolling: true** - Refreshes session expiration on each authenticated request
-- **maxAge: 1 year** - Sessions persist for 1 year or until explicit logout
-- **httpOnly: true** - Prevents XSS attacks by blocking JavaScript access to session cookies
-- **secure: production only** - Enforces HTTPS cookies in production, allows HTTP in development
-- **sameSite: 'lax'** - Allows cookies for same-site requests (frontend/backend on same domain)
-- **domain: undefined** - Let browser determine correct domain for maximum compatibility
-
-### Authentication Flow Consolidation
-All login entry points now use a unified authentication system:
-- **Single Auth Surface**: All pages redirect unauthenticated users to `/auth` (web) or `/auth/mobile` (native)
-- **Redirect Query Parameters**: Pages pass `?redirect=/path` to return users to their intended destination after login (e.g., `/auth?redirect=/create-campaign`)
-- **Consistent Login Flow**: AuthPage and MobileAuthPage both use AuthExperience component, ensuring identical authentication logic
-- **Platform Detection**: System automatically routes to appropriate auth page based on `isNativeApp()` detection
-- **Loading Guards**: All protected pages check `isLoading` before redirecting to prevent spurious redirects during auth query loading
-- **Post-Login Navigation**: After successful login, users are redirected to the `redirect` query parameter or "/" (home page) by default
-- **Session Propagation**: 400ms delay after login ensures session is set before navigation
-
-**Protected Pages with Auth Guards**:
-- ExplorePage → `/auth?redirect=/explore`
-- ProfilePage (own profile) → `/auth?redirect=/profile`
-- CreateCampaignPage → `/auth?redirect=/donate/create`
-- ConnectPage → `/auth?redirect=/connect`
-
-### Debugging
-Server logs show session flow:
-- `✅ Login successful for: [username]` - Login succeeded
-- `📝 Session ID: [id]` - Session created  
-- `📱 Mobile app session ID detected: [id]` - Session ID received via header
-- `✅ Session restored from header for user: [username]` - Session successfully restored
-- `❌ User not authenticated` - Session not found or invalid
-
-## Media URL Handling for Mobile Apps (Oct 30, 2025)
-### Problem
-Mobile apps running in Capacitor WebView couldn't load images stored on the Replit server. Images like profile pictures, post images, and event flyers showed as broken/missing in the mobile app while working fine on the web version.
-
-### Root Cause
-- **Database Storage**: Image URLs are stored as relative paths like `/uploads/profile.jpg`
-- **Web Browsers**: Relative paths work because the frontend and backend are on the same origin
-- **Mobile Apps**: The app runs on `capacitor://` protocol, so relative paths don't resolve to the Replit server
-
-### Solution
-Created `getImageUrl()` helper function in `client/src/lib/api-config.ts`:
-- **For Web**: Returns relative paths as-is (e.g., `/uploads/image.jpg`)
-- **For Mobile**: Converts to full URLs (e.g., `https://replit-server.dev/uploads/image.jpg`)
-- **Smart Detection**: Checks if URL is already absolute (http/https) to avoid double-conversion
-
-### Implementation
-**Updated Components**:
-- `ProfilePage.tsx` - Profile pictures
-- `Header.tsx` - User avatar in header
-- `PlatformPostCard.tsx` - Post images, videos, and comment avatars
-- `MinistryPostCard.tsx` - Event flyers and ministry logos
-- `DirectChatPage.tsx` - Chat profile pictures
-
-**Usage Pattern**:
-```typescript
-import { getImageUrl } from "@/lib/api-config";
-
-// Before
-<AvatarImage src={user.profileImageUrl} />
-<img src={post.mediaUrls[0]} />
-
-// After
-<AvatarImage src={getImageUrl(user.profileImageUrl)} />
-<img src={getImageUrl(post.mediaUrls[0])} />
-```
-
-### File Serving
-- Uploaded files stored in `public/uploads` directory
-- Express static middleware serves files at `/uploads` route
-- Multer handles file uploads with generated filenames
-- All uploaded image URLs use `/uploads/` prefix pattern
-
-### Benefits
-- ✅ Images load correctly in both web and mobile apps
-- ✅ No database schema changes required
-- ✅ Backward compatible with existing image URLs
-- ✅ Automatic detection prevents duplicate URL conversion
-- ✅ Works for all media types: images, videos, avatars, event flyers

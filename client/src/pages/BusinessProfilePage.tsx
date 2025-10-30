@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Globe, Phone, Mail, Calendar, Users, Star } from "lucide-react";
 import { BusinessProfile } from "@shared/schema";
+import { buildApiUrl } from "@/lib/api-config";
 
 export default function BusinessProfilePage() {
   const { id } = useParams();
@@ -14,7 +15,9 @@ export default function BusinessProfilePage() {
   const { data: profile, isLoading, error } = useQuery<BusinessProfile>({
     queryKey: ["/api/business-profiles", id],
     queryFn: async () => {
-      const response = await fetch(`/api/business-profiles/${id}`);
+      const response = await fetch(buildApiUrl(`/api/business-profiles/${id}`), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch business profile');
       }
