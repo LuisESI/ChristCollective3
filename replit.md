@@ -121,17 +121,33 @@ Capacitor's WebView doesn't reliably persist HTTP-only cookies, which broke sess
 - Clear `sessionId` from `localStorage` on logout
 
 ### Authentication Flow
-1. **Login/Register**: Backend creates session, returns `sessionId` in response body
-2. **Client Storage**: Frontend stores `sessionId` in `localStorage`
-3. **Subsequent Requests**: All API calls include `X-Session-ID` header
-4. **Session Restoration**: Backend middleware checks for header, loads session from store
+1. **Login/Register**: Backend creates session using `req.session.save()` to ensure persistence, returns `sessionId` in response body
+2. **Client Storage**: Frontend stores `sessionId` in `localStorage` (for mobile apps)
+3. **Subsequent Requests**: 
+   - Mobile apps: Send `X-Session-ID` header with stored sessionId
+   - Web browsers: Send standard session cookies automatically
+4. **Session Restoration**: 
+   - Backend middleware converts X-Session-ID header to cookie format for mobile
+   - Standard cookie sessions work for web browsers
 5. **Logout**: Frontend clears `localStorage`, backend destroys session
+
+### Critical Auth Fixes (Oct 30, 2025)
+**Problem:** Users logging in for 2-3 seconds then immediately logged out
+**Root Cause:** Race condition - after login, frontend was calling `refetch()` with 300ms-1000ms delay, which created a NEW session instead of using the logged-in session
+**Solution:** 
+- Removed unnecessary `refetch()` call after login - immediately use user data from login response
+- Added `req.session.save()` callback to ensure session is persisted before responding
+- Improved session debugging with detailed logs
 
 ### Session Configuration
 - **saveUninitialized: false** - Prevents creating empty sessions on every request (critical for preventing immediate logout)
 - **resave: false** - Only saves sessions when they change
 - **rolling: true** - Refreshes session expiration on each authenticated request
 - **maxAge: 1 year** - Sessions persist for 1 year or until explicit logout
+- **httpOnly: true** - Prevents XSS attacks by blocking JavaScript access to session cookies
+- **secure: production only** - Enforces HTTPS cookies in production, allows HTTP in development
+- **sameSite: 'lax'** - Allows cookies for same-site requests (frontend/backend on same domain)
+- **domain: undefined** - Let browser determine correct domain for maximum compatibility
 
 ### Authentication Flow Consolidation
 All login entry points now use a unified authentication system:
