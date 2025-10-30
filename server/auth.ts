@@ -99,8 +99,9 @@ export function setupAuth(app: Express) {
       const cookieParts = cookies.split(';').filter(c => !c.trim().startsWith(sessionCookieName));
       
       // Add our session ID as a cookie (express-session expects it this way)
-      // Note: express-session expects format 's:sessionId.signature' but we just use the ID
-      cookieParts.push(`${sessionCookieName}=${sessionId}`);
+      // express-session expects format 's:sessionId.signature' for signed cookies
+      // We need the 's:' prefix to indicate it's signed
+      cookieParts.push(`${sessionCookieName}=s:${sessionId}`);
       req.headers.cookie = cookieParts.join('; ');
       console.log("   ✅ Session header converted to cookie");
     } else if (hasCookie) {
