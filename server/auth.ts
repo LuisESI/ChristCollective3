@@ -61,14 +61,16 @@ function hashResetToken(token: string): string {
 export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   
+  const sessionStore = new MemoryStore({
+    checkPeriod: 86400000, // prune expired entries every 24h
+  });
+  
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'christ-collective-secret-2024',
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session until something stored
     rolling: true, // Reset expiration on each request
-    store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    }),
+    store: sessionStore,
     cookie: {
       httpOnly: true, // Secure cookie - prevent XSS attacks
       secure: process.env.NODE_ENV === 'production', // Only enforce secure in production
@@ -81,47 +83,45 @@ export function setupAuth(app: Express) {
 
   app.set("trust proxy", 1);
   
-  // Middleware to convert X-Session-ID header to cookie BEFORE session middleware runs
-  // This allows Capacitor apps to maintain sessions via header instead of cookies
-  app.use((req, res, next) => {
-    const sessionId = req.headers['x-session-id'] as string;
-    const hasCookie = !!req.headers.cookie;
-    
-    if (sessionId) {
-      console.log("📱 Mobile session detected - ID:", sessionId);
-      console.log("   Browser cookie present:", hasCookie);
-      
-      // Convert session ID header to cookie format that express-session expects
-      const cookies = req.headers.cookie || '';
-      const sessionCookieName = 'connect.sid';
-      
-      // Remove existing session cookie if present
-      const cookieParts = cookies.split(';').filter(c => !c.trim().startsWith(sessionCookieName));
-      
-      // Add our session ID as a cookie (express-session expects it this way)
-      // We send the raw session ID - express-session will handle unsigned sessions
-      cookieParts.push(`${sessionCookieName}=${sessionId}`);
-      req.headers.cookie = cookieParts.join('; ');
-      console.log("   📝 Cookie string:", req.headers.cookie);
-      console.log("   ✅ Session header converted to cookie");
-    } else if (hasCookie) {
-      console.log("🍪 Browser cookie detected (no session header)");
-    }
-    next();
-  });
-  
   const sessionMiddleware = session(sessionSettings);
   app.use(sessionMiddleware);
   
-  // Debug middleware - log session info after session middleware runs
+  // Middleware to manually restore mobile sessions from store
+  // This runs AFTER express-session middleware to override any new sessions it created
   app.use((req, res, next) => {
-    if (req.headers['x-session-id']) {
-      console.log("   🔍 After session middleware:");
-      console.log("   - req.sessionID:", req.sessionID);
-      console.log("   - req.session exists:", !!req.session);
-      console.log("   - req.session.passport:", (req.session as any)?.passport);
+    const mobileSessionId = req.headers['x-session-id'] as string;
+    
+    if (!mobileSessionId) {
+      // Regular browser request - let express-session handle it
+      return next();
     }
-    next();
+    
+    console.log("📱 Mobile session detected - ID:", mobileSessionId);
+    
+    // Manually load session from store
+    sessionStore.get(mobileSessionId, (err, sessionData) => {
+      if (err) {
+        console.error("   ❌ Error loading session from store:", err);
+        return next();
+      }
+      
+      if (!sessionData) {
+        console.log("   ⚠️  Session not found in store - creating new session");
+        return next();
+      }
+      
+      console.log("   ✅ Session loaded from store");
+      console.log("   - Passport data:", (sessionData as any).passport);
+      
+      // Replace the auto-generated session with our stored session
+      req.sessionID = mobileSessionId;
+      Object.assign(req.session, sessionData);
+      
+      // Mark session as loaded from mobile header
+      (req.session as any)._loadedFromMobile = true;
+      
+      next();
+    });
   });
   
   app.use(passport.initialize());
