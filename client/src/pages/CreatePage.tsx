@@ -23,6 +23,19 @@ import { Helmet } from "react-helmet";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { isNativeApp } from "@/lib/platform";
 
+type CreateOption = {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  color: string;
+  bgColor: string;
+  href: string;
+  badge: string | null;
+  userType: string;
+  action?: string;
+};
+
 export default function CreatePage() {
   const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
@@ -59,7 +72,7 @@ export default function CreatePage() {
   }
 
   // Base options available to all regular users
-  const baseCreateOptions = [
+  const baseCreateOptions: CreateOption[] = [
     {
       id: "campaign",
       title: "Create Campaign",
@@ -69,8 +82,7 @@ export default function CreatePage() {
       bgColor: "bg-red-500",
       href: "/donate/create",
       badge: "Popular",
-      userType: "all",
-      action: undefined
+      userType: "all"
     },
     {
       id: "creator",
@@ -81,8 +93,7 @@ export default function CreatePage() {
       bgColor: "bg-purple-500",
       href: "/creators/profile/manage",
       badge: null,
-      userType: "all",
-      action: undefined
+      userType: "all"
     },
     {
       id: "business",
@@ -93,8 +104,7 @@ export default function CreatePage() {
       bgColor: "bg-blue-500",
       href: "/business/create",
       badge: null,
-      userType: "all",
-      action: undefined
+      userType: "all"
     },
     {
       id: "ministry",
@@ -105,8 +115,7 @@ export default function CreatePage() {
       bgColor: "bg-green-500",
       href: "/ministry/create",
       badge: null,
-      userType: "all",
-      action: undefined
+      userType: "all"
     },
     {
       id: "post",
@@ -123,7 +132,7 @@ export default function CreatePage() {
   ];
 
   // Additional options for creator profiles
-  const creatorOnlyOptions = [
+  const creatorOnlyOptions: CreateOption[] = [
     {
       id: "share-social",
       title: "Share Social Media Content",
@@ -139,7 +148,7 @@ export default function CreatePage() {
   ];
 
   // Additional options for ministry profiles
-  const ministryOnlyOptions = [
+  const ministryOnlyOptions: CreateOption[] = [
     {
       id: "create-event",
       title: "Create Event",
@@ -149,8 +158,7 @@ export default function CreatePage() {
       bgColor: "bg-green-600",
       href: "/events/create",
       badge: "Ministry Only",
-      userType: "ministry",
-      action: undefined
+      userType: "ministry"
     }
   ];
 

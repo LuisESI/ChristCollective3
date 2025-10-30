@@ -532,7 +532,7 @@ export default function ConnectPage() {
                   {queues.map((queue) => {
                     const intentionInfo = getIntentionInfo(queue.intention);
                     const Icon = intentionInfo.icon;
-                    const isOwner = queue.creatorId === user.id;
+                    const isOwner = queue.creatorId === user?.id;
                     const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
                     // Check if user is already a member of this queue
                     const isMember = joinedQueues.has(queue.id);
