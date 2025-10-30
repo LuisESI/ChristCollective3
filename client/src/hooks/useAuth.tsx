@@ -68,16 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store session ID for mobile apps
       if (user.sessionId) {
         localStorage.setItem('sessionId', user.sessionId);
-        console.log('📱 Session ID stored:', user.sessionId);
+        console.log('📱 Session ID stored in localStorage:', user.sessionId);
       }
       
+      // Immediately set user data - no need to refetch since we already have fresh data
       queryClient.setQueryData(["/api/user"], user);
-      // Mobile apps need longer delay for cross-origin session cookie propagation
-      const delay = isNativeApp() ? 1000 : 300;
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-        refetch(); 
-      }, delay);
+      console.log('✅ Login successful, user data cached:', user.username);
     },
     onError: (error: Error) => {
       toast({
@@ -106,14 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store session ID for mobile apps
       if (user.sessionId) {
         localStorage.setItem('sessionId', user.sessionId);
-        console.log('📱 Session ID stored:', user.sessionId);
+        console.log('📱 Session ID stored in localStorage:', user.sessionId);
       }
       
+      // Immediately set user data - no need to refetch since we already have fresh data
       queryClient.setQueryData(["/api/user"], user);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setTimeout(() => {
-        refetch();
-      }, 100);
+      console.log('✅ Registration successful, user data cached:', user.username);
+      
       toast({
         title: "Account created!",
         description: "Welcome to Christ Collective.",

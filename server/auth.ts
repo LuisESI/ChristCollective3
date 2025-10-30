@@ -70,11 +70,12 @@ export function setupAuth(app: Express) {
       checkPeriod: 86400000, // prune expired entries every 24h
     }),
     cookie: {
-      httpOnly: true, // Secure cookie, not accessible via JavaScript
-      secure: true, // Always use secure cookies (Replit is always HTTPS)
+      httpOnly: true, // Secure cookie - prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only enforce secure in production
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - persistent until explicit logout
-      sameSite: 'lax', // Changed from 'none' to 'lax' for better browser compatibility
+      sameSite: 'lax', // Lax for same-site requests (frontend/backend on same domain)
       path: '/', // Ensure cookie is available for all paths
+      domain: undefined, // Let browser determine correct domain
     },
   };
 
@@ -84,9 +85,11 @@ export function setupAuth(app: Express) {
   // This allows Capacitor apps to maintain sessions via header instead of cookies
   app.use((req, res, next) => {
     const sessionId = req.headers['x-session-id'] as string;
+    const hasCookie = !!req.headers.cookie;
     
     if (sessionId) {
-      console.log("📱 Mobile app session ID detected:", sessionId);
+      console.log("📱 Mobile session detected - ID:", sessionId);
+      console.log("   Browser cookie present:", hasCookie);
       
       // Convert session ID header to cookie format that express-session expects
       const cookies = req.headers.cookie || '';
@@ -99,6 +102,9 @@ export function setupAuth(app: Express) {
       // Note: express-session expects format 's:sessionId.signature' but we just use the ID
       cookieParts.push(`${sessionCookieName}=${sessionId}`);
       req.headers.cookie = cookieParts.join('; ');
+      console.log("   ✅ Session header converted to cookie");
+    } else if (hasCookie) {
+      console.log("🍪 Browser cookie detected (no session header)");
     }
     next();
   });
@@ -422,17 +428,27 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", async (req, res) => {
-    // Debug logging for mobile session issues
-    console.log("🔍 /api/user request - Session ID:", req.sessionID);
-    console.log("🔍 Authenticated:", req.isAuthenticated());
-    console.log("🔍 Cookies received:", req.headers.cookie ? "Yes" : "No");
+    // Debug logging for session issues
+    const hasSessionHeader = !!req.headers['x-session-id'];
+    const hasCookie = !!req.headers.cookie;
     
-    if (!req.isAuthenticated()) {
-      console.log("❌ User not authenticated, returning 401");
+    console.log("━━━━━ /api/user Request ━━━━━");
+    console.log("Session ID:", req.sessionID);
+    console.log("Has X-Session-ID header:", hasSessionHeader);
+    console.log("Has Cookie:", hasCookie);
+    console.log("Authenticated:", req.isAuthenticated());
+    
+    if (req.isAuthenticated()) {
+      const sessionUser = req.user as SelectUser;
+      console.log("✅ User authenticated:", sessionUser.username);
+    } else {
+      console.log("❌ Not authenticated - returning 401");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
       return res.sendStatus(401);
     }
+    
     const sessionUser = req.user as SelectUser;
-    console.log("✅ Authenticated user:", sessionUser.username);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
     
     // Fetch fresh user data from database to ensure we have the latest updates
     try {
