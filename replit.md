@@ -72,34 +72,43 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 - ✅ Explore page links work properly
 - ✅ Follow/unfollow functionality works on mobile
 
-### Connect Page Black Screen Fix
+### Connect Page Black Screen Fix (FINAL FIX)
 **Problem:** After logging in through the Connect section in mobile app, users saw a black screen instead of the Connect page content.
 
-**Root Cause:** The page was rendering its full content immediately, even before authentication was verified. This caused a race condition where:
+**Root Cause:** Race condition between login navigation and React Query cache propagation:
 1. User logs in successfully
-2. Page navigates to Connect
-3. React Query is still loading user data (`isLoading = true`)
-4. Page renders empty/black content while waiting for auth check
-5. By the time auth check completes, the page has already rendered incorrectly
+2. MobileAuthPage immediately navigates to `/connect` (400ms timeout)
+3. Navigation happens BEFORE React Query propagates user data to all components
+4. ConnectPage sees `user = null` and redirects back to login
+5. Creates redirect loop or infinite loading state
 
-**Solution:** Show a proper loading state until authentication is confirmed:
-1. Wait for `isLoading` to become `false`
-2. Check if `user` exists (authenticated) or is `null` (not authenticated)
-3. Show a loading spinner while waiting for auth check to complete
-4. Only render actual page content after confirming user is authenticated
-5. Redirect to login if user is not authenticated
+**Solution:** Two-part fix to ensure React Query data is available before navigation:
 
-**Implementation:**
+**Part 1 - MobileAuthPage:** Wait for actual user data before navigating
 ```typescript
-// In ConnectPage.tsx - proper loading state
+// In MobileAuthPage.tsx
+useEffect(() => {
+  if (!isLoading && user) {
+    // Only navigate when user data is actually available
+    setLocation(redirectTo);
+  }
+}, [isLoading, user, setLocation, redirectTo]);
+
+const handleLoginSuccess = () => {
+  // Don't navigate here - let useEffect handle it when user data is ready
+  // The useEffect will trigger when React Query updates the user data
+};
+```
+
+**Part 2 - ConnectPage:** Show loading state while checking authentication
+```typescript
+// In ConnectPage.tsx
 useEffect(() => {
   if (!isLoading) {
     if (user) {
-      // User is authenticated - show content
-      setAuthCheckComplete(true);
+      setAuthCheckComplete(true); // User authenticated - show content
     } else {
-      // Not authenticated - redirect to login
-      navigate(`/auth/mobile?redirect=/connect`);
+      navigate(`/auth/mobile?redirect=/connect`); // Redirect to login
     }
   }
 }, [isLoading, user, navigate]);
@@ -108,17 +117,22 @@ useEffect(() => {
 if (!authCheckComplete || isLoading) {
   return <LoadingSpinner />;
 }
-
-// Only render content after authentication is confirmed
-return <ConnectPageContent />;
 ```
 
+**How It Works:**
+1. Login succeeds → React Query cache updates with user data
+2. MobileAuthPage's useEffect detects user is now available
+3. MobileAuthPage navigates to `/connect`
+4. ConnectPage shows loading spinner
+5. ConnectPage's useEffect confirms user exists
+6. ConnectPage renders content
+
 **Benefits:**
-- ✅ No more black screen - shows a proper loading spinner instead
-- ✅ Content only renders after authentication is confirmed
-- ✅ No reliance on sessionStorage or arbitrary timing delays
-- ✅ Works reliably in both local development and production builds
-- ✅ Simple, predictable logic that waits for actual user data
+- ✅ No more black screen or redirect loops
+- ✅ Navigation only happens when user data is actually available
+- ✅ Loading spinner provides visual feedback during auth check
+- ✅ Works reliably across all environments (dev/prod/mobile)
+- ✅ Reactive approach - waits for actual data instead of arbitrary delays
 
 ### Logout 404 Error Fix
 **Problem:** Users couldn't sign out - clicking "Log Out" led to a 404 error in mobile apps.

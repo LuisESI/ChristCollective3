@@ -13,6 +13,7 @@ export default function MobileAuthPage() {
 
   useEffect(() => {
     if (!isLoading && user) {
+      console.log('🔄 User already authenticated, redirecting to:', redirectTo);
       setLocation(redirectTo);
     }
   }, [isLoading, user, setLocation, redirectTo]);
@@ -26,10 +27,10 @@ export default function MobileAuthPage() {
   }
 
   const handleLoginSuccess = () => {
-    // Navigate to redirect URL after login
-    setTimeout(() => {
-      setLocation(redirectTo);
-    }, 400);
+    console.log('✅ Login successful, waiting for user data to propagate...');
+    // Don't navigate here - let the useEffect above handle it when user data is available
+    // The useEffect will trigger when React Query updates the user data
+    // Note: sessionStorage 'justLoggedIn' flag is set by AuthExperience component
   };
 
   return (
