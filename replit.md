@@ -54,3 +54,32 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 -   **Email Services**: Resend (production & development), Ethereal (development fallback)
 -   **UI and Styling**: Tailwind CSS, shadcn/ui, Radix UI, Lucide React (icons)
 -   **Development Tools**: TypeScript, ESLint, Prettier, Vite
+
+## Recent Fixes (Oct 31, 2025)
+
+### Profile Pages API Fix
+**Problem:** Business, ministry, and creator profiles showed "not found" errors when clicked from explore page in mobile apps.
+
+**Root Cause:** Profile pages used relative URLs (`/api/ministries/${id}`) which don't work on `capacitor://` protocol.
+
+**Solution:** Updated all profile page API calls to use `buildApiUrl()` and `credentials: 'include'`:
+- MinistryProfileViewPage
+- CreatorProfilePage  
+- BusinessProfilePage
+
+**Benefits:**
+- ✅ Profiles load correctly in both web and mobile apps
+- ✅ Explore page links work properly
+- ✅ Follow/unfollow functionality works on mobile
+
+### Connect Page Black Screen Fix
+**Problem:** After logging in through the Connect section in mobile app, users saw a black screen.
+
+**Root Cause:** Race condition - ConnectPage's auth check ran before React Query finished propagating user data after login, causing redirect loop.
+
+**Solution:** Added staged authentication check with 100ms delay to let React Query update before checking auth status.
+
+**Benefits:**
+- ✅ No more black screen after login through Connect section
+- ✅ Smooth transition from login to Connect page
+- ✅ Prevents race condition between login and auth check

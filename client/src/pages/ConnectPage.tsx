@@ -58,6 +58,7 @@ export default function ConnectPage() {
   const [joinedQueues, setJoinedQueues] = useState<Set<number>>(new Set());
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
 
   const form = useForm<CreateQueueForm>({
     resolver: zodResolver(createQueueSchema),
@@ -238,13 +239,24 @@ export default function ConnectPage() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  // Redirect to auth page if not authenticated
+  // Wait for auth to fully load before checking (prevents race condition after login)
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading) {
+      // Add a small delay to ensure React Query has fully updated after login
+      const timer = setTimeout(() => {
+        setAuthCheckComplete(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  // Redirect to auth page if not authenticated (after auth check is complete)
+  useEffect(() => {
+    if (authCheckComplete && !user) {
       const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
       navigate(`${authRoute}?redirect=/connect`);
     }
-  }, [isLoading, user, navigate]);
+  }, [authCheckComplete, user, navigate]);
 
   return (
     <div className="min-h-screen bg-black text-white">
