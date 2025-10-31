@@ -239,31 +239,34 @@ export default function ConnectPage() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  // Wait for auth to fully load before checking (prevents race condition after login)
+  // Check for fresh login flag immediately on mount (prevents race condition)
   useEffect(() => {
-    if (!isLoading) {
-      // Check if we just logged in to prevent race condition
-      const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
-      
-      if (justLoggedIn) {
-        // Clear the flag and wait longer for React Query to propagate user data
-        sessionStorage.removeItem('justLoggedIn');
-        const timer = setTimeout(() => {
-          setAuthCheckComplete(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else {
-        // Normal case - check auth immediately
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
+    
+    if (justLoggedIn) {
+      // Clear the flag and wait for React Query to propagate user data
+      sessionStorage.removeItem('justLoggedIn');
+      console.log('🔐 Fresh login detected, delaying auth check for 1000ms');
+      const timer = setTimeout(() => {
+        console.log('✅ Auth check complete after fresh login');
         setAuthCheckComplete(true);
-      }
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (!isLoading) {
+      // Normal case - check auth after loading completes
+      console.log('📋 Normal navigation, checking auth');
+      setAuthCheckComplete(true);
     }
   }, [isLoading]);
 
   // Redirect to auth page if not authenticated (after auth check is complete)
   useEffect(() => {
     if (authCheckComplete && !user) {
+      console.log('❌ Not authenticated, redirecting to login');
       const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
       navigate(`${authRoute}?redirect=/connect`);
+    } else if (authCheckComplete && user) {
+      console.log('✅ Authenticated as:', user.username);
     }
   }, [authCheckComplete, user, navigate]);
 

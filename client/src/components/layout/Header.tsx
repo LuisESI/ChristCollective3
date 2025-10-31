@@ -20,7 +20,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotificationAnimation, setShowNotificationAnimation] = useState(false);
   const [path] = useLocation();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logoutMutation } = useAuth();
   const { data: creatorStatus } = useCreatorStatus();
   const prevNotificationCount = useRef<number>(0);
   
@@ -158,8 +158,11 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem asChild>
-                  <a href="/api/logout" className="cursor-pointer w-full">Log Out</a>
+                <DropdownMenuItem 
+                  onClick={() => logoutMutation.mutate()}
+                  className="cursor-pointer"
+                >
+                  Log Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -210,12 +213,12 @@ export default function Header() {
             {user ? (
               <>
                 <hr className="border-gray-200" />
-                <a 
-                  href="/api/logout" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
+                <button 
+                  onClick={() => logoutMutation.mutate()}
+                  className="text-foreground hover:text-primary transition-colors font-medium py-2 text-left w-full"
                 >
                   Log Out
-                </a>
+                </button>
               </>
             ) : (
               <div className="flex space-x-4">

@@ -79,23 +79,26 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 
 **Solution:** Implemented sessionStorage-based login detection with staged authentication:
 1. AuthExperience sets `justLoggedIn` flag in sessionStorage on successful login
-2. ConnectPage checks for this flag on mount
+2. ConnectPage checks for this flag **immediately on mount** (before checking isLoading)
 3. If flag exists (fresh login): wait 1000ms before checking auth to allow React Query to propagate
-4. If flag doesn't exist (normal navigation): check auth immediately
+4. If flag doesn't exist (normal navigation): check auth after isLoading completes
 
 **Implementation:**
 ```typescript
 // In AuthExperience.tsx - on login success
 sessionStorage.setItem('justLoggedIn', 'true');
 
-// In ConnectPage.tsx - staged auth check
-const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
-if (justLoggedIn) {
-  sessionStorage.removeItem('justLoggedIn');
-  setTimeout(() => setAuthCheckComplete(true), 1000);
-} else {
-  setAuthCheckComplete(true);
-}
+// In ConnectPage.tsx - check flag FIRST, before isLoading
+useEffect(() => {
+  const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
+  
+  if (justLoggedIn) {
+    sessionStorage.removeItem('justLoggedIn');
+    setTimeout(() => setAuthCheckComplete(true), 1000);
+  } else if (!isLoading) {
+    setAuthCheckComplete(true);
+  }
+}, [isLoading]);
 ```
 
 **Benefits:**
@@ -104,3 +107,26 @@ if (justLoggedIn) {
 - ✅ Prevents race condition between login and auth check
 - ✅ Only delays auth check after fresh login (no delay for normal navigation)
 - ✅ Generous 1-second delay ensures React Query has time to update
+
+### Logout 404 Error Fix
+**Problem:** Users couldn't sign out - clicking "Log Out" led to a 404 error in mobile apps.
+
+**Root Cause:** Header component used `<a href="/api/logout">` which tries to navigate to `capacitor://localhost/api/logout` on mobile instead of the actual server.
+
+**Solution:** Updated Header component to use the `logoutMutation` from `useAuth()` instead of direct links:
+```typescript
+// Desktop dropdown
+<DropdownMenuItem onClick={() => logoutMutation.mutate()}>
+  Log Out
+</DropdownMenuItem>
+
+// Mobile menu
+<button onClick={() => logoutMutation.mutate()}>
+  Log Out
+</button>
+```
+
+**Benefits:**
+- ✅ Logout works correctly in both web and mobile apps
+- ✅ Uses proper API calls with credentials and session management
+- ✅ No more 404 errors when signing out
