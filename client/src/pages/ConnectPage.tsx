@@ -239,36 +239,42 @@ export default function ConnectPage() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  // Check for fresh login flag immediately on mount (prevents race condition)
+  // Wait for user data to be available before showing content
   useEffect(() => {
+    // Check for fresh login flag
     const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
     
     if (justLoggedIn) {
-      // Clear the flag and wait for React Query to propagate user data
       sessionStorage.removeItem('justLoggedIn');
-      console.log('🔐 Fresh login detected, delaying auth check for 1000ms');
-      const timer = setTimeout(() => {
-        console.log('✅ Auth check complete after fresh login');
-        setAuthCheckComplete(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (!isLoading) {
-      // Normal case - check auth after loading completes
-      console.log('📋 Normal navigation, checking auth');
-      setAuthCheckComplete(true);
+      console.log('🔐 Fresh login detected, waiting for user data...');
     }
-  }, [isLoading]);
 
-  // Redirect to auth page if not authenticated (after auth check is complete)
-  useEffect(() => {
-    if (authCheckComplete && !user) {
-      console.log('❌ Not authenticated, redirecting to login');
-      const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
-      navigate(`${authRoute}?redirect=/connect`);
-    } else if (authCheckComplete && user) {
-      console.log('✅ Authenticated as:', user.username);
+    // Wait until loading is complete
+    if (!isLoading) {
+      if (user) {
+        // User is authenticated - show content
+        console.log('✅ Authenticated as:', user.username);
+        setAuthCheckComplete(true);
+      } else {
+        // Not authenticated - redirect to login
+        console.log('❌ Not authenticated, redirecting to login');
+        const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
+        navigate(`${authRoute}?redirect=/connect`);
+      }
     }
-  }, [authCheckComplete, user, navigate]);
+  }, [isLoading, user, navigate]);
+
+  // Show loading state while checking authentication
+  if (!authCheckComplete || isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#D4AF37] border-r-transparent mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">

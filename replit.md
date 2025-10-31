@@ -73,40 +73,52 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 - ✅ Follow/unfollow functionality works on mobile
 
 ### Connect Page Black Screen Fix
-**Problem:** After logging in through the Connect section in mobile app, users saw a black screen.
+**Problem:** After logging in through the Connect section in mobile app, users saw a black screen instead of the Connect page content.
 
-**Root Cause:** Race condition - ConnectPage's auth check ran before React Query finished propagating user data after login, causing redirect loop.
+**Root Cause:** The page was rendering its full content immediately, even before authentication was verified. This caused a race condition where:
+1. User logs in successfully
+2. Page navigates to Connect
+3. React Query is still loading user data (`isLoading = true`)
+4. Page renders empty/black content while waiting for auth check
+5. By the time auth check completes, the page has already rendered incorrectly
 
-**Solution:** Implemented sessionStorage-based login detection with staged authentication:
-1. AuthExperience sets `justLoggedIn` flag in sessionStorage on successful login
-2. ConnectPage checks for this flag **immediately on mount** (before checking isLoading)
-3. If flag exists (fresh login): wait 1000ms before checking auth to allow React Query to propagate
-4. If flag doesn't exist (normal navigation): check auth after isLoading completes
+**Solution:** Show a proper loading state until authentication is confirmed:
+1. Wait for `isLoading` to become `false`
+2. Check if `user` exists (authenticated) or is `null` (not authenticated)
+3. Show a loading spinner while waiting for auth check to complete
+4. Only render actual page content after confirming user is authenticated
+5. Redirect to login if user is not authenticated
 
 **Implementation:**
 ```typescript
-// In AuthExperience.tsx - on login success
-sessionStorage.setItem('justLoggedIn', 'true');
-
-// In ConnectPage.tsx - check flag FIRST, before isLoading
+// In ConnectPage.tsx - proper loading state
 useEffect(() => {
-  const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
-  
-  if (justLoggedIn) {
-    sessionStorage.removeItem('justLoggedIn');
-    setTimeout(() => setAuthCheckComplete(true), 1000);
-  } else if (!isLoading) {
-    setAuthCheckComplete(true);
+  if (!isLoading) {
+    if (user) {
+      // User is authenticated - show content
+      setAuthCheckComplete(true);
+    } else {
+      // Not authenticated - redirect to login
+      navigate(`/auth/mobile?redirect=/connect`);
+    }
   }
-}, [isLoading]);
+}, [isLoading, user, navigate]);
+
+// Show loading spinner until auth is confirmed
+if (!authCheckComplete || isLoading) {
+  return <LoadingSpinner />;
+}
+
+// Only render content after authentication is confirmed
+return <ConnectPageContent />;
 ```
 
 **Benefits:**
-- ✅ No more black screen after login through Connect section
-- ✅ Smooth transition from login to Connect page
-- ✅ Prevents race condition between login and auth check
-- ✅ Only delays auth check after fresh login (no delay for normal navigation)
-- ✅ Generous 1-second delay ensures React Query has time to update
+- ✅ No more black screen - shows a proper loading spinner instead
+- ✅ Content only renders after authentication is confirmed
+- ✅ No reliance on sessionStorage or arbitrary timing delays
+- ✅ Works reliably in both local development and production builds
+- ✅ Simple, predictable logic that waits for actual user data
 
 ### Logout 404 Error Fix
 **Problem:** Users couldn't sign out - clicking "Log Out" led to a 404 error in mobile apps.
