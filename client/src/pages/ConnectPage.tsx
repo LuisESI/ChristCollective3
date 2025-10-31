@@ -242,11 +242,20 @@ export default function ConnectPage() {
   // Wait for auth to fully load before checking (prevents race condition after login)
   useEffect(() => {
     if (!isLoading) {
-      // Add a small delay to ensure React Query has fully updated after login
-      const timer = setTimeout(() => {
+      // Check if we just logged in to prevent race condition
+      const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
+      
+      if (justLoggedIn) {
+        // Clear the flag and wait longer for React Query to propagate user data
+        sessionStorage.removeItem('justLoggedIn');
+        const timer = setTimeout(() => {
+          setAuthCheckComplete(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        // Normal case - check auth immediately
         setAuthCheckComplete(true);
-      }, 100);
-      return () => clearTimeout(timer);
+      }
     }
   }, [isLoading]);
 

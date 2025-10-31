@@ -77,9 +77,30 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 
 **Root Cause:** Race condition - ConnectPage's auth check ran before React Query finished propagating user data after login, causing redirect loop.
 
-**Solution:** Added staged authentication check with 100ms delay to let React Query update before checking auth status.
+**Solution:** Implemented sessionStorage-based login detection with staged authentication:
+1. AuthExperience sets `justLoggedIn` flag in sessionStorage on successful login
+2. ConnectPage checks for this flag on mount
+3. If flag exists (fresh login): wait 1000ms before checking auth to allow React Query to propagate
+4. If flag doesn't exist (normal navigation): check auth immediately
+
+**Implementation:**
+```typescript
+// In AuthExperience.tsx - on login success
+sessionStorage.setItem('justLoggedIn', 'true');
+
+// In ConnectPage.tsx - staged auth check
+const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
+if (justLoggedIn) {
+  sessionStorage.removeItem('justLoggedIn');
+  setTimeout(() => setAuthCheckComplete(true), 1000);
+} else {
+  setAuthCheckComplete(true);
+}
+```
 
 **Benefits:**
 - ✅ No more black screen after login through Connect section
 - ✅ Smooth transition from login to Connect page
 - ✅ Prevents race condition between login and auth check
+- ✅ Only delays auth check after fresh login (no delay for normal navigation)
+- ✅ Generous 1-second delay ensures React Query has time to update

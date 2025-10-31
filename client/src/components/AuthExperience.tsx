@@ -95,6 +95,9 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
     
     loginMutation.mutate(loginData, {
       onSuccess: () => {
+        // Set flag to indicate fresh login (helps prevent race conditions on protected pages)
+        sessionStorage.setItem('justLoggedIn', 'true');
+        
         if (variant === "mobile") {
           toast({
             title: "Welcome back!",
