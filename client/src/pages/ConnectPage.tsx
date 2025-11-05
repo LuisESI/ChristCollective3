@@ -241,12 +241,15 @@ export default function ConnectPage() {
 
   // Wait for user data to be available before showing content
   useEffect(() => {
+    console.log('🔍 ConnectPage - isLoading:', isLoading, 'user:', user?.username || 'null', 'authCheckComplete:', authCheckComplete);
+    
     // Check for fresh login flag
     const justLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
     
     if (justLoggedIn) {
       sessionStorage.removeItem('justLoggedIn');
       console.log('🔐 Fresh login detected, waiting for user data...');
+      alert('Fresh login detected! Waiting for user data...'); // Debug alert
     }
 
     // Wait until loading is complete
@@ -254,23 +257,30 @@ export default function ConnectPage() {
       if (user) {
         // User is authenticated - show content
         console.log('✅ Authenticated as:', user.username);
+        alert(`Authenticated as: ${user.username}`); // Debug alert
         setAuthCheckComplete(true);
       } else {
         // Not authenticated - redirect to login
         console.log('❌ Not authenticated, redirecting to login');
+        alert('Not authenticated, redirecting...'); // Debug alert
         const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
         navigate(`${authRoute}?redirect=/connect`);
       }
+    } else {
+      console.log('⏳ Still loading user data...');
     }
-  }, [isLoading, user, navigate]);
+  }, [isLoading, user, navigate, authCheckComplete]);
 
   // Show loading state while checking authentication
   if (!authCheckComplete || isLoading) {
+    console.log('📋 Showing loading screen - authCheckComplete:', authCheckComplete, 'isLoading:', isLoading);
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#D4AF37] border-r-transparent mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#D4AF37] border-r-transparent mb-4"></div>
+          <p className="text-black text-lg font-semibold">Checking authentication...</p>
+          <p className="text-gray-600 text-sm mt-2">isLoading: {isLoading ? 'true' : 'false'}</p>
+          <p className="text-gray-600 text-sm">authCheckComplete: {authCheckComplete ? 'true' : 'false'}</p>
         </div>
       </div>
     );
