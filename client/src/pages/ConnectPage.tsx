@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
+import { getImageUrl } from "@/lib/api-config";
 
 const createQueueSchema = insertGroupChatQueueSchema.extend({
   minPeople: z.coerce.number().min(2, "Minimum 2 people").max(12, "Maximum 12 people"),
@@ -677,7 +678,7 @@ export default function ConnectPage() {
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
                             {otherUser?.profileImageUrl ? (
                               <img 
-                                src={otherUser.profileImageUrl} 
+                                src={getImageUrl(otherUser.profileImageUrl)} 
                                 alt={otherUserName}
                                 className="w-full h-full object-cover rounded-full"
                               />

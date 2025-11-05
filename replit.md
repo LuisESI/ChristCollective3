@@ -143,3 +143,26 @@ const { data: directChats = [] } = useQuery<any[]>({
 - ✅ Logout works correctly in both web and mobile apps
 - ✅ Uses proper API calls with credentials and session management
 - ✅ No more 404 errors when signing out
+
+### Profile Pictures Not Loading Fix (Nov 5, 2025)
+**Problem:** Profile pictures/avatars were not loading on the Explore, Connect, and Feed pages in mobile apps.
+
+**Root Cause:** These pages were rendering images with relative URLs directly without converting them to absolute URLs for mobile apps. While profile pages used `getImageUrl()` helper (and worked correctly), the explore/connect pages were passing relative paths like `/uploads/image.jpg` directly to `<AvatarImage>`, which doesn't work on the `capacitor://` protocol.
+
+**Solution:** Wrapped all avatar/profile image sources with `getImageUrl()` helper on:
+- **ExplorePage.tsx**: Creator avatars, business logos, ministry logos, member profile pictures
+- **ConnectPage.tsx**: Direct chat user profile pictures
+- **Feed components**: Already using `getImageUrl()` correctly
+
+```typescript
+// Before (broken on mobile)
+<AvatarImage src={creator.profileImage} />
+
+// After (works on both web and mobile)
+<AvatarImage src={getImageUrl(creator.profileImage)} />
+```
+
+**Benefits:**
+- ✅ Profile pictures load correctly on all pages in mobile apps
+- ✅ Consistent image handling across entire application
+- ✅ Follows same pattern as other working pages (ProfilePage, etc.)

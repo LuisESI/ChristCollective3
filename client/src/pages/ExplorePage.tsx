@@ -9,6 +9,7 @@ import { Search, TrendingUp, Users, DollarSign, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
+import { getImageUrl } from "@/lib/api-config";
 
 export default function ExplorePage() {
   const { user, isLoading } = useAuth();
@@ -290,7 +291,7 @@ export default function ExplorePage() {
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={creator.profileImage} />
+                          <AvatarImage src={getImageUrl(creator.profileImage)} />
                           <AvatarFallback>{creator.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -345,7 +346,7 @@ export default function ExplorePage() {
                       <div className="flex items-center mb-4">
                         {business.logo ? (
                           <Avatar className="h-12 w-12 mr-4">
-                            <AvatarImage src={business.logo} alt={business.companyName} />
+                            <AvatarImage src={getImageUrl(business.logo)} alt={business.companyName} />
                             <AvatarFallback>{business.companyName?.charAt(0)}</AvatarFallback>
                           </Avatar>
                         ) : (
@@ -406,7 +407,7 @@ export default function ExplorePage() {
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={ministry.logo} />
+                          <AvatarImage src={getImageUrl(ministry.logo)} />
                           <AvatarFallback>{ministry.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -456,7 +457,7 @@ export default function ExplorePage() {
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.profileImageUrl} />
+                          <AvatarImage src={getImageUrl(member.profileImageUrl)} />
                           <AvatarFallback>{member.firstName?.[0] || member.username?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
