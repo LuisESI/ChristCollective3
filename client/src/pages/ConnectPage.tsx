@@ -74,18 +74,21 @@ export default function ConnectPage() {
   // Fetch active queues
   const { data: queues = [] } = useQuery<GroupChatQueue[]>({
     queryKey: ["/api/group-chat-queues"],
+    enabled: !!user, // Only fetch when authenticated
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   // Fetch active chats
   const { data: activeChats = [] } = useQuery<GroupChat[]>({
     queryKey: ["/api/group-chats/active"],
+    enabled: !!user, // Only fetch when authenticated
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   // Fetch direct chats
   const { data: directChats = [] } = useQuery<any[]>({
     queryKey: ["/api/direct-chats"],
+    enabled: !!user, // Only fetch when authenticated
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 

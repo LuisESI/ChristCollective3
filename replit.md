@@ -72,67 +72,54 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 - ✅ Explore page links work properly
 - ✅ Follow/unfollow functionality works on mobile
 
-### Connect Page Black Screen Fix (FINAL FIX)
+### Connect Page Black Screen Fix (FINAL FIX - Nov 5, 2025)
 **Problem:** After logging in through the Connect section in mobile app, users saw a black screen instead of the Connect page content.
 
-**Root Cause:** Race condition between login navigation and React Query cache propagation:
-1. User logs in successfully
-2. MobileAuthPage immediately navigates to `/connect` (400ms timeout)
-3. Navigation happens BEFORE React Query propagates user data to all components
-4. ConnectPage sees `user = null` and redirects back to login
-5. Creates redirect loop or infinite loading state
+**Root Cause:** ConnectPage was firing API queries BEFORE authentication completed:
+1. User clicks "Connect" before logging in
+2. ConnectPage loads and immediately fires queries: `/api/group-chat-queues`, `/api/group-chats/active`, `/api/direct-chats`
+3. All queries return 401 errors (unauthenticated)
+4. React Query caches these errors
+5. User logs in successfully
+6. ConnectPage loads again, but cached queries are still in error state and never retry
+7. Page stays in loading/error state → black screen
 
-**Solution:** Two-part fix to ensure React Query data is available before navigation:
-
-**Part 1 - MobileAuthPage:** Wait for actual user data before navigating
+**Solution:** Gate all queries behind authentication check using `enabled: !!user`:
 ```typescript
-// In MobileAuthPage.tsx
-useEffect(() => {
-  if (!isLoading && user) {
-    // Only navigate when user data is actually available
-    setLocation(redirectTo);
-  }
-}, [isLoading, user, setLocation, redirectTo]);
+// In ConnectPage.tsx - All queries now wait for authentication
+const { data: queues = [] } = useQuery<GroupChatQueue[]>({
+  queryKey: ["/api/group-chat-queues"],
+  enabled: !!user, // Only fetch when authenticated
+  refetchInterval: 5000,
+});
 
-const handleLoginSuccess = () => {
-  // Don't navigate here - let useEffect handle it when user data is ready
-  // The useEffect will trigger when React Query updates the user data
-};
-```
+const { data: activeChats = [] } = useQuery<GroupChat[]>({
+  queryKey: ["/api/group-chats/active"],
+  enabled: !!user, // Only fetch when authenticated
+  refetchInterval: 10000,
+});
 
-**Part 2 - ConnectPage:** Show loading state while checking authentication
-```typescript
-// In ConnectPage.tsx
-useEffect(() => {
-  if (!isLoading) {
-    if (user) {
-      setAuthCheckComplete(true); // User authenticated - show content
-    } else {
-      navigate(`/auth/mobile?redirect=/connect`); // Redirect to login
-    }
-  }
-}, [isLoading, user, navigate]);
-
-// Show loading spinner until auth is confirmed
-if (!authCheckComplete || isLoading) {
-  return <LoadingSpinner />;
-}
+const { data: directChats = [] } = useQuery<any[]>({
+  queryKey: ["/api/direct-chats"],
+  enabled: !!user, // Only fetch when authenticated
+  refetchInterval: 10000,
+});
 ```
 
 **How It Works:**
-1. Login succeeds → React Query cache updates with user data
-2. MobileAuthPage's useEffect detects user is now available
+1. User clicks "Connect" → redirected to login
+2. User logs in successfully → React Query updates user data
 3. MobileAuthPage navigates to `/connect`
-4. ConnectPage shows loading spinner
-5. ConnectPage's useEffect confirms user exists
-6. ConnectPage renders content
+4. ConnectPage checks `user` exists
+5. Queries are enabled and fire for the first time (no 401 errors to cache)
+6. Page renders with fresh data
 
 **Benefits:**
-- ✅ No more black screen or redirect loops
-- ✅ Navigation only happens when user data is actually available
-- ✅ Loading spinner provides visual feedback during auth check
-- ✅ Works reliably across all environments (dev/prod/mobile)
-- ✅ Reactive approach - waits for actual data instead of arbitrary delays
+- ✅ No more pre-authentication 401 errors
+- ✅ No cached error states in React Query
+- ✅ Queries only fire when user is authenticated
+- ✅ Consistent with other protected pages (e.g., ProfilePage, ExplorePage)
+- ✅ Simple, clean solution following React Query best practices
 
 ### Logout 404 Error Fix
 **Problem:** Users couldn't sign out - clicking "Log Out" led to a 404 error in mobile apps.
