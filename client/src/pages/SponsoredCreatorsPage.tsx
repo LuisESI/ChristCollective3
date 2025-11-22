@@ -44,9 +44,9 @@ export default function SponsoredCreatorsPage() {
 
   // Fetch featured YouTube videos from The Matrix Unlocked
   const { data: youtubeVideo, isLoading: isYouTubeLoading } = useQuery({
-    queryKey: ["/api/youtube/video", "https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"],
+    queryKey: ["/api/youtube/video", "https://youtu.be/oWN9m7O9BH0?si=xYaLydzt5kTxcR4S"],
     queryFn: async () => {
-      const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/ixGHJQXm5kY?si=w00d7O5BiesO0BBt"));
+      const response = await fetch("/api/youtube/video?url=" + encodeURIComponent("https://youtu.be/oWN9m7O9BH0?si=xYaLydzt5kTxcR4S"));
       if (!response.ok) throw new Error("Failed to fetch video data");
       return response.json();
     },
