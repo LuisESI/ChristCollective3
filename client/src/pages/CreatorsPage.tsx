@@ -97,10 +97,10 @@ export default function CreatorsPage() {
       <div className="bg-white py-16">
         <div className="container mx-auto px-4">
           {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="flex justify-center mb-12">
             {/* Featured Video */}
             {!isYouTubeLoading && youtubeVideo && (
-              <div className="lg:col-span-2 space-y-6">
+              <div className="max-w-2xl w-full space-y-6">
                 <Card className="bg-white shadow-2xl overflow-hidden">
                   <div className="aspect-video">
                     <iframe
