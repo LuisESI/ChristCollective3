@@ -140,39 +140,6 @@ export default function CreatorsPage() {
 
               </div>
             )}
-            
-            {/* Content Highlights Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Quick Stats */}
-              <Card className="bg-card shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <Eye className="w-5 h-5 text-primary" />
-                    Content Impact
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">50K+</div>
-                      <div className="text-xs text-muted-foreground">Total Views</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">1.2K</div>
-                      <div className="text-xs text-muted-foreground">Engagements</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">25+</div>
-                      <div className="text-xs text-muted-foreground">Active Creators</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">95%</div>
-                      <div className="text-xs text-muted-foreground">Satisfaction</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </div>
