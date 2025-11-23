@@ -125,6 +125,7 @@ export const campaigns = pgTable("campaigns", {
   updatedAt: timestamp("updated_at").defaultNow(),
   endDate: timestamp("end_date"),
   slug: varchar("slug").notNull(),
+  stripeAccountId: varchar("stripe_account_id"),
 }, (table) => ({
   slugIndex: uniqueIndex("campaigns_slug_idx").on(table.slug),
 }));

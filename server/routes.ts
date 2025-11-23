@@ -27,19 +27,15 @@ import { tiktokService } from "./tiktok";
 import { instagramService } from "./instagram";
 import { emailService } from "./emailService";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('Warning: Missing Stripe secret key. Stripe functionality will not work.');
-}
-
 let stripe: Stripe | undefined;
-try {
-  if (process.env.STRIPE_SECRET_KEY) {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2025-04-30.basil",
-    });
+
+async function getStripeClient() {
+  if (!stripe) {
+    const { getUncachableStripeClient } = await import("./stripeClient");
+    const client = await getUncachableStripeClient();
+    stripe = client;
   }
-} catch (error) {
-  console.error("Error initializing Stripe:", error);
+  return stripe;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
