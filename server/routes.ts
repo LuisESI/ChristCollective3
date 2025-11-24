@@ -26,17 +26,9 @@ import { youtubeService } from "./youtube";
 import { tiktokService } from "./tiktok";
 import { instagramService } from "./instagram";
 import { emailService } from "./emailService";
+import { getUncachableStripeClient } from "./stripeClient";
 
 let stripe: Stripe | undefined;
-
-async function getStripeClient() {
-  if (!stripe) {
-    const { getUncachableStripeClient } = await import("./stripeClient");
-    const client = await getUncachableStripeClient();
-    stripe = client;
-  }
-  return stripe;
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up uploads directory if it doesn't exist
@@ -1169,6 +1161,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Donation payment intent - no authentication required for donations
   app.post('/api/donations/create-payment-intent', async (req: any, res) => {
+    try {
+      stripe = await getUncachableStripeClient();
+    } catch (error) {
+      return res.status(503).json({ message: "Stripe is not available" });
+    }
+    
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
@@ -1239,6 +1237,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Donation webhook to record donation after successful payment
   app.post('/api/donations/webhook', async (req, res) => {
+    try {
+      stripe = await getUncachableStripeClient();
+    } catch (error) {
+      return res.status(503).json({ message: "Stripe is not available" });
+    }
+    
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
@@ -1277,6 +1281,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Complete donation after successful payment
   app.post('/api/donations/complete', async (req: any, res) => {
+    try {
+      stripe = await getUncachableStripeClient();
+    } catch (error) {
+      return res.status(500).json({ message: "Stripe is not available" });
+    }
+    
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
