@@ -3745,7 +3745,26 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  // Admin routes - Create product
+  // Admin routes - Upload product image
+  app.post('/api/admin/products/upload-image', isAuthenticated, upload.single('productImage'), async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error("Error uploading product image:", error);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
+  // Admin routes - Create product with variants
   app.post('/api/admin/products', isAuthenticated, async (req: any, res) => {
     try {
       if (!req.user?.isAdmin) {
@@ -3753,28 +3772,72 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       }
 
       const stripeClient = await getUncachableStripeClient();
-      const { name, description, unitAmount, currency = 'usd', metadata = {}, images = [] } = req.body;
+      const { name, description, images = [], variants = [], category = '', featured = false } = req.body;
 
-      if (!name || !unitAmount) {
-        return res.status(400).json({ message: "Name and unit amount are required" });
+      if (!name) {
+        return res.status(400).json({ message: "Product name is required" });
       }
 
+      if (!variants || variants.length === 0) {
+        return res.status(400).json({ message: "At least one variant is required" });
+      }
+
+      // Build full image URLs for Stripe (must be absolute URLs)
+      const baseUrl = process.env.REPLIT_DEPLOYMENT_URL || process.env.REPL_SLUG 
+        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+        : 'https://localhost:5000';
+      
+      const fullImageUrls = images.map((img: string) => {
+        if (img.startsWith('http')) return img;
+        return `${baseUrl}${img}`;
+      });
+
+      // Create the product in Stripe
       const product = await stripeClient.products.create({
         name,
         description: description || undefined,
-        images: images.length > 0 ? images : undefined,
-        metadata,
+        images: fullImageUrls.length > 0 ? fullImageUrls : undefined,
+        metadata: { category, featured: featured ? 'true' : 'false' },
       });
 
-      const price = await stripeClient.prices.create({
-        product: product.id,
-        unit_amount: unitAmount,
-        currency,
-      });
+      // Create a price for each variant
+      const createdPrices = [];
+      for (const variant of variants) {
+        const { color, size, price: priceAmount, sku } = variant;
+        
+        if (!priceAmount || priceAmount <= 0) {
+          continue;
+        }
+
+        const priceMetadata: Record<string, string> = {};
+        if (color) priceMetadata.color = color;
+        if (size) priceMetadata.size = size;
+        if (sku) priceMetadata.sku = sku;
+
+        const stripePrice = await stripeClient.prices.create({
+          product: product.id,
+          unit_amount: Math.round(priceAmount * 100),
+          currency: 'usd',
+          metadata: priceMetadata,
+        });
+
+        createdPrices.push({
+          id: stripePrice.id,
+          unit_amount: stripePrice.unit_amount,
+          currency: stripePrice.currency,
+          metadata: priceMetadata,
+        });
+      }
 
       res.json({
-        product,
-        price,
+        product: {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          images: product.images,
+          metadata: product.metadata,
+        },
+        prices: createdPrices,
         message: "Product created successfully",
       });
     } catch (error) {
