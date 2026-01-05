@@ -207,31 +207,33 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/shop/success?${orderParams.toString()}`,
-          receipt_email: contactInfo.email,
-          shipping: {
-            name: shippingInfo.name,
-            address: {
-              line1: shippingInfo.address,
-              line2: shippingInfo.address2 || undefined,
-              city: shippingInfo.city,
-              state: shippingInfo.state,
-              postal_code: shippingInfo.zipCode,
-              country: 'US',
-            },
-          },
         },
         redirect: 'if_required',
       });
 
       if (error) {
+        console.error('Stripe error:', error.type, error.code, error.message);
         toast({
           title: 'Payment Failed',
-          description: error.message,
+          description: error.message || 'Payment could not be processed.',
           variant: 'destructive',
         });
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment succeeded without redirect - navigate manually
-        window.location.href = `/shop/success?payment_intent=${paymentIntent.id}&${orderParams.toString()}`;
+      } else if (paymentIntent) {
+        if (paymentIntent.status === 'succeeded') {
+          // Payment succeeded without redirect - navigate manually
+          window.location.href = `/shop/success?payment_intent=${paymentIntent.id}&${orderParams.toString()}`;
+        } else if (paymentIntent.status === 'requires_action') {
+          // Handle additional authentication if needed
+          toast({
+            title: 'Additional Authentication Required',
+            description: 'Please complete the authentication process.',
+          });
+        } else {
+          toast({
+            title: 'Payment Processing',
+            description: `Payment status: ${paymentIntent.status}`,
+          });
+        }
       }
     } catch (error: any) {
       console.error('Payment error:', error);
