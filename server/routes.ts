@@ -3779,6 +3779,9 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       const paymentIntent = await stripeClient.paymentIntents.create({
         amount: price.unit_amount,
         currency: price.currency,
+        automatic_payment_methods: {
+          enabled: true,
+        },
         metadata: {
           priceId,
           productId: typeof price.product === 'string' ? price.product : price.product.id,
