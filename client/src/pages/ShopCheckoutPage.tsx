@@ -90,7 +90,7 @@ const US_STATES = [
   { value: 'DC', label: 'District of Columbia' },
 ];
 
-function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetails; clientSecret: string }) {
+function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: PriceDetails; clientSecret: string; quantity: number }) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -217,13 +217,16 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
           <div className="flex-1">
             <h3 className="font-semibold text-white">{priceDetails.product.name}</h3>
             <p className="text-sm text-gray-400 line-clamp-1">{priceDetails.product.description}</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {formatPrice(priceDetails.unit_amount, priceDetails.currency)} × {quantity}
+            </p>
           </div>
         </div>
         <Separator className="my-4 bg-gray-700" />
         <div className="flex justify-between items-center">
           <span className="font-semibold text-white">Total</span>
           <span className="font-bold text-lg text-[#D4AF37]">
-            {formatPrice(priceDetails.unit_amount, priceDetails.currency)}
+            {formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}
           </span>
         </div>
       </div>
@@ -350,7 +353,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
         className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold py-3 text-lg"
         data-testid="button-pay"
       >
-        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount, priceDetails.currency)}`}
+        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}`}
       </Button>
 
       <div className="flex items-center justify-center text-sm text-gray-400">
@@ -367,6 +370,9 @@ export default function ShopCheckoutPage() {
   const { toast } = useToast();
   const [stripePromise, setStripePromise] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  
+  const searchParams = new URLSearchParams(window.location.search);
+  const quantity = Math.max(1, parseInt(searchParams.get('qty') || '1', 10));
 
   useEffect(() => {
     const fetchPublishableKey = async () => {
@@ -486,7 +492,7 @@ export default function ShopCheckoutPage() {
           <CardContent>
             {stripePromise && clientSecret ? (
               <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#D4AF37' } } }}>
-                <CheckoutForm priceDetails={priceDetails} clientSecret={clientSecret} />
+                <CheckoutForm priceDetails={priceDetails} clientSecret={clientSecret} quantity={quantity} />
               </Elements>
             ) : (
               <div className="py-8 text-center">
