@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Package, Lock, ShoppingCart, MapPin, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Package, Lock, ShoppingCart, MapPin } from 'lucide-react';
 import { buildApiUrl, getImageUrl } from '@/lib/api-config';
 
 interface PriceDetails {
@@ -104,7 +104,6 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
     zipCode: '',
   });
   const [shippingErrors, setShippingErrors] = useState<Partial<ShippingInfo>>({});
-  const [quantity, setQuantity] = useState(1);
 
   const validateShipping = (): boolean => {
     const errors: Partial<ShippingInfo> = {};
@@ -218,44 +217,13 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
           <div className="flex-1">
             <h3 className="font-semibold text-white">{priceDetails.product.name}</h3>
             <p className="text-sm text-gray-400 line-clamp-1">{priceDetails.product.description}</p>
-            <p className="text-sm text-[#D4AF37] mt-1">
-              {formatPrice(priceDetails.unit_amount, priceDetails.currency)} each
-            </p>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-white">Quantity</span>
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="h-8 w-8 p-0 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-              data-testid="button-quantity-decrease"
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <span className="text-white font-medium w-8 text-center" data-testid="text-quantity">{quantity}</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setQuantity(quantity + 1)}
-              className="h-8 w-8 p-0 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-              data-testid="button-quantity-increase"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
         <Separator className="my-4 bg-gray-700" />
         <div className="flex justify-between items-center">
           <span className="font-semibold text-white">Total</span>
           <span className="font-bold text-lg text-[#D4AF37]">
-            {formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}
+            {formatPrice(priceDetails.unit_amount, priceDetails.currency)}
           </span>
         </div>
       </div>
@@ -382,7 +350,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
         className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold py-3 text-lg"
         data-testid="button-pay"
       >
-        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}`}
+        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount, priceDetails.currency)}`}
       </Button>
 
       <div className="flex items-center justify-center text-sm text-gray-400">
