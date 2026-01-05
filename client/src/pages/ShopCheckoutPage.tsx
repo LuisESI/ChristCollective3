@@ -188,7 +188,7 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
     setIsProcessing(true);
 
     try {
-      // Build return URL with order data
+      // Build order data params
       const orderParams = new URLSearchParams({
         priceId: priceDetails.id,
         qty: quantity.toString(),
@@ -203,7 +203,7 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
         zip: shippingInfo.zipCode,
       });
 
-      const { error } = await stripe.confirmPayment({
+      const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/shop/success?${orderParams.toString()}`,
@@ -220,6 +220,7 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
             },
           },
         },
+        redirect: 'if_required',
       });
 
       if (error) {
@@ -228,6 +229,9 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
           description: error.message,
           variant: 'destructive',
         });
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Payment succeeded without redirect - navigate manually
+        window.location.href = `/shop/success?payment_intent=${paymentIntent.id}&${orderParams.toString()}`;
       }
     } catch (error: any) {
       console.error('Payment error:', error);
