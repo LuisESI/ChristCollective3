@@ -71,6 +71,9 @@ import {
   passwordResetTokens,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  shopOrders,
+  type ShopOrder,
+  type InsertShopOrder,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -237,6 +240,14 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   markTokenAsUsed(tokenId: number): Promise<void>;
   deleteExpiredTokens(): Promise<void>;
+  
+  // Shop order operations
+  createShopOrder(orderData: InsertShopOrder): Promise<ShopOrder>;
+  getShopOrder(id: number): Promise<ShopOrder | undefined>;
+  getShopOrderByPaymentIntent(paymentIntentId: string): Promise<ShopOrder | undefined>;
+  listShopOrders(): Promise<ShopOrder[]>;
+  getUserShopOrders(userId: string): Promise<ShopOrder[]>;
+  updateShopOrder(id: number, data: Partial<ShopOrder>): Promise<ShopOrder>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1987,6 +1998,57 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(passwordResetTokens)
       .where(sql`${passwordResetTokens.expiresAt} < NOW()`);
+  }
+
+  // Shop order operations
+  async createShopOrder(orderData: InsertShopOrder): Promise<ShopOrder> {
+    const [order] = await db
+      .insert(shopOrders)
+      .values(orderData)
+      .returning();
+    return order;
+  }
+
+  async getShopOrder(id: number): Promise<ShopOrder | undefined> {
+    const [order] = await db
+      .select()
+      .from(shopOrders)
+      .where(eq(shopOrders.id, id))
+      .limit(1);
+    return order;
+  }
+
+  async getShopOrderByPaymentIntent(paymentIntentId: string): Promise<ShopOrder | undefined> {
+    const [order] = await db
+      .select()
+      .from(shopOrders)
+      .where(eq(shopOrders.stripePaymentIntentId, paymentIntentId))
+      .limit(1);
+    return order;
+  }
+
+  async listShopOrders(): Promise<ShopOrder[]> {
+    return await db
+      .select()
+      .from(shopOrders)
+      .orderBy(desc(shopOrders.createdAt));
+  }
+
+  async getUserShopOrders(userId: string): Promise<ShopOrder[]> {
+    return await db
+      .select()
+      .from(shopOrders)
+      .where(eq(shopOrders.userId, userId))
+      .orderBy(desc(shopOrders.createdAt));
+  }
+
+  async updateShopOrder(id: number, data: Partial<ShopOrder>): Promise<ShopOrder> {
+    const [order] = await db
+      .update(shopOrders)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(shopOrders.id, id))
+      .returning();
+    return order;
   }
 }
 

@@ -3793,6 +3793,170 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Shop routes - Create order after successful payment
+  app.post('/api/shop/create-order', async (req: any, res) => {
+    try {
+      const {
+        paymentIntentId,
+        priceId,
+        quantity,
+        customerEmail,
+        customerPhone,
+        customerName,
+        shippingName,
+        shippingAddress,
+        shippingAddress2,
+        shippingCity,
+        shippingState,
+        shippingZipCode,
+      } = req.body;
+
+      if (!paymentIntentId || !priceId || !customerEmail || !customerName || !shippingName || !shippingAddress || !shippingCity || !shippingState || !shippingZipCode) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Check if order already exists for this payment intent
+      const existingOrder = await storage.getShopOrderByPaymentIntent(paymentIntentId);
+      if (existingOrder) {
+        return res.json({ orderId: existingOrder.id, message: "Order already exists" });
+      }
+
+      const stripeClient = await getUncachableStripeClient();
+      
+      // Verify the payment intent is successful
+      const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId);
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ message: "Payment not successful" });
+      }
+
+      // Get price and product details
+      const price = await stripeClient.prices.retrieve(priceId, { expand: ['product'] });
+      const product = price.product as any;
+
+      const orderData = {
+        userId: req.user?.id || null,
+        stripePaymentIntentId: paymentIntentId,
+        stripePriceId: priceId,
+        productName: product.name,
+        quantity: quantity || 1,
+        unitAmount: price.unit_amount || 0,
+        totalAmount: (price.unit_amount || 0) * (quantity || 1),
+        currency: price.currency,
+        status: 'paid' as const,
+        customerEmail,
+        customerPhone: customerPhone || null,
+        customerName,
+        shippingName,
+        shippingAddress,
+        shippingAddress2: shippingAddress2 || null,
+        shippingCity,
+        shippingState,
+        shippingZipCode,
+        shippingCountry: 'US',
+      };
+
+      const order = await storage.createShopOrder(orderData);
+
+      // Send order confirmation email
+      try {
+        const { sendOrderConfirmationEmail } = await import('./email');
+        await sendOrderConfirmationEmail({
+          to: customerEmail,
+          customerName,
+          orderId: order.id,
+          productName: product.name,
+          quantity: quantity || 1,
+          unitAmount: price.unit_amount || 0,
+          totalAmount: order.totalAmount,
+          currency: price.currency,
+          shippingAddress: {
+            name: shippingName,
+            address: shippingAddress,
+            address2: shippingAddress2,
+            city: shippingCity,
+            state: shippingState,
+            zipCode: shippingZipCode,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+
+      res.json({ orderId: order.id, message: "Order created successfully" });
+    } catch (error: any) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  // Admin routes - Get all shop orders
+  app.get('/api/admin/shop-orders', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const orders = await storage.listShopOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching shop orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Admin routes - Update shop order status
+  app.patch('/api/admin/shop-orders/:orderId', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { orderId } = req.params;
+      const { status, trackingNumber, trackingCarrier, adminNotes } = req.body;
+
+      const updateData: any = {};
+      if (status) updateData.status = status;
+      if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber;
+      if (trackingCarrier !== undefined) updateData.trackingCarrier = trackingCarrier;
+      if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
+      
+      if (status === 'shipped' && !updateData.shippedAt) {
+        updateData.shippedAt = new Date();
+      }
+      if (status === 'delivered' && !updateData.deliveredAt) {
+        updateData.deliveredAt = new Date();
+      }
+
+      const order = await storage.updateShopOrder(parseInt(orderId), updateData);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating shop order:", error);
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
+  // Admin routes - Get single shop order
+  app.get('/api/admin/shop-orders/:orderId', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { orderId } = req.params;
+      const order = await storage.getShopOrder(parseInt(orderId));
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching shop order:", error);
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
   // Admin routes - Upload product image
   app.post('/api/admin/products/upload-image', isAuthenticated, upload.single('productImage'), async (req: any, res) => {
     try {

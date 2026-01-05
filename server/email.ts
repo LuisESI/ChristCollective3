@@ -68,3 +68,117 @@ export async function sendPasswordResetEmail({ to, resetToken, userName }: SendP
     throw error;
   }
 }
+
+export interface OrderConfirmationEmailParams {
+  to: string;
+  customerName: string;
+  orderId: number;
+  productName: string;
+  quantity: number;
+  unitAmount: number;
+  totalAmount: number;
+  currency: string;
+  shippingAddress: {
+    name: string;
+    address: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+}
+
+export async function sendOrderConfirmationEmail(params: OrderConfirmationEmailParams) {
+  const { to, customerName, orderId, productName, quantity, unitAmount, totalAmount, currency, shippingAddress } = params;
+  
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase()
+    }).format(amount / 100);
+  };
+
+  const baseUrl = process.env.REPLIT_DEPLOYMENT === '1' 
+    ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
+    : `http://localhost:5000`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Christ Collective <noreply@christcollective.org>',
+      to: [to],
+      subject: `Order Confirmation #${orderId} - Christ Collective`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #000; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="color: #D4AF37; margin: 0;">Christ Collective</h1>
+            </div>
+            <div style="background-color: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+              <h2 style="color: #D4AF37; margin-top: 0;">Order Confirmed!</h2>
+              <p>Hello ${customerName},</p>
+              <p>Thank you for your purchase! Your order has been confirmed and is being processed.</p>
+              
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #333;">Order #${orderId}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #e0e0e0;">
+                      <strong>${productName}</strong><br>
+                      <span style="color: #666;">Qty: ${quantity} × ${formatPrice(unitAmount)}</span>
+                    </td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #e0e0e0; text-align: right; font-weight: bold;">
+                      ${formatPrice(totalAmount)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; font-weight: bold;">Total</td>
+                    <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #D4AF37; font-size: 18px;">
+                      ${formatPrice(totalAmount)}
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #333;">Shipping Address</h3>
+                <p style="margin: 0;">
+                  ${shippingAddress.name}<br>
+                  ${shippingAddress.address}<br>
+                  ${shippingAddress.address2 ? shippingAddress.address2 + '<br>' : ''}
+                  ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}
+                </p>
+              </div>
+
+              <p>We'll send you another email with tracking information once your order ships.</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${baseUrl}/shop" style="background-color: #D4AF37; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Continue Shopping</a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+              <p style="font-size: 12px; color: #999; text-align: center;">
+                © ${new Date().getFullYear()} Christ Collective. All rights reserved.
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending order confirmation email:', error);
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    console.log('Order confirmation email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in sendOrderConfirmationEmail:', error);
+    throw error;
+  }
+}

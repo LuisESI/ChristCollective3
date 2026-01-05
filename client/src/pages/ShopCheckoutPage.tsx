@@ -188,10 +188,26 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
     setIsProcessing(true);
 
     try {
+      // Build return URL with order data
+      const orderParams = new URLSearchParams({
+        priceId: priceDetails.id,
+        qty: quantity.toString(),
+        email: contactInfo.email,
+        phone: contactInfo.phone || '',
+        customerName: shippingInfo.name,
+        shippingName: shippingInfo.name,
+        address: shippingInfo.address,
+        address2: shippingInfo.address2 || '',
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        zip: shippingInfo.zipCode,
+      });
+
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/shop/success?priceId=${priceDetails.id}`,
+          return_url: `${window.location.origin}/shop/success?${orderParams.toString()}`,
+          receipt_email: contactInfo.email,
           shipping: {
             name: shippingInfo.name,
             address: {
