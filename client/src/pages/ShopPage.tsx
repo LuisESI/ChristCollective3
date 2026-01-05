@@ -208,8 +208,8 @@ export default function ShopPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
+              <Card key={i} className="overflow-hidden bg-black border-gray-800">
+                <Skeleton className="h-48 w-full bg-gray-800" />
                 <CardHeader>
                   <Skeleton className="h-6 w-3/4" />
                 </CardHeader>
@@ -241,11 +241,11 @@ export default function ShopPage() {
               return (
                 <Card 
                   key={product.id} 
-                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" 
+                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer bg-black text-white border-gray-800" 
                   data-testid={`card-product-${product.id}`}
                   onClick={() => openProductDetail(product)}
                 >
-                  <div className="aspect-square bg-gray-100 relative">
+                  <div className="aspect-square bg-gray-900 relative">
                     {product.images && product.images[0] ? (
                       <img
                         src={getImageUrl(product.images[0])}
@@ -273,7 +273,7 @@ export default function ShopPage() {
                     )}
                   </CardHeader>
                   <CardContent className="pb-2">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    <p className="text-sm text-gray-400 line-clamp-2">
                       {product.description || 'No description available'}
                     </p>
                     {product.prices && product.prices.length > 0 && (
