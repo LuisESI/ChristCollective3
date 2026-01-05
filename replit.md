@@ -43,6 +43,7 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 -   **Platform Posts**: Users can create posts with multiple media types (image, video, text, YouTube channel links).
 -   **Administrative Dashboard**: Campaign/user management, donation tracking, sponsorship review.
 -   **Notification System**: Real-time notifications with read/unread status.
+-   **E-commerce Shop**: Product management with image uploads, product variants (color/size combinations), Stripe integration for checkout. Admin dashboard for creating/managing products. Each variant creates a separate Stripe Price with metadata (color, size, sku). Featured products can be highlighted on the shop page.
 
 ### System Design Choices
 -   **Deployment**: Development uses local environment with HMR, Vite dev server. Production uses optimized static assets, Express server, automatic database migrations, and environment-specific configuration.
