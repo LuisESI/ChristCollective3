@@ -337,7 +337,7 @@ export default function ShopProductPage() {
                       type="number"
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 h-10 text-center border-0 text-black"
+                      className="w-16 h-10 text-center border-0 text-black bg-white"
                       min="1"
                       data-testid="input-quantity"
                     />
