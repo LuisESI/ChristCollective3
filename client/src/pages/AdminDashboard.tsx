@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
@@ -413,6 +414,25 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Shop Management Quick Links */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white mb-3">Shop Management</h3>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/admin/products">
+              <Button className="bg-primary hover:bg-primary/90 text-black gap-2" data-testid="link-admin-products">
+                <ShoppingBag className="h-4 w-4" />
+                Manage Products
+              </Button>
+            </Link>
+            <Link href="/admin/orders">
+              <Button className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 gap-2" data-testid="link-admin-orders">
+                <Package className="h-4 w-4" />
+                Manage Orders
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">

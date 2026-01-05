@@ -3,6 +3,14 @@ import { Resend } from 'resend';
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Use Resend's default test sender for development, or verified domain for production
+const getEmailSender = () => {
+  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  return isProduction 
+    ? 'Christ Collective <noreply@christcollective.org>'
+    : 'Christ Collective <onboarding@resend.dev>';
+};
+
 export interface SendPasswordResetEmailParams {
   to: string;
   resetToken: string;
@@ -19,7 +27,7 @@ export async function sendPasswordResetEmail({ to, resetToken, userName }: SendP
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Christ Collective <noreply@christcollective.org>',
+      from: getEmailSender(),
       to: [to],
       subject: 'Reset Password',
       html: `
@@ -104,7 +112,7 @@ export async function sendOrderConfirmationEmail(params: OrderConfirmationEmailP
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Christ Collective <noreply@christcollective.org>',
+      from: getEmailSender(),
       to: [to],
       subject: `Order Confirmation #${orderId} - Christ Collective`,
       html: `
