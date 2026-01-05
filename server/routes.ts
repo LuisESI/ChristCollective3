@@ -3684,6 +3684,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
             currency: price.currency,
             recurring: price.recurring,
             active: price.active,
+            metadata: price.metadata,
           })),
       }));
 

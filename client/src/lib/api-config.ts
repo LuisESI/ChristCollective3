@@ -59,8 +59,18 @@ export function getImageUrl(imageUrl: string | null | undefined): string {
     return `${baseUrl}${normalizedPath}`;
   }
   
-  // For web: if it's an absolute URL, return as-is
+  // For web: if it's an absolute URL with /uploads/, extract path and use current origin
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    try {
+      const url = new URL(imageUrl);
+      const path = url.pathname;
+      // If it's an uploads path, use current origin to ensure it works
+      if (path.startsWith('/uploads/')) {
+        return `${window.location.origin}${path}`;
+      }
+    } catch (e) {
+      // If URL parsing fails, return as-is
+    }
     return imageUrl;
   }
   
