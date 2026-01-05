@@ -3,14 +3,9 @@ import { Resend } from 'resend';
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Use Resend's default test sender for development, or verified domain for production
+// Use the verified christcollective.info domain for sending emails
 const getEmailSender = () => {
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
-  const sender = isProduction 
-    ? 'Christ Collective <noreply@christcollective.org>'
-    : 'Christ Collective <onboarding@resend.dev>';
-  console.log(`📧 Email sender: ${sender} (production: ${isProduction})`);
-  return sender;
+  return 'Christ Collective <no-reply@christcollective.info>';
 };
 
 export interface SendPasswordResetEmailParams {
