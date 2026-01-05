@@ -137,17 +137,19 @@ export default function ShopPage() {
   const selectedPrice = selectedProduct?.prices?.find(p => p.id === selectedPriceId);
 
   return (
-    <div className="min-h-screen bg-background pt-16">
+    <div className="min-h-screen bg-white">
       <Helmet>
         <title>Shop | Christ Collective</title>
         <meta name="description" content="Browse our collection of faith-based products and merchandise from Christ Collective." />
       </Helmet>
 
-      <div className="bg-gradient-to-r from-black to-gray-900 text-white py-16">
+      {/* Hero Section - Black Background */}
+      <section className="py-20 bg-black">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Christ Collective <span className="text-[#D4AF37]">Shop</span>
           </h1>
+          <div className="w-16 h-1 bg-[#D4AF37] mx-auto mb-6"></div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Faith-inspired products to support your journey and our mission
           </p>
@@ -160,9 +162,11 @@ export default function ShopPage() {
             </Link>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Content Section - White Background */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -306,7 +310,8 @@ export default function ShopPage() {
             })}
           </div>
         )}
-      </div>
+        </div>
+      </section>
 
       {/* Product Detail Dialog */}
       <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && closeProductDetail()}>
