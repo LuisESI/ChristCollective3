@@ -3650,6 +3650,161 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Shop routes - Get Stripe publishable key
+  app.get('/api/stripe/publishable-key', async (req, res) => {
+    try {
+      const { getStripePublishableKey } = await import("./stripeClient");
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Error fetching Stripe publishable key:", error);
+      res.status(500).json({ message: "Failed to fetch Stripe key" });
+    }
+  });
+
+  // Shop routes - List products with prices
+  app.get('/api/shop/products', async (req, res) => {
+    try {
+      const stripeClient = await getUncachableStripeClient();
+      const products = await stripeClient.products.list({ active: true, limit: 100 });
+      const prices = await stripeClient.prices.list({ active: true, limit: 100 });
+
+      const productsWithPrices = products.data.map(product => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        active: product.active,
+        images: product.images,
+        metadata: product.metadata,
+        prices: prices.data
+          .filter(price => price.product === product.id)
+          .map(price => ({
+            id: price.id,
+            unit_amount: price.unit_amount,
+            currency: price.currency,
+            recurring: price.recurring,
+            active: price.active,
+          })),
+      }));
+
+      res.json({ data: productsWithPrices });
+    } catch (error) {
+      console.error("Error fetching shop products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // Shop routes - Get price details with product info
+  app.get('/api/shop/price/:priceId', async (req, res) => {
+    try {
+      const { priceId } = req.params;
+      const stripeClient = await getUncachableStripeClient();
+      const price = await stripeClient.prices.retrieve(priceId, { expand: ['product'] });
+
+      res.json({
+        id: price.id,
+        unit_amount: price.unit_amount,
+        currency: price.currency,
+        product: price.product,
+      });
+    } catch (error) {
+      console.error("Error fetching price details:", error);
+      res.status(500).json({ message: "Failed to fetch price details" });
+    }
+  });
+
+  // Shop routes - Create payment intent for product purchase
+  app.post('/api/shop/create-payment-intent', async (req: any, res) => {
+    try {
+      const stripeClient = await getUncachableStripeClient();
+      const { priceId } = req.body;
+
+      if (!priceId) {
+        return res.status(400).json({ message: "Price ID is required" });
+      }
+
+      const price = await stripeClient.prices.retrieve(priceId);
+      if (!price.unit_amount) {
+        return res.status(400).json({ message: "Invalid price" });
+      }
+
+      const paymentIntent = await stripeClient.paymentIntents.create({
+        amount: price.unit_amount,
+        currency: price.currency,
+        metadata: {
+          priceId,
+          productId: typeof price.product === 'string' ? price.product : price.product.id,
+          userId: req.user?.id || 'guest',
+        },
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      console.error("Error creating shop payment intent:", error);
+      res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
+  // Admin routes - Create product
+  app.post('/api/admin/products', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const stripeClient = await getUncachableStripeClient();
+      const { name, description, unitAmount, currency = 'usd', metadata = {}, images = [] } = req.body;
+
+      if (!name || !unitAmount) {
+        return res.status(400).json({ message: "Name and unit amount are required" });
+      }
+
+      const product = await stripeClient.products.create({
+        name,
+        description: description || undefined,
+        images: images.length > 0 ? images : undefined,
+        metadata,
+      });
+
+      const price = await stripeClient.prices.create({
+        product: product.id,
+        unit_amount: unitAmount,
+        currency,
+      });
+
+      res.json({
+        product,
+        price,
+        message: "Product created successfully",
+      });
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // Admin routes - Update product active status
+  app.patch('/api/admin/products/:productId', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const stripeClient = await getUncachableStripeClient();
+      const { productId } = req.params;
+      const { active } = req.body;
+
+      const product = await stripeClient.products.update(productId, {
+        active: active !== undefined ? active : true,
+      });
+
+      res.json({ product, message: "Product updated successfully" });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

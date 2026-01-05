@@ -48,6 +48,10 @@ import EventCreatePage from "@/pages/EventCreatePage";
 import PostPage from "@/pages/PostPage";
 import DirectChatPage from "@/pages/DirectChatPage";
 import DebugAuthPage from "@/pages/DebugAuthPage";
+import ShopPage from "@/pages/ShopPage";
+import AdminProductsPage from "@/pages/AdminProductsPage";
+import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
+import ShopSuccessPage from "@/pages/ShopSuccessPage";
 
 import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
@@ -105,6 +109,10 @@ function Router() {
       <Route path="/direct-chat/:chatId" component={DirectChatPage} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/debug-auth" component={DebugAuthPage} />
+      <Route path="/shop" component={ShopPage} />
+      <Route path="/shop/checkout/:priceId" component={ShopCheckoutPage} />
+      <Route path="/shop/success" component={ShopSuccessPage} />
+      <Route path="/admin/products" component={AdminProductsPage} />
 
       <Route path="/privacy-settings" component={PrivacySettingsPage} />
       <Route component={NotFound} />
