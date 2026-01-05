@@ -49,6 +49,7 @@ import PostPage from "@/pages/PostPage";
 import DirectChatPage from "@/pages/DirectChatPage";
 import DebugAuthPage from "@/pages/DebugAuthPage";
 import ShopPage from "@/pages/ShopPage";
+import ShopProductPage from "@/pages/ShopProductPage";
 import AdminProductsPage from "@/pages/AdminProductsPage";
 import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
 import ShopSuccessPage from "@/pages/ShopSuccessPage";
@@ -110,6 +111,7 @@ function Router() {
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/debug-auth" component={DebugAuthPage} />
       <Route path="/shop" component={ShopPage} />
+      <Route path="/shop/product/:productId" component={ShopProductPage} />
       <Route path="/shop/checkout/:priceId" component={ShopCheckoutPage} />
       <Route path="/shop/success" component={ShopSuccessPage} />
       <Route path="/admin/products" component={AdminProductsPage} />

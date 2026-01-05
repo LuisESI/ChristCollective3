@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Search, Filter, Package, DollarSign, Star, Settings, X } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Package, DollarSign, Star, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { buildApiUrl, getImageUrl } from '@/lib/api-config';
 
@@ -37,13 +33,9 @@ interface Product {
 
 export default function ShopPage() {
   const { user } = useAuth();
-  const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [category, setCategory] = useState('all');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedPriceId, setSelectedPriceId] = useState<string>('');
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['/api/shop/products'],
@@ -64,21 +56,9 @@ export default function ShopPage() {
     }).format(amount / 100);
   };
 
-  const getVariantLabel = (price: ProductPrice) => {
-    const parts = [];
-    if (price.metadata?.color) parts.push(price.metadata.color);
-    if (price.metadata?.size) parts.push(price.metadata.size);
-    return parts.length > 0 ? parts.join(' / ') : 'Default';
-  };
-
   const getUniqueColors = (prices: ProductPrice[]) => {
     const colors = prices.map(p => p.metadata?.color).filter(Boolean) as string[];
     return Array.from(new Set(colors));
-  };
-
-  const getUniqueSizes = (prices: ProductPrice[]) => {
-    const sizes = prices.map(p => p.metadata?.size).filter(Boolean) as string[];
-    return Array.from(new Set(sizes));
   };
 
   const getPriceRange = (prices: ProductPrice[]) => {
@@ -90,24 +70,6 @@ export default function ShopPage() {
       return formatPrice(min, prices[0].currency);
     }
     return `${formatPrice(min, prices[0].currency)} - ${formatPrice(max, prices[0].currency)}`;
-  };
-
-  const openProductDetail = (product: Product) => {
-    setSelectedProduct(product);
-    setSelectedPriceId(product.prices?.[0]?.id || '');
-    setSelectedImageIndex(0);
-  };
-
-  const closeProductDetail = () => {
-    setSelectedProduct(null);
-    setSelectedPriceId('');
-    setSelectedImageIndex(0);
-  };
-
-  const handleCheckout = () => {
-    if (selectedPriceId) {
-      navigate(`/shop/checkout/${selectedPriceId}`);
-    }
   };
 
   const filteredProducts = products
@@ -133,8 +95,6 @@ export default function ShopPage() {
     });
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.metadata?.category).filter(Boolean)))];
-
-  const selectedPrice = selectedProduct?.prices?.find(p => p.id === selectedPriceId);
 
   return (
     <div className="min-h-screen bg-white">
@@ -235,212 +195,81 @@ export default function ShopPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => {
               const colors = getUniqueColors(product.prices || []);
-              const sizes = getUniqueSizes(product.prices || []);
-              const hasVariants = colors.length > 0 || sizes.length > 0;
+              const hasVariants = colors.length > 0;
 
               return (
-                <Card 
-                  key={product.id} 
-                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer bg-black text-white border-gray-800" 
-                  data-testid={`card-product-${product.id}`}
-                  onClick={() => openProductDetail(product)}
-                >
-                  <div className="aspect-square bg-gray-900 relative">
-                    {product.images && product.images[0] ? (
-                      <img
-                        src={getImageUrl(product.images[0])}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-16 h-16 text-gray-300" />
-                      </div>
-                    )}
-                    {product.metadata?.featured === 'true' && (
-                      <Badge className="absolute top-2 right-2 bg-[#D4AF37] text-black">
-                        <Star className="w-3 h-3 mr-1" />
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
-                    {product.metadata?.category && (
-                      <Badge variant="outline" className="w-fit">
-                        {product.metadata.category}
-                      </Badge>
-                    )}
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <p className="text-sm text-gray-400 line-clamp-2">
-                      {product.description || 'No description available'}
-                    </p>
-                    {product.prices && product.prices.length > 0 && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-[#D4AF37]" />
-                        <span className="text-lg font-bold">
-                          {getPriceRange(product.prices)}
-                        </span>
-                      </div>
-                    )}
-                    {hasVariants && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {colors.slice(0, 3).map(color => (
-                          <Badge key={color} variant="secondary" className="text-xs">{color}</Badge>
-                        ))}
-                        {colors.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">+{colors.length - 3}</Badge>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black" 
-                      data-testid={`button-view-${product.id}`}
-                      onClick={() => openProductDetail(product)}
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {hasVariants ? 'Select Options' : 'Buy Now'}
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <Link key={product.id} href={`/shop/product/${product.id}`}>
+                  <Card 
+                    className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer bg-black text-white border-gray-800 h-full" 
+                    data-testid={`card-product-${product.id}`}
+                  >
+                    <div className="aspect-square bg-gray-900 relative">
+                      {product.images && product.images[0] ? (
+                        <img
+                          src={getImageUrl(product.images[0])}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="w-16 h-16 text-gray-300" />
+                        </div>
+                      )}
+                      {product.metadata?.featured === 'true' && (
+                        <Badge className="absolute top-2 right-2 bg-[#D4AF37] text-black">
+                          <Star className="w-3 h-3 mr-1" />
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
+                      {product.metadata?.category && (
+                        <Badge variant="outline" className="w-fit">
+                          {product.metadata.category}
+                        </Badge>
+                      )}
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-400 line-clamp-2">
+                        {product.description || 'No description available'}
+                      </p>
+                      {product.prices && product.prices.length > 0 && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-[#D4AF37]" />
+                          <span className="text-lg font-bold">
+                            {getPriceRange(product.prices)}
+                          </span>
+                        </div>
+                      )}
+                      {hasVariants && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {colors.slice(0, 3).map(color => (
+                            <Badge key={color} variant="secondary" className="text-xs">{color}</Badge>
+                          ))}
+                          {colors.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">+{colors.length - 3}</Badge>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black" 
+                        data-testid={`button-view-${product.id}`}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        View Product
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </Link>
               );
             })}
           </div>
         )}
         </div>
       </section>
-
-      {/* Product Detail Dialog */}
-      <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && closeProductDetail()}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          {selectedProduct && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-                <DialogDescription>
-                  {selectedProduct.description || 'No description available'}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                {/* Product Images */}
-                <div className="space-y-3">
-                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    {selectedProduct.images && selectedProduct.images[selectedImageIndex] ? (
-                      <img
-                        src={getImageUrl(selectedProduct.images[selectedImageIndex])}
-                        alt={selectedProduct.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-24 h-24 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                  {selectedProduct.images && selectedProduct.images.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto">
-                      {selectedProduct.images.map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedImageIndex(index)}
-                          className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors ${
-                            index === selectedImageIndex ? 'border-[#D4AF37]' : 'border-transparent'
-                          }`}
-                        >
-                          <img
-                            src={getImageUrl(image)}
-                            alt={`${selectedProduct.name} ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Options */}
-                <div className="space-y-6">
-                  {selectedProduct.metadata?.category && (
-                    <Badge variant="outline">{selectedProduct.metadata.category}</Badge>
-                  )}
-
-                  {selectedProduct.prices && selectedProduct.prices.length > 1 ? (
-                    <div className="space-y-4">
-                      <Label className="text-base font-semibold">Select Variant</Label>
-                      <RadioGroup value={selectedPriceId} onValueChange={setSelectedPriceId}>
-                        {selectedProduct.prices.map((price) => (
-                          <div
-                            key={price.id}
-                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                              selectedPriceId === price.id 
-                                ? 'border-[#D4AF37] bg-[#D4AF37]/5' 
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                            onClick={() => setSelectedPriceId(price.id)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <RadioGroupItem value={price.id} id={price.id} />
-                              <Label htmlFor={price.id} className="cursor-pointer">
-                                <span className="font-medium">{getVariantLabel(price)}</span>
-                                {price.metadata?.sku && (
-                                  <span className="text-xs text-muted-foreground ml-2">
-                                    SKU: {price.metadata.sku}
-                                  </span>
-                                )}
-                              </Label>
-                            </div>
-                            <span className="font-bold text-lg">
-                              {formatPrice(price.unit_amount, price.currency)}
-                            </span>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  ) : selectedProduct.prices?.[0] && (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-5 h-5 text-[#D4AF37]" />
-                      <span className="text-2xl font-bold">
-                        {formatPrice(selectedProduct.prices[0].unit_amount, selectedProduct.prices[0].currency)}
-                      </span>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  {selectedPrice && (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Selected:</span>
-                        <span className="font-medium">{getVariantLabel(selectedPrice)}</span>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-muted-foreground">Price:</span>
-                        <span className="font-bold text-xl text-[#D4AF37]">
-                          {formatPrice(selectedPrice.unit_amount, selectedPrice.currency)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button
-                    className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black h-12 text-lg"
-                    onClick={handleCheckout}
-                    disabled={!selectedPriceId}
-                    data-testid="button-checkout"
-                  >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    Proceed to Checkout
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

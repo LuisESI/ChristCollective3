@@ -3695,6 +3695,53 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Shop routes - Get single product by ID
+  app.get('/api/shop/products/:productId', async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const stripeClient = await getUncachableStripeClient();
+      
+      // Fetch the product
+      const product = await stripeClient.products.retrieve(productId);
+      
+      if (!product || !product.active) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      // Fetch all prices for this product
+      const prices = await stripeClient.prices.list({ 
+        product: productId, 
+        active: true, 
+        limit: 100 
+      });
+      
+      const productWithPrices = {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        active: product.active,
+        images: product.images,
+        metadata: product.metadata,
+        prices: prices.data.map(price => ({
+          id: price.id,
+          unit_amount: price.unit_amount,
+          currency: price.currency,
+          recurring: price.recurring,
+          active: price.active,
+          metadata: price.metadata,
+        })),
+      };
+      
+      res.json(productWithPrices);
+    } catch (error: any) {
+      console.error("Error fetching product:", error);
+      if (error.code === 'resource_missing') {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
   // Shop routes - Get price details with product info
   app.get('/api/shop/price/:priceId', async (req, res) => {
     try {
