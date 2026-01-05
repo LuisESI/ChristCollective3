@@ -137,7 +137,7 @@ export default function ShopPage() {
   const selectedPrice = selectedProduct?.prices?.find(p => p.id === selectedPriceId);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-16">
       <Helmet>
         <title>Shop | Christ Collective</title>
         <meta name="description" content="Browse our collection of faith-based products and merchandise from Christ Collective." />

@@ -35,16 +35,33 @@ export function buildApiUrl(path: string): string {
 export function getImageUrl(imageUrl: string | null | undefined): string {
   if (!imageUrl) return '';
   
-  // If already a full URL (http/https), return as-is
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    return imageUrl;
-  }
-  
-  // For mobile apps, convert relative paths to full URLs
+  // For mobile apps, we need to handle URLs differently
   if (isNativeApp()) {
     const baseUrl = getApiBaseUrl();
+    
+    // If it's an absolute URL with /uploads/, extract just the path
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      try {
+        const url = new URL(imageUrl);
+        // Extract the path (e.g., /uploads/filename.png)
+        const path = url.pathname;
+        if (path.startsWith('/uploads/')) {
+          return `${baseUrl}${path}`;
+        }
+      } catch (e) {
+        // If URL parsing fails, return as-is
+      }
+      return imageUrl;
+    }
+    
+    // Convert relative paths to full URLs
     const normalizedPath = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
     return `${baseUrl}${normalizedPath}`;
+  }
+  
+  // For web: if it's an absolute URL, return as-is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
   }
   
   // For web, return relative path as-is
