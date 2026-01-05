@@ -6,9 +6,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Use Resend's default test sender for development, or verified domain for production
 const getEmailSender = () => {
   const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
-  return isProduction 
+  const sender = isProduction 
     ? 'Christ Collective <noreply@christcollective.org>'
     : 'Christ Collective <onboarding@resend.dev>';
+  console.log(`📧 Email sender: ${sender} (production: ${isProduction})`);
+  return sender;
 };
 
 export interface SendPasswordResetEmailParams {
@@ -98,6 +100,8 @@ export interface OrderConfirmationEmailParams {
 
 export async function sendOrderConfirmationEmail(params: OrderConfirmationEmailParams) {
   const { to, customerName, orderId, productName, quantity, unitAmount, totalAmount, currency, shippingAddress } = params;
+  
+  console.log(`📧 Attempting to send order confirmation email to: ${to} for order #${orderId}`);
   
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
