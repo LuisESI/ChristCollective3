@@ -198,7 +198,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-800 p-4 rounded-lg">
         <div className="flex items-center gap-4 mb-4">
           {priceDetails.product.images?.[0] ? (
             <img
@@ -207,19 +207,19 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
               className="w-16 h-16 rounded object-cover"
             />
           ) : (
-            <div className="w-16 h-16 rounded bg-gray-200 flex items-center justify-center">
-              <Package className="w-8 h-8 text-gray-400" />
+            <div className="w-16 h-16 rounded bg-gray-700 flex items-center justify-center">
+              <Package className="w-8 h-8 text-gray-500" />
             </div>
           )}
           <div>
-            <h3 className="font-semibold text-black">{priceDetails.product.name}</h3>
-            <p className="text-sm text-gray-600 line-clamp-1">{priceDetails.product.description}</p>
+            <h3 className="font-semibold text-white">{priceDetails.product.name}</h3>
+            <p className="text-sm text-gray-400 line-clamp-1">{priceDetails.product.description}</p>
           </div>
         </div>
         <Separator className="my-4" />
         <div className="flex justify-between items-center">
-          <span className="font-semibold text-black">Total</span>
-          <span className="font-bold text-lg text-black">
+          <span className="font-semibold text-white">Total</span>
+          <span className="font-bold text-lg text-[#D4AF37]">
             {formatPrice(priceDetails.unit_amount, priceDetails.currency)}
           </span>
         </div>
@@ -228,13 +228,13 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-[#D4AF37]" />
-          <h3 className="font-semibold text-lg text-black">Shipping Address</h3>
+          <h3 className="font-semibold text-lg text-[#D4AF37]">Shipping Address</h3>
         </div>
-        <p className="text-sm text-gray-600">We currently only ship within the United States.</p>
+        <p className="text-sm text-gray-400">We currently only ship within the United States.</p>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name" className="text-black">Full Name *</Label>
+            <Label htmlFor="name" className="text-white">Full Name *</Label>
             <Input
               id="name"
               value={shippingInfo.name}
@@ -249,7 +249,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
           </div>
 
           <div>
-            <Label htmlFor="address" className="text-black">Street Address *</Label>
+            <Label htmlFor="address" className="text-white">Street Address *</Label>
             <Input
               id="address"
               value={shippingInfo.address}
@@ -265,7 +265,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="city" className="text-black">City *</Label>
+              <Label htmlFor="city" className="text-white">City *</Label>
               <Input
                 id="city"
                 value={shippingInfo.city}
@@ -280,7 +280,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
             </div>
 
             <div>
-              <Label htmlFor="state" className="text-black">State *</Label>
+              <Label htmlFor="state" className="text-white">State *</Label>
               <Select
                 value={shippingInfo.state}
                 onValueChange={(value) => updateShippingField('state', value)}
@@ -306,7 +306,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
           </div>
 
           <div className="w-1/2">
-            <Label htmlFor="zipCode" className="text-black">ZIP Code *</Label>
+            <Label htmlFor="zipCode" className="text-white">ZIP Code *</Label>
             <Input
               id="zipCode"
               value={shippingInfo.zipCode}
@@ -325,7 +325,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
       <Separator />
 
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg text-black">Payment Method</h3>
+        <h3 className="font-semibold text-lg text-white">Payment Method</h3>
         <PaymentElement />
       </div>
 
@@ -338,7 +338,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
         {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount, priceDetails.currency)}`}
       </Button>
 
-      <div className="flex items-center justify-center text-sm text-gray-500">
+      <div className="flex items-center justify-center text-sm text-gray-400">
         <Lock className="w-4 h-4 mr-1" />
         Your payment information is secure and encrypted
       </div>
@@ -413,13 +413,13 @@ export default function ShopCheckoutPage() {
 
   if (isPriceLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-black py-8">
         <div className="container mx-auto px-4 max-w-lg">
-          <Skeleton className="h-8 w-32 mb-6" />
-          <Card>
+          <Skeleton className="h-8 w-32 mb-6 bg-gray-800" />
+          <Card className="bg-gray-900 border-gray-800">
             <CardContent className="pt-6">
-              <Skeleton className="h-20 w-full mb-4" />
-              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-20 w-full mb-4 bg-gray-800" />
+              <Skeleton className="h-40 w-full bg-gray-800" />
             </CardContent>
           </Card>
         </div>
@@ -429,14 +429,14 @@ export default function ShopCheckoutPage() {
 
   if (!priceDetails) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-black py-8">
         <div className="container mx-auto px-4 max-w-lg">
-          <Card>
+          <Card className="bg-gray-900 border-gray-800">
             <CardContent className="pt-6 text-center">
-              <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h2 className="text-xl font-semibold mb-2 text-black">Product Not Found</h2>
-              <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
-              <Button onClick={() => navigate('/shop')}>Back to Shop</Button>
+              <Package className="w-16 h-16 mx-auto text-gray-500 mb-4" />
+              <h2 className="text-xl font-semibold mb-2 text-white">Product Not Found</h2>
+              <p className="text-gray-400 mb-4">The product you're looking for doesn't exist.</p>
+              <Button onClick={() => navigate('/shop')} className="bg-[#D4AF37] hover:bg-[#C4A030] text-black">Back to Shop</Button>
             </CardContent>
           </Card>
         </div>
@@ -445,7 +445,7 @@ export default function ShopCheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-black py-8">
       <Helmet>
         <title>Checkout | Christ Collective Shop</title>
       </Helmet>
@@ -453,30 +453,30 @@ export default function ShopCheckoutPage() {
       <div className="container mx-auto px-4 max-w-lg">
         <Button
           variant="ghost"
-          className="mb-6 text-black"
+          className="mb-6 text-white hover:text-[#D4AF37]"
           onClick={() => navigate('/shop')}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Shop
         </Button>
 
-        <Card>
+        <Card className="bg-black border-gray-800">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black">
+            <CardTitle className="flex items-center gap-2 text-[#D4AF37]">
               <ShoppingCart className="w-5 h-5" />
               Checkout
             </CardTitle>
-            <CardDescription className="text-gray-600">Complete your purchase</CardDescription>
+            <CardDescription className="text-gray-400">Complete your purchase</CardDescription>
           </CardHeader>
           <CardContent>
             {stripePromise && clientSecret ? (
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#D4AF37' } } }}>
                 <CheckoutForm priceDetails={priceDetails} clientSecret={clientSecret} />
               </Elements>
             ) : (
               <div className="py-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-4" />
-                <p className="text-gray-600">Initializing payment...</p>
+                <p className="text-gray-400">Initializing payment...</p>
               </div>
             )}
           </CardContent>
