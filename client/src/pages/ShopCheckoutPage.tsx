@@ -229,10 +229,11 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Payment error:', error);
       toast({
         title: 'Payment Error',
-        description: 'An unexpected error occurred. Please try again.',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
         variant: 'destructive',
       });
     } finally {
