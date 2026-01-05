@@ -794,3 +794,51 @@ export const insertDirectMessageSchema = createInsertSchema(directMessages)
 export type DirectChat = typeof directChats.$inferSelect;
 export type DirectMessage = typeof directMessages.$inferSelect;
 export type InsertDirectMessage = z.infer<typeof insertDirectMessageSchema>;
+
+// Shop Orders
+export const shopOrders = pgTable("shop_orders", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").notNull(),
+  stripePriceId: varchar("stripe_price_id").notNull(),
+  productName: varchar("product_name").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  unitAmount: integer("unit_amount").notNull(),
+  totalAmount: integer("total_amount").notNull(),
+  currency: varchar("currency").notNull().default("usd"),
+  status: varchar("status", { enum: ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"] }).default("pending").notNull(),
+  // Customer info (for guests or signed-in users)
+  customerEmail: varchar("customer_email").notNull(),
+  customerPhone: varchar("customer_phone"),
+  customerName: varchar("customer_name").notNull(),
+  // Shipping address
+  shippingName: varchar("shipping_name").notNull(),
+  shippingAddress: varchar("shipping_address").notNull(),
+  shippingAddress2: varchar("shipping_address2"),
+  shippingCity: varchar("shipping_city").notNull(),
+  shippingState: varchar("shipping_state").notNull(),
+  shippingZipCode: varchar("shipping_zip_code").notNull(),
+  shippingCountry: varchar("shipping_country").notNull().default("US"),
+  // Tracking info
+  trackingNumber: varchar("tracking_number"),
+  trackingCarrier: varchar("tracking_carrier"),
+  shippedAt: timestamp("shipped_at"),
+  deliveredAt: timestamp("delivered_at"),
+  // Notes
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const shopOrdersRelations = relations(shopOrders, ({ one }) => ({
+  user: one(users, {
+    fields: [shopOrders.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertShopOrderSchema = createInsertSchema(shopOrders)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export type ShopOrder = typeof shopOrders.$inferSelect;
+export type InsertShopOrder = z.infer<typeof insertShopOrderSchema>;
