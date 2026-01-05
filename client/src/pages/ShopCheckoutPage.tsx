@@ -12,8 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Package, Lock, ShoppingCart, MapPin } from 'lucide-react';
-import { buildApiUrl } from '@/lib/api-config';
+import { ArrowLeft, Package, Lock, ShoppingCart, MapPin, Plus, Minus } from 'lucide-react';
+import { buildApiUrl, getImageUrl } from '@/lib/api-config';
 
 interface PriceDetails {
   id: string;
@@ -30,6 +30,7 @@ interface PriceDetails {
 interface ShippingInfo {
   name: string;
   address: string;
+  address2: string;
   city: string;
   state: string;
   zipCode: string;
@@ -97,11 +98,13 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     name: '',
     address: '',
+    address2: '',
     city: '',
     state: '',
     zipCode: '',
   });
   const [shippingErrors, setShippingErrors] = useState<Partial<ShippingInfo>>({});
+  const [quantity, setQuantity] = useState(1);
 
   const validateShipping = (): boolean => {
     const errors: Partial<ShippingInfo> = {};
@@ -155,6 +158,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
             name: shippingInfo.name,
             address: {
               line1: shippingInfo.address,
+              line2: shippingInfo.address2 || undefined,
               city: shippingInfo.city,
               state: shippingInfo.state,
               postal_code: shippingInfo.zipCode,
@@ -202,7 +206,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
         <div className="flex items-center gap-4 mb-4">
           {priceDetails.product.images?.[0] ? (
             <img
-              src={priceDetails.product.images[0]}
+              src={getImageUrl(priceDetails.product.images[0])}
               alt={priceDetails.product.name}
               className="w-16 h-16 rounded object-cover"
             />
@@ -211,16 +215,47 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
               <Package className="w-8 h-8 text-gray-500" />
             </div>
           )}
-          <div>
+          <div className="flex-1">
             <h3 className="font-semibold text-white">{priceDetails.product.name}</h3>
             <p className="text-sm text-gray-400 line-clamp-1">{priceDetails.product.description}</p>
+            <p className="text-sm text-[#D4AF37] mt-1">
+              {formatPrice(priceDetails.unit_amount, priceDetails.currency)} each
+            </p>
           </div>
         </div>
-        <Separator className="my-4" />
+        
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-white">Quantity</span>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="h-8 w-8 p-0 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+              data-testid="button-quantity-decrease"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="text-white font-medium w-8 text-center" data-testid="text-quantity">{quantity}</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setQuantity(quantity + 1)}
+              className="h-8 w-8 p-0 bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+              data-testid="button-quantity-increase"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        <Separator className="my-4 bg-gray-700" />
         <div className="flex justify-between items-center">
           <span className="font-semibold text-white">Total</span>
           <span className="font-bold text-lg text-[#D4AF37]">
-            {formatPrice(priceDetails.unit_amount, priceDetails.currency)}
+            {formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}
           </span>
         </div>
       </div>
@@ -254,13 +289,25 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
               id="address"
               value={shippingInfo.address}
               onChange={(e) => updateShippingField('address', e.target.value)}
-              placeholder="123 Main St, Apt 4"
+              placeholder="123 Main St"
               className={`mt-1 bg-white text-black ${shippingErrors.address ? 'border-red-500' : ''}`}
               data-testid="input-shipping-address"
             />
             {shippingErrors.address && (
               <p className="text-sm text-red-500 mt-1">{shippingErrors.address}</p>
             )}
+          </div>
+
+          <div>
+            <Label htmlFor="address2" className="text-white">Address Line 2 <span className="text-gray-400">(Optional)</span></Label>
+            <Input
+              id="address2"
+              value={shippingInfo.address2}
+              onChange={(e) => updateShippingField('address2', e.target.value)}
+              placeholder="Apt, Suite, Unit, etc."
+              className="mt-1 bg-white text-black"
+              data-testid="input-shipping-address2"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -335,7 +382,7 @@ function CheckoutForm({ priceDetails, clientSecret }: { priceDetails: PriceDetai
         className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold py-3 text-lg"
         data-testid="button-pay"
       >
-        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount, priceDetails.currency)}`}
+        {isProcessing ? 'Processing...' : `Pay ${formatPrice(priceDetails.unit_amount * quantity, priceDetails.currency)}`}
       </Button>
 
       <div className="flex items-center justify-center text-sm text-gray-400">
