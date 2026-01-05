@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Package, Lock, ShoppingCart, MapPin } from 'lucide-react';
+import { ArrowLeft, Package, Lock, ShoppingCart, MapPin, Mail, Phone } from 'lucide-react';
 import { buildApiUrl, getImageUrl } from '@/lib/api-config';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PriceDetails {
   id: string;
@@ -34,6 +35,11 @@ interface ShippingInfo {
   city: string;
   state: string;
   zipCode: string;
+}
+
+interface ContactInfo {
+  email: string;
+  phone: string;
 }
 
 const US_STATES = [
@@ -90,7 +96,7 @@ const US_STATES = [
   { value: 'DC', label: 'District of Columbia' },
 ];
 
-function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: PriceDetails; clientSecret: string; quantity: number }) {
+function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDetails: PriceDetails; clientSecret: string; quantity: number; user: any }) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -104,6 +110,12 @@ function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: 
     zipCode: '',
   });
   const [shippingErrors, setShippingErrors] = useState<Partial<ShippingInfo>>({});
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: user?.email || '',
+    phone: user?.phone || '',
+  });
+  const [contactErrors, setContactErrors] = useState<Partial<ContactInfo>>({});
+  const isGuest = !user;
 
   const validateShipping = (): boolean => {
     const errors: Partial<ShippingInfo> = {};
@@ -130,6 +142,24 @@ function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: 
     return Object.keys(errors).length === 0;
   };
 
+  const validateContact = (): boolean => {
+    const errors: Partial<ContactInfo> = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!contactInfo.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(contactInfo.email)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    if (contactInfo.phone && !/^[\d\s\-\+\(\)]{10,}$/.test(contactInfo.phone.replace(/\s/g, ''))) {
+      errors.phone = 'Invalid phone number format';
+    }
+
+    setContactErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -137,6 +167,15 @@ function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: 
       toast({
         title: 'Shipping Information Required',
         description: 'Please fill in all shipping fields correctly.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validateContact()) {
+      toast({
+        title: 'Contact Information Required',
+        description: 'Please provide a valid email address.',
         variant: 'destructive',
       });
       return;
@@ -196,6 +235,13 @@ function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: 
     setShippingInfo(prev => ({ ...prev, [field]: value }));
     if (shippingErrors[field]) {
       setShippingErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const updateContactField = (field: keyof ContactInfo, value: string) => {
+    setContactInfo(prev => ({ ...prev, [field]: value }));
+    if (contactErrors[field]) {
+      setContactErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -340,6 +386,53 @@ function CheckoutForm({ priceDetails, clientSecret, quantity }: { priceDetails: 
         </div>
       </div>
 
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Mail className="w-5 h-5 text-[#D4AF37]" />
+          <h3 className="font-semibold text-lg text-[#D4AF37]">Contact Information</h3>
+        </div>
+        {!isGuest && (
+          <p className="text-sm text-gray-400">We'll send your order confirmation here.</p>
+        )}
+        {isGuest && (
+          <p className="text-sm text-gray-400">We'll send your order confirmation to this email.</p>
+        )}
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="email" className="text-white">Email Address *</Label>
+            <Input
+              id="email"
+              type="email"
+              value={contactInfo.email}
+              onChange={(e) => updateContactField('email', e.target.value)}
+              placeholder="you@example.com"
+              className={`mt-1 bg-white text-black ${contactErrors.email ? 'border-red-500' : ''}`}
+              data-testid="input-contact-email"
+            />
+            {contactErrors.email && (
+              <p className="text-sm text-red-500 mt-1">{contactErrors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="phone" className="text-white">Phone Number <span className="text-gray-400">(Optional)</span></Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={contactInfo.phone}
+              onChange={(e) => updateContactField('phone', e.target.value)}
+              placeholder="(555) 123-4567"
+              className={`mt-1 bg-white text-black ${contactErrors.phone ? 'border-red-500' : ''}`}
+              data-testid="input-contact-phone"
+            />
+            {contactErrors.phone && (
+              <p className="text-sm text-red-500 mt-1">{contactErrors.phone}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       <Separator />
 
       <div className="space-y-4">
@@ -368,6 +461,7 @@ export default function ShopCheckoutPage() {
   const { priceId } = useParams<{ priceId: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [stripePromise, setStripePromise] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   
@@ -492,7 +586,7 @@ export default function ShopCheckoutPage() {
           <CardContent>
             {stripePromise && clientSecret ? (
               <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#D4AF37' } } }}>
-                <CheckoutForm priceDetails={priceDetails} clientSecret={clientSecret} quantity={quantity} />
+                <CheckoutForm priceDetails={priceDetails} clientSecret={clientSecret} quantity={quantity} user={user} />
               </Elements>
             ) : (
               <div className="py-8 text-center">
