@@ -51,6 +51,7 @@ import DebugAuthPage from "@/pages/DebugAuthPage";
 import ShopPage from "@/pages/ShopPage";
 import ShopProductPage from "@/pages/ShopProductPage";
 import AdminProductsPage from "@/pages/AdminProductsPage";
+import AdminOrdersPage from "@/pages/AdminOrdersPage";
 import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
 import ShopSuccessPage from "@/pages/ShopSuccessPage";
 
@@ -115,6 +116,7 @@ function Router() {
       <Route path="/shop/checkout/:priceId" component={ShopCheckoutPage} />
       <Route path="/shop/success" component={ShopSuccessPage} />
       <Route path="/admin/products" component={AdminProductsPage} />
+      <Route path="/admin/orders" component={AdminOrdersPage} />
 
       <Route path="/privacy-settings" component={PrivacySettingsPage} />
       <Route component={NotFound} />
