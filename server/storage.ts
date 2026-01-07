@@ -74,6 +74,12 @@ import {
   shopOrders,
   type ShopOrder,
   type InsertShopOrder,
+  moneyEventLogs,
+  type MoneyEventLog,
+  type InsertMoneyEventLog,
+  webhookEvents,
+  type WebhookEvent,
+  type InsertWebhookEvent,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -248,6 +254,16 @@ export interface IStorage {
   listShopOrders(): Promise<ShopOrder[]>;
   getUserShopOrders(userId: string): Promise<ShopOrder[]>;
   updateShopOrder(id: number, data: Partial<ShopOrder>): Promise<ShopOrder>;
+  
+  // Money event log operations (audit trail)
+  createMoneyEventLog(eventData: InsertMoneyEventLog): Promise<MoneyEventLog>;
+  getMoneyEventLogsByOrder(orderId: number): Promise<MoneyEventLog[]>;
+  getMoneyEventLogsByPaymentIntent(paymentIntentId: string): Promise<MoneyEventLog[]>;
+  
+  // Webhook event operations (deduplication)
+  getWebhookEvent(stripeEventId: string): Promise<WebhookEvent | undefined>;
+  createWebhookEvent(eventData: InsertWebhookEvent): Promise<WebhookEvent>;
+  markWebhookEventProcessed(stripeEventId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2049,6 +2065,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(shopOrders.id, id))
       .returning();
     return order;
+  }
+
+  // Money event log operations (immutable audit trail)
+  async createMoneyEventLog(eventData: InsertMoneyEventLog): Promise<MoneyEventLog> {
+    const [log] = await db
+      .insert(moneyEventLogs)
+      .values(eventData)
+      .returning();
+    return log;
+  }
+
+  async getMoneyEventLogsByOrder(orderId: number): Promise<MoneyEventLog[]> {
+    return await db
+      .select()
+      .from(moneyEventLogs)
+      .where(eq(moneyEventLogs.orderId, orderId))
+      .orderBy(desc(moneyEventLogs.createdAt));
+  }
+
+  async getMoneyEventLogsByPaymentIntent(paymentIntentId: string): Promise<MoneyEventLog[]> {
+    return await db
+      .select()
+      .from(moneyEventLogs)
+      .where(eq(moneyEventLogs.stripePaymentIntentId, paymentIntentId))
+      .orderBy(desc(moneyEventLogs.createdAt));
+  }
+
+  // Webhook event operations (deduplication)
+  async getWebhookEvent(stripeEventId: string): Promise<WebhookEvent | undefined> {
+    const [event] = await db
+      .select()
+      .from(webhookEvents)
+      .where(eq(webhookEvents.stripeEventId, stripeEventId))
+      .limit(1);
+    return event;
+  }
+
+  async createWebhookEvent(eventData: InsertWebhookEvent): Promise<WebhookEvent> {
+    const [event] = await db
+      .insert(webhookEvents)
+      .values(eventData)
+      .returning();
+    return event;
+  }
+
+  async markWebhookEventProcessed(stripeEventId: string): Promise<void> {
+    await db
+      .update(webhookEvents)
+      .set({ processed: true, processedAt: new Date() })
+      .where(eq(webhookEvents.stripeEventId, stripeEventId));
   }
 }
 

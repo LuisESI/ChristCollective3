@@ -842,3 +842,41 @@ export const insertShopOrderSchema = createInsertSchema(shopOrders)
 
 export type ShopOrder = typeof shopOrders.$inferSelect;
 export type InsertShopOrder = z.infer<typeof insertShopOrderSchema>;
+
+// Money Event Log - Immutable audit trail for all payment-related events
+export const moneyEventLogs = pgTable("money_event_logs", {
+  id: serial("id").primaryKey(),
+  eventType: varchar("event_type", { 
+    enum: ["payment_intent_created", "payment_succeeded", "payment_failed", "refund_initiated", "refund_succeeded", "refund_failed", "order_created", "order_updated", "webhook_received"] 
+  }).notNull(),
+  orderId: integer("order_id").references(() => shopOrders.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeEventId: varchar("stripe_event_id"),
+  amount: integer("amount"),
+  currency: varchar("currency"),
+  status: varchar("status"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertMoneyEventLogSchema = createInsertSchema(moneyEventLogs)
+  .omit({ id: true, createdAt: true });
+
+export type MoneyEventLog = typeof moneyEventLogs.$inferSelect;
+export type InsertMoneyEventLog = z.infer<typeof insertMoneyEventLogSchema>;
+
+// Webhook Events - For deduplication of Stripe webhook deliveries
+export const webhookEvents = pgTable("webhook_events", {
+  id: serial("id").primaryKey(),
+  stripeEventId: varchar("stripe_event_id").notNull().unique(),
+  eventType: varchar("event_type").notNull(),
+  processed: boolean("processed").default(false),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertWebhookEventSchema = createInsertSchema(webhookEvents)
+  .omit({ id: true, createdAt: true });
+
+export type WebhookEvent = typeof webhookEvents.$inferSelect;
+export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
