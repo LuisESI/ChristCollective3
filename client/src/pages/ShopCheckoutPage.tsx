@@ -213,9 +213,33 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
 
       if (error) {
         console.error('Stripe error:', error.type, error.code, error.message);
+        
+        // Provide user-friendly error messages with helpful guidance
+        let userMessage = error.message || 'Payment could not be processed.';
+        let supportInfo = '';
+        
+        if (error.type === 'card_error') {
+          // Card-specific errors with guidance
+          if (error.code === 'card_declined') {
+            userMessage = 'Your card was declined. Please check your card details or try a different payment method.';
+          } else if (error.code === 'insufficient_funds') {
+            userMessage = 'Your card has insufficient funds. Please try a different card.';
+          } else if (error.code === 'expired_card') {
+            userMessage = 'Your card has expired. Please use a different card.';
+          } else if (error.code === 'incorrect_cvc') {
+            userMessage = 'The security code (CVC) is incorrect. Please check and try again.';
+          }
+        } else if (error.type === 'validation_error') {
+          userMessage = 'Please check your payment details and try again.';
+        }
+        
+        // Generate reference ID for support
+        const refId = `ERR-${Date.now().toString(36).toUpperCase()}`;
+        supportInfo = `If this issue persists, please contact support with reference: ${refId}`;
+        
         toast({
           title: 'Payment Failed',
-          description: error.message || 'Payment could not be processed.',
+          description: `${userMessage} ${supportInfo}`,
           variant: 'destructive',
         });
       } else if (paymentIntent) {
@@ -237,9 +261,10 @@ function CheckoutForm({ priceDetails, clientSecret, quantity, user }: { priceDet
       }
     } catch (error: any) {
       console.error('Payment error:', error);
+      const refId = `ERR-${Date.now().toString(36).toUpperCase()}`;
       toast({
         title: 'Payment Error',
-        description: error?.message || 'An unexpected error occurred. Please try again.',
+        description: `An unexpected error occurred. Your card was not charged. Please try again or contact support with reference: ${refId}`,
         variant: 'destructive',
       });
     } finally {
