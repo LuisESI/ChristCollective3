@@ -45,6 +45,30 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 -   **Notification System**: Real-time notifications with read/unread status.
 -   **E-commerce Shop**: Product management with image uploads, product variants (color/size combinations), Stripe integration for checkout. Admin dashboard for creating/managing products. Each variant creates a separate Stripe Price with metadata (color, size, sku). Featured products can be highlighted on the shop page.
 
+### Payment Safety Implementation (Jan 2026)
+The shop e-commerce system follows payment safety best practices:
+
+**Data Model:**
+- `shop_orders` - Order records with Stripe payment intent IDs
+- `money_event_logs` - Immutable audit trail for all payment events
+- `webhook_events` - Deduplication storage for Stripe webhook events
+
+**Safety Features:**
+1. **No Raw Card Data**: Uses Stripe Elements for payment collection; server only sees tokens/IDs
+2. **Idempotency**: Payment intent creation uses stable idempotency keys based on user + price + time window
+3. **Server-Side Verification**: Orders only created after verifying payment_intent.status === 'succeeded'
+4. **Webhook Deduplication**: Each Stripe event ID is stored and checked to prevent duplicate processing
+5. **Signature Verification**: Webhook handler verifies Stripe signature using STRIPE_SHOP_WEBHOOK_SECRET
+6. **Audit Trail**: All payment events logged to money_event_logs (immutable, append-only)
+7. **Failure UX**: User-friendly error messages with support reference IDs
+
+**Middleware Configuration:**
+- Webhook endpoints (`/api/shop/webhook`, `/api/donations/webhook`) skip JSON body parsing in `server/index.ts` to preserve raw body for signature verification
+
+**Required Secrets:**
+- `STRIPE_SECRET_KEY` - Stripe API secret key
+- `STRIPE_SHOP_WEBHOOK_SECRET` - Shop webhook endpoint signing secret (configure in Stripe Dashboard)
+
 ### System Design Choices
 -   **Deployment**: Development uses local environment with HMR, Vite dev server. Production uses optimized static assets, Express server, automatic database migrations, and environment-specific configuration.
 -   **Database Management**: Drizzle migrations, automated backups, connection pooling, query optimization.
