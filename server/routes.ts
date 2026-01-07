@@ -3761,11 +3761,11 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  // Shop routes - Create payment intent for product purchase
+  // Shop routes - Create payment intent for product purchase with idempotency
   app.post('/api/shop/create-payment-intent', async (req: any, res) => {
     try {
       const stripeClient = await getUncachableStripeClient();
-      const { priceId } = req.body;
+      const { priceId, idempotencyKey } = req.body;
 
       if (!priceId) {
         return res.status(400).json({ message: "Price ID is required" });
@@ -3776,6 +3776,11 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "Invalid price" });
       }
 
+      // Create stable idempotency key based on user session + price + timestamp (15 min window)
+      const timeWindow = Math.floor(Date.now() / (15 * 60 * 1000));
+      const userId = req.user?.id || 'guest';
+      const stableIdempotencyKey = idempotencyKey || `shop_pi_${userId}_${priceId}_${timeWindow}`;
+
       const paymentIntent = await stripeClient.paymentIntents.create({
         amount: price.unit_amount,
         currency: price.currency,
@@ -3785,11 +3790,31 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         metadata: {
           priceId,
           productId: typeof price.product === 'string' ? price.product : price.product.id,
-          userId: req.user?.id || 'guest',
+          userId,
         },
+      }, {
+        idempotencyKey: stableIdempotencyKey,
       });
 
-      res.json({ clientSecret: paymentIntent.client_secret });
+      // Log payment intent creation (audit trail)
+      try {
+        await storage.createMoneyEventLog({
+          eventType: 'payment_intent_created',
+          stripePaymentIntentId: paymentIntent.id,
+          amount: price.unit_amount,
+          currency: price.currency,
+          status: paymentIntent.status,
+          metadata: { priceId, userId, idempotencyKey: stableIdempotencyKey },
+        });
+      } catch (logError) {
+        console.error("Failed to log payment intent creation:", logError);
+        // Don't fail the request if logging fails
+      }
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      });
     } catch (error) {
       console.error("Error creating shop payment intent:", error);
       res.status(500).json({ message: "Failed to create payment intent" });
@@ -3860,6 +3885,25 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
 
       const order = await storage.createShopOrder(orderData);
 
+      // Log order creation (audit trail)
+      try {
+        await storage.createMoneyEventLog({
+          eventType: 'order_created',
+          orderId: order.id,
+          stripePaymentIntentId: paymentIntentId,
+          amount: order.totalAmount,
+          currency: order.currency,
+          status: order.status,
+          metadata: { 
+            customerEmail, 
+            productName: product.name,
+            quantity: quantity || 1,
+          },
+        });
+      } catch (logError) {
+        console.error("Failed to log order creation:", logError);
+      }
+
       // Send order confirmation email
       try {
         const { sendOrderConfirmationEmail } = await import('./email');
@@ -3891,6 +3935,139 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       console.error("Error creating order:", error);
       res.status(500).json({ message: "Failed to create order" });
     }
+  });
+
+  // Shop webhook - Handle Stripe payment events with deduplication and verification
+  // Note: This endpoint needs raw body for signature verification, so it's registered
+  // separately in index.ts BEFORE body parsers
+  app.post('/api/shop/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const webhookSecret = process.env.STRIPE_SHOP_WEBHOOK_SECRET;
+    
+    if (!webhookSecret) {
+      console.log('⚠️ Shop webhook endpoint called but STRIPE_SHOP_WEBHOOK_SECRET not configured');
+      return res.status(200).json({ received: true, warning: 'Webhook not configured' });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    if (!sig) {
+      console.error('❌ No stripe-signature header');
+      return res.status(400).json({ error: 'No signature' });
+    }
+
+    let event;
+    try {
+      const stripeClient = await getUncachableStripeClient();
+      event = stripeClient.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('❌ Webhook signature verification failed:', err.message);
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+
+    const eventId = event.id;
+    const eventType = event.type;
+
+    // Check for duplicate event (deduplication)
+    try {
+      const existingEvent = await storage.getWebhookEvent(eventId);
+      if (existingEvent) {
+        console.log(`⚠️ Duplicate webhook event ignored: ${eventId}`);
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+
+      // Record event for deduplication
+      await storage.createWebhookEvent({
+        stripeEventId: eventId,
+        eventType: eventType,
+        processed: false,
+      });
+    } catch (dedupError) {
+      console.error('❌ Deduplication check failed:', dedupError);
+      // Continue processing - we don't want to fail just because dedup failed
+    }
+
+    // Log webhook received (audit trail)
+    try {
+      const paymentIntent = event.data.object as any;
+      await storage.createMoneyEventLog({
+        eventType: 'webhook_received',
+        stripeEventId: eventId,
+        stripePaymentIntentId: paymentIntent.id || null,
+        amount: paymentIntent.amount || null,
+        currency: paymentIntent.currency || null,
+        status: eventType,
+        metadata: { eventType, livemode: event.livemode },
+      });
+    } catch (logError) {
+      console.error('Failed to log webhook event:', logError);
+    }
+
+    // Handle specific events
+    try {
+      if (eventType === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object as any;
+        console.log(`✅ Payment succeeded: ${paymentIntent.id}`);
+        
+        // Log success
+        await storage.createMoneyEventLog({
+          eventType: 'payment_succeeded',
+          stripePaymentIntentId: paymentIntent.id,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          status: 'succeeded',
+          metadata: paymentIntent.metadata || {},
+        });
+        
+        // Check if order exists - if not, the client-side create-order will handle it
+        const existingOrder = await storage.getShopOrderByPaymentIntent(paymentIntent.id);
+        if (existingOrder && existingOrder.status === 'pending') {
+          // Update order to paid
+          await storage.updateShopOrder(existingOrder.id, { status: 'paid' });
+        }
+      } else if (eventType === 'payment_intent.payment_failed') {
+        const paymentIntent = event.data.object as any;
+        console.log(`❌ Payment failed: ${paymentIntent.id}`);
+        
+        await storage.createMoneyEventLog({
+          eventType: 'payment_failed',
+          stripePaymentIntentId: paymentIntent.id,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          status: 'failed',
+          metadata: { 
+            error: paymentIntent.last_payment_error?.message || 'Unknown error',
+            ...paymentIntent.metadata 
+          },
+        });
+      } else if (eventType === 'charge.refunded') {
+        const charge = event.data.object as any;
+        console.log(`💸 Refund processed: ${charge.payment_intent}`);
+        
+        await storage.createMoneyEventLog({
+          eventType: 'refund_succeeded',
+          stripePaymentIntentId: charge.payment_intent,
+          amount: charge.amount_refunded,
+          currency: charge.currency,
+          status: 'refunded',
+          metadata: { chargeId: charge.id },
+        });
+        
+        // Update order status if exists
+        if (charge.payment_intent) {
+          const order = await storage.getShopOrderByPaymentIntent(charge.payment_intent);
+          if (order) {
+            await storage.updateShopOrder(order.id, { status: 'refunded' });
+          }
+        }
+      }
+
+      // Mark event as processed
+      await storage.markWebhookEventProcessed(eventId);
+    } catch (processError) {
+      console.error('❌ Error processing webhook event:', processError);
+      // Still return 200 to prevent Stripe from retrying immediately
+    }
+
+    res.status(200).json({ received: true });
   });
 
   // Admin routes - Get all shop orders
