@@ -54,7 +54,14 @@ app.use(cors({
   exposedHeaders: ['set-cookie']
 }));
 
-app.use(express.json());
+// Skip JSON parsing for Stripe webhook endpoints (they need raw body for signature verification)
+app.use((req, res, next) => {
+  if (req.path === '/api/shop/webhook' || req.path === '/api/donations/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: false }));
 
 // Serve uploaded files
