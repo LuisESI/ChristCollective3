@@ -8,7 +8,7 @@ export default function MissionSection() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Our Mission</h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-6"></div>
           <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            Christ Collective exists to unite Christians from all denominations worldwide, fostering community, charity, and business relationships grounded in shared faith.
+            Christ Collective is a community of creatives, who have chosen to use their gifts & influence to bridge the gap betweeen sacred & secular spaces, bringing jesus to the creative community through content creation & various creative means.
           </p>
         </div>
 
