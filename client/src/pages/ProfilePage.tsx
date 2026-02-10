@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye } from "lucide-react";
 import { useLocation, useParams } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -204,6 +204,8 @@ export default function ProfilePage() {
 
   const creator = (creatorProfile as any)?.creatorProfile;
 
+  const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
+
   return (
     <>
       <Helmet>
@@ -211,198 +213,145 @@ export default function ProfilePage() {
         <meta name="description" content="Your profile on Christ Collective - connect with the Christian community." />
       </Helmet>
       <div className="min-h-screen bg-black text-white pb-20">
-        {/* Modern Header with Navigation */}
-        <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-800">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate("/feed")}
-                className="text-white hover:bg-white/10 p-2"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <h1 className="text-lg font-semibold text-center flex-1">
-                {displayUser?.firstName && displayUser?.lastName 
-                  ? `${displayUser.firstName} ${displayUser.lastName}`
-                  : displayUser?.username}
-              </h1>
-              {isOwnProfile ? (
-                <Button 
-                  variant="ghost" 
-                  onClick={() => navigate("/edit-profile")}
-                  className="text-white hover:bg-white/10 p-2"
-                >
-                  <Edit className="w-5 h-5" />
-                </Button>
-              ) : (
-                <div className="w-9 h-9"></div>
-              )}
-            </div>
-          </div>
+        {/* Cover Photo */}
+        <div className="relative h-40 md:h-48 bg-gradient-to-b from-gray-900 to-black">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 via-gray-900 to-black" />
         </div>
 
-        {/* Profile Header */}
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-start gap-6 mb-4">
-            <Avatar className="w-32 h-32 ring-2 ring-gray-700">
+        <div className="max-w-4xl mx-auto px-4">
+          {/* Avatar overlapping cover + Edit Profile button row */}
+          <div className="flex items-end justify-between">
+            <Avatar className="w-24 h-24 -mt-12 ring-2 ring-[#D4AF37] border-4 border-black">
               <AvatarImage src={getImageUrl(displayUser?.profileImageUrl || creator?.profileImage)} alt={displayUser?.firstName || displayUser?.username} />
-              <AvatarFallback className="bg-gray-800 text-white text-3xl font-bold">
+              <AvatarFallback className="bg-gray-800 text-white text-2xl font-bold">
                 {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
               </AvatarFallback>
             </Avatar>
-            
-            <div className="flex-1">
-              <div className="flex flex-col gap-1 mb-2">
-                <h2 className="text-xl font-semibold text-left">
-                  {displayUser?.firstName && displayUser?.lastName 
-                    ? `${displayUser.firstName} ${displayUser.lastName}`
-                    : displayUser?.username}
-                </h2>
-                <p className="text-gray-400 text-sm">@{displayUser?.username}</p>
-                {(creatorProfile as any)?.isCreator && (
-                  <Badge className="bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
-                    ✨ Sponsored Creator
-                  </Badge>
-                )}
-              </div>
-              
-              {/* Stats Row - Show for all users */}
-              <div className="flex gap-6 mb-3">
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {creator?.posts?.length || creator?.totalPosts || 0}
-                  </div>
-                  <div className="text-xs text-gray-400">posts</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {(userStats as any)?.followersCount || creator?.totalFollowers || 0}
-                  </div>
-                  <div className="text-xs text-gray-400">followers</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-semibold">
-                    {(userStats as any)?.followingCount || (followingData as any)?.length || 0}
-                  </div>
-                  <div className="text-xs text-gray-400">following</div>
-                </div>
-              </div>
+
+            <div className="flex gap-2 pb-2">
+              {isOwnProfile ? (
+                <>
+                  <Button
+                    onClick={() => navigate("/edit-profile")}
+                    variant="outline"
+                    className="border-[#D4AF37] text-white bg-transparent hover:bg-[#D4AF37]/10 font-medium"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/privacy-settings")}
+                    variant="outline"
+                    className="border-gray-700 text-white bg-transparent hover:bg-white/10"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    className="border-gray-700 text-white bg-transparent hover:bg-white/10"
+                    onClick={() => {
+                      if (!displayUser?.id) {
+                        toast({
+                          title: "Error",
+                          description: "Unable to start chat. Please try again.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const createDirectChat = async () => {
+                        try {
+                          const response = await fetch('/api/direct-chats', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ recipientId: displayUser.id })
+                          });
+                          if (response.ok) {
+                            const chat = await response.json();
+                            navigate(`/direct-chat/${chat.id}`);
+                          } else {
+                            const errorData = await response.json();
+                            toast({
+                              title: "Error",
+                              description: errorData.message || "Failed to start chat",
+                              variant: "destructive",
+                            });
+                          }
+                        } catch (error) {
+                          console.error('Error creating direct chat:', error);
+                          toast({
+                            title: "Error",
+                            description: "Failed to start chat. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      };
+                      createDirectChat();
+                    }}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Message
+                  </Button>
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={followMutation.isPending || unfollowMutation.isPending}
+                    className={`font-medium ${
+                      isFollowing
+                        ? 'bg-gray-600 text-white hover:bg-gray-700'
+                        : 'bg-[#D4AF37] text-black hover:bg-[#B8941F]'
+                    }`}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    {followMutation.isPending || unfollowMutation.isPending
+                      ? '...'
+                      : isFollowing ? 'Unfollow' : 'Follow'
+                    }
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Bio - Left aligned */}
+          {/* Name / Username */}
+          <div className="mt-3">
+            <h2 className="text-2xl font-bold">
+              {displayUser?.firstName && displayUser?.lastName
+                ? `${displayUser.firstName} ${displayUser.lastName}`
+                : displayUser?.username}
+            </h2>
+            <p className="text-gray-400 text-sm">@{displayUser?.username}</p>
+            {(creatorProfile as any)?.isCreator && (
+              <Badge className="mt-2 bg-[#D4AF37] text-black hover:bg-[#B8941F] text-xs px-3 py-1 w-fit rounded-full font-medium">
+                Sponsored Creator
+              </Badge>
+            )}
+          </div>
+
+          {/* Bio */}
           {(creator?.bio || displayUser?.bio) && (
-            <div className="mb-4">
-              <p className="text-sm leading-relaxed text-left">
+            <div className="mt-3">
+              <p className="text-sm leading-relaxed">
                 {creator?.bio || displayUser?.bio}
               </p>
             </div>
           )}
-          
-          {/* Content Type and Audience - Single line */}
+
+          {/* Content Type and Audience */}
           {(creatorProfile as any)?.isCreator && (
-            <div className="text-sm text-gray-400 mb-6 text-left">
+            <div className="text-sm text-gray-400 mt-2">
               <div>
                 Content: {creator?.content || "Biblical Education / Podcast"}
-                {creator?.audience && ` • Audience: ${creator.audience}`}
-                {creator?.sponsorshipStartDate && ` • Sponsored since ${formatDate(creator.sponsorshipStartDate)}`}
+                {creator?.audience && ` \u2022 Audience: ${creator.audience}`}
+                {creator?.sponsorshipStartDate && ` \u2022 Sponsored since ${formatDate(creator.sponsorshipStartDate)}`}
               </div>
             </div>
           )}
 
-          {/* Action Buttons - Different for own vs others' profiles */}
-          <div className="flex gap-3 mb-6">
-            {isOwnProfile ? (
-              <>
-                <Button 
-                  onClick={() => navigate("/edit-profile")}
-                  className="flex-1 bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
-                <Button 
-                  onClick={() => navigate("/privacy-settings")}
-                  variant="outline" 
-                  className="flex-1 border-gray-600 text-white hover:bg-gray-800"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant="outline"
-                  className="flex-1 border-gray-600 text-white hover:bg-gray-800"
-                  onClick={() => {
-                    if (!displayUser?.id) {
-                      toast({
-                        title: "Error",
-                        description: "Unable to start chat. Please try again.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    
-                    // Create or navigate to direct chat
-                    const createDirectChat = async () => {
-                      try {
-                        const response = await fetch('/api/direct-chats', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ recipientId: displayUser.id })
-                        });
-                        
-                        if (response.ok) {
-                          const chat = await response.json();
-                          navigate(`/direct-chat/${chat.id}`);
-                        } else {
-                          const errorData = await response.json();
-                          toast({
-                            title: "Error",
-                            description: errorData.message || "Failed to start chat",
-                            variant: "destructive",
-                          });
-                        }
-                      } catch (error) {
-                        console.error('Error creating direct chat:', error);
-                        toast({
-                          title: "Error",
-                          description: "Failed to start chat. Please try again.",
-                          variant: "destructive",
-                        });
-                      }
-                    };
-                    createDirectChat();
-                  }}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Message
-                </Button>
-                <Button 
-                  onClick={handleFollowToggle}
-                  disabled={followMutation.isPending || unfollowMutation.isPending}
-                  className={`flex-1 font-medium ${
-                    isFollowing 
-                      ? 'bg-gray-600 text-white hover:bg-gray-700' 
-                      : 'bg-[#D4AF37] text-black hover:bg-[#B8941F]'
-                  }`}
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  {followMutation.isPending || unfollowMutation.isPending 
-                    ? '...' 
-                    : isFollowing ? 'Unfollow' : 'Follow'
-                  }
-                </Button>
-              </>
-            )}
-          </div>
-
           {/* Platform Links */}
           {creator?.platforms && (creator.platforms as any[]).length > 0 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 mb-6">
+            <div className="flex gap-3 overflow-x-auto pb-2 mt-4">
               {(creator.platforms as any[]).map((platform, index) => (
                 <button
                   key={index}
@@ -425,29 +374,53 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {/* Stats Row */}
+          <div className="border border-gray-800 rounded-xl p-4 mt-5">
+            <div className="flex justify-around text-center">
+              <div>
+                <div className="text-lg font-semibold text-[#D4AF37]">
+                  {creator?.posts?.length || creator?.totalPosts || 0}
+                </div>
+                <div className="text-xs text-gray-400">Posts</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-[#D4AF37]">
+                  {(userStats as any)?.followersCount || creator?.totalFollowers || 0}
+                </div>
+                <div className="text-xs text-gray-400">Followers</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-[#D4AF37]">
+                  {(userStats as any)?.followingCount || (followingData as any)?.length || 0}
+                </div>
+                <div className="text-xs text-gray-400">Following</div>
+              </div>
+            </div>
+          </div>
+
           {/* Welcome message for new users without creator profile - only show for own profile */}
           {isOwnProfile && !(creatorProfile as any)?.isCreator && (
-            <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
+            <div className="text-center mt-5 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
               <p className="text-gray-400 text-sm mb-4">
                 Choose your path to connect with the Christian community and share your faith journey.
               </p>
               <div className="flex flex-col gap-3">
-                <Button 
+                <Button
                   onClick={() => navigate("/edit-profile")}
                   className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
                 >
                   Become a Content Creator
                 </Button>
                 <div className="flex gap-2">
-                  <Button 
+                  <Button
                     onClick={() => navigate("/business")}
                     variant="outline"
                     className="flex-1 border-gray-600 text-white hover:bg-gray-800"
                   >
                     Business Networking
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => navigate("/ministry-profile")}
                     variant="outline"
                     className="flex-1 border-gray-600 text-white hover:bg-gray-800"
@@ -461,12 +434,12 @@ export default function ProfilePage() {
 
           {/* Empty state for creators without platforms - only show for own profile */}
           {isOwnProfile && (creatorProfile as any)?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
-            <div className="text-center mb-6 p-6 bg-gray-900 rounded-xl border border-gray-700">
+            <div className="text-center mt-5 p-6 bg-gray-900 rounded-xl border border-gray-700">
               <h3 className="text-lg font-semibold text-white mb-2">Connect Your Platforms</h3>
               <p className="text-gray-400 text-sm mb-4">
                 Link your social media accounts to showcase your content and connect with sponsors.
               </p>
-              <Button 
+              <Button
                 onClick={() => navigate("/edit-profile")}
                 className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
               >
@@ -475,74 +448,108 @@ export default function ProfilePage() {
             </div>
           )}
 
-
+          {/* Posts / Saved Toggle Tabs */}
+          <div className="flex gap-3 mt-5">
+            <button
+              onClick={() => setActiveTab('posts')}
+              className={`flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'posts'
+                  ? 'bg-[#D4AF37] text-black'
+                  : 'bg-transparent text-gray-400 border border-gray-700 hover:text-white'
+              }`}
+            >
+              Posts
+            </button>
+            <button
+              onClick={() => setActiveTab('saved')}
+              className={`flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'saved'
+                  ? 'bg-[#D4AF37] text-black'
+                  : 'bg-transparent text-gray-400 border border-gray-700 hover:text-white'
+              }`}
+            >
+              Saved
+            </button>
+          </div>
 
           {/* Content Grid */}
-          <div className="border-t border-gray-800 mt-6 pt-6">
-            {!creator?.posts || creator.posts.length === 0 ? (
+          <div className="mt-5">
+            {activeTab === 'posts' ? (
+              <>
+                {!creator?.posts || creator.posts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Play className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+                    {isOwnProfile ? (
+                      <>
+                        <p className="text-gray-400 text-sm">
+                          Your content will appear here once you start sharing.
+                        </p>
+                        <Button
+                          onClick={() => navigate("/edit-profile")}
+                          className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Add Content
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="text-gray-400 text-sm">
+                        No content has been shared yet.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-1">
+                    {creator.posts.map((post: any) => (
+                      <button
+                        key={post.id}
+                        onClick={() => window.open(post.postUrl, '_blank')}
+                        className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
+                      >
+                        {post.thumbnailUrl ? (
+                          <img
+                            src={post.thumbnailUrl}
+                            alt={post.postTitle || 'Post'}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                            <Play className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="flex items-center gap-4 text-white text-sm">
+                            {post.likeCount && (
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-4 h-4 fill-white" />
+                                <span>{post.likeCount.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {post.viewCount && (
+                              <div className="flex items-center gap-1">
+                                <Eye className="w-4 h-4" />
+                                <span>{post.viewCount.toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Play className="w-8 h-8 text-gray-400" />
+                  <Heart className="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                {isOwnProfile ? (
-                  <>
-                    <p className="text-gray-400 text-sm">
-                      Your content will appear here once you start sharing.
-                    </p>
-                    <Button 
-                      onClick={() => navigate("/edit-profile")}
-                      className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Add Content
-                    </Button>
-                  </>
-                ) : (
-                  <p className="text-gray-400 text-sm">
-                    No content has been shared yet.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1">
-                {creator.posts.map((post: any) => (
-                  <button
-                    key={post.id}
-                    onClick={() => window.open(post.postUrl, '_blank')}
-                    className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
-                  >
-                    {post.thumbnailUrl ? (
-                      <img 
-                        src={post.thumbnailUrl} 
-                        alt={post.postTitle || 'Post'}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <Play className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    
-                    {/* Overlay with stats */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="flex items-center gap-4 text-white text-sm">
-                        {post.likeCount && (
-                          <div className="flex items-center gap-1">
-                            <Heart className="w-4 h-4 fill-white" />
-                            <span>{post.likeCount.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {post.viewCount && (
-                          <div className="flex items-center gap-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.viewCount.toLocaleString()}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                <h3 className="text-lg font-semibold mb-2">No saved posts</h3>
+                <p className="text-gray-400 text-sm">
+                  Posts you save will appear here.
+                </p>
               </div>
             )}
           </div>

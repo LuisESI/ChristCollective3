@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, TrendingUp, Users, DollarSign, Star } from "lucide-react";
+import { Search, TrendingUp, Users, DollarSign, Star, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
@@ -17,7 +17,6 @@ export default function ExplorePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Redirect to auth page if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
       const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
@@ -50,7 +49,6 @@ export default function ExplorePage() {
     enabled: !!user,
   });
 
-  // Get current user's following list to prioritize unfollowed users
   const { data: userFollowing } = useQuery({
     queryKey: [`/api/users/${user?.id}/following`],
     enabled: !!user?.id,
@@ -58,7 +56,7 @@ export default function ExplorePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full" />
       </div>
     );
@@ -94,20 +92,15 @@ export default function ExplorePage() {
     ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
 
-  // Filter users but exclude those who should be in other categories
   const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((targetUser: any) => {
-    // Don't show current user in the list
     if (targetUser.id === user?.id) return false;
     
-    // Check if user has ministry profile, creator profile, or business profile
     const hasMinistryProfile = ministries && Array.isArray(ministries) && ministries.some((ministry: any) => ministry.userId === targetUser.id);
     const hasCreatorProfile = creators && Array.isArray(creators) && creators.some((creator: any) => creator.userId === targetUser.id);
     const hasBusinessProfile = businesses && Array.isArray(businesses) && businesses.some((business: any) => business.userId === targetUser.id);
     
-    // Only show regular users (those without special profiles)
     const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
     
-    // Apply search filter
     const matchesSearch = targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,15 +109,12 @@ export default function ExplorePage() {
     return isRegularUser && matchesSearch;
   }) : [];
 
-  // Randomize and prioritize unfollowed users
   const randomizedUsers = filteredUsers.length > 0 ? (() => {
     const followingIds = userFollowing && Array.isArray(userFollowing) ? userFollowing.map((follow: any) => follow.id) : [];
     
-    // Separate followed and unfollowed users
     const unfollowedUsers = filteredUsers.filter((targetUser: any) => !followingIds.includes(targetUser.id));
     const followedUsers = filteredUsers.filter((targetUser: any) => followingIds.includes(targetUser.id));
     
-    // Shuffle both arrays
     const shuffleArray = (array: any[]) => {
       const shuffled = [...array];
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -137,66 +127,62 @@ export default function ExplorePage() {
     const shuffledUnfollowed = shuffleArray(unfollowedUsers);
     const shuffledFollowed = shuffleArray(followedUsers);
     
-    // Prioritize unfollowed users, then followed users
     return [...shuffledUnfollowed, ...shuffledFollowed];
   })() : [];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-background border-b border-border">
+    <div className="min-h-screen bg-black text-white pb-20">
+      <div className="bg-black border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 max-w-4xl">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-foreground">Explore</h1>
+            <h1 className="text-xl font-bold text-white">Explore</h1>
           </div>
           
-          {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search campaigns, creators, businesses, members..."
+              placeholder="Search for people, topics, or posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-[#D4AF37]"
             />
           </div>
         </div>
       </div>
 
-      {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* Category Tabs */}
         <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category) => {
             const Icon = category.icon;
+            const isActive = selectedCategory === category.id;
             return (
-              <Button
+              <button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                className="flex items-center space-x-2 whitespace-nowrap"
+                className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-[#D4AF37] text-black"
+                    : "bg-transparent border border-gray-700 text-gray-400 hover:border-gray-500"
+                }`}
               >
+                {isActive && <Check className="h-4 w-4" />}
                 <Icon className="h-4 w-4" />
                 <span>{category.label}</span>
-              </Button>
+              </button>
             );
           })}
         </div>
 
-
-
-        {/* Campaigns Section */}
         {(selectedCategory === "all" || selectedCategory === "campaigns") && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Featured Campaigns</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#D4AF37] font-italic italic">Featured Campaigns</h3>
             {campaignsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse bg-gray-900 border-gray-800">
                     <CardContent className="p-4">
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      <div className="h-4 bg-gray-800 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-800 rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -204,21 +190,18 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCampaigns?.slice(0, 6).map((campaign: any) => (
-                  <Card key={campaign.id} className="hover:shadow-md transition-shadow border-gray-600 overflow-hidden cursor-pointer"
+                  <Card key={campaign.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800 overflow-hidden cursor-pointer"
                         onClick={() => navigate(`/donate/${campaign.slug}`)}>
-                    {/* Black Header Section */}
-                    <div className="bg-black px-3 py-2 border-b border-gray-600">
+                    <div className="bg-black px-3 py-2 border-b border-gray-800">
                       <div className="flex items-center">
                         <span className="text-[#D4AF37] font-semibold text-xs tracking-wide">CHRIST COLLECTIVE</span>
                       </div>
                     </div>
                     
-                    {/* Black Content Section */}
-                    <div className="bg-black px-3 py-3">
+                    <div className="bg-gray-900 px-3 py-3">
                       <div className="flex gap-3">
-                        {/* Left side - Campaign cover image */}
                         <div className="flex-shrink-0">
-                          <div className="w-20 h-20 bg-gray-800 border border-gray-600 rounded-lg flex items-center justify-center overflow-hidden">
+                          <div className="w-20 h-20 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
                             {campaign.imageUrl || campaign.image ? (
                               <img 
                                 src={campaign.imageUrl || campaign.image} 
@@ -234,14 +217,12 @@ export default function ExplorePage() {
                           </div>
                         </div>
 
-                        {/* Right side - Campaign content */}
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-white text-sm mb-2">{campaign.title}</h4>
                           <p className="text-gray-300 text-xs mb-2 leading-relaxed">
                             {campaign.description?.substring(0, 50)}...
                           </p>
                           
-                          {/* Stats Row */}
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-1">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
@@ -256,7 +237,6 @@ export default function ExplorePage() {
                         </div>
                       </div>
                       
-                      {/* Donate Button - Full width below */}
                       <button className="w-full bg-[#D4AF37] text-black font-semibold py-2 rounded-md text-xs hover:bg-[#B8941F] transition-colors mt-3">
                         Donate Now
                       </button>
@@ -268,17 +248,16 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Creators Section */}
         {(selectedCategory === "all" || selectedCategory === "creators") && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Popular Creators</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#D4AF37] font-italic italic">Popular Creators</h3>
             {creatorsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse bg-gray-900 border-gray-800">
                     <CardContent className="p-4">
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-800 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-800 rounded w-1/2"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -286,7 +265,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCreators?.slice(0, 6).map((creator: any) => (
-                  <Card key={creator.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
+                  <Card key={creator.id} className="hover:shadow-md transition-shadow cursor-pointer bg-gray-900 border-gray-800"
                         onClick={() => navigate(`/creators/${creator.id}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-center space-x-3">
@@ -295,10 +274,10 @@ export default function ExplorePage() {
                           <AvatarFallback>{creator.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-medium text-yellow-400">{creator.name}</h4>
+                          <h4 className="font-medium text-[#D4AF37]">{creator.name}</h4>
                           <p className="text-sm text-white">{creator.bio?.substring(0, 60)}...</p>
                           <div className="flex items-center mt-2">
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none">{creator.content}</Badge>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none border-gray-700 text-gray-400">{creator.content}</Badge>
                           </div>
                         </div>
                       </div>
@@ -310,28 +289,27 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Businesses Section */}
         {(selectedCategory === "all" || selectedCategory === "businesses") && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Featured Businesses</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#D4AF37] font-italic italic">Featured Businesses</h3>
             {businessesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse bg-gray-900 border-gray-800">
                     <CardContent className="p-6">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full mr-4" />
+                        <div className="w-12 h-12 bg-gray-800 rounded-full mr-4" />
                         <div className="flex-1">
-                          <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
-                          <div className="h-4 bg-gray-100 rounded w-1/2" />
+                          <div className="h-5 bg-gray-800 rounded w-3/4 mb-2" />
+                          <div className="h-4 bg-gray-800 rounded w-1/2" />
                         </div>
                       </div>
-                      <div className="h-4 bg-gray-100 rounded mb-3 w-full" />
-                      <div className="h-4 bg-gray-100 rounded mb-3 w-full" />
-                      <div className="h-4 bg-gray-100 rounded mb-4 w-3/4" />
+                      <div className="h-4 bg-gray-800 rounded mb-3 w-full" />
+                      <div className="h-4 bg-gray-800 rounded mb-3 w-full" />
+                      <div className="h-4 bg-gray-800 rounded mb-4 w-3/4" />
                       <div className="flex justify-between">
-                        <div className="h-6 bg-gray-200 rounded w-1/3" />
-                        <div className="h-6 bg-gray-200 rounded w-1/4" />
+                        <div className="h-6 bg-gray-800 rounded w-1/3" />
+                        <div className="h-6 bg-gray-800 rounded w-1/4" />
                       </div>
                     </CardContent>
                   </Card>
@@ -340,7 +318,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBusinesses?.slice(0, 6).map((business: any) => (
-                  <Card key={business.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
+                  <Card key={business.id} className="hover:shadow-md transition-shadow cursor-pointer bg-gray-900 border-gray-800"
                         onClick={() => navigate(`/business/profile/${business.id}`)}>
                     <CardContent className="p-6">
                       <div className="flex items-center mb-4">
@@ -355,7 +333,7 @@ export default function ExplorePage() {
                           </Avatar>
                         )}
                         <div>
-                          <h3 className="font-semibold text-yellow-400">{business.companyName}</h3>
+                          <h3 className="font-semibold text-[#D4AF37]">{business.companyName}</h3>
                           <div className="inline-flex items-center justify-center w-auto min-w-[60px] h-6 px-3 bg-white rounded-full">
                             <p className="text-xs text-black font-medium">{business.industry}</p>
                           </div>
@@ -372,7 +350,7 @@ export default function ExplorePage() {
                             📍 {business.location}
                           </span>
                         )}
-                        <Button variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-500">
+                        <Button variant="ghost" size="sm" className="text-[#D4AF37] hover:text-[#B8941F]">
                           View Profile
                         </Button>
                       </div>
@@ -384,17 +362,16 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Ministries Section */}
         {(selectedCategory === "all" || selectedCategory === "ministries") && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Featured Ministries</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#D4AF37] font-italic italic">Featured Ministries</h3>
             {ministriesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse bg-gray-900 border-gray-800">
                     <CardContent className="p-4">
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-800 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-800 rounded w-1/2"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -402,7 +379,7 @@ export default function ExplorePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredMinistries?.slice(0, 6).map((ministry: any) => (
-                  <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
+                  <Card key={ministry.id} className="hover:shadow-md transition-shadow cursor-pointer bg-gray-900 border-gray-800"
                         onClick={() => navigate(`/ministry/${ministry.id}`)}>
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
@@ -411,10 +388,10 @@ export default function ExplorePage() {
                           <AvatarFallback>{ministry.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-medium text-yellow-400">{ministry.name}</h4>
+                          <h4 className="font-medium text-[#D4AF37]">{ministry.name}</h4>
                           <p className="text-sm text-white mt-1">{ministry.description?.substring(0, 80)}...</p>
                           <div className="flex items-center mt-3">
-                            <Badge variant="outline">{ministry.denomination}</Badge>
+                            <Badge variant="outline" className="border-gray-700 text-gray-400">{ministry.denomination}</Badge>
                             <span className="text-sm text-gray-300 ml-2">
                               {ministry.location}
                             </span>
@@ -429,61 +406,52 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Users/Members Section */}
         {(selectedCategory === "all" || selectedCategory === "users") && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Community Members</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#D4AF37] font-italic italic">Suggested for You</h3>
             {usersLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div key={i} className="animate-pulse flex items-center space-x-3 p-4 bg-gray-900 border border-gray-800 rounded-lg">
+                    <div className="h-12 w-12 bg-gray-800 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-800 rounded mb-2 w-1/3"></div>
+                      <div className="h-3 bg-gray-800 rounded w-1/4"></div>
+                    </div>
+                    <div className="h-8 w-20 bg-gray-800 rounded-full"></div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-3">
                 {randomizedUsers?.slice(0, 9).map((member: any) => (
-                  <Card key={member.id} className="hover:shadow-md transition-shadow cursor-pointer bg-black border-gray-600"
-                        onClick={() => navigate(`/profile/${member.username}`)}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={getImageUrl(member.profileImageUrl)} />
-                          <AvatarFallback>{member.firstName?.[0] || member.username?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-yellow-400">
-                            {member.firstName && member.lastName 
-                              ? `${member.firstName} ${member.lastName}`
-                              : member.username}
-                          </h4>
-                          <p className="text-xs text-gray-400">@{member.username}</p>
-                          {member.bio && (
-                            <p className="text-sm text-white mt-1">{member.bio.substring(0, 50)}...</p>
-                          )}
-                          <div className="flex items-center mt-2">
-                            {member.userType && member.userType !== "ministry" && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 leading-none capitalize">
-                                {member.userType === "business_owner" ? "Business" : member.userType}
-                              </Badge>
-                            )}
-                            {member.location && member.showLocation && (
-                              <span className="text-xs text-gray-400 ml-2">{member.location}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div key={member.id} className="flex items-center space-x-3 p-4 bg-gray-900 border border-gray-800 rounded-lg hover:bg-gray-800 transition-colors">
+                    <div className="cursor-pointer" onClick={() => navigate(`/profile/${member.username}`)}>
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={getImageUrl(member.profileImageUrl)} />
+                        <AvatarFallback>{member.firstName?.[0] || member.username?.[0]}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/profile/${member.username}`)}>
+                      <h4 className="font-medium text-white">
+                        {member.firstName && member.lastName 
+                          ? `${member.firstName} ${member.lastName}`
+                          : member.username}
+                      </h4>
+                      <p className="text-xs text-gray-400">@{member.username}</p>
+                      {member.followerCount !== undefined && (
+                        <p className="text-xs text-gray-500 mt-0.5">{member.followerCount || 0} followers</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="border border-[#D4AF37] text-[#D4AF37] bg-transparent rounded-full px-4 py-1.5 text-sm font-medium hover:bg-[#D4AF37] hover:text-black transition-colors"
+                    >
+                      Follow
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

@@ -25,7 +25,7 @@ export default function MobileAuthPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full" />
       </div>
     );
@@ -41,7 +41,7 @@ export default function MobileAuthPage() {
         <title>Sign In | Christ Collective</title>
         <meta name="description" content="Sign in to Christ Collective to connect with your community and make a difference through faith." />
       </Helmet>
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
         <AuthExperience variant="mobile" onLoginSuccess={handleLoginSuccess} />
       </div>
     </>

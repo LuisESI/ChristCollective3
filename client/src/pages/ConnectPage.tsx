@@ -60,6 +60,7 @@ export default function ConnectPage() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
+  const [activeTab, setActiveTab] = useState<"communities" | "messages">("communities");
 
   const form = useForm<CreateQueueForm>({
     resolver: zodResolver(createQueueSchema),
@@ -274,20 +275,29 @@ export default function ConnectPage() {
         <meta name="description" content="Join group chats for prayer, Bible study, evangelizing, and fellowship with other believers" />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-4 max-w-4xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Active Chats</h1>
-            <p className="text-gray-400 text-sm mt-1">Join ongoing conversations with fellow believers</p>
-          </div>
-          <Button 
-            onClick={() => setCreateDialogOpen(true)}
-            className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium px-4 py-2 text-sm"
+      <div className="container mx-auto px-4 py-4 max-w-lg pb-20">
+        {/* Communities / Messages Tab Toggle */}
+        <div className="flex gap-0 mb-6 bg-gray-900 rounded-full p-1 border border-gray-800">
+          <button
+            onClick={() => setActiveTab("communities")}
+            className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-colors ${
+              activeTab === "communities" 
+                ? "bg-[#D4AF37] text-black" 
+                : "bg-transparent text-gray-400"
+            }`}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Start Queue
-          </Button>
+            Communities
+          </button>
+          <button
+            onClick={() => setActiveTab("messages")}
+            className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-colors ${
+              activeTab === "messages" 
+                ? "bg-[#D4AF37] text-black" 
+                : "bg-transparent text-gray-400"
+            }`}
+          >
+            Messages
+          </button>
         </div>
 
         {/* Create Queue Dialog */}
@@ -505,8 +515,8 @@ export default function ConnectPage() {
           </Dialog>
         </div>
 
-        {/* Chat Queues Section - Top */}
-        {(queues.length > 0 || activeChats.length === 0) && (
+        {/* Communities Tab Content */}
+        {activeTab === "communities" && (queues.length > 0 || activeChats.length === 0) && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -644,7 +654,8 @@ export default function ConnectPage() {
           </div>
         )}
 
-        {/* Active Chats Section - Bottom */}
+        {/* Messages Tab Content */}
+        {activeTab === "messages" && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -790,8 +801,17 @@ export default function ConnectPage() {
             </div>
           )}
         </div>
+        )}
 
-
+        {/* Floating Action Button */}
+        <div className="fixed bottom-20 right-4 z-40">
+          <button 
+            onClick={() => setCreateDialogOpen(true)}
+            className="w-14 h-14 rounded-full bg-[#D4AF37] hover:bg-[#B8941F] text-black shadow-lg shadow-[#D4AF37]/30 flex items-center justify-center transition-all hover:scale-105"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
       </div>
     </div>
   );

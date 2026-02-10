@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 The platform detects the environment (iOS/Android app vs. web browser) for tailored user experience. Mobile apps feature a dedicated authentication flow, hidden footer, and bottom navigation. A consistent black/gold color scheme (`#D4AF37`) is used for branding. A unified authentication system leverages an `AuthExperience` component with platform-specific layouts.
 
+**Design System (Feb 2026):**
+- Full dark theme: black backgrounds (#000), dark cards (gray-900), subtle borders (gray-800)
+- Gold accent color: #D4AF37 for primary actions, active states, highlights
+- CSS variables set in both :root and .dark to gold palette (43 74% 52%)
+- Bottom navigation: Feed, Explore, Create (gold circle), Connect, Profile
+- Feed: Single-column layout with floating gold FAB for creating posts
+- Profile: Cover photo gradient, overlapping avatar with gold ring, stats in gold, Posts/Saved tabs
+- Explore: Dark search bar, gold filter chips (active), italic gold section headers, Follow buttons
+- Connect: Communities/Messages tab toggle (gold pill active), floating gold FAB
+- Auth pages: Dark backgrounds with gold-accented forms and buttons
+
 ### Technical Implementations
 **Frontend:**
 -   **Framework**: React 18 with TypeScript

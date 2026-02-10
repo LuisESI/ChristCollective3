@@ -213,7 +213,7 @@ export default function Header() {
             ))}
             {user ? (
               <>
-                <hr className="border-gray-200" />
+                <hr className="border-gray-800" />
                 <button 
                   onClick={() => logoutMutation.mutate()}
                   className="text-foreground hover:text-primary transition-colors font-medium py-2 text-left w-full"

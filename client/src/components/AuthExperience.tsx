@@ -197,8 +197,8 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
             <Logo className="h-12 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900">Welcome to Christ Collective</h1>
-            <p className="text-gray-600 mt-2">Join our community of faith-driven individuals</p>
+            <h1 className="text-2xl font-bold text-white">Welcome to Christ Collective</h1>
+            <p className="text-gray-400 mt-2">Join our community of faith-driven individuals</p>
           </div>
 
           <Tabs defaultValue="login" className="w-full">
@@ -208,7 +208,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </TabsList>
             
             <TabsContent value="login">
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle>Sign In</CardTitle>
                   <CardDescription>
@@ -265,7 +265,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </TabsContent>
             
             <TabsContent value="register">
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle>Create Account</CardTitle>
                   <CardDescription>
@@ -403,24 +403,24 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
         {/* Right side - Hero content */}
         <div className="hidden lg:block">
           <div className="text-center space-y-6">
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-4xl font-bold text-white">
               Unite in Faith, <span className="text-primary">Grow Together</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-lg mx-auto">
+            <p className="text-xl text-gray-400 max-w-lg mx-auto">
               Join a community where faith meets action. Support causes you believe in, connect with like-minded businesses, and make a lasting impact.
             </p>
             <div className="grid grid-cols-1 gap-4 max-w-md mx-auto mt-8">
-              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                <h3 className="font-semibold text-gray-900 mb-2">Support Causes</h3>
-                <p className="text-gray-600 text-sm">Donate to verified campaigns and see your impact grow</p>
+              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                <h3 className="font-semibold text-white mb-2">Support Causes</h3>
+                <p className="text-gray-400 text-sm">Donate to verified campaigns and see your impact grow</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                <h3 className="font-semibold text-gray-900 mb-2">Network & Connect</h3>
-                <p className="text-gray-600 text-sm">Build meaningful relationships with Christian businesses</p>
+              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                <h3 className="font-semibold text-white mb-2">Network & Connect</h3>
+                <p className="text-gray-400 text-sm">Build meaningful relationships with Christian businesses</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                <h3 className="font-semibold text-gray-900 mb-2">Create Content</h3>
-                <p className="text-gray-600 text-sm">Share your faith journey and get sponsored</p>
+              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                <h3 className="font-semibold text-white mb-2">Create Content</h3>
+                <p className="text-gray-400 text-sm">Share your faith journey and get sponsored</p>
               </div>
             </div>
           </div>
@@ -428,16 +428,16 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
 
         {/* Forgot Password Modal */}
         <Dialog open={showForgotPasswordModal} onOpenChange={setShowForgotPasswordModal}>
-          <DialogContent className="bg-white">
+          <DialogContent className="bg-gray-900 border-gray-700">
             <DialogHeader>
-              <DialogTitle className="text-black">Reset Password</DialogTitle>
-              <DialogDescription className="text-gray-700">
+              <DialogTitle className="text-white">Reset Password</DialogTitle>
+              <DialogDescription className="text-gray-400">
                 Enter your email address and we'll send you a link to reset your password.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
               <div>
-                <Label htmlFor="forgot-email" className="text-sm mb-2 block text-black">Email Address</Label>
+                <Label htmlFor="forgot-email" className="text-sm mb-2 block text-white">Email Address</Label>
                 <Input
                   id="forgot-email"
                   type="email"
@@ -470,8 +470,8 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
       {/* Logo and welcome section */}
       <div className="flex flex-col items-center mb-8">
         <Logo className="h-16 mb-6" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Christ Collective</h1>
-        <p className="text-gray-600 text-center">Join our community of faith-driven individuals</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Welcome to Christ Collective</h1>
+        <p className="text-gray-400 text-center">Join our community of faith-driven individuals</p>
       </div>
 
       {/* Toggle buttons */}
@@ -480,8 +480,8 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           onClick={() => setMode("login")}
           className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
             mode === "login" 
-              ? "bg-white text-black" 
-              : "bg-transparent text-white"
+              ? "bg-[#D4AF37] text-black" 
+              : "bg-transparent text-gray-400"
           }`}
           data-testid="button-toggle-login"
         >
@@ -491,8 +491,8 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           onClick={() => setMode("register")}
           className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
             mode === "register" 
-              ? "bg-white text-black" 
-              : "bg-transparent text-white"
+              ? "bg-[#D4AF37] text-black" 
+              : "bg-transparent text-gray-400"
           }`}
           data-testid="button-toggle-register"
         >
@@ -504,7 +504,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
       {mode === "login" && (
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <Label htmlFor="mobile-login-username" className="text-gray-900">Username or Email</Label>
+            <Label htmlFor="mobile-login-username" className="text-white">Username or Email</Label>
             <Input
               id="mobile-login-username"
               type="text"
@@ -518,7 +518,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
-              <Label htmlFor="mobile-login-password" className="text-gray-900">Password</Label>
+              <Label htmlFor="mobile-login-password" className="text-white">Password</Label>
               <button
                 type="button"
                 onClick={() => setShowForgotPasswordModal(true)}
@@ -541,7 +541,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           </div>
           <Button 
             type="submit" 
-            className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-base" 
+            className="w-full h-12 bg-[#D4AF37] hover:bg-[#B8941F] text-black font-semibold text-base" 
             disabled={loginMutation.isPending}
             data-testid="button-login"
           >
@@ -555,7 +555,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="mobile-firstName" className="text-gray-900">First Name</Label>
+              <Label htmlFor="mobile-firstName" className="text-white">First Name</Label>
               <Input
                 id="mobile-firstName"
                 type="text"
@@ -568,7 +568,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
               />
             </div>
             <div>
-              <Label htmlFor="mobile-lastName" className="text-gray-900">Last Name</Label>
+              <Label htmlFor="mobile-lastName" className="text-white">Last Name</Label>
               <Input
                 id="mobile-lastName"
                 type="text"
@@ -582,7 +582,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </div>
           </div>
           <div>
-            <Label htmlFor="mobile-register-username" className="text-gray-900">Username</Label>
+            <Label htmlFor="mobile-register-username" className="text-white">Username</Label>
             <Input
               id="mobile-register-username"
               type="text"
@@ -595,7 +595,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             />
           </div>
           <div>
-            <Label htmlFor="mobile-email" className="text-gray-900">Email</Label>
+            <Label htmlFor="mobile-email" className="text-white">Email</Label>
             <Input
               id="mobile-email"
               type="email"
@@ -608,7 +608,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             />
           </div>
           <div>
-            <Label htmlFor="mobile-phone" className="text-gray-900">Phone Number</Label>
+            <Label htmlFor="mobile-phone" className="text-white">Phone Number</Label>
             <Input
               id="mobile-phone"
               type="tel"
@@ -621,7 +621,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             />
           </div>
           <div>
-            <Label htmlFor="mobile-userType" className="text-gray-900">Are you a... (Optional)</Label>
+            <Label htmlFor="mobile-userType" className="text-white">Are you a... (Optional)</Label>
             <Select 
               value={registerData.userType} 
               onValueChange={(value) => setRegisterData({ ...registerData, userType: value })}
@@ -637,7 +637,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </Select>
           </div>
           <div>
-            <Label htmlFor="mobile-register-password" className="text-gray-900">Password</Label>
+            <Label htmlFor="mobile-register-password" className="text-white">Password</Label>
             <Input
               id="mobile-register-password"
               type="password"
@@ -650,7 +650,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             />
           </div>
           <div>
-            <Label htmlFor="mobile-confirm-password" className="text-gray-900">Confirm Password</Label>
+            <Label htmlFor="mobile-confirm-password" className="text-white">Confirm Password</Label>
             <Input
               id="mobile-confirm-password"
               type="password"
@@ -664,7 +664,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           </div>
           <Button 
             type="submit" 
-            className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-base" 
+            className="w-full h-12 bg-[#D4AF37] hover:bg-[#B8941F] text-black font-semibold text-base" 
             disabled={registerMutation.isPending}
             data-testid="button-register"
           >
@@ -675,16 +675,16 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
 
       {/* Forgot Password Modal */}
       <Dialog open={showForgotPasswordModal} onOpenChange={setShowForgotPasswordModal}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-gray-900 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-black">Reset Password</DialogTitle>
-            <DialogDescription className="text-gray-700">
+            <DialogTitle className="text-white">Reset Password</DialogTitle>
+            <DialogDescription className="text-gray-400">
               Enter your email address and we'll send you a link to reset your password.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="mobile-forgot-email" className="text-sm mb-2 block text-black">Email Address</Label>
+              <Label htmlFor="mobile-forgot-email" className="text-sm mb-2 block text-white">Email Address</Label>
               <Input
                 id="mobile-forgot-email"
                 type="email"
@@ -698,7 +698,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </div>
             <Button
               type="submit"
-              className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              className="w-full h-12 bg-[#D4AF37] hover:bg-[#B8941F] text-black font-semibold"
               disabled={forgotPasswordMutation.isPending}
               data-testid="button-send-reset-link"
             >
