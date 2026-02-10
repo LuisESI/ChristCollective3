@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual, createHash } from "crypto";
+import { scrypt, randomBytes, timingSafeEqual, createHash, createHmac } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
@@ -83,46 +83,41 @@ export function setupAuth(app: Express) {
 
   app.set("trust proxy", 1);
   
-  const sessionMiddleware = session(sessionSettings);
-  app.use(sessionMiddleware);
+  // Sign a value the same way cookie-signature does, so express-session recognizes it
+  function signCookie(val: string, secret: string): string {
+    const sig = createHmac('sha256', secret)
+      .update(val)
+      .digest('base64')
+      .replace(/=+$/, '');
+    return val + '.' + sig;
+  }
   
-  // Middleware to manually restore mobile sessions from store
-  // This runs AFTER express-session middleware to override any new sessions it created
+  // PRE-session middleware: inject mobile X-Session-ID as a signed cookie
+  // so express-session loads the correct session automatically
   app.use((req, res, next) => {
     const mobileSessionId = req.headers['x-session-id'] as string;
+    if (!mobileSessionId) return next();
     
-    if (!mobileSessionId) {
-      // Regular browser request - let express-session handle it
-      return next();
-    }
+    console.log("📱 Mobile session detected - injecting session cookie for ID:", mobileSessionId);
     
-    console.log("📱 Mobile session detected - ID:", mobileSessionId);
+    const secret = sessionSettings.secret as string;
+    const signed = 's:' + signCookie(mobileSessionId, secret);
+    const encodedCookie = `connect.sid=${encodeURIComponent(signed)}`;
     
-    // Manually load session from store
-    sessionStore.get(mobileSessionId, (err, sessionData) => {
-      if (err) {
-        console.error("   ❌ Error loading session from store:", err);
-        return next();
-      }
-      
-      if (!sessionData) {
-        console.log("   ⚠️  Session not found in store - creating new session");
-        return next();
-      }
-      
-      console.log("   ✅ Session loaded from store");
-      console.log("   - Passport data:", (sessionData as any).passport);
-      
-      // Replace the auto-generated session with our stored session
-      req.sessionID = mobileSessionId;
-      Object.assign(req.session, sessionData);
-      
-      // Mark session as loaded from mobile header
-      (req.session as any)._loadedFromMobile = true;
-      
-      next();
-    });
+    // Preserve any existing cookies and add/replace the session cookie
+    const existingCookies = req.headers.cookie || '';
+    const cookieParts = existingCookies
+      .split(';')
+      .map(c => c.trim())
+      .filter(c => !c.startsWith('connect.sid='));
+    cookieParts.push(encodedCookie);
+    req.headers.cookie = cookieParts.filter(Boolean).join('; ');
+    
+    next();
   });
+  
+  const sessionMiddleware = session(sessionSettings);
+  app.use(sessionMiddleware);
   
   app.use(passport.initialize());
   app.use(passport.session());
