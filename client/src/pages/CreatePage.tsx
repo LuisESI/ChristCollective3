@@ -74,17 +74,6 @@ export default function CreatePage() {
   // Base options available to all regular users
   const baseCreateOptions: CreateOption[] = [
     {
-      id: "campaign",
-      title: "Create Campaign",
-      description: "Start a fundraising campaign for a cause you care about",
-      icon: Heart,
-      color: "text-white",
-      bgColor: "bg-red-500",
-      href: "/donate/create",
-      badge: "Popular",
-      userType: "all"
-    },
-    {
       id: "creator",
       title: "Creator Profile",
       description: "Set up your content creator profile and get sponsored",
