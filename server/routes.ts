@@ -124,6 +124,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
+      if (!req.file.mimetype.startsWith('image/')) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ message: "Only image files are allowed for banners" });
+      }
       const imageUrl = `/uploads/${req.file.filename}`;
       await storage.updateUser(req.user.id, { bannerImageUrl: imageUrl });
       res.json({ url: imageUrl });
