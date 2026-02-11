@@ -204,20 +204,22 @@ export default function ExplorePage() {
                   <div 
                     key={post.id} 
                     className="aspect-square relative group overflow-hidden rounded-lg cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/feed?post=${post.id}`)}
+                    onClick={() => navigate(`/posts/${post.id}`)}
                   >
                     {post.mediaUrls?.[0] ? (
                       <div className="w-full h-full">
-                        {post.mediaType === 'video' || post.mediaUrls[0].endsWith('.mp4') ? (
+                        {post.mediaType === 'video' || (typeof post.mediaUrls[0] === 'string' && (post.mediaUrls[0].toLowerCase().endsWith('.mp4') || post.mediaUrls[0].toLowerCase().endsWith('.mov') || post.mediaUrls[0].toLowerCase().endsWith('.webm'))) ? (
                           <video 
                             src={getImageUrl(post.mediaUrls[0])} 
                             className="w-full h-full object-cover"
                             muted
                             playsInline
-                            onMouseOver={(e) => (e.target as HTMLVideoElement).play()}
+                            loop
+                            onMouseOver={(e) => (e.target as HTMLVideoElement).play().catch(err => console.error("Video play failed:", err))}
                             onMouseOut={(e) => {
-                              (e.target as HTMLVideoElement).pause();
-                              (e.target as HTMLVideoElement).currentTime = 0;
+                              const video = e.target as HTMLVideoElement;
+                              video.pause();
+                              video.currentTime = 0;
                             }}
                           />
                         ) : (
@@ -225,6 +227,10 @@ export default function ExplorePage() {
                             src={getImageUrl(post.mediaUrls[0])} 
                             alt={post.title || "Post"}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            onError={(e) => {
+                              const img = e.target as HTMLImageElement;
+                              img.src = "/favicon.png"; // Fallback if image fails
+                            }}
                           />
                         )}
                       </div>
