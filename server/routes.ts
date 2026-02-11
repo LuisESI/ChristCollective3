@@ -119,6 +119,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/upload/banner-image', isAuthenticated, upload.single('bannerImage'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      const imageUrl = `/uploads/${req.file.filename}`;
+      await storage.updateUser(req.user.id, { bannerImageUrl: imageUrl });
+      res.json({ url: imageUrl });
+    } catch (error) {
+      console.error("Error uploading banner image:", error);
+      res.status(500).json({ message: "Failed to upload banner image" });
+    }
+  });
+
   // Check if current user is an approved creator
   app.get('/api/user/creator-status', isAuthenticated, async (req: any, res) => {
     try {

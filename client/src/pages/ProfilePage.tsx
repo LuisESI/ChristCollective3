@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark } from "lucide-react";
+import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { useLocation, useParams } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -25,7 +25,33 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
-  
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [bannerUploading, setBannerUploading] = useState(false);
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('bannerImage', file);
+      const res = await fetch('/api/upload/banner-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      toast({ title: "Banner updated", description: "Your profile banner has been updated." });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload banner image.", variant: "destructive" });
+    } finally {
+      setBannerUploading(false);
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
+    }
+  };
+
   // If no username in URL, viewing current user's profile
   const isOwnProfile = !username;
   const profileUser = isOwnProfile ? user : null;
@@ -220,8 +246,38 @@ export default function ProfilePage() {
       </Helmet>
       <div className="min-h-screen bg-black text-white pb-20">
         {/* Cover Photo */}
-        <div className="relative h-40 md:h-48 bg-gradient-to-b from-gray-900 to-black">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 via-gray-900 to-black" />
+        <div className="relative h-40 md:h-48 bg-gradient-to-b from-gray-900 to-black overflow-hidden">
+          {displayUser?.bannerImageUrl ? (
+            <img
+              src={getImageUrl(displayUser.bannerImageUrl)}
+              alt="Profile banner"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 via-gray-900 to-black" />
+          )}
+          {isOwnProfile && (
+            <>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBannerUpload}
+                className="hidden"
+              />
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={bannerUploading}
+                className="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors z-10"
+              >
+                {bannerUploading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5" />
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="max-w-4xl mx-auto px-4">
