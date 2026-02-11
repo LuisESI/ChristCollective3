@@ -865,6 +865,22 @@ export const insertMoneyEventLogSchema = createInsertSchema(moneyEventLogs)
 export type MoneyEventLog = typeof moneyEventLogs.$inferSelect;
 export type InsertMoneyEventLog = z.infer<typeof insertMoneyEventLogSchema>;
 
+// Saved posts (bookmarks)
+export const savedPosts = pgTable("saved_posts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  postId: integer("post_id").notNull().references(() => platformPosts.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueSave: uniqueIndex("unique_saved_post").on(table.userId, table.postId),
+}));
+
+export const insertSavedPostSchema = createInsertSchema(savedPosts)
+  .omit({ id: true, createdAt: true });
+
+export type SavedPost = typeof savedPosts.$inferSelect;
+export type InsertSavedPost = z.infer<typeof insertSavedPostSchema>;
+
 // Webhook Events - For deduplication of Stripe webhook deliveries
 export const webhookEvents = pgTable("webhook_events", {
   id: serial("id").primaryKey(),

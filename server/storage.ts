@@ -52,6 +52,8 @@ import {
   type InsertUserFollow,
   businessFollows,
   type BusinessFollow,
+  savedPosts,
+  type SavedPost,
   groupChatQueues,
   groupChats,
   groupChatMembers,
@@ -264,6 +266,12 @@ export interface IStorage {
   getWebhookEvent(stripeEventId: string): Promise<WebhookEvent | undefined>;
   createWebhookEvent(eventData: InsertWebhookEvent): Promise<WebhookEvent>;
   markWebhookEventProcessed(stripeEventId: string): Promise<void>;
+
+  // Saved post operations
+  savePost(userId: string, postId: number): Promise<SavedPost>;
+  unsavePost(userId: string, postId: number): Promise<void>;
+  isPostSaved(userId: string, postId: number): Promise<boolean>;
+  getUserSavedPosts(userId: string): Promise<PlatformPost[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2115,6 +2123,49 @@ export class DatabaseStorage implements IStorage {
       .update(webhookEvents)
       .set({ processed: true, processedAt: new Date() })
       .where(eq(webhookEvents.stripeEventId, stripeEventId));
+  }
+
+  // Saved post operations
+  async savePost(userId: string, postId: number): Promise<SavedPost> {
+    const [saved] = await db
+      .insert(savedPosts)
+      .values({ userId, postId })
+      .onConflictDoNothing()
+      .returning();
+    if (!saved) {
+      const [existing] = await db
+        .select()
+        .from(savedPosts)
+        .where(and(eq(savedPosts.userId, userId), eq(savedPosts.postId, postId)))
+        .limit(1);
+      return existing;
+    }
+    return saved;
+  }
+
+  async unsavePost(userId: string, postId: number): Promise<void> {
+    await db
+      .delete(savedPosts)
+      .where(and(eq(savedPosts.userId, userId), eq(savedPosts.postId, postId)));
+  }
+
+  async isPostSaved(userId: string, postId: number): Promise<boolean> {
+    const [saved] = await db
+      .select()
+      .from(savedPosts)
+      .where(and(eq(savedPosts.userId, userId), eq(savedPosts.postId, postId)))
+      .limit(1);
+    return !!saved;
+  }
+
+  async getUserSavedPosts(userId: string): Promise<PlatformPost[]> {
+    const saved = await db
+      .select({ post: platformPosts })
+      .from(savedPosts)
+      .innerJoin(platformPosts, eq(savedPosts.postId, platformPosts.id))
+      .where(eq(savedPosts.userId, userId))
+      .orderBy(desc(savedPosts.createdAt));
+    return saved.map(s => s.post);
   }
 }
 

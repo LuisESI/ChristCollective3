@@ -735,6 +735,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save/unsave a post (bookmark toggle)
+  app.post('/api/platform-posts/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+
+      const post = await storage.getPlatformPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      const alreadySaved = await storage.isPostSaved(userId, postId);
+      if (alreadySaved) {
+        await storage.unsavePost(userId, postId);
+        res.json({ saved: false });
+      } else {
+        await storage.savePost(userId, postId);
+        res.json({ saved: true });
+      }
+    } catch (error) {
+      console.error("Error toggling post save:", error);
+      res.status(500).json({ message: "Failed to toggle save" });
+    }
+  });
+
+  // Check if post is saved
+  app.get('/api/platform-posts/:id/saved', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      if (isNaN(postId)) return res.status(400).json({ message: "Invalid post ID" });
+      const saved = await storage.isPostSaved(userId, postId);
+      res.json({ saved });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check save status" });
+    }
+  });
+
+  // Get current user's saved posts
+  app.get('/api/saved-posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const posts = await storage.getUserSavedPosts(req.user.id);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching saved posts:", error);
+      res.status(500).json({ message: "Failed to fetch saved posts" });
+    }
+  });
+
   // Add comment to post
   app.post('/api/platform-posts/:id/comment', isAuthenticated, async (req: any, res) => {
     try {
