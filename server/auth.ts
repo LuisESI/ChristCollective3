@@ -474,6 +474,7 @@ export function setupAuth(app: Express) {
         location: freshUser.location,
         bio: freshUser.bio,
         profileImageUrl: freshUser.profileImageUrl,
+        bannerImageUrl: freshUser.bannerImageUrl,
         isAdmin: freshUser.isAdmin,
         stripeCustomerId: freshUser.stripeCustomerId,
         createdAt: freshUser.createdAt,
