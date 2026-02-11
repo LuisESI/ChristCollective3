@@ -42,7 +42,7 @@ export default function ProfilePage() {
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/user'] });
       toast({ title: "Banner updated", description: "Your profile banner has been updated." });
     } catch (error) {
       toast({ title: "Error", description: "Failed to upload banner image.", variant: "destructive" });
