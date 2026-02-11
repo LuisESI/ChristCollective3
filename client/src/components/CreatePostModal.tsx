@@ -194,7 +194,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
       )}
     
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black border-gray-800">
         <DialogHeader>
           <DialogTitle className="text-white">Create New Post</DialogTitle>
         </DialogHeader>
@@ -214,10 +214,10 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                 }));
               }}
             >
-              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+              <SelectTrigger className="bg-[#0A0A0A] border-gray-800 text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
+              <SelectContent className="bg-[#0A0A0A] border-gray-800">
                 {getAuthorOptions().map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -234,7 +234,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Add a title to your post..."
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
             />
           </div>
 
@@ -246,7 +246,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
               onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
               placeholder="What would you like to share?"
               rows={4}
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
               required
             />
           </div>
@@ -265,7 +265,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                     className={`flex items-center gap-2 ${
                       formData.mediaType === type.value
                         ? "bg-[#D4AF37] text-black hover:bg-[#B8941F]"
-                        : "bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+                        : "bg-[#0A0A0A] border-gray-800 text-white hover:bg-gray-900"
                     }`}
                     onClick={() => setFormData(prev => ({ ...prev, mediaType: type.value }))}
                   >
@@ -290,8 +290,8 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
               
               {/* File Upload Area - Only for Image/Video, not YouTube Channel */}
               {formData.mediaType !== "youtube_channel" && (
-                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
-                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <div className="border-2 border-dashed border-gray-800 rounded-lg p-6 text-center hover:border-gray-700 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-500 mx-auto mb-2" />
                   <p className="text-gray-400 mb-2">
                     Click to upload or drag and drop your {formData.mediaType}
                   </p>
@@ -318,7 +318,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                   <Button
                     type="button"
                     variant="outline"
-                    className="mt-2 border-gray-600 text-gray-300 hover:bg-gray-800"
+                    className="mt-2 border-gray-800 text-gray-300 hover:bg-[#0A0A0A]"
                     onClick={(e) => {
                       const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
                       input?.click();
@@ -331,7 +331,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
 
               {/* Add Media URL */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-400">
+                <label className="text-xs font-medium text-gray-500">
                   {formData.mediaType === "youtube_channel" 
                     ? "Enter your YouTube channel URL:" 
                     : "Or add media URL:"}
@@ -345,12 +345,12 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                         ? "https://www.youtube.com/@yourchannel or https://www.youtube.com/channel/UCxxx..."
                         : `https://example.com/${formData.mediaType === "image" ? "image.jpg" : "video.mp4"}`
                     }
-                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                    className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
                   />
                   <Button
                     type="button"
                     onClick={addMediaUrl}
-                    className="bg-gray-700 hover:bg-gray-600"
+                    className="bg-gray-800 hover:bg-gray-700 text-white"
                   >
                     Add
                   </Button>
@@ -363,7 +363,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                   <label className="text-sm font-medium text-white">Preview</label>
                   <div className="grid gap-3">
                     {formData.mediaUrls.map((url, index) => (
-                      <div key={index} className="relative bg-gray-800 rounded-lg overflow-hidden">
+                      <div key={index} className="relative bg-[#0A0A0A] rounded-lg overflow-hidden border border-gray-800">
                         {formData.mediaType === "youtube_channel" ? (
                           <div className="p-4 flex items-center gap-3">
                             <Youtube className="w-8 h-8 text-red-500" />
@@ -407,7 +407,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                         
                         {/* URL display - Only for non-YouTube channel */}
                         {formData.mediaType !== "youtube_channel" && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2">
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-2 border-t border-gray-800">
                             <p className="text-xs text-gray-300 truncate">
                               {url}
                             </p>
@@ -430,7 +430,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Add a tag..."
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -441,7 +441,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
               <Button
                 type="button"
                 onClick={addTag}
-                className="bg-gray-700 hover:bg-gray-600"
+                className="bg-gray-800 hover:bg-gray-700 text-white"
               >
                 Add
               </Button>
@@ -452,7 +452,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                   <Badge
                     key={index}
                     variant="secondary"
-                    className="bg-gray-700 text-white flex items-center gap-1"
+                    className="bg-gray-800 text-white border border-gray-700 flex items-center gap-1"
                   >
                     #{tag}
                     <Button
@@ -460,7 +460,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                       size="sm"
                       variant="ghost"
                       onClick={() => removeTag(tag)}
-                      className="p-0 h-auto text-gray-400 hover:text-white"
+                      className="p-0 h-auto text-gray-500 hover:text-white"
                     >
                       <X className="w-3 h-3" />
                     </Button>
@@ -476,7 +476,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              className="border-gray-800 text-gray-400 hover:bg-gray-900"
             >
               Cancel
             </Button>
