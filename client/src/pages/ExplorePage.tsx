@@ -204,14 +204,22 @@ export default function ExplorePage() {
                   <div 
                     key={post.id} 
                     className="aspect-square relative group overflow-hidden rounded-lg cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/posts/${post.id}`)}
+                    onClick={() => navigate(`/feed?post=${post.id}`)}
                   >
                     {post.mediaUrls?.[0] ? (
                       <div className="w-full h-full">
-                        {post.mediaType === 'video' ? (
-                          <div className="w-full h-full bg-[#111] flex items-center justify-center">
-                            <Star className="text-[#D4AF37] opacity-50" size={24} />
-                          </div>
+                        {post.mediaType === 'video' || post.mediaUrls[0].endsWith('.mp4') ? (
+                          <video 
+                            src={getImageUrl(post.mediaUrls[0])} 
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                            onMouseOver={(e) => (e.target as HTMLVideoElement).play()}
+                            onMouseOut={(e) => {
+                              (e.target as HTMLVideoElement).pause();
+                              (e.target as HTMLVideoElement).currentTime = 0;
+                            }}
+                          />
                         ) : (
                           <img 
                             src={getImageUrl(post.mediaUrls[0])} 
