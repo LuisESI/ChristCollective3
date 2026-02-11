@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye } from "lucide-react";
+import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark } from "lucide-react";
+import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { useLocation, useParams } from "wouter";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   const username = params.username;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
   
   // If no username in URL, viewing current user's profile
   const isOwnProfile = !username;
@@ -90,6 +92,12 @@ export default function ProfilePage() {
   });
 
   const isFollowing = isFollowingData?.isFollowing || false;
+
+  // Fetch saved posts for own profile
+  const { data: savedPosts = [], isLoading: savedPostsLoading } = useQuery<any[]>({
+    queryKey: ["/api/saved-posts"],
+    enabled: isOwnProfile && !!user,
+  });
 
   // Follow mutation
   const followMutation = useMutation({
@@ -203,8 +211,6 @@ export default function ProfilePage() {
   }
 
   const creator = (creatorProfile as any)?.creatorProfile;
-
-  const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
 
   return (
     <>
@@ -542,15 +548,44 @@ export default function ProfilePage() {
                 )}
               </>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">No saved posts</h3>
-                <p className="text-gray-400 text-sm">
-                  Posts you save will appear here.
-                </p>
-              </div>
+              <>
+                {!isOwnProfile ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bookmark className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Saved posts are private</h3>
+                    <p className="text-gray-400 text-sm">
+                      Only you can see your saved posts.
+                    </p>
+                  </div>
+                ) : savedPostsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto"></div>
+                  </div>
+                ) : savedPosts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bookmark className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No saved posts</h3>
+                    <p className="text-gray-400 text-sm">
+                      Tap the bookmark icon on any post to save it here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {savedPosts.map((post: any) => (
+                      <PlatformPostCard
+                        key={`saved-${post.id}`}
+                        post={post}
+                        currentUserId={user?.id}
+                        showActions={true}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

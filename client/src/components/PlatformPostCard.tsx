@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [isSaved, setIsSaved] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     title: post.title || "",
@@ -77,6 +78,51 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { requireAuth } = useAuthGuard();
+
+  // Check if post is saved by current user
+  const { data: savedData } = useQuery({
+    queryKey: ["/api/platform-posts", post.id, "saved"],
+    queryFn: async () => {
+      const response = await fetch(buildApiUrl(`/api/platform-posts/${post.id}/saved`), {
+        credentials: 'include',
+      });
+      if (!response.ok) return { saved: false };
+      return response.json();
+    },
+    enabled: !!currentUserId,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest(`/api/platform-posts/${post.id}/save`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (data: any) => {
+      setIsSaved(data.saved);
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts", post.id, "saved"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-posts"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (savedData?.saved !== undefined) {
+      setIsSaved(savedData.saved);
+    }
+  }, [savedData?.saved, post.id]);
+
+  const handleSave = () => {
+    requireAuth(() => {
+      saveMutation.mutate();
+    }, "Please sign in to save posts");
+  };
 
   // Fetch user data for the post author
   const { data: postAuthor } = useQuery({
@@ -609,9 +655,25 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               </Button>
             </div>
             
-            {/* Date moved to bottom right */}
-            <div className="text-xs text-gray-500">
-              {new Date(post.createdAt).toLocaleDateString()}
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-gray-500">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSave();
+                }}
+                disabled={saveMutation.isPending}
+                className={`flex items-center p-1 ${
+                  isSaved ? "text-[#D4AF37]" : "text-gray-400 hover:text-[#D4AF37]"
+                }`}
+                data-testid="button-save"
+              >
+                <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+              </Button>
             </div>
           </div>
         )}
