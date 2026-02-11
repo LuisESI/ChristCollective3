@@ -209,6 +209,8 @@ export function setupAuth(app: Express) {
             firstName: user.firstName,
             lastName: user.lastName,
             phone: user.phone,
+            profileImageUrl: user.profileImageUrl,
+            bannerImageUrl: user.bannerImageUrl,
             isAdmin: user.isAdmin,
             sessionId: req.sessionID // Return session ID for mobile apps
           });
@@ -269,6 +271,8 @@ export function setupAuth(app: Express) {
             firstName: userData.firstName,
             lastName: userData.lastName,
             phone: userData.phone,
+            profileImageUrl: userData.profileImageUrl,
+            bannerImageUrl: userData.bannerImageUrl,
             isAdmin: userData.isAdmin,
             sessionId: req.sessionID // Return session ID for mobile apps
           });
@@ -423,6 +427,8 @@ export function setupAuth(app: Express) {
               firstName: user.firstName,
               lastName: user.lastName,
               phone: user.phone,
+              profileImageUrl: user.profileImageUrl,
+              bannerImageUrl: user.bannerImageUrl,
               isAdmin: user.isAdmin
             }
           });
@@ -491,6 +497,8 @@ export function setupAuth(app: Express) {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        profileImageUrl: user.profileImageUrl,
+        bannerImageUrl: user.bannerImageUrl,
         isAdmin: user.isAdmin 
       });
     }
