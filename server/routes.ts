@@ -561,7 +561,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const posts = await storage.listPlatformPosts(limit);
-      res.json(posts);
+      const postsWithUsers = await Promise.all(
+        posts.map(async (post) => {
+          const postUser = await storage.getUser(post.userId);
+          return {
+            ...post,
+            user: postUser ? {
+              id: postUser.id,
+              username: postUser.username,
+              firstName: postUser.firstName,
+              lastName: postUser.lastName,
+              profileImageUrl: postUser.profileImageUrl,
+            } : null,
+          };
+        })
+      );
+      res.json(postsWithUsers);
     } catch (error) {
       console.error("Error fetching platform posts:", error);
       res.status(500).json({ message: "Failed to fetch posts" });

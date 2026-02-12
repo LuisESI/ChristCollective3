@@ -1,15 +1,223 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, TrendingUp, Users, DollarSign, Star, Check, ImageIcon } from "lucide-react";
+import { Search, TrendingUp, Users, Star, Check, Heart, MessageCircle, Share2, Briefcase, Church, UserPlus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl } from "@/lib/api-config";
+
+type FeedItem = {
+  type: 'post' | 'creator' | 'business' | 'ministry' | 'user';
+  id: string;
+  data: any;
+  sortDate: Date;
+};
+
+function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
+  return (
+    <div 
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      onClick={() => navigate(`/post/${post.id}`)}
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <Avatar className="w-9 h-9">
+          <AvatarImage src={getImageUrl(post.user?.profileImageUrl)} />
+          <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
+            {post.user?.firstName?.[0] || post.user?.username?.[0] || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-sm font-medium truncate">
+            {post.user?.firstName && post.user?.lastName 
+              ? `${post.user.firstName} ${post.user.lastName}`
+              : post.user?.username || 'User'}
+          </p>
+          <p className="text-gray-500 text-xs">@{post.user?.username || 'user'}</p>
+        </div>
+        <span className="text-gray-600 text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
+      </div>
+
+      {post.title && (
+        <h3 className="text-white font-semibold text-sm mb-1">{post.title}</h3>
+      )}
+      
+      <p className="text-gray-300 text-sm leading-relaxed line-clamp-3 mb-3">{post.content}</p>
+
+      {post.mediaUrls?.[0] && (
+        <div className="rounded-lg overflow-hidden mb-3">
+          {post.mediaType === 'video' || (typeof post.mediaUrls[0] === 'string' && (post.mediaUrls[0].toLowerCase().endsWith('.mp4') || post.mediaUrls[0].toLowerCase().endsWith('.mov') || post.mediaUrls[0].toLowerCase().endsWith('.webm'))) ? (
+            <video 
+              src={getImageUrl(post.mediaUrls[0])} 
+              className="w-full max-h-[300px] object-cover rounded-lg"
+              muted
+              playsInline
+              loop
+              onMouseOver={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+              onMouseOut={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
+            />
+          ) : (
+            <img 
+              src={getImageUrl(post.mediaUrls[0])} 
+              alt={post.title || "Post"}
+              className="w-full max-h-[300px] object-cover rounded-lg"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 text-gray-500 text-xs">
+        <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {post.likesCount || 0}</span>
+        <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" /> {post.commentsCount || 0}</span>
+        <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5" /> {post.sharesCount || 0}</span>
+      </div>
+    </div>
+  );
+}
+
+function CreatorCard({ creator, navigate }: { creator: any; navigate: (path: string) => void }) {
+  return (
+    <div 
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      onClick={() => navigate(`/creators/${creator.id}`)}
+    >
+      <div className="flex items-center gap-3">
+        <Avatar className="w-12 h-12 border-2 border-[#D4AF37]">
+          <AvatarImage src={getImageUrl(creator.profileImage)} />
+          <AvatarFallback className="bg-[#D4AF37] text-black font-bold">
+            {creator.name?.[0] || 'C'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-white font-semibold text-sm truncate">{creator.name}</p>
+            <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] px-2 py-0.5 rounded-full font-medium">Creator</span>
+          </div>
+          <p className="text-gray-500 text-xs">{creator.content || 'Content Creator'}</p>
+        </div>
+        <Button
+          size="sm"
+          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
+        >
+          View
+        </Button>
+      </div>
+      {creator.bio && (
+        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{creator.bio}</p>
+      )}
+    </div>
+  );
+}
+
+function BusinessCard({ business, navigate }: { business: any; navigate: (path: string) => void }) {
+  return (
+    <div 
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      onClick={() => navigate(`/business/profile/${business.id}`)}
+    >
+      <div className="flex items-center gap-3">
+        <Avatar className="w-12 h-12 border-2 border-gray-700">
+          <AvatarImage src={getImageUrl(business.logo)} />
+          <AvatarFallback className="bg-gray-800 text-[#D4AF37] font-bold">
+            {business.companyName?.[0] || 'B'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-white font-semibold text-sm truncate">{business.companyName}</p>
+            <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <Briefcase className="w-2.5 h-2.5" /> Business
+            </span>
+          </div>
+          <p className="text-[#D4AF37] text-xs">{business.industry || 'Business'}</p>
+        </div>
+        <Button
+          size="sm"
+          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
+        >
+          View
+        </Button>
+      </div>
+      {business.description && (
+        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{business.description}</p>
+      )}
+    </div>
+  );
+}
+
+function MinistryCard({ ministry, navigate }: { ministry: any; navigate: (path: string) => void }) {
+  return (
+    <div 
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      onClick={() => navigate(`/ministry/${ministry.id}`)}
+    >
+      <div className="flex items-center gap-3">
+        <Avatar className="w-12 h-12 border-2 border-gray-700">
+          <AvatarImage src={getImageUrl(ministry.logo)} />
+          <AvatarFallback className="bg-gray-800 text-[#D4AF37] font-bold">
+            {ministry.name?.[0] || 'M'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-white font-semibold text-sm truncate">{ministry.name}</p>
+            <span className="bg-purple-500/20 text-purple-400 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <Church className="w-2.5 h-2.5" /> Ministry
+            </span>
+          </div>
+          <p className="text-[#D4AF37] text-xs">{ministry.denomination || 'Ministry'}</p>
+        </div>
+        <Button
+          size="sm"
+          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
+        >
+          View
+        </Button>
+      </div>
+      {ministry.description && (
+        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{ministry.description}</p>
+      )}
+    </div>
+  );
+}
+
+function UserCard({ member, navigate }: { member: any; navigate: (path: string) => void }) {
+  return (
+    <div 
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      onClick={() => navigate(`/profile/${member.username}`)}
+    >
+      <div className="flex items-center gap-3">
+        <Avatar className="w-10 h-10 border border-gray-700">
+          <AvatarImage src={getImageUrl(member.profileImageUrl)} />
+          <AvatarFallback className="bg-gray-800 text-gray-400">
+            {member.firstName?.[0] || member.username?.[0] || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-sm font-medium truncate">
+            {member.firstName && member.lastName 
+              ? `${member.firstName} ${member.lastName}`
+              : member.username}
+          </p>
+          <p className="text-gray-500 text-xs">@{member.username}</p>
+        </div>
+        <Button
+          size="sm"
+          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
+        >
+          <UserPlus className="w-3 h-3 mr-1" /> Follow
+        </Button>
+      </div>
+      {member.bio && (
+        <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed">{member.bio}</p>
+      )}
+    </div>
+  );
+}
 
 export default function ExplorePage() {
   const { user, isLoading } = useAuth();
@@ -24,32 +232,27 @@ export default function ExplorePage() {
     }
   }, [isLoading, user, navigate]);
 
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery({
-    queryKey: ["/api/campaigns"],
-    enabled: !!user,
-  });
-
-  const { data: creators, isLoading: creatorsLoading } = useQuery({
+  const { data: creators } = useQuery({
     queryKey: ["/api/content-creators"],
     enabled: !!user,
   });
 
-  const { data: businesses, isLoading: businessesLoading } = useQuery({
+  const { data: businesses } = useQuery({
     queryKey: ["/api/business-profiles"],
     enabled: !!user,
   });
 
-  const { data: ministries, isLoading: ministriesLoading } = useQuery({
+  const { data: ministries } = useQuery({
     queryKey: ["/api/ministries"],
     enabled: !!user,
   });
 
-  const { data: allUsers, isLoading: usersLoading } = useQuery({
+  const { data: allUsers } = useQuery({
     queryKey: ["/api/users"],
     enabled: !!user,
   });
 
-  const { data: posts, isLoading: postsLoading } = useQuery({
+  const { data: posts } = useQuery({
     queryKey: ["/api/platform-posts"],
     enabled: !!user,
   });
@@ -70,81 +273,140 @@ export default function ExplorePage() {
   const categories = [
     { id: "all", label: "All", icon: TrendingUp },
     { id: "posts", label: "Posts", icon: Star },
-    { id: "campaigns", label: "Campaigns", icon: DollarSign },
     { id: "creators", label: "Creators", icon: Star },
-    { id: "businesses", label: "Businesses", icon: Users },
-    { id: "ministries", label: "Ministries", icon: Star },
+    { id: "businesses", label: "Businesses", icon: Briefcase },
+    { id: "ministries", label: "Ministries", icon: Church },
     { id: "users", label: "Members", icon: Users },
   ];
 
-  const filteredPosts = posts && Array.isArray(posts) ? posts.filter((post: any) =>
-    post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const followingIds = userFollowing && Array.isArray(userFollowing) ? userFollowing.map((f: any) => f.id) : [];
 
-  const filteredCampaigns = campaigns && Array.isArray(campaigns) ? campaigns.filter((campaign: any) =>
-    campaign.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    campaign.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredPosts = posts && Array.isArray(posts) ? posts.filter((post: any) => {
+    if (post.userId === user?.id) return false;
+    if (followingIds.includes(post.userId)) return false;
+    const matchesSearch = !searchTerm || 
+      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  }) : [];
 
-  const filteredCreators = creators && Array.isArray(creators) ? creators.filter((creator: any) =>
-    creator.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    creator.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    creator.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredCreators = creators && Array.isArray(creators) ? creators.filter((creator: any) => {
+    const matchesSearch = !searchTerm ||
+      creator.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      creator.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      creator.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  }) : [];
 
-  const filteredBusinesses = businesses && Array.isArray(businesses) ? businesses.filter((business: any) =>
-    business.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    business.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredBusinesses = businesses && Array.isArray(businesses) ? businesses.filter((business: any) => {
+    const matchesSearch = !searchTerm ||
+      business.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      business.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  }) : [];
 
-  const filteredMinistries = ministries && Array.isArray(ministries) ? ministries.filter((ministry: any) =>
-    ministry.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ministry.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredMinistries = ministries && Array.isArray(ministries) ? ministries.filter((ministry: any) => {
+    const matchesSearch = !searchTerm ||
+      ministry.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ministry.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  }) : [];
 
   const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((targetUser: any) => {
     if (targetUser.id === user?.id) return false;
     
-    const hasMinistryProfile = ministries && Array.isArray(ministries) && ministries.some((ministry: any) => ministry.userId === targetUser.id);
-    const hasCreatorProfile = creators && Array.isArray(creators) && creators.some((creator: any) => creator.userId === targetUser.id);
-    const hasBusinessProfile = businesses && Array.isArray(businesses) && businesses.some((business: any) => business.userId === targetUser.id);
+    const hasMinistryProfile = ministries && Array.isArray(ministries) && ministries.some((m: any) => m.userId === targetUser.id);
+    const hasCreatorProfile = creators && Array.isArray(creators) && creators.some((c: any) => c.userId === targetUser.id);
+    const hasBusinessProfile = businesses && Array.isArray(businesses) && businesses.some((b: any) => b.userId === targetUser.id);
     
     const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
     
-    const matchesSearch = targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = !searchTerm ||
+      targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      targetUser.bio?.toLowerCase().includes(searchTerm.toLowerCase());
+      targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase());
       
     return isRegularUser && matchesSearch;
   }) : [];
 
-  const randomizedUsers = filteredUsers.length > 0 ? (() => {
-    const followingIds = userFollowing && Array.isArray(userFollowing) ? userFollowing.map((follow: any) => follow.id) : [];
-    
-    const unfollowedUsers = filteredUsers.filter((targetUser: any) => !followingIds.includes(targetUser.id));
-    const followedUsers = filteredUsers.filter((targetUser: any) => followingIds.includes(targetUser.id));
-    
-    const shuffleArray = (array: any[]) => {
-      const shuffled = [...array];
+  const buildMixedFeed = (): FeedItem[] => {
+    const items: FeedItem[] = [];
+
+    if (selectedCategory === 'all' || selectedCategory === 'posts') {
+      filteredPosts.forEach((post: any) => {
+        items.push({
+          type: 'post',
+          id: `post-${post.id}`,
+          data: post,
+          sortDate: new Date(post.createdAt),
+        });
+      });
+    }
+
+    if (selectedCategory === 'all' || selectedCategory === 'creators') {
+      filteredCreators.forEach((creator: any) => {
+        items.push({
+          type: 'creator',
+          id: `creator-${creator.id}`,
+          data: creator,
+          sortDate: new Date(creator.createdAt || '2025-01-01'),
+        });
+      });
+    }
+
+    if (selectedCategory === 'all' || selectedCategory === 'businesses') {
+      filteredBusinesses.forEach((business: any) => {
+        items.push({
+          type: 'business',
+          id: `business-${business.id}`,
+          data: business,
+          sortDate: new Date(business.createdAt || '2025-01-01'),
+        });
+      });
+    }
+
+    if (selectedCategory === 'all' || selectedCategory === 'ministries') {
+      filteredMinistries.forEach((ministry: any) => {
+        items.push({
+          type: 'ministry',
+          id: `ministry-${ministry.id}`,
+          data: ministry,
+          sortDate: new Date(ministry.createdAt || '2025-01-01'),
+        });
+      });
+    }
+
+    if (selectedCategory === 'all' || selectedCategory === 'users') {
+      const shuffled = [...filteredUsers];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      return shuffled;
-    };
-    
-    const shuffledUnfollowed = shuffleArray(unfollowedUsers);
-    const shuffledFollowed = shuffleArray(followedUsers);
-    
-    return [...shuffledUnfollowed, ...shuffledFollowed];
-  })() : [];
+      const unfollowed = shuffled.filter((u: any) => !followingIds.includes(u.id));
+      const followed = shuffled.filter((u: any) => followingIds.includes(u.id));
+      [...unfollowed, ...followed].slice(0, 10).forEach((member: any) => {
+        items.push({
+          type: 'user',
+          id: `user-${member.id}`,
+          data: member,
+          sortDate: new Date(member.createdAt || '2025-01-01'),
+        });
+      });
+    }
+
+    if (selectedCategory === 'all') {
+      items.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
+    }
+
+    return items;
+  };
+
+  const feedItems = buildMixedFeed();
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
       <div className="bg-black border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="container mx-auto px-4 py-4 max-w-lg">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold text-white">Explore</h1>
           </div>
@@ -161,8 +423,8 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-1 md:px-4 py-6 max-w-4xl">
-        <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide px-3 md:px-0">
+      <div className="container mx-auto px-4 py-4 max-w-lg">
+        <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category) => {
             const Icon = category.icon;
             const isActive = selectedCategory === category.id;
@@ -184,311 +446,34 @@ export default function ExplorePage() {
           })}
         </div>
 
-        {(selectedCategory === "all" || selectedCategory === "posts") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Latest Posts</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("posts")}>
-                View All
-              </Button>
+        <div className="space-y-3">
+          {feedItems.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-400">
+                <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                <p className="text-sm">Try a different search or category</p>
+              </div>
             </div>
-            {postsLoading ? (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-[#0A0A0A] rounded-lg"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {filteredPosts?.slice(0, 9).map((post: any) => (
-                  <div 
-                    key={post.id} 
-                    className="aspect-square relative group overflow-hidden rounded-lg cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/post/${post.id}`)}
-                  >
-                    {post.mediaUrls?.[0] ? (
-                      <div className="w-full h-full">
-                        {post.mediaType === 'video' || (typeof post.mediaUrls[0] === 'string' && (post.mediaUrls[0].toLowerCase().endsWith('.mp4') || post.mediaUrls[0].toLowerCase().endsWith('.mov') || post.mediaUrls[0].toLowerCase().endsWith('.webm'))) ? (
-                          <video 
-                            src={getImageUrl(post.mediaUrls[0])} 
-                            className="w-full h-full object-cover"
-                            muted
-                            playsInline
-                            loop
-                            onMouseOver={(e) => {
-                              const video = e.target as HTMLVideoElement;
-                              video.play().catch(err => console.error("Video play failed:", err));
-                            }}
-                            onMouseOut={(e) => {
-                              const video = e.target as HTMLVideoElement;
-                              video.pause();
-                              video.currentTime = 0;
-                            }}
-                          />
-                        ) : (
-                          <img 
-                            src={getImageUrl(post.mediaUrls[0])} 
-                            alt={post.title || "Post"}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                            onError={(e) => {
-                              const img = e.target as HTMLImageElement;
-                              // If it fails to load as an image, maybe it's actually a video or something else
-                              // but for now let's use a fallback star icon container
-                              img.style.display = 'none';
-                              if (img.parentElement) {
-                                img.parentElement.classList.add('flex', 'items-center', 'justify-center', 'bg-[#111]');
-                                const icon = document.createElement('div');
-                                icon.innerHTML = '<Star class="text-[#D4AF37] opacity-50" size="24" />';
-                                img.parentElement.appendChild(icon);
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-gray-400 p-4 text-xs text-center overflow-hidden">
-                        <div className="line-clamp-6 leading-relaxed">
-                          {post.content}
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
-                      {post.title && <p className="text-white text-[10px] md:text-sm font-semibold truncate">{post.title}</p>}
-                      <p className="text-gray-300 text-[8px] md:text-xs line-clamp-2">{post.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {(selectedCategory === "all" || selectedCategory === "campaigns") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Featured Campaigns</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("campaigns")}>
-                View All
-              </Button>
-            </div>
-            {campaignsLoading ? (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-[#0A0A0A] rounded-lg"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {filteredCampaigns?.slice(0, 6).map((campaign: any) => (
-                  <div 
-                    key={campaign.id} 
-                    className="aspect-square relative group overflow-hidden cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/donate/${campaign.slug}`)}
-                  >
-                    {campaign.imageUrl || campaign.image ? (
-                      <img 
-                        src={campaign.imageUrl || campaign.image} 
-                        alt={campaign.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-700">
-                        <ImageIcon size={24} />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
-                      <p className="text-white text-[10px] md:text-sm font-semibold truncate">{campaign.title}</p>
-                      <p className="text-[#D4AF37] text-[8px] md:text-xs font-bold">${(campaign.currentAmount || 0).toLocaleString()} raised</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {(selectedCategory === "all" || selectedCategory === "creators") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Popular Creators</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("creators")}>
-                View All
-              </Button>
-            </div>
-            {creatorsLoading ? (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-[#0A0A0A] rounded-lg"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {filteredCreators?.slice(0, 6).map((creator: any) => (
-                  <div 
-                    key={creator.id} 
-                    className="aspect-square relative group overflow-hidden cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/creators/${creator.id}`)}
-                  >
-                    {creator.profileImage ? (
-                      <img 
-                        src={getImageUrl(creator.profileImage)} 
-                        alt={creator.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-[#D4AF37] font-bold text-xl">
-                        {creator.name?.[0]}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
-                      <p className="text-white text-[10px] md:text-sm font-semibold truncate">{creator.name}</p>
-                      <p className="text-gray-300 text-[8px] md:text-xs truncate">{creator.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {(selectedCategory === "all" || selectedCategory === "businesses") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Featured Businesses</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("businesses")}>
-                View All
-              </Button>
-            </div>
-            {businessesLoading ? (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-[#0A0A0A] rounded-lg"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {filteredBusinesses?.slice(0, 6).map((business: any) => (
-                  <div 
-                    key={business.id} 
-                    className="aspect-square relative group overflow-hidden cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/business/profile/${business.id}`)}
-                  >
-                    {business.logo ? (
-                      <img 
-                        src={getImageUrl(business.logo)} 
-                        alt={business.companyName}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-[#D4AF37] font-bold text-xl">
-                        {business.companyName?.[0]}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
-                      <p className="text-white text-[10px] md:text-sm font-semibold truncate">{business.companyName}</p>
-                      <p className="text-[#D4AF37] text-[8px] md:text-xs font-bold">{business.industry}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {(selectedCategory === "all" || selectedCategory === "ministries") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Featured Ministries</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("ministries")}>
-                View All
-              </Button>
-            </div>
-            {ministriesLoading ? (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-[#0A0A0A] rounded-lg"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1 md:gap-4">
-                {filteredMinistries?.slice(0, 6).map((ministry: any) => (
-                  <div 
-                    key={ministry.id} 
-                    className="aspect-square relative group overflow-hidden cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/ministry/${ministry.id}`)}
-                  >
-                    {ministry.logo ? (
-                      <img 
-                        src={getImageUrl(ministry.logo)} 
-                        alt={ministry.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-[#D4AF37] font-bold text-xl">
-                        {ministry.name?.[0]}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
-                      <p className="text-white text-[10px] md:text-sm font-semibold truncate">{ministry.name}</p>
-                      <p className="text-[#D4AF37] text-[8px] md:text-xs font-bold">{ministry.denomination}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {(selectedCategory === "all" || selectedCategory === "users") && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 px-3 md:px-0">
-              <h3 className="text-lg font-semibold text-[#D4AF37] font-italic italic">Suggested for You</h3>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37]" onClick={() => setSelectedCategory("users")}>
-                View All
-              </Button>
-            </div>
-            {usersLoading ? (
-              <div className="space-y-3 px-3 md:px-0">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="animate-pulse flex items-center space-x-3 p-4 bg-[#0A0A0A] border border-gray-900 rounded-lg">
-                    <div className="h-12 w-12 bg-gray-900 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-900 rounded mb-2 w-1/3"></div>
-                      <div className="h-3 bg-gray-900 rounded w-1/4"></div>
-                    </div>
-                    <div className="h-8 w-20 bg-gray-900 rounded-full"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3 px-3 md:px-0">
-                {randomizedUsers?.slice(0, 9).map((member: any) => (
-                  <div key={member.id} className="flex items-center space-x-3 p-4 bg-[#0A0A0A] border border-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-                    <div className="cursor-pointer" onClick={() => navigate(`/profile/${member.username}`)}>
-                      <Avatar className="h-12 w-12 border border-gray-800">
-                        <AvatarImage src={getImageUrl(member.profileImageUrl)} />
-                        <AvatarFallback className="bg-gray-900 text-gray-400">{member.firstName?.[0] || member.username?.[0]}</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/profile/${member.username}`)}>
-                      <h4 className="font-medium text-white">
-                        {member.firstName && member.lastName 
-                          ? `${member.firstName} ${member.lastName}`
-                          : member.username}
-                      </h4>
-                      <p className="text-xs text-gray-400">@{member.username}</p>
-                    </div>
-                    <button
-                      className="border border-[#D4AF37] text-[#D4AF37] bg-transparent rounded-full px-4 py-1.5 text-sm font-medium hover:bg-[#D4AF37] hover:text-black transition-colors"
-                    >
-                      Follow
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          ) : (
+            feedItems.map((item) => {
+              switch (item.type) {
+                case 'post':
+                  return <PostPreviewCard key={item.id} post={item.data} navigate={navigate} />;
+                case 'creator':
+                  return <CreatorCard key={item.id} creator={item.data} navigate={navigate} />;
+                case 'business':
+                  return <BusinessCard key={item.id} business={item.data} navigate={navigate} />;
+                case 'ministry':
+                  return <MinistryCard key={item.id} ministry={item.data} navigate={navigate} />;
+                case 'user':
+                  return <UserCard key={item.id} member={item.data} navigate={navigate} />;
+                default:
+                  return null;
+              }
+            })
+          )}
+        </div>
       </div>
     </div>
   );
