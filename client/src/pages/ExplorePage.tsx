@@ -232,14 +232,24 @@ export default function ExplorePage() {
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                             onError={(e) => {
                               const img = e.target as HTMLImageElement;
-                              img.src = "/favicon.png"; // Fallback if image fails
+                              // If it fails to load as an image, maybe it's actually a video or something else
+                              // but for now let's use a fallback star icon container
+                              img.style.display = 'none';
+                              if (img.parentElement) {
+                                img.parentElement.classList.add('flex', 'items-center', 'justify-center', 'bg-[#111]');
+                                const icon = document.createElement('div');
+                                icon.innerHTML = '<Star class="text-[#D4AF37] opacity-50" size="24" />';
+                                img.parentElement.appendChild(icon);
+                              }
                             }}
                           />
                         )}
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-gray-500 p-2 text-[10px] text-center">
-                        {post.content?.substring(0, 50)}...
+                      <div className="w-full h-full flex items-center justify-center bg-[#111] text-gray-400 p-4 text-xs text-center overflow-hidden">
+                        <div className="line-clamp-6 leading-relaxed">
+                          {post.content}
+                        </div>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 md:p-4">
