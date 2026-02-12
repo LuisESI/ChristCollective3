@@ -298,11 +298,12 @@ export default function ExplorePage() {
       const profileChunkSize = 3;
       let profileIndex = 0;
       const profilesToInsert = showProfiles ? displayProfiles : [];
+      const postsPerProfileRow = Math.max(2, Math.ceil(sortedPosts.length / Math.ceil(profilesToInsert.length / profileChunkSize || 1)));
 
       sortedPosts.forEach((post: any, i: number) => {
         feed.push({ type: 'post', data: post });
 
-        if (showProfiles && (i + 1) % 3 === 0 && profileIndex < profilesToInsert.length) {
+        if (showProfiles && (i + 1) % postsPerProfileRow === 0 && profileIndex < profilesToInsert.length) {
           const chunk = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
           if (chunk.length > 0) {
             feed.push({ type: 'profiles', data: chunk });
@@ -311,11 +312,10 @@ export default function ExplorePage() {
         }
       });
 
-      while (profileIndex < profilesToInsert.length) {
-        const chunk = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
-        if (chunk.length > 0) {
-          feed.push({ type: 'profiles', data: chunk });
-          profileIndex += profileChunkSize;
+      if (profileIndex < profilesToInsert.length) {
+        const remaining = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
+        if (remaining.length > 0) {
+          feed.push({ type: 'profiles', data: remaining });
         }
       }
     } else if (showProfiles && !showPosts) {
