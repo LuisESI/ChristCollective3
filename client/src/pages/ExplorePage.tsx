@@ -209,14 +209,18 @@ export default function ExplorePage() {
 
   const followingIds = userFollowing && Array.isArray(userFollowing) ? userFollowing.map((f: any) => f.id) : [];
 
-  const filteredPosts = posts && Array.isArray(posts) ? posts.filter((post: any) => {
-    if (post.userId === user?.id) return false;
-    if (followingIds.includes(post.userId)) return false;
+  const allFilteredPosts = posts && Array.isArray(posts) ? posts.filter((post: any) => {
     const matchesSearch = !searchTerm || 
       post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.content?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   }) : [];
+
+  const discoveryPosts = allFilteredPosts.filter((post: any) => {
+    return post.userId !== user?.id && !followingIds.includes(post.userId);
+  });
+
+  const filteredPosts = discoveryPosts.length > 0 ? discoveryPosts : allFilteredPosts;
 
   const filteredCreators = creators && Array.isArray(creators) ? creators.filter((creator: any) => {
     const matchesSearch = !searchTerm ||
