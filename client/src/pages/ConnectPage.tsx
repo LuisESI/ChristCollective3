@@ -516,139 +516,259 @@ export default function ConnectPage() {
         </div>
 
         {/* Communities Tab Content */}
-        {activeTab === "communities" && (queues.length > 0 || activeChats.length === 0) && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
+        {activeTab === "communities" && (
+          <div className="space-y-6">
+            {/* Active Communities - Vertical Stack with Banners */}
+            {activeChats.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-white">Chat Queues</h2>
-                <p className="text-xs text-gray-400">Available queues waiting for people to join</p>
-              </div>
-              {queues.length > 0 && (
-                <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]">
-                  {queues.length} Available
-                </Badge>
-              )}
-            </div>
-            
-            {queues.length > 0 ? (
-              <div className="relative">
-                {/* Navigation Arrows */}
-                {canScrollLeft && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={scrollLeft}
-                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                )}
-                {canScrollRight && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={scrollRight}
-                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                )}
-                
-                {/* Horizontal Scroll Container */}
-                <div 
-                  ref={scrollContainerRef}
-                  className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {queues.map((queue) => {
-                    const intentionInfo = getIntentionInfo(queue.intention);
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Your Communities</h2>
+                    <p className="text-xs text-gray-400">Active group chats you're part of</p>
+                  </div>
+                  <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
+                    {activeChats.length} Active
+                  </Badge>
+                </div>
+
+                <div className="space-y-4">
+                  {activeChats.map((chat) => {
+                    const intentionInfo = getIntentionInfo(chat.intention);
                     const Icon = intentionInfo.icon;
-                    const isOwner = queue.creatorId === user?.id;
-                    const progressPercent = (queue.currentCount / queue.maxPeople) * 100;
-                    // Check if user is already a member of this queue
-                    const isMember = joinedQueues.has(queue.id);
-                    const createdDate = new Date().toLocaleDateString(); // Since we don't have createdAt, using current date
-                    
+                    const bannerGradients: Record<string, string> = {
+                      prayer: "from-red-900/80 via-red-800/50 to-black",
+                      bible_study: "from-blue-900/80 via-blue-800/50 to-black",
+                      evangelizing: "from-green-900/80 via-green-800/50 to-black",
+                      fellowship: "from-purple-900/80 via-purple-800/50 to-black",
+                      worship: "from-[#D4AF37]/40 via-[#D4AF37]/20 to-black",
+                    };
+                    const gradient = bannerGradients[chat.intention] || bannerGradients.fellowship;
+
                     return (
-                      <div key={queue.id} className="rounded-lg bg-black border border-gray-700/50 hover:border-[#D4AF37]/50 transition-all duration-300 flex-shrink-0 w-80">
-                        <div className="p-4">
-                          {/* Top Row - Icon, Title and Badge */}
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className={`p-2 rounded-lg ${intentionInfo.color} flex-shrink-0`}>
-                              <Icon className="w-5 h-5 text-white" />
+                      <div
+                        key={`community-${chat.id}`}
+                        className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 cursor-pointer"
+                        onClick={() => navigate(`/chat/${chat.id}`)}
+                      >
+                        {/* Banner */}
+                        <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
+                          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                            <Icon className="w-16 h-16 text-white" />
+                          </div>
+                        </div>
+
+                        {/* Profile Picture + Info */}
+                        <div className="px-4 pb-4 -mt-8 relative">
+                          <div className="flex items-end gap-3 mb-3">
+                            <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                              <Icon className="w-7 h-7 text-white" />
                             </div>
-                            <div className="flex items-center space-x-2 flex-1">
-                              <h3 className="text-sm font-semibold text-white">{queue.title}</h3>
-                              <Badge className={`${intentionInfo.badgeColor} text-white text-xs px-2 py-0.5 font-medium`}>
-                                {intentionInfo.label}
-                              </Badge>
+                            <div className="flex-1 min-w-0 pb-1">
+                              <h3 className="text-base font-bold text-white truncate">{chat.title}</h3>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <Badge className={`${intentionInfo.badgeColor} text-white text-xs px-2 py-0.5 font-medium`}>
+                                  {intentionInfo.label}
+                                </Badge>
+                                <span className="text-xs text-gray-400">{chat.memberCount} members</span>
+                              </div>
                             </div>
                           </div>
-                          
-                          {/* Date and Member Count */}
-                          <div className="text-xs text-gray-400 mb-3 ml-11">
-                            {createdDate} • {queue.currentCount}/{queue.maxPeople} members
-                          </div>
-                          
-                          {/* Profile Pictures Row */}
-                          <div className="flex space-x-2 ml-11 mb-4">
-                            {Array.from({ length: Math.min(queue.currentCount, 5) }).map((_, index) => (
-                              <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">
-                                  {String.fromCharCode(65 + index)}
-                                </span>
-                              </div>
-                            ))}
-                            {queue.currentCount > 5 && (
-                              <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-800 flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">+{queue.currentCount - 5}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Action Button - Full Width at Bottom */}
-                          {isOwner ? (
-                            <Button
-                              variant="outline"
-                              onClick={() => cancelQueueMutation.mutate(queue.id)}
-                              disabled={cancelQueueMutation.isPending}
-                              className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 py-2 text-sm rounded-lg"
-                            >
-                              Cancel Queue
-                            </Button>
-                          ) : isMember ? (
-                            <Button
-                              variant="outline"
-                              onClick={() => exitQueueMutation.mutate(queue.id)}
-                              disabled={exitQueueMutation.isPending}
-                              className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 py-2 text-sm rounded-lg"
-                            >
-                              {exitQueueMutation.isPending ? "Leaving Queue..." : "Exit Queue"}
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={() => joinQueueMutation.mutate(queue.id)}
-                              disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
-                              className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium py-2 text-sm rounded-lg"
-                            >
-                              {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Queue Full" : "Join Queue"}
-                            </Button>
+
+                          {chat.description && (
+                            <p className="text-xs text-gray-400 mb-3 line-clamp-2">{chat.description}</p>
                           )}
+
+                          {/* Member Avatars */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex -space-x-2">
+                              {Array.from({ length: Math.min(chat.memberCount, 5) }).map((_, index) => (
+                                <div key={index} className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 border-2 border-black flex items-center justify-center">
+                                  <span className="text-xs text-white font-medium">
+                                    {String.fromCharCode(65 + index)}
+                                  </span>
+                                </div>
+                              ))}
+                              {chat.memberCount > 5 && (
+                                <div className="w-8 h-8 rounded-full bg-gray-800 border-2 border-black flex items-center justify-center">
+                                  <span className="text-xs text-gray-300 font-medium">+{chat.memberCount - 5}</span>
+                                </div>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/chat/${chat.id}`);
+                              }}
+                              className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-medium text-xs px-4 h-8 rounded-full"
+                            >
+                              Open Chat
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-6 bg-black border border-gray-700/50 rounded-lg">
-                <div className="flex items-center justify-center mb-2">
-                  <div className="p-2 bg-[#D4AF37]/20 rounded-full">
-                    <Users className="w-5 h-5 text-[#D4AF37]" />
+            )}
+
+            {/* Chat Queues - Horizontal Scroll */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Chat Queues</h2>
+                  <p className="text-xs text-gray-400">Available queues waiting for people to join</p>
+                </div>
+                {queues.length > 0 && (
+                  <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]">
+                    {queues.length} Available
+                  </Badge>
+                )}
+              </div>
+
+              {queues.length > 0 ? (
+                <div className="relative">
+                  {canScrollLeft && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={scrollLeft}
+                      className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {canScrollRight && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={scrollRight}
+                      className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  <div
+                    ref={scrollContainerRef}
+                    className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {queues.map((queue) => {
+                      const intentionInfo = getIntentionInfo(queue.intention);
+                      const Icon = intentionInfo.icon;
+                      const isOwner = queue.creatorId === user?.id;
+                      const isMember = joinedQueues.has(queue.id);
+                      const bannerGradients: Record<string, string> = {
+                        prayer: "from-red-900/80 via-red-800/50 to-black",
+                        bible_study: "from-blue-900/80 via-blue-800/50 to-black",
+                        evangelizing: "from-green-900/80 via-green-800/50 to-black",
+                        fellowship: "from-purple-900/80 via-purple-800/50 to-black",
+                        worship: "from-[#D4AF37]/40 via-[#D4AF37]/20 to-black",
+                      };
+                      const gradient = bannerGradients[queue.intention] || bannerGradients.fellowship;
+
+                      return (
+                        <div key={queue.id} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72">
+                          {/* Mini Banner */}
+                          <div className={`h-16 bg-gradient-to-r ${gradient} relative`}>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                              <Icon className="w-10 h-10 text-white" />
+                            </div>
+                          </div>
+
+                          <div className="px-3 pb-3 -mt-5 relative">
+                            <div className="flex items-end gap-2 mb-2">
+                              <div className={`w-10 h-10 rounded-full ${intentionInfo.color} border-3 border-black flex items-center justify-center flex-shrink-0 shadow-md`}>
+                                <Icon className="w-4 h-4 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0 pb-0.5">
+                                <h3 className="text-sm font-semibold text-white truncate">{queue.title}</h3>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={`${intentionInfo.badgeColor} text-white text-xs px-2 py-0.5 font-medium`}>
+                                {intentionInfo.label}
+                              </Badge>
+                              <span className="text-xs text-gray-400">{queue.currentCount}/{queue.maxPeople}</span>
+                            </div>
+
+                            <div className="flex -space-x-1.5 mb-3">
+                              {Array.from({ length: Math.min(queue.currentCount, 4) }).map((_, index) => (
+                                <div key={index} className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 border-2 border-black flex items-center justify-center">
+                                  <span className="text-[10px] text-white font-medium">
+                                    {String.fromCharCode(65 + index)}
+                                  </span>
+                                </div>
+                              ))}
+                              {queue.currentCount > 4 && (
+                                <div className="w-6 h-6 rounded-full bg-gray-800 border-2 border-black flex items-center justify-center">
+                                  <span className="text-[10px] text-gray-300 font-medium">+{queue.currentCount - 4}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {isOwner ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => cancelQueueMutation.mutate(queue.id)}
+                                disabled={cancelQueueMutation.isPending}
+                                className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 text-xs h-8 rounded-full"
+                              >
+                                Cancel Queue
+                              </Button>
+                            ) : isMember ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => exitQueueMutation.mutate(queue.id)}
+                                disabled={exitQueueMutation.isPending}
+                                className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 text-xs h-8 rounded-full"
+                              >
+                                {exitQueueMutation.isPending ? "Leaving..." : "Exit Queue"}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => joinQueueMutation.mutate(queue.id)}
+                                disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
+                                className="w-full bg-[#D4AF37] hover:bg-[#B8941F] text-black font-medium text-xs h-8 rounded-full"
+                              >
+                                {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Full" : "Join Queue"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <h3 className="text-base font-semibold text-white mb-1">No active queues</h3>
-                <p className="text-gray-400 text-xs">Start a queue to connect with other believers</p>
+              ) : (
+                <div className="text-center py-6 bg-black border border-gray-800 rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="p-2 bg-[#D4AF37]/20 rounded-full">
+                      <Users className="w-5 h-5 text-[#D4AF37]" />
+                    </div>
+                  </div>
+                  <h3 className="text-base font-semibold text-white mb-1">No active queues</h3>
+                  <p className="text-gray-400 text-xs">Start a queue to connect with other believers</p>
+                </div>
+              )}
+            </div>
+
+            {/* Empty state when no communities and no queues */}
+            {activeChats.length === 0 && queues.length === 0 && (
+              <div className="text-center py-8 bg-black border border-gray-800 rounded-xl">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="p-3 bg-[#D4AF37]/20 rounded-full">
+                    <Users className="w-6 h-6 text-[#D4AF37]" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-1">No communities yet</h3>
+                <p className="text-gray-400 text-sm">Create a queue to start connecting with believers</p>
               </div>
             )}
           </div>
