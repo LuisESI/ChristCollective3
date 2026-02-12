@@ -3598,6 +3598,75 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  app.post("/api/group-chats/:id/banner", isAuthenticated, upload.single("banner"), async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const userId = req.user.id;
+      if (!req.user.isAdmin) {
+        const queue = await storage.getGroupChatById(chatId);
+        if (!queue) return res.status(404).json({ message: "Chat not found" });
+      }
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const bannerImage = `/uploads/${req.file.filename}`;
+      const chat = await storage.updateGroupChatImages(chatId, { bannerImage });
+      res.json(chat);
+    } catch (error) {
+      console.error("Error uploading chat banner:", error);
+      res.status(500).json({ message: "Failed to upload banner" });
+    }
+  });
+
+  app.post("/api/group-chats/:id/icon", isAuthenticated, upload.single("icon"), async (req: any, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      if (!req.user.isAdmin) {
+        const queue = await storage.getGroupChatById(chatId);
+        if (!queue) return res.status(404).json({ message: "Chat not found" });
+      }
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const profileImage = `/uploads/${req.file.filename}`;
+      const chat = await storage.updateGroupChatImages(chatId, { profileImage });
+      res.json(chat);
+    } catch (error) {
+      console.error("Error uploading chat icon:", error);
+      res.status(500).json({ message: "Failed to upload icon" });
+    }
+  });
+
+  app.post("/api/group-chat-queues/:id/banner", isAuthenticated, upload.single("banner"), async (req: any, res) => {
+    try {
+      const queueId = parseInt(req.params.id);
+      if (!req.user.isAdmin) {
+        const queue = await storage.getGroupChatQueue(queueId);
+        if (!queue || queue.creatorId !== req.user.id) return res.status(403).json({ message: "Not authorized" });
+      }
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const bannerImage = `/uploads/${req.file.filename}`;
+      const queue = await storage.updateGroupChatQueueImages(queueId, { bannerImage });
+      res.json(queue);
+    } catch (error) {
+      console.error("Error uploading queue banner:", error);
+      res.status(500).json({ message: "Failed to upload banner" });
+    }
+  });
+
+  app.post("/api/group-chat-queues/:id/icon", isAuthenticated, upload.single("icon"), async (req: any, res) => {
+    try {
+      const queueId = parseInt(req.params.id);
+      if (!req.user.isAdmin) {
+        const queue = await storage.getGroupChatQueue(queueId);
+        if (!queue || queue.creatorId !== req.user.id) return res.status(403).json({ message: "Not authorized" });
+      }
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const profileImage = `/uploads/${req.file.filename}`;
+      const queue = await storage.updateGroupChatQueueImages(queueId, { profileImage });
+      res.json(queue);
+    } catch (error) {
+      console.error("Error uploading queue icon:", error);
+      res.status(500).json({ message: "Failed to upload icon" });
+    }
+  });
+
   app.post("/api/group-chats/:id/messages", isAuthenticated, async (req: any, res) => {
     try {
       const chatId = parseInt(req.params.id);
