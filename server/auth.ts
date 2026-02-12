@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import { emailService } from "./emailService";
+import { authLimiter } from "./security";
 
 declare global {
   namespace Express {
@@ -59,6 +60,11 @@ function hashResetToken(token: string): string {
 }
 
 export function setupAuth(app: Express) {
+  // OWASP: Fail fast if session secret is missing — never use a hardcoded fallback
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required. Generate a strong random value (32+ characters).');
+  }
+
   const MemoryStore = createMemoryStore(session);
   
   const sessionStore = new MemoryStore({
@@ -66,7 +72,7 @@ export function setupAuth(app: Express) {
   });
   
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || 'christ-collective-secret-2024',
+    secret: process.env.SESSION_SECRET!,
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session until something stored
     rolling: true, // Reset expiration on each request
@@ -156,7 +162,7 @@ export function setupAuth(app: Express) {
     done(null, user);
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/register", authLimiter, async (req, res, next) => {
     try {
       const { username, email, password, firstName, lastName, phone, userType } = req.body;
       
@@ -227,7 +233,7 @@ export function setupAuth(app: Express) {
     res.redirect("/auth");
   });
 
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/login", authLimiter, (req, res, next) => {
     // Transform usernameOrEmail to username for passport compatibility
     if (req.body.usernameOrEmail) {
       req.body.username = req.body.usernameOrEmail;
@@ -305,7 +311,7 @@ export function setupAuth(app: Express) {
   });
 
   // Forgot password - sends reset link via email
-  app.post("/api/auth/forgot-password", async (req, res) => {
+  app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
     try {
       const { email } = req.body;
       
@@ -347,7 +353,7 @@ export function setupAuth(app: Express) {
   });
 
   // Reset password with token
-  app.post("/api/auth/reset-password", async (req, res) => {
+  app.post("/api/auth/reset-password", authLimiter, async (req, res) => {
     try {
       const { token, newPassword, confirmPassword } = req.body;
       

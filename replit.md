@@ -180,6 +180,33 @@ const { data: directChats = [] } = useQuery<any[]>({
 - ✅ Uses proper API calls with credentials and session management
 - ✅ No more 404 errors when signing out
 
+### Security Hardening (Feb 2026)
+**Changes applied following OWASP best practices:**
+
+**Rate Limiting (`server/security.ts`):**
+- Global limiter: 200 req/15min on all /api routes (applied in server/index.ts)
+- Auth limiter: 10 req/15min on login, register, password reset endpoints
+- Payment limiter: 20 req/15min on Stripe payment intent and subscription creation
+- Upload limiter: 30 req/15min on all file upload endpoints
+- Write limiter: 60 req/15min on all POST/PUT/DELETE data mutation routes
+- User-aware key generation: authenticated users tracked by userId, guests by IPv6-safe IP
+- Graceful 429 JSON responses with Retry-After headers
+- Webhook endpoints (Stripe) are exempt from rate limiting
+
+**Input Validation & Sanitization:**
+- Zod-based validation middleware (`validateBody()`) applied to 14+ endpoints
+- Schemas with `.strict()` reject unexpected fields on sensitive endpoints
+- Length limits on all string fields, email normalization, type coercion
+- Sanitization: trim whitespace, collapse internal spaces
+- Covers: donations, shop payments, orders, profiles, campaigns, posts, comments, chats, business profiles
+
+**API Key & Secret Security:**
+- Removed hardcoded session secret fallback; requires `SESSION_SECRET` env var (fail-fast)
+- Body size limit: 1MB on JSON/URL-encoded payloads to prevent DoS
+- All API keys read from environment variables (YOUTUBE_API_KEY, TIKTOK_API_KEY, RESEND_API_KEY, Stripe keys)
+- Only Stripe publishable key exposed to client (by design)
+- Image-only MIME type validation on community image upload endpoints
+
 ### Profile Pictures Not Loading Fix (Nov 5, 2025)
 **Problem:** Profile pictures/avatars were not loading on the Explore, Connect, and Feed pages in mobile apps.
 

@@ -3,6 +3,7 @@ import path from "path";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { globalLimiter } from "./security";
 
 // Apify API key is configured via environment variables (TIKTOK_API_KEY)
 if (process.env.TIKTOK_API_KEY) {
@@ -54,15 +55,19 @@ app.use(cors({
   exposedHeaders: ['set-cookie']
 }));
 
+// Global rate limiter for all /api routes — OWASP: prevent brute-force and DoS
+app.use('/api', globalLimiter);
+
 // Skip JSON parsing for Stripe webhook endpoints (they need raw body for signature verification)
+// Body size limit: 1MB max to prevent payload-based DoS (OWASP)
 app.use((req, res, next) => {
   if (req.path === '/api/shop/webhook' || req.path === '/api/donations/webhook') {
     next();
   } else {
-    express.json()(req, res, next);
+    express.json({ limit: '1mb' })(req, res, next);
   }
 });
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));

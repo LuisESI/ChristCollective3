@@ -27,6 +27,15 @@ import { tiktokService } from "./tiktok";
 import { instagramService } from "./instagram";
 import { emailService } from "./emailService";
 import { getUncachableStripeClient } from "./stripeClient";
+import { 
+  paymentLimiter, uploadLimiter, writeLimiter,
+  validateBody,
+  donationPaymentIntentSchema, shopPaymentIntentSchema, shopOrderSchema,
+  profileUpdateSchema, privacySettingsSchema, campaignCreateSchema,
+  platformPostSchema, commentSchema, groupChatQueueSchema,
+  groupChatMessageSchema, directChatMessageSchema, directChatCreateSchema,
+  businessProfileCreateSchema, manualDonationSchema
+} from "./security";
 
 let stripe: Stripe | undefined;
 
@@ -80,19 +89,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
-  // Update basic user profile
-  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+  // Update basic user profile (validated by profileUpdateSchema middleware)
+  app.put('/api/user/profile', isAuthenticated, writeLimiter, validateBody(profileUpdateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const updateData = req.body;
 
-      // Validate the input
-      const validatedData = z.object({
-        bio: z.string().optional(),
-        profileImageUrl: z.string().optional(),
-      }).parse(updateData);
+      if (updateData.username) {
+        const currentUser = await storage.getUser(userId);
+        if (currentUser && updateData.username !== currentUser.username) {
+          const existingUser = await storage.getUserByUsername(updateData.username);
+          if (existingUser) {
+            return res.status(400).json({ message: "Username already taken", field: "username" });
+          }
+        }
+      }
 
-      const updatedUser = await storage.updateUser(userId, validatedData);
+      const updatedUser = await storage.updateUser(userId, updateData);
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user profile:", error);
@@ -104,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile image upload endpoint
-  app.post('/api/upload/profile-image', isAuthenticated, upload.single('profileImage'), async (req: any, res) => {
+  app.post('/api/upload/profile-image', isAuthenticated, uploadLimiter, upload.single('profileImage'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -119,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/upload/banner-image', isAuthenticated, upload.single('bannerImage'), async (req: any, res) => {
+  app.post('/api/upload/banner-image', isAuthenticated, uploadLimiter, upload.single('bannerImage'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -418,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update content creator profile
-  app.put('/api/content-creators/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/content-creators/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const creatorId = parseInt(id);
@@ -509,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Platform posts endpoints - unified content sharing for all user types
 
   // Create a new platform post
-  app.post('/api/platform-posts', isAuthenticated, async (req: any, res) => {
+  app.post('/api/platform-posts', isAuthenticated, writeLimiter, validateBody(platformPostSchema), async (req: any, res) => {
     try {
       const { authorType, authorId, title, content, mediaUrls, mediaType, tags } = req.body;
       const userId = req.user.id;
@@ -625,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update platform post
-  app.put('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/platform-posts/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -654,7 +667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PATCH endpoint for platform posts (same as PUT but using PATCH method)
-  app.patch('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/platform-posts/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -690,7 +703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete platform post
-  app.delete('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/platform-posts/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -721,7 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Post interaction endpoints
 
   // Like/unlike a post
-  app.post('/api/platform-posts/:id/like', isAuthenticated, async (req: any, res) => {
+  app.post('/api/platform-posts/:id/like', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -769,7 +782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Save/unsave a post (bookmark toggle)
-  app.post('/api/platform-posts/:id/save', isAuthenticated, async (req: any, res) => {
+  app.post('/api/platform-posts/:id/save', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const postId = parseInt(req.params.id);
       const userId = req.user.id;
@@ -822,7 +835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add comment to post
-  app.post('/api/platform-posts/:id/comment', isAuthenticated, async (req: any, res) => {
+  app.post('/api/platform-posts/:id/comment', isAuthenticated, writeLimiter, validateBody(commentSchema), async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -882,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete platform post
-  app.delete('/api/platform-posts/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/platform-posts/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const postId = parseInt(id);
@@ -970,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload route - supports both images and videos
-  app.post('/api/upload', isAuthenticated, (req, res, next) => {
+  app.post('/api/upload', isAuthenticated, uploadLimiter, (req, res, next) => {
     // Create a fields configuration that accepts both 'image', 'video' and 'file' fields
     const uploadFields = upload.fields([
       { name: 'image', maxCount: 1 },
@@ -1030,7 +1043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
-  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+  app.put('/api/user/profile', isAuthenticated, writeLimiter, validateBody(profileUpdateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const updateData = req.body;
@@ -1060,7 +1073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Privacy settings route
-  app.put('/api/user/privacy-settings', isAuthenticated, async (req: any, res) => {
+  app.put('/api/user/privacy-settings', isAuthenticated, writeLimiter, validateBody(privacySettingsSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { showEmail, showPhone, showLocation } = req.body;
@@ -1081,7 +1094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.post('/api/campaigns', isAuthenticated, async (req: any, res) => {
+  app.post('/api/campaigns', isAuthenticated, writeLimiter, validateBody(campaignCreateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
 
@@ -1246,7 +1259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Donation payment intent - no authentication required for donations
-  app.post('/api/donations/create-payment-intent', async (req: any, res) => {
+  app.post('/api/donations/create-payment-intent', paymentLimiter, validateBody(donationPaymentIntentSchema), async (req: any, res) => {
     try {
       stripe = await getUncachableStripeClient();
     } catch (error) {
@@ -1478,7 +1491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual donation recording for recovery purposes
-  app.post('/api/donations/manual', async (req: any, res) => {
+  app.post('/api/donations/manual', validateBody(manualDonationSchema), async (req: any, res) => {
     try {
       const { amount, campaignId, stripePaymentId, description } = req.body;
 
@@ -1552,7 +1565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Business profile routes
-  app.post('/api/business-profiles', isAuthenticated, async (req: any, res) => {
+  app.post('/api/business-profiles', isAuthenticated, writeLimiter, validateBody(businessProfileCreateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
 
@@ -1622,7 +1635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/business-profiles/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/business-profiles/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const profileId = parseInt(id, 10);
@@ -1653,7 +1666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/business-profiles/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/business-profiles/:id', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const profileId = parseInt(id, 10);
@@ -1695,7 +1708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Membership subscription
-  app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
+  app.post('/api/create-subscription', isAuthenticated, paymentLimiter, async (req: any, res) => {
     if (!stripe) {
       return res.status(503).json({ message: "Stripe is not available" });
     }
@@ -1826,7 +1839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/content-creators", isAuthenticated, async (req: any, res) => {
+  app.post("/api/content-creators", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
 
@@ -1864,7 +1877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/sponsorship-applications", isAuthenticated, async (req: any, res) => {
+  app.post("/api/sponsorship-applications", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       console.log(`Sponsorship application submission for user: ${userId}`);
@@ -1924,7 +1937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload routes
-  app.post('/api/upload/profile-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+  app.post('/api/upload/profile-image', isAuthenticated, uploadLimiter, upload.single('image'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No image file provided' });
@@ -1947,7 +1960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/upload/business-logo', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+  app.post('/api/upload/business-logo', isAuthenticated, uploadLimiter, upload.single('logo'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No logo file provided' });
@@ -3092,7 +3105,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   }
 
   // Business follow system routes
-  app.post("/api/businesses/:businessId/follow", isAuthenticated, async (req: any, res) => {
+  app.post("/api/businesses/:businessId/follow", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { businessId } = req.params;
       const userId = req.user.id;
@@ -3164,7 +3177,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   });
 
   // User follow system routes
-  app.post("/api/users/:userId/follow", isAuthenticated, async (req: any, res) => {
+  app.post("/api/users/:userId/follow", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const { userId: targetUserId } = req.params;
       const followerId = req.user.id;
@@ -3483,7 +3496,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   });
 
   // Group Chat Queue Routes
-  app.post("/api/group-chat-queues", isAuthenticated, async (req: any, res) => {
+  app.post("/api/group-chat-queues", isAuthenticated, writeLimiter, validateBody(groupChatQueueSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const queueData = insertGroupChatQueueSchema.parse(req.body);
@@ -3505,7 +3518,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chat-queues/:id/join", isAuthenticated, async (req: any, res) => {
+  app.post("/api/group-chat-queues/:id/join", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const queueId = parseInt(req.params.id);
@@ -3517,7 +3530,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chat-queues/:id/leave", isAuthenticated, async (req: any, res) => {
+  app.post("/api/group-chat-queues/:id/leave", isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const queueId = parseInt(req.params.id);
@@ -3598,7 +3611,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chats/:id/banner", isAuthenticated, upload.single("banner"), async (req: any, res) => {
+  app.post("/api/group-chats/:id/banner", isAuthenticated, uploadLimiter, upload.single("banner"), async (req: any, res) => {
     try {
       if (!req.user.isAdmin) return res.status(403).json({ message: "Admin access required" });
       const chatId = parseInt(req.params.id);
@@ -3615,7 +3628,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chats/:id/icon", isAuthenticated, upload.single("icon"), async (req: any, res) => {
+  app.post("/api/group-chats/:id/icon", isAuthenticated, uploadLimiter, upload.single("icon"), async (req: any, res) => {
     try {
       if (!req.user.isAdmin) return res.status(403).json({ message: "Admin access required" });
       const chatId = parseInt(req.params.id);
@@ -3632,7 +3645,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chat-queues/:id/banner", isAuthenticated, upload.single("banner"), async (req: any, res) => {
+  app.post("/api/group-chat-queues/:id/banner", isAuthenticated, uploadLimiter, upload.single("banner"), async (req: any, res) => {
     try {
       const queueId = parseInt(req.params.id);
       const queue = await storage.getGroupChatQueue(queueId);
@@ -3649,7 +3662,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chat-queues/:id/icon", isAuthenticated, upload.single("icon"), async (req: any, res) => {
+  app.post("/api/group-chat-queues/:id/icon", isAuthenticated, uploadLimiter, upload.single("icon"), async (req: any, res) => {
     try {
       const queueId = parseInt(req.params.id);
       const queue = await storage.getGroupChatQueue(queueId);
@@ -3666,7 +3679,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/group-chats/:id/messages", isAuthenticated, async (req: any, res) => {
+  app.post("/api/group-chats/:id/messages", isAuthenticated, writeLimiter, validateBody(groupChatMessageSchema), async (req: any, res) => {
     try {
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
@@ -3738,7 +3751,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/direct-chats", isAuthenticated, async (req: any, res) => {
+  app.post("/api/direct-chats", isAuthenticated, writeLimiter, validateBody(directChatCreateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { recipientId } = req.body;
@@ -3766,7 +3779,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
-  app.post("/api/direct-chats/:id/messages", isAuthenticated, async (req: any, res) => {
+  app.post("/api/direct-chats/:id/messages", isAuthenticated, writeLimiter, validateBody(directChatMessageSchema), async (req: any, res) => {
     try {
       const chatId = parseInt(req.params.id);
       const userId = req.user.id;
@@ -3916,7 +3929,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   });
 
   // Shop routes - Create payment intent for product purchase with idempotency
-  app.post('/api/shop/create-payment-intent', async (req: any, res) => {
+  app.post('/api/shop/create-payment-intent', paymentLimiter, validateBody(shopPaymentIntentSchema), async (req: any, res) => {
     try {
       const stripeClient = await getUncachableStripeClient();
       const { priceId, idempotencyKey } = req.body;
@@ -3976,7 +3989,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   });
 
   // Shop routes - Create order after successful payment
-  app.post('/api/shop/create-order', async (req: any, res) => {
+  app.post('/api/shop/create-order', paymentLimiter, validateBody(shopOrderSchema), async (req: any, res) => {
     try {
       const {
         paymentIntentId,
@@ -4292,7 +4305,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
   });
 
   // Admin routes - Upload product image
-  app.post('/api/admin/products/upload-image', isAuthenticated, upload.single('productImage'), async (req: any, res) => {
+  app.post('/api/admin/products/upload-image', isAuthenticated, uploadLimiter, upload.single('productImage'), async (req: any, res) => {
     try {
       if (!req.user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
