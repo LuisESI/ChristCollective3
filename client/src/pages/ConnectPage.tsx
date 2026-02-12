@@ -28,7 +28,9 @@ import {
   X, 
   UserPlus,
   Clock,
-  Calendar
+  Calendar,
+  Camera,
+  ImagePlus
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
@@ -194,6 +196,48 @@ export default function ConnectPage() {
       });
     },
   });
+
+  const uploadCommunityImage = async (type: 'banner' | 'icon', entityType: 'chat' | 'queue', entityId: number, file: File) => {
+    const formData = new FormData();
+    formData.append(type === 'banner' ? 'banner' : 'icon', file);
+    const endpoint = entityType === 'chat' 
+      ? `/api/group-chats/${entityId}/${type}` 
+      : `/api/group-chat-queues/${entityId}/${type}`;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Upload failed');
+    return response.json();
+  };
+
+  const uploadImageMutation = useMutation({
+    mutationFn: async ({ type, entityType, entityId, file }: { type: 'banner' | 'icon'; entityType: 'chat' | 'queue'; entityId: number; file: File }) => {
+      return uploadCommunityImage(type, entityType, entityId, file);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/group-chats/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/group-chat-queues"] });
+      toast({ title: "Image updated!", description: "Community image has been updated." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload image.", variant: "destructive" });
+    },
+  });
+
+  const handleImageUpload = (type: 'banner' | 'icon', entityType: 'chat' | 'queue', entityId: number) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadImageMutation.mutate({ type, entityType, entityId, file });
+      }
+    };
+    input.click();
+  };
 
   const checkScrollPosition = () => {
     if (scrollContainerRef.current) {
@@ -551,17 +595,43 @@ export default function ConnectPage() {
                         onClick={() => navigate(`/chat/${chat.id}`)}
                       >
                         {/* Banner */}
-                        <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
-                          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                            <Icon className="w-16 h-16 text-white" />
-                          </div>
+                        <div className={`h-24 ${(chat as any).bannerImage ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
+                          {(chat as any).bannerImage ? (
+                            <img src={getImageUrl((chat as any).bannerImage)} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                              <Icon className="w-16 h-16 text-white" />
+                            </div>
+                          )}
+                          {user?.isAdmin && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleImageUpload('banner', 'chat', chat.id); }}
+                              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors z-10"
+                            >
+                              <Camera className="w-4 h-4 text-white" />
+                            </button>
+                          )}
                         </div>
 
                         {/* Profile Picture + Info */}
                         <div className="px-4 pb-4 -mt-8 relative">
                           <div className="flex items-end gap-3 mb-3">
-                            <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                              <Icon className="w-7 h-7 text-white" />
+                            <div className="relative flex-shrink-0">
+                              {(chat as any).profileImage ? (
+                                <img src={getImageUrl((chat as any).profileImage)} alt="" className="w-16 h-16 rounded-full border-4 border-black object-cover shadow-lg" />
+                              ) : (
+                                <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center shadow-lg`}>
+                                  <Icon className="w-7 h-7 text-white" />
+                                </div>
+                              )}
+                              {user?.isAdmin && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleImageUpload('icon', 'chat', chat.id); }}
+                                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#D4AF37] hover:bg-[#B8941F] flex items-center justify-center transition-colors z-10"
+                                >
+                                  <Camera className="w-3 h-3 text-black" />
+                                </button>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0 pb-1">
                               <h3 className="text-base font-bold text-white truncate">{chat.title}</h3>
@@ -672,16 +742,42 @@ export default function ConnectPage() {
                       return (
                         <div key={queue.id} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72">
                           {/* Mini Banner */}
-                          <div className={`h-16 bg-gradient-to-r ${gradient} relative`}>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-15">
-                              <Icon className="w-10 h-10 text-white" />
-                            </div>
+                          <div className={`h-16 ${queue.bannerImage ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
+                            {queue.bannerImage ? (
+                              <img src={getImageUrl(queue.bannerImage)} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                                <Icon className="w-10 h-10 text-white" />
+                              </div>
+                            )}
+                            {(user?.isAdmin || isOwner) && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleImageUpload('banner', 'queue', queue.id); }}
+                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors z-10"
+                              >
+                                <Camera className="w-3 h-3 text-white" />
+                              </button>
+                            )}
                           </div>
 
                           <div className="px-3 pb-3 -mt-5 relative">
                             <div className="flex items-end gap-2 mb-2">
-                              <div className={`w-10 h-10 rounded-full ${intentionInfo.color} border-3 border-black flex items-center justify-center flex-shrink-0 shadow-md`}>
-                                <Icon className="w-4 h-4 text-white" />
+                              <div className="relative flex-shrink-0">
+                                {queue.profileImage ? (
+                                  <img src={getImageUrl(queue.profileImage)} alt="" className="w-10 h-10 rounded-full border-2 border-black object-cover shadow-md" />
+                                ) : (
+                                  <div className={`w-10 h-10 rounded-full ${intentionInfo.color} border-2 border-black flex items-center justify-center shadow-md`}>
+                                    <Icon className="w-4 h-4 text-white" />
+                                  </div>
+                                )}
+                                {(user?.isAdmin || isOwner) && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleImageUpload('icon', 'queue', queue.id); }}
+                                    className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#D4AF37] hover:bg-[#B8941F] flex items-center justify-center transition-colors z-10"
+                                  >
+                                    <Camera className="w-2.5 h-2.5 text-black" />
+                                  </button>
+                                )}
                               </div>
                               <div className="flex-1 min-w-0 pb-0.5">
                                 <h3 className="text-sm font-semibold text-white truncate">{queue.title}</h3>

@@ -229,6 +229,7 @@ export interface IStorage {
   getUserGroupChats(userId: string): Promise<GroupChat[]>;
   updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat>;
   updateGroupChatQueueImages(queueId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChatQueue>;
+  getGroupChatById(chatId: number): Promise<GroupChat | undefined>;
   getQueueMembers(queueId: number): Promise<User[]>;
   getChatMembers(chatId: number): Promise<User[]>;
   
