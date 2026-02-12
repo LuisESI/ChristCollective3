@@ -306,7 +306,7 @@ export default function ExplorePage() {
       sortedPosts.forEach((post: any, i: number) => {
         feed.push({ type: 'post', data: post });
 
-        if (chunkIndex < profileChunks.length && i < sortedPosts.length - 1) {
+        if (chunkIndex < profileChunks.length && (i + 1) % 2 === 0) {
           feed.push({ type: 'profiles', data: profileChunks[chunkIndex] });
           chunkIndex++;
         }
