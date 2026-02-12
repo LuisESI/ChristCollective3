@@ -293,36 +293,33 @@ export default function ExplorePage() {
 
   const buildFeed = () => {
     const feed: { type: 'post' | 'profiles'; data: any }[] = [];
+    const profileChunkSize = 3;
+    const profilesToInsert = showProfiles ? displayProfiles : [];
+    const profileChunks: any[][] = [];
+    for (let i = 0; i < profilesToInsert.length; i += profileChunkSize) {
+      profileChunks.push(profilesToInsert.slice(i, i + profileChunkSize));
+    }
 
     if (showPosts && sortedPosts.length > 0) {
-      const profileChunkSize = 3;
-      let profileIndex = 0;
-      const profilesToInsert = showProfiles ? displayProfiles : [];
-      const postsPerProfileRow = Math.max(2, Math.ceil(sortedPosts.length / Math.ceil(profilesToInsert.length / profileChunkSize || 1)));
+      let chunkIndex = 0;
 
       sortedPosts.forEach((post: any, i: number) => {
         feed.push({ type: 'post', data: post });
 
-        if (showProfiles && (i + 1) % postsPerProfileRow === 0 && profileIndex < profilesToInsert.length) {
-          const chunk = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
-          if (chunk.length > 0) {
-            feed.push({ type: 'profiles', data: chunk });
-            profileIndex += profileChunkSize;
-          }
+        if (chunkIndex < profileChunks.length && i < sortedPosts.length - 1) {
+          feed.push({ type: 'profiles', data: profileChunks[chunkIndex] });
+          chunkIndex++;
         }
       });
 
-      if (profileIndex < profilesToInsert.length) {
-        const remaining = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
-        if (remaining.length > 0) {
-          feed.push({ type: 'profiles', data: remaining });
-        }
+      while (chunkIndex < profileChunks.length) {
+        feed.push({ type: 'profiles', data: profileChunks[chunkIndex] });
+        chunkIndex++;
       }
     } else if (showProfiles && !showPosts) {
-      for (let i = 0; i < displayProfiles.length; i += 3) {
-        const chunk = displayProfiles.slice(i, i + 3);
+      profileChunks.forEach((chunk) => {
         feed.push({ type: 'profiles', data: chunk });
-      }
+      });
     } else if (showPosts) {
       sortedPosts.forEach((post: any) => {
         feed.push({ type: 'post', data: post });
