@@ -204,7 +204,7 @@ export default function ExplorePage() {
                   <div 
                     key={post.id} 
                     className="aspect-square relative group overflow-hidden rounded-lg cursor-pointer bg-[#0A0A0A] border border-gray-900"
-                    onClick={() => navigate(`/posts/${post.id}`)}
+                    onClick={() => navigate(`/post/${post.id}`)}
                   >
                     {post.mediaUrls?.[0] ? (
                       <div className="w-full h-full">
@@ -215,7 +215,10 @@ export default function ExplorePage() {
                             muted
                             playsInline
                             loop
-                            onMouseOver={(e) => (e.target as HTMLVideoElement).play().catch(err => console.error("Video play failed:", err))}
+                            onMouseOver={(e) => {
+                              const video = e.target as HTMLVideoElement;
+                              video.play().catch(err => console.error("Video play failed:", err));
+                            }}
                             onMouseOut={(e) => {
                               const video = e.target as HTMLVideoElement;
                               video.pause();
