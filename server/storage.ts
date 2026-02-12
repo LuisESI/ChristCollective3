@@ -227,6 +227,8 @@ export interface IStorage {
   createGroupChatFromQueue(queueId: number): Promise<GroupChat>;
   listActiveChats(): Promise<(GroupChat & { members?: User[] })[]>;
   getUserGroupChats(userId: string): Promise<GroupChat[]>;
+  updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat>;
+  updateGroupChatQueueImages(queueId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChatQueue>;
   getQueueMembers(queueId: number): Promise<User[]>;
   getChatMembers(chatId: number): Promise<User[]>;
   
@@ -1641,6 +1643,30 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
       .where(eq(groupChatMembers.chatId, chatId));
+  }
+
+  async updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat> {
+    const updateData: Record<string, any> = {};
+    if (data.bannerImage !== undefined) updateData.bannerImage = data.bannerImage;
+    if (data.profileImage !== undefined) updateData.profileImage = data.profileImage;
+    const [chat] = await db
+      .update(groupChats)
+      .set(updateData)
+      .where(eq(groupChats.id, chatId))
+      .returning();
+    return chat;
+  }
+
+  async updateGroupChatQueueImages(queueId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChatQueue> {
+    const updateData: Record<string, any> = {};
+    if (data.bannerImage !== undefined) updateData.bannerImage = data.bannerImage;
+    if (data.profileImage !== undefined) updateData.profileImage = data.profileImage;
+    const [queue] = await db
+      .update(groupChatQueues)
+      .set(updateData)
+      .where(eq(groupChatQueues.id, queueId))
+      .returning();
+    return queue;
   }
 
   // Group chat message operations
