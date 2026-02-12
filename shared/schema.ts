@@ -644,6 +644,8 @@ export const groupChatQueues = pgTable("group_chat_queues", {
   maxPeople: integer("max_people").notNull().default(12),
   currentCount: integer("current_count").notNull().default(1), // starts with creator
   status: varchar("status").notNull().default("waiting"), // waiting, active, completed, cancelled
+  bannerImage: varchar("banner_image"),
+  profileImage: varchar("profile_image"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -656,6 +658,8 @@ export const groupChats = pgTable("group_chats", {
   intention: varchar("intention").notNull(),
   memberCount: integer("member_count").notNull(),
   status: varchar("status").notNull().default("active"), // active, completed, archived
+  bannerImage: varchar("banner_image"),
+  profileImage: varchar("profile_image"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
