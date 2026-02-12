@@ -9,17 +9,10 @@ import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl } from "@/lib/api-config";
 
-type FeedItem = {
-  type: 'post' | 'creator' | 'business' | 'ministry' | 'user';
-  id: string;
-  data: any;
-  sortDate: Date;
-};
-
 function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
   return (
     <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors w-full"
       onClick={() => navigate(`/post/${post.id}`)}
     >
       <div className="flex items-center gap-3 mb-3">
@@ -78,143 +71,78 @@ function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: strin
   );
 }
 
-function CreatorCard({ creator, navigate }: { creator: any; navigate: (path: string) => void }) {
-  return (
-    <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
-      onClick={() => navigate(`/creators/${creator.id}`)}
-    >
-      <div className="flex items-center gap-3">
-        <Avatar className="w-12 h-12 border-2 border-[#D4AF37]">
-          <AvatarImage src={getImageUrl(creator.profileImage)} />
-          <AvatarFallback className="bg-[#D4AF37] text-black font-bold">
-            {creator.name?.[0] || 'C'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-white font-semibold text-sm truncate">{creator.name}</p>
-            <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] px-2 py-0.5 rounded-full font-medium">Creator</span>
-          </div>
-          <p className="text-gray-500 text-xs">{creator.content || 'Content Creator'}</p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
-        >
-          View
-        </Button>
-      </div>
-      {creator.bio && (
-        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{creator.bio}</p>
-      )}
-    </div>
-  );
-}
+function ProfileCard({ item, navigate }: { item: { type: string; data: any }; navigate: (path: string) => void }) {
+  const getRoute = () => {
+    switch (item.type) {
+      case 'creator': return `/creators/${item.data.id}`;
+      case 'business': return `/business/profile/${item.data.id}`;
+      case 'ministry': return `/ministry/${item.data.id}`;
+      case 'user': return `/profile/${item.data.username}`;
+      default: return '/explore';
+    }
+  };
 
-function BusinessCard({ business, navigate }: { business: any; navigate: (path: string) => void }) {
-  return (
-    <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
-      onClick={() => navigate(`/business/profile/${business.id}`)}
-    >
-      <div className="flex items-center gap-3">
-        <Avatar className="w-12 h-12 border-2 border-gray-700">
-          <AvatarImage src={getImageUrl(business.logo)} />
-          <AvatarFallback className="bg-gray-800 text-[#D4AF37] font-bold">
-            {business.companyName?.[0] || 'B'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-white font-semibold text-sm truncate">{business.companyName}</p>
-            <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <Briefcase className="w-2.5 h-2.5" /> Business
-            </span>
-          </div>
-          <p className="text-[#D4AF37] text-xs">{business.industry || 'Business'}</p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
-        >
-          View
-        </Button>
-      </div>
-      {business.description && (
-        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{business.description}</p>
-      )}
-    </div>
-  );
-}
+  const getImage = () => {
+    switch (item.type) {
+      case 'creator': return getImageUrl(item.data.profileImage);
+      case 'business': return getImageUrl(item.data.logo);
+      case 'ministry': return getImageUrl(item.data.logo);
+      case 'user': return getImageUrl(item.data.profileImageUrl);
+      default: return '';
+    }
+  };
 
-function MinistryCard({ ministry, navigate }: { ministry: any; navigate: (path: string) => void }) {
-  return (
-    <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
-      onClick={() => navigate(`/ministry/${ministry.id}`)}
-    >
-      <div className="flex items-center gap-3">
-        <Avatar className="w-12 h-12 border-2 border-gray-700">
-          <AvatarImage src={getImageUrl(ministry.logo)} />
-          <AvatarFallback className="bg-gray-800 text-[#D4AF37] font-bold">
-            {ministry.name?.[0] || 'M'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-white font-semibold text-sm truncate">{ministry.name}</p>
-            <span className="bg-purple-500/20 text-purple-400 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <Church className="w-2.5 h-2.5" /> Ministry
-            </span>
-          </div>
-          <p className="text-[#D4AF37] text-xs">{ministry.denomination || 'Ministry'}</p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
-        >
-          View
-        </Button>
-      </div>
-      {ministry.description && (
-        <p className="text-gray-400 text-xs mt-3 line-clamp-2 leading-relaxed">{ministry.description}</p>
-      )}
-    </div>
-  );
-}
+  const getName = () => {
+    switch (item.type) {
+      case 'creator': return item.data.name;
+      case 'business': return item.data.companyName;
+      case 'ministry': return item.data.name;
+      case 'user': return item.data.firstName && item.data.lastName 
+        ? `${item.data.firstName} ${item.data.lastName}` 
+        : item.data.username;
+      default: return '';
+    }
+  };
 
-function UserCard({ member, navigate }: { member: any; navigate: (path: string) => void }) {
+  const getSubtext = () => {
+    switch (item.type) {
+      case 'creator': return item.data.content || 'Creator';
+      case 'business': return item.data.industry || 'Business';
+      case 'ministry': return item.data.denomination || 'Ministry';
+      case 'user': return `@${item.data.username}`;
+      default: return '';
+    }
+  };
+
+  const getBadge = () => {
+    switch (item.type) {
+      case 'creator': return { label: 'Creator', color: 'bg-[#D4AF37]/20 text-[#D4AF37]' };
+      case 'business': return { label: 'Business', color: 'bg-blue-500/20 text-blue-400' };
+      case 'ministry': return { label: 'Ministry', color: 'bg-purple-500/20 text-purple-400' };
+      case 'user': return { label: 'Member', color: 'bg-gray-700/50 text-gray-300' };
+      default: return { label: '', color: '' };
+    }
+  };
+
+  const badge = getBadge();
+  const initials = getName()?.[0] || '?';
+
   return (
     <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors"
-      onClick={() => navigate(`/profile/${member.username}`)}
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 cursor-pointer hover:bg-[#111] transition-colors flex flex-col items-center text-center"
+      onClick={() => navigate(getRoute())}
     >
-      <div className="flex items-center gap-3">
-        <Avatar className="w-10 h-10 border border-gray-700">
-          <AvatarImage src={getImageUrl(member.profileImageUrl)} />
-          <AvatarFallback className="bg-gray-800 text-gray-400">
-            {member.firstName?.[0] || member.username?.[0] || 'U'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium truncate">
-            {member.firstName && member.lastName 
-              ? `${member.firstName} ${member.lastName}`
-              : member.username}
-          </p>
-          <p className="text-gray-500 text-xs">@{member.username}</p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black rounded-full text-xs px-4 h-8"
-        >
-          <UserPlus className="w-3 h-3 mr-1" /> Follow
-        </Button>
-      </div>
-      {member.bio && (
-        <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed">{member.bio}</p>
-      )}
+      <Avatar className="w-14 h-14 mb-2 border-2 border-gray-700">
+        <AvatarImage src={getImage()} />
+        <AvatarFallback className="bg-gray-800 text-[#D4AF37] font-bold text-lg">
+          {initials}
+        </AvatarFallback>
+      </Avatar>
+      <p className="text-white text-xs font-semibold truncate w-full">{getName()}</p>
+      <p className="text-gray-500 text-[10px] truncate w-full mb-2">{getSubtext()}</p>
+      <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium ${badge.color}`}>
+        {badge.label}
+      </span>
     </div>
   );
 }
@@ -314,69 +242,22 @@ export default function ExplorePage() {
 
   const filteredUsers = allUsers && Array.isArray(allUsers) ? allUsers.filter((targetUser: any) => {
     if (targetUser.id === user?.id) return false;
-    
     const hasMinistryProfile = ministries && Array.isArray(ministries) && ministries.some((m: any) => m.userId === targetUser.id);
     const hasCreatorProfile = creators && Array.isArray(creators) && creators.some((c: any) => c.userId === targetUser.id);
     const hasBusinessProfile = businesses && Array.isArray(businesses) && businesses.some((b: any) => b.userId === targetUser.id);
-    
     const isRegularUser = !hasMinistryProfile && !hasCreatorProfile && !hasBusinessProfile;
-    
     const matchesSearch = !searchTerm ||
       targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase());
-      
     return isRegularUser && matchesSearch;
   }) : [];
 
-  const buildMixedFeed = (): FeedItem[] => {
-    const items: FeedItem[] = [];
-
-    if (selectedCategory === 'all' || selectedCategory === 'posts') {
-      filteredPosts.forEach((post: any) => {
-        items.push({
-          type: 'post',
-          id: `post-${post.id}`,
-          data: post,
-          sortDate: new Date(post.createdAt),
-        });
-      });
-    }
-
-    if (selectedCategory === 'all' || selectedCategory === 'creators') {
-      filteredCreators.forEach((creator: any) => {
-        items.push({
-          type: 'creator',
-          id: `creator-${creator.id}`,
-          data: creator,
-          sortDate: new Date(creator.createdAt || '2025-01-01'),
-        });
-      });
-    }
-
-    if (selectedCategory === 'all' || selectedCategory === 'businesses') {
-      filteredBusinesses.forEach((business: any) => {
-        items.push({
-          type: 'business',
-          id: `business-${business.id}`,
-          data: business,
-          sortDate: new Date(business.createdAt || '2025-01-01'),
-        });
-      });
-    }
-
-    if (selectedCategory === 'all' || selectedCategory === 'ministries') {
-      filteredMinistries.forEach((ministry: any) => {
-        items.push({
-          type: 'ministry',
-          id: `ministry-${ministry.id}`,
-          data: ministry,
-          sortDate: new Date(ministry.createdAt || '2025-01-01'),
-        });
-      });
-    }
-
-    if (selectedCategory === 'all' || selectedCategory === 'users') {
+  const allProfiles = [
+    ...filteredCreators.map((c: any) => ({ type: 'creator', data: c, date: new Date(c.createdAt || '2025-01-01') })),
+    ...filteredBusinesses.map((b: any) => ({ type: 'business', data: b, date: new Date(b.createdAt || '2025-01-01') })),
+    ...filteredMinistries.map((m: any) => ({ type: 'ministry', data: m, date: new Date(m.createdAt || '2025-01-01') })),
+    ...((() => {
       const shuffled = [...filteredUsers];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -384,24 +265,70 @@ export default function ExplorePage() {
       }
       const unfollowed = shuffled.filter((u: any) => !followingIds.includes(u.id));
       const followed = shuffled.filter((u: any) => followingIds.includes(u.id));
-      [...unfollowed, ...followed].slice(0, 10).forEach((member: any) => {
-        items.push({
-          type: 'user',
-          id: `user-${member.id}`,
-          data: member,
-          sortDate: new Date(member.createdAt || '2025-01-01'),
-        });
+      return [...unfollowed, ...followed].slice(0, 6);
+    })().map((u: any) => ({ type: 'user', data: u, date: new Date(u.createdAt || '2025-01-01') }))),
+  ];
+
+  const sortedPosts = [...filteredPosts].sort((a: any, b: any) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  const showPosts = selectedCategory === 'all' || selectedCategory === 'posts';
+  const showProfiles = selectedCategory === 'all' || ['creators', 'businesses', 'ministries', 'users'].includes(selectedCategory);
+
+  const getFilteredProfiles = () => {
+    if (selectedCategory === 'all') return allProfiles;
+    if (selectedCategory === 'creators') return allProfiles.filter(p => p.type === 'creator');
+    if (selectedCategory === 'businesses') return allProfiles.filter(p => p.type === 'business');
+    if (selectedCategory === 'ministries') return allProfiles.filter(p => p.type === 'ministry');
+    if (selectedCategory === 'users') return allProfiles.filter(p => p.type === 'user');
+    return [];
+  };
+
+  const displayProfiles = getFilteredProfiles();
+
+  const buildFeed = () => {
+    const feed: { type: 'post' | 'profiles'; data: any }[] = [];
+
+    if (showPosts && sortedPosts.length > 0) {
+      const profileChunkSize = 3;
+      let profileIndex = 0;
+      const profilesToInsert = showProfiles ? displayProfiles : [];
+
+      sortedPosts.forEach((post: any, i: number) => {
+        feed.push({ type: 'post', data: post });
+
+        if (showProfiles && (i + 1) % 3 === 0 && profileIndex < profilesToInsert.length) {
+          const chunk = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
+          if (chunk.length > 0) {
+            feed.push({ type: 'profiles', data: chunk });
+            profileIndex += profileChunkSize;
+          }
+        }
+      });
+
+      while (profileIndex < profilesToInsert.length) {
+        const chunk = profilesToInsert.slice(profileIndex, profileIndex + profileChunkSize);
+        if (chunk.length > 0) {
+          feed.push({ type: 'profiles', data: chunk });
+          profileIndex += profileChunkSize;
+        }
+      }
+    } else if (showProfiles && !showPosts) {
+      for (let i = 0; i < displayProfiles.length; i += 3) {
+        const chunk = displayProfiles.slice(i, i + 3);
+        feed.push({ type: 'profiles', data: chunk });
+      }
+    } else if (showPosts) {
+      sortedPosts.forEach((post: any) => {
+        feed.push({ type: 'post', data: post });
       });
     }
 
-    if (selectedCategory === 'all') {
-      items.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
-    }
-
-    return items;
+    return feed;
   };
 
-  const feedItems = buildMixedFeed();
+  const feed = buildFeed();
 
   return (
     <div className="min-h-screen bg-black text-white pb-20">
@@ -447,7 +374,7 @@ export default function ExplorePage() {
         </div>
 
         <div className="space-y-3">
-          {feedItems.length === 0 ? (
+          {feed.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-gray-400">
                 <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
@@ -456,20 +383,21 @@ export default function ExplorePage() {
               </div>
             </div>
           ) : (
-            feedItems.map((item) => {
-              switch (item.type) {
-                case 'post':
-                  return <PostPreviewCard key={item.id} post={item.data} navigate={navigate} />;
-                case 'creator':
-                  return <CreatorCard key={item.id} creator={item.data} navigate={navigate} />;
-                case 'business':
-                  return <BusinessCard key={item.id} business={item.data} navigate={navigate} />;
-                case 'ministry':
-                  return <MinistryCard key={item.id} ministry={item.data} navigate={navigate} />;
-                case 'user':
-                  return <UserCard key={item.id} member={item.data} navigate={navigate} />;
-                default:
-                  return null;
+            feed.map((item, index) => {
+              if (item.type === 'post') {
+                return <PostPreviewCard key={`post-${item.data.id}`} post={item.data} navigate={navigate} />;
+              } else {
+                return (
+                  <div key={`profiles-${index}`} className="grid grid-cols-3 gap-2">
+                    {item.data.map((profile: any, i: number) => (
+                      <ProfileCard 
+                        key={`${profile.type}-${profile.data.id || i}`} 
+                        item={profile} 
+                        navigate={navigate} 
+                      />
+                    ))}
+                  </div>
+                );
               }
             })
           )}
