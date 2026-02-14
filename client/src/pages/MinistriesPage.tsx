@@ -94,7 +94,7 @@ export default function MinistriesPage() {
                     key={denomination}
                     variant={denominationFilter === denomination ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setDenominationFilter(denomination === denominationFilter ? "" : denomination)}
+                    onClick={() => setDenominationFilter(denomination === denominationFilter ? "" : (denomination || ""))}
                     className="text-xs"
                   >
                     {denomination}
@@ -153,7 +153,7 @@ export default function MinistriesPage() {
                   <Card key={ministry.id} className="bg-black border-gray-800 hover:bg-gray-900 transition-all duration-300">
                     <CardHeader className="text-center pb-4">
                       <Avatar className="h-20 w-20 mx-auto mb-4">
-                        <AvatarImage src={ministry.logo} alt={ministry.name} />
+                        <AvatarImage src={ministry.logo || undefined} alt={ministry.name} />
                         <AvatarFallback className="bg-primary text-black text-2xl font-bold">
                           {ministry.name?.charAt(0) || 'M'}
                         </AvatarFallback>

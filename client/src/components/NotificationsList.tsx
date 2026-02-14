@@ -98,7 +98,7 @@ export function NotificationsList() {
       case 'like':
         return <Heart className="h-5 w-5 text-red-500" />;
       case 'comment':
-        return <MessageCircle className="h-5 w-5 text-blue-500" />;
+        return <MessageCircle className="h-5 w-5 text-gray-400" />;
       case 'follow':
         return <UserPlus className="h-5 w-5 text-green-500" />;
       case 'rsvp':
@@ -110,7 +110,7 @@ export function NotificationsList() {
       case 'post':
         return <Bell className="h-5 w-5 text-gray-400" />;
       case 'chat_message':
-        return <MessageCircle className="h-5 w-5 text-cyan-400" />;
+        return <MessageCircle className="h-5 w-5 text-[#D4AF37]" />;
       default:
         return <Bell className="h-5 w-5 text-gray-400" />;
     }
@@ -161,7 +161,7 @@ export function NotificationsList() {
           disabled={createTestNotificationsMutation.isPending}
           variant="outline"
           size="sm"
-          className="text-blue-400 border-blue-600 hover:bg-blue-700/20"
+          className="text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37]/20"
         >
           <Bell className="h-4 w-4 mr-2" />
           Test Notifications

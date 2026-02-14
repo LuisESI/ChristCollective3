@@ -90,7 +90,7 @@ export default function CreatePage() {
       description: "Create or update your business profile for networking",
       icon: Briefcase,
       color: "text-white",
-      bgColor: "bg-blue-500",
+      bgColor: "bg-[#D4AF37]",
       href: "/business/create",
       badge: null,
       userType: "all"
@@ -101,7 +101,7 @@ export default function CreatePage() {
       description: "Create a profile for your ministry or church organization",
       icon: Building,
       color: "text-white",
-      bgColor: "bg-green-500",
+      bgColor: "bg-gray-700",
       href: "/ministry/create",
       badge: null,
       userType: "all"
@@ -112,7 +112,7 @@ export default function CreatePage() {
       description: "Share inspirational content, testimonies, or updates with the community",
       icon: PenTool,
       color: "text-white",
-      bgColor: "bg-indigo-500",
+      bgColor: "bg-gray-800",
       href: "/feed",
       badge: null,
       userType: "all",

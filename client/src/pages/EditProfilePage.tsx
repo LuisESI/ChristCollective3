@@ -633,7 +633,7 @@ export default function EditProfilePage() {
                     <Badge className="bg-[#D4AF37] text-black text-xs">Creator</Badge>
                   )}
                   {hasBusinessProfile && (
-                    <Badge className="bg-blue-600 text-white text-xs">Business</Badge>
+                    <Badge className="bg-[#D4AF37] text-black text-xs">Business</Badge>
                   )}
                 </div>
               </div>

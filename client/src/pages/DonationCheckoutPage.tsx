@@ -405,7 +405,7 @@ export default function DonationCheckoutPage() {
 
               {/* Guest Information - Only show if not authenticated */}
               {!isAuthenticated && (
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-gray-100 p-4 rounded-lg">
                   <h4 className="font-semibold text-black mb-3">Donor Information</h4>
                   <p className="text-sm text-gray-600 mb-4">
                     Please provide your information to receive a donation receipt.

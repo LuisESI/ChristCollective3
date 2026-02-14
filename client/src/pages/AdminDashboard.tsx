@@ -389,7 +389,7 @@ export default function AdminDashboard() {
                     {usersLoading ? "..." : Array.isArray(allUsers) ? allUsers.length : 0}
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-blue-400/50" />
+                <Users className="h-8 w-8 text-gray-400/50" />
               </div>
             </CardContent>
           </Card>

@@ -246,9 +246,9 @@ For questions about your donation, please contact us at support@christcollective
             </div>
 
             {/* Tax Information */}
-            <div className="bg-blue-900/20 border border-blue-700 p-4 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-300 mb-2">Tax Receipt Information</h4>
-              <p className="text-xs text-blue-200">
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-300 mb-2">Tax Receipt Information</h4>
+              <p className="text-xs text-gray-400">
                 This donation may be tax-deductible. Please consult with your tax advisor and retain this receipt for your records. 
                 Christ Collective is a registered 501(c)(3) nonprofit organization.
               </p>

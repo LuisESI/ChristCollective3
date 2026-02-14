@@ -235,7 +235,7 @@ export default function MinistryProfileViewPage() {
                   <h1 className="text-3xl font-bold text-white mb-2">{ministry.name}</h1>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                     {ministry.denomination && (
-                      <Badge variant="outline" className="bg-blue-900/30 border-blue-600 text-blue-300">
+                      <Badge variant="outline" className="bg-[#D4AF37]/30 border-[#D4AF37] text-[#D4AF37]">
                         {ministry.denomination}
                       </Badge>
                     )}

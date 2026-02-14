@@ -127,7 +127,7 @@ export default function BusinessProfilePage() {
                       href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                      className="text-[#D4AF37] hover:underline transition-colors"
                     >
                       {profile.website}
                     </a>
