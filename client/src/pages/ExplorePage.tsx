@@ -117,7 +117,7 @@ function ProfileCard({ item, navigate }: { item: { type: string; data: any }; na
   const getBadge = () => {
     switch (item.type) {
       case 'creator': return { label: 'Creator', color: 'bg-[#D4AF37]/20 text-[#D4AF37]' };
-      case 'business': return { label: 'Business', color: 'bg-blue-500/20 text-blue-400' };
+      case 'business': return { label: 'Business', color: 'bg-[#D4AF37]/20 text-[#D4AF37]' };
       case 'ministry': return { label: 'Ministry', color: 'bg-purple-500/20 text-purple-400' };
       case 'user': return { label: 'Member', color: 'bg-gray-700/50 text-gray-300' };
       default: return { label: '', color: '' };

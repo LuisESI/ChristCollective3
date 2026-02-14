@@ -45,7 +45,7 @@ type CreateQueueForm = z.infer<typeof createQueueSchema>;
 
 const intentionOptions = [
   { value: "prayer", label: "Prayer", icon: Heart, color: "bg-red-500", badgeColor: "bg-red-500/20" },
-  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-blue-500", badgeColor: "bg-blue-500/20" },
+  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
   { value: "evangelizing", label: "Evangelizing", icon: MessageCircle, color: "bg-green-500", badgeColor: "bg-green-500/20" },
   { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
   { value: "worship", label: "Worship", icon: Calendar, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
@@ -518,8 +518,8 @@ export default function ConnectPage() {
                       />
                     </div>
                     
-                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                      <p className="text-xs text-blue-300 flex items-center">
+                    <div className="mt-4 p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-lg">
+                      <p className="text-xs text-[#D4AF37] flex items-center">
                         <MessageCircle className="w-3 h-3 mr-2" />
                         Chat starts automatically when minimum people join
                       </p>

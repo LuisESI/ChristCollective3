@@ -163,7 +163,7 @@ export default function MinistriesPage() {
                       <CardDescription className="text-gray-400">
                         <div className="flex flex-wrap gap-2 justify-center mt-2">
                           {ministry.denomination && (
-                            <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
+                            <Badge variant="outline" className="text-xs bg-[#D4AF37]/30 border-[#D4AF37] text-[#D4AF37]">
                               {ministry.denomination}
                             </Badge>
                           )}

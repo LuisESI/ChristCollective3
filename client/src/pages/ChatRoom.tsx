@@ -161,7 +161,7 @@ export default function ChatRoom() {
     id: member.id,
     username: member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "User"),
     initials: (member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "U")).slice(0, 2).toUpperCase(),
-    color: member.id === currentUser?.id ? "bg-[#D4AF37]" : "bg-blue-500",
+    color: member.id === currentUser?.id ? "bg-[#D4AF37]" : "bg-gray-700",
     profileImage: member.profileImageUrl
   }));
 
@@ -177,7 +177,7 @@ export default function ChatRoom() {
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               </Link>
-              <div className="p-2 bg-blue-600 rounded-lg">
+              <div className="p-2 bg-[#D4AF37] rounded-lg">
                 <Icon className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -230,8 +230,8 @@ export default function ChatRoom() {
               <div className="max-w-2xl mx-auto w-full space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="p-4 bg-blue-600/20 rounded-full w-fit mx-auto mb-4">
-                      <Icon className="w-8 h-8 text-blue-400" />
+                    <div className="p-4 bg-[#D4AF37]/20 rounded-full w-fit mx-auto mb-4">
+                      <Icon className="w-8 h-8 text-[#D4AF37]" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">Welcome to {chat?.title || "Bible Study Circle"}</h3>
                     <p className="text-gray-400 text-sm max-w-md mx-auto">Start the conversation with your fellow believers. Share thoughts, prayers, or questions.</p>
