@@ -208,10 +208,10 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </TabsList>
             
             <TabsContent value="login">
-              <Card className="bg-gray-900 border-gray-700">
+              <Card className="bg-black border-gray-800 shadow-xl">
                 <CardHeader>
-                  <CardTitle>Sign In</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Sign In</CardTitle>
+                  <CardDescription className="text-gray-400">
                     Enter your credentials to access your account
                   </CardDescription>
                 </CardHeader>
@@ -265,10 +265,10 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             </TabsContent>
             
             <TabsContent value="register">
-              <Card className="bg-gray-900 border-gray-700">
+              <Card className="bg-black border-gray-800 shadow-xl">
                 <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Create Account</CardTitle>
+                  <CardDescription className="text-gray-400">
                     Join our community and start making a difference
                   </CardDescription>
                 </CardHeader>
@@ -410,15 +410,15 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
               Join a community where faith meets action. Support causes you believe in, connect with like-minded businesses, and make a lasting impact.
             </p>
             <div className="grid grid-cols-1 gap-4 max-w-md mx-auto mt-8">
-              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+              <div className="bg-black rounded-lg p-6 border border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                 <h3 className="font-semibold text-white mb-2">Support Causes</h3>
                 <p className="text-gray-400 text-sm">Donate to verified campaigns and see your impact grow</p>
               </div>
-              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+              <div className="bg-black rounded-lg p-6 border border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                 <h3 className="font-semibold text-white mb-2">Network & Connect</h3>
                 <p className="text-gray-400 text-sm">Build meaningful relationships with Christian businesses</p>
               </div>
-              <div className="bg-gray-900 rounded-lg p-6 border-2 border-primary shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+              <div className="bg-black rounded-lg p-6 border border-[#D4AF37]/50 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                 <h3 className="font-semibold text-white mb-2">Create Content</h3>
                 <p className="text-gray-400 text-sm">Share your faith journey and get sponsored</p>
               </div>

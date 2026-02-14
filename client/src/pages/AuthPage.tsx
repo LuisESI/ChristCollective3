@@ -40,7 +40,9 @@ export default function AuthPage() {
         <meta name="description" content="Sign in to Christ Collective to connect with your community and make a difference through faith." />
       </Helmet>
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <AuthExperience variant="desktop" onLoginSuccess={handleLoginSuccess} />
+        <div className="w-full flex justify-center">
+          <AuthExperience variant="desktop" onLoginSuccess={handleLoginSuccess} />
+        </div>
       </div>
     </>
   );
