@@ -281,7 +281,7 @@ export default function ChatRoom() {
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0 px-4 pt-1 pb-2 bg-black">
+      <div className="flex-shrink-0 px-4 pt-1 pb-20 bg-black">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-end space-x-3">
             <div className="flex-1">
