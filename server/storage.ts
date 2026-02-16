@@ -1525,6 +1525,8 @@ export class DatabaseStorage implements IStorage {
         description: queue.description,
         intention: queue.intention,
         memberCount: queue.currentCount,
+        bannerImage: queue.bannerImage,
+        profileImage: queue.profileImage,
       })
       .returning();
 

@@ -203,12 +203,17 @@ export default function ConnectPage() {
     const endpoint = entityType === 'chat' 
       ? `/api/group-chats/${entityId}/${type}` 
       : `/api/group-chat-queues/${entityId}/${type}`;
+    console.log(`Uploading to ${endpoint}...`);
     const response = await fetch(endpoint, {
       method: 'POST',
       body: formData,
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Upload failed');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Upload failed: ${response.status} ${errorText}`);
+      throw new Error('Upload failed');
+    }
     return response.json();
   };
 
