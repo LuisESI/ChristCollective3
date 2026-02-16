@@ -1576,6 +1576,8 @@ export class DatabaseStorage implements IStorage {
         intention: groupChats.intention,
         memberCount: groupChats.memberCount,
         status: groupChats.status,
+        bannerImage: groupChats.bannerImage,
+        profileImage: groupChats.profileImage,
         createdAt: groupChats.createdAt,
         updatedAt: groupChats.updatedAt,
       })

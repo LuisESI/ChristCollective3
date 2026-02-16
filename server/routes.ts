@@ -3130,74 +3130,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     return match ? match[1] : null;
   }
 
-  // Community image upload routes
-  app.post('/api/group-chats/:id/banner', isAuthenticated, uploadLimiter, upload.single('banner'), async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      if (!req.file.mimetype.startsWith('image/')) {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({ message: "Only image files allowed" });
-      }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatImages(parseInt(id), { bannerImage: imageUrl });
-      res.json({ url: imageUrl });
-    } catch (error) {
-      console.error("Error uploading chat banner:", error);
-      res.status(500).json({ message: "Upload failed" });
-    }
-  });
-
-  app.post('/api/group-chats/:id/icon', isAuthenticated, uploadLimiter, upload.single('icon'), async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      if (!req.file.mimetype.startsWith('image/')) {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({ message: "Only image files allowed" });
-      }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatImages(parseInt(id), { profileImage: imageUrl });
-      res.json({ url: imageUrl });
-    } catch (error) {
-      console.error("Error uploading chat icon:", error);
-      res.status(500).json({ message: "Upload failed" });
-    }
-  });
-
-  app.post('/api/group-chat-queues/:id/banner', isAuthenticated, uploadLimiter, upload.single('banner'), async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      if (!req.file.mimetype.startsWith('image/')) {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({ message: "Only image files allowed" });
-      }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatQueueImages(parseInt(id), { bannerImage: imageUrl });
-      res.json({ url: imageUrl });
-    } catch (error) {
-      console.error("Error uploading queue banner:", error);
-      res.status(500).json({ message: "Upload failed" });
-    }
-  });
-
-  app.post('/api/group-chat-queues/:id/icon', isAuthenticated, uploadLimiter, upload.single('icon'), async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      if (!req.file.mimetype.startsWith('image/')) {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({ message: "Only image files allowed" });
-      }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatQueueImages(parseInt(id), { profileImage: imageUrl });
-      res.json({ url: imageUrl });
-    } catch (error) {
-      console.error("Error uploading queue icon:", error);
-      res.status(500).json({ message: "Upload failed" });
-    }
-  });
+  // Community image upload routes are defined below (near group chat CRUD routes)
 
   // Business follow system routes
   app.post("/api/businesses/:businessId/follow", isAuthenticated, writeLimiter, async (req: any, res) => {
