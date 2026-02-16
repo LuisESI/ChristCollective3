@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { FollowersModal } from "@/components/FollowersModal";
-import { useLocation, useParams } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
@@ -612,54 +612,90 @@ export default function ProfilePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-1">
                     {platformPosts.map((post: any) => (
-                      <PlatformPostCard
+                      <Link
                         key={`platform-${post.id}`}
-                        post={post}
-                        currentUserId={user?.id}
-                        showActions={true}
-                      />
-                    ))}
-                    {creator?.posts && creator.posts.length > 0 && (
-                      <div className="grid grid-cols-3 gap-1 mt-4">
-                        {creator.posts.map((post: any) => (
-                          <button
-                            key={`creator-${post.id}`}
-                            onClick={() => window.open(post.postUrl, '_blank')}
-                            className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
-                          >
-                            {post.thumbnailUrl ? (
-                              <img
-                                src={post.thumbnailUrl}
-                                alt={post.postTitle || 'Post'}
+                        href={`/post/${post.id}`}
+                        className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
+                      >
+                        {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== 'text' ? (
+                          post.mediaType === 'video' ? (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-800 relative">
+                              <video
+                                src={getImageUrl(post.mediaUrls[0])}
                                 className="w-full h-full object-cover"
+                                muted
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                                <Play className="w-8 h-8 text-gray-400" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <div className="flex items-center gap-4 text-white text-sm">
-                                {post.likeCount && (
-                                  <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4 fill-white" />
-                                    <span>{post.likeCount.toLocaleString()}</span>
-                                  </div>
-                                )}
-                                {post.viewCount && (
-                                  <div className="flex items-center gap-1">
-                                    <Eye className="w-4 h-4" />
-                                    <span>{post.viewCount.toLocaleString()}</span>
-                                  </div>
-                                )}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <Play className="w-8 h-8 text-white/70" />
                               </div>
                             </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                          ) : (
+                            <img
+                              src={getImageUrl(post.mediaUrls[0])}
+                              alt={post.title || 'Post'}
+                              className="w-full h-full object-cover"
+                            />
+                          )
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-800 p-2">
+                            <p className="text-gray-300 text-xs line-clamp-4 text-center">{post.content}</p>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="flex items-center gap-4 text-white text-sm">
+                            {post.likeCount > 0 && (
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-4 h-4 fill-white" />
+                                <span>{post.likeCount}</span>
+                              </div>
+                            )}
+                            {post.commentCount > 0 && (
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{post.commentCount}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                    {creator?.posts && creator.posts.length > 0 && creator.posts.map((post: any) => (
+                      <button
+                        key={`creator-${post.id}`}
+                        onClick={() => window.open(post.postUrl, '_blank')}
+                        className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
+                      >
+                        {post.thumbnailUrl ? (
+                          <img
+                            src={post.thumbnailUrl}
+                            alt={post.postTitle || 'Post'}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                            <Play className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="flex items-center gap-4 text-white text-sm">
+                            {post.likeCount && (
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-4 h-4 fill-white" />
+                                <span>{post.likeCount.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {post.viewCount && (
+                              <div className="flex items-center gap-1">
+                                <Eye className="w-4 h-4" />
+                                <span>{post.viewCount.toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
               </>
