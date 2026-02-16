@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera } from "lucide-react";
+import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera, AlignLeft } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { FollowersModal } from "@/components/FollowersModal";
 import { Link, useLocation, useParams } from "wouter";
@@ -626,52 +626,69 @@ export default function ProfilePage() {
                         <Link
                           key={`platform-${post.id}`}
                           href={`/post/${post.id}`}
-                          className="aspect-square overflow-hidden group relative bg-gray-900"
+                          className="aspect-square overflow-hidden group relative block"
                         >
-                          {isImage ? (
-                            <img
-                              src={getImageUrl(post.mediaUrls[0])}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : isVideo ? (
-                            <video
-                              src={getImageUrl(post.mediaUrls[0])}
-                              className="w-full h-full object-cover"
-                              muted
-                              preload="metadata"
-                            />
-                          ) : isYoutube && thumbUrl ? (
-                            <img
-                              src={thumbUrl}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
+                          {hasMedia ? (
+                            <>
+                              <div className="absolute inset-0">
+                                {isVideo ? (
+                                  <video
+                                    src={getImageUrl(post.mediaUrls[0])}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    muted
+                                    preload="metadata"
+                                  />
+                                ) : isYoutube && thumbUrl ? (
+                                  <img
+                                    src={thumbUrl}
+                                    alt=""
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <img
+                                    src={getImageUrl(post.mediaUrls[0])}
+                                    alt=""
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                  />
+                                )}
+                              </div>
+
+                              {(isVideo || isYoutube) && (
+                                <div className="absolute top-1.5 right-1.5 bg-black/70 rounded-full p-1 z-10">
+                                  <Play className="w-3 h-3 text-white fill-white" />
+                                </div>
+                              )}
+
+                              {post.mediaUrls.length > 1 && (
+                                <div className="absolute top-1.5 left-1.5 bg-black/70 rounded px-1.5 py-0.5 z-10">
+                                  <span className="text-[10px] text-white font-medium">+{post.mediaUrls.length - 1}</span>
+                                </div>
+                              )}
+
+                              {post.content && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pt-5 pb-1.5 z-10">
+                                  <p className="text-[10px] text-white/90 line-clamp-2 leading-snug">{post.content}</p>
+                                </div>
+                              )}
+                            </>
                           ) : (
-                            <div className="w-full h-full bg-gray-900 p-3 flex items-center">
-                              <p className="text-gray-200 text-xs line-clamp-6 leading-relaxed">{post.content}</p>
+                            <div className="absolute inset-0 bg-black border border-gray-800 flex flex-col justify-between p-3">
+                              <AlignLeft className="w-3.5 h-3.5 text-[#D4AF37]/60" />
+                              <p className="text-gray-200 text-[11px] line-clamp-4 leading-relaxed">{post.content}</p>
+                              <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                <div className="flex items-center gap-0.5">
+                                  <Heart className="w-2.5 h-2.5" />
+                                  <span>{post.likeCount || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-0.5">
+                                  <MessageCircle className="w-2.5 h-2.5" />
+                                  <span>{post.commentCount || 0}</span>
+                                </div>
+                              </div>
                             </div>
                           )}
 
-                          {(isVideo || isYoutube) && (
-                            <div className="absolute top-1.5 right-1.5 bg-black/70 rounded-full p-1">
-                              <Play className="w-3 h-3 text-white fill-white" />
-                            </div>
-                          )}
-
-                          {hasMedia && post.mediaUrls.length > 1 && (
-                            <div className="absolute top-1.5 left-1.5 bg-black/70 rounded px-1 py-0.5">
-                              <span className="text-[10px] text-white font-medium">+{post.mediaUrls.length - 1}</span>
-                            </div>
-                          )}
-
-                          {hasMedia && post.content && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 pt-4 pb-1.5">
-                              <p className="text-[10px] text-white/90 line-clamp-2 leading-tight">{post.content}</p>
-                            </div>
-                          )}
-
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
                             <div className="flex items-center gap-3 text-white text-xs">
                               <div className="flex items-center gap-1">
                                 <Heart className="w-3.5 h-3.5 fill-white" />
