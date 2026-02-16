@@ -612,67 +612,80 @@ export default function ProfilePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-1">
-                    {platformPosts.map((post: any) => (
-                      <Link
-                        key={`platform-${post.id}`}
-                        href={`/post/${post.id}`}
-                        className="aspect-square bg-gray-900 border border-gray-800 rounded-lg overflow-hidden group relative transition-all hover:border-[#D4AF37]/40"
-                      >
-                        {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== 'text' ? (
-                          <div className="w-full h-full flex flex-col">
-                            <div className="flex-1 min-h-0 relative">
-                              {post.mediaType === 'video' ? (
-                                <>
-                                  <video
-                                    src={getImageUrl(post.mediaUrls[0])}
-                                    className="w-full h-full object-cover"
-                                    muted
-                                  />
-                                  <div className="absolute top-1.5 right-1.5 bg-black/60 rounded-full p-1">
-                                    <Play className="w-3 h-3 text-white fill-white" />
-                                  </div>
-                                </>
-                              ) : (
-                                <img
-                                  src={getImageUrl(post.mediaUrls[0])}
-                                  alt={post.title || 'Post'}
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-                              {post.mediaUrls.length > 1 && (
-                                <div className="absolute top-1.5 left-1.5 bg-black/60 rounded px-1 py-0.5">
-                                  <span className="text-[10px] text-white font-medium">+{post.mediaUrls.length - 1}</span>
-                                </div>
-                              )}
+                  <div className="grid grid-cols-3 gap-0.5">
+                    {platformPosts.map((post: any) => {
+                      const hasMedia = post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== 'text';
+                      const isYoutube = post.mediaType === 'youtube';
+                      const isVideo = post.mediaType === 'video';
+                      const isImage = hasMedia && !isVideo && !isYoutube;
+                      const thumbUrl = isYoutube && post.mediaUrls?.[0]
+                        ? `https://img.youtube.com/vi/${post.mediaUrls[0].match(/(?:v=|\/embed\/|youtu\.be\/)([^&?\s]+)/)?.[1] || ''}/hqdefault.jpg`
+                        : null;
+
+                      return (
+                        <Link
+                          key={`platform-${post.id}`}
+                          href={`/post/${post.id}`}
+                          className="aspect-square overflow-hidden group relative bg-gray-900"
+                        >
+                          {isImage ? (
+                            <img
+                              src={getImageUrl(post.mediaUrls[0])}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : isVideo ? (
+                            <video
+                              src={getImageUrl(post.mediaUrls[0])}
+                              className="w-full h-full object-cover"
+                              muted
+                              preload="metadata"
+                            />
+                          ) : isYoutube && thumbUrl ? (
+                            <img
+                              src={thumbUrl}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-900 p-3 flex items-center">
+                              <p className="text-gray-200 text-xs line-clamp-6 leading-relaxed">{post.content}</p>
                             </div>
-                            {post.content && (
-                              <div className="px-1.5 py-1 bg-gray-900/95 border-t border-gray-800">
-                                <p className="text-[10px] text-gray-300 line-clamp-2 leading-tight">{post.content}</p>
+                          )}
+
+                          {(isVideo || isYoutube) && (
+                            <div className="absolute top-1.5 right-1.5 bg-black/70 rounded-full p-1">
+                              <Play className="w-3 h-3 text-white fill-white" />
+                            </div>
+                          )}
+
+                          {hasMedia && post.mediaUrls.length > 1 && (
+                            <div className="absolute top-1.5 left-1.5 bg-black/70 rounded px-1 py-0.5">
+                              <span className="text-[10px] text-white font-medium">+{post.mediaUrls.length - 1}</span>
+                            </div>
+                          )}
+
+                          {hasMedia && post.content && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 pt-4 pb-1.5">
+                              <p className="text-[10px] text-white/90 line-clamp-2 leading-tight">{post.content}</p>
+                            </div>
+                          )}
+
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="flex items-center gap-3 text-white text-xs">
+                              <div className="flex items-center gap-1">
+                                <Heart className="w-3.5 h-3.5 fill-white" />
+                                <span>{post.likeCount || 0}</span>
                               </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-3">
-                            <div className="w-6 h-0.5 bg-[#D4AF37]/40 rounded mb-2"></div>
-                            <p className="text-gray-200 text-[11px] line-clamp-5 text-center leading-relaxed">{post.content}</p>
-                            <div className="w-6 h-0.5 bg-[#D4AF37]/40 rounded mt-2"></div>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2 rounded-lg">
-                          <div className="flex items-center gap-3 text-white text-xs">
-                            <div className="flex items-center gap-1">
-                              <Heart className="w-3.5 h-3.5 fill-white" />
-                              <span>{post.likeCount || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span>{post.commentCount || 0}</span>
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>{post.commentCount || 0}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                        </Link>
+                      );
+                    })}
                     {creator?.posts && creator.posts.length > 0 && creator.posts.map((post: any) => (
                       <button
                         key={`creator-${post.id}`}
