@@ -614,13 +614,21 @@ export default function ProfilePage() {
                 ) : (
                   <div className="grid grid-cols-3 gap-0.5">
                     {platformPosts.map((post: any) => {
-                      const hasMedia = post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== 'text';
-                      const isYoutube = post.mediaType === 'youtube';
+                      const firstUrl = post.mediaUrls?.[0] || '';
+                      const isBroken = firstUrl.startsWith('blob:') || !firstUrl;
+                      const isYoutube = post.mediaType === 'youtube' || post.mediaType === 'youtube_channel';
                       const isVideo = post.mediaType === 'video';
-                      const isImage = hasMedia && !isVideo && !isYoutube;
-                      const thumbUrl = isYoutube && post.mediaUrls?.[0]
-                        ? `https://img.youtube.com/vi/${post.mediaUrls[0].match(/(?:v=|\/embed\/|youtu\.be\/)([^&?\s]+)/)?.[1] || ''}/hqdefault.jpg`
-                        : null;
+                      const hasMedia = post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== 'text' && !isBroken;
+
+                      let thumbUrl: string | null = null;
+                      if (isYoutube && firstUrl) {
+                        const match = firstUrl.match(/(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([^&?\s\/]+)/);
+                        if (match?.[1]) {
+                          thumbUrl = `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+                        }
+                      }
+
+                      const showAsText = !hasMedia || (isYoutube && !thumbUrl);
 
                       return (
                         <Link
@@ -628,12 +636,12 @@ export default function ProfilePage() {
                           href={`/post/${post.id}`}
                           className="aspect-square overflow-hidden group relative block"
                         >
-                          {hasMedia ? (
+                          {!showAsText ? (
                             <>
-                              <div className="absolute inset-0">
+                              <div className="absolute inset-0 bg-gray-900">
                                 {isVideo ? (
                                   <video
-                                    src={getImageUrl(post.mediaUrls[0])}
+                                    src={getImageUrl(firstUrl)}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     muted
                                     preload="metadata"
@@ -646,7 +654,7 @@ export default function ProfilePage() {
                                   />
                                 ) : (
                                   <img
-                                    src={getImageUrl(post.mediaUrls[0])}
+                                    src={getImageUrl(firstUrl)}
                                     alt=""
                                     className="absolute inset-0 w-full h-full object-cover"
                                   />
