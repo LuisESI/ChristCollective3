@@ -3114,7 +3114,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "Only image files allowed" });
       }
       const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatImages(parseInt(id), { bannerUrl: imageUrl });
+      await storage.updateGroupChatImages(parseInt(id), { bannerImage: imageUrl });
       res.json({ url: imageUrl });
     } catch (error) {
       console.error("Error uploading chat banner:", error);
@@ -3131,7 +3131,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "Only image files allowed" });
       }
       const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatImages(parseInt(id), { iconUrl: imageUrl });
+      await storage.updateGroupChatImages(parseInt(id), { profileImage: imageUrl });
       res.json({ url: imageUrl });
     } catch (error) {
       console.error("Error uploading chat icon:", error);
@@ -3148,7 +3148,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "Only image files allowed" });
       }
       const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatQueueImages(parseInt(id), { bannerUrl: imageUrl });
+      await storage.updateGroupChatQueueImages(parseInt(id), { bannerImage: imageUrl });
       res.json({ url: imageUrl });
     } catch (error) {
       console.error("Error uploading queue banner:", error);
@@ -3165,7 +3165,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "Only image files allowed" });
       }
       const imageUrl = `/uploads/${req.file.filename}`;
-      await storage.updateGroupChatQueueImages(parseInt(id), { iconUrl: imageUrl });
+      await storage.updateGroupChatQueueImages(parseInt(id), { profileImage: imageUrl });
       res.json({ url: imageUrl });
     } catch (error) {
       console.error("Error uploading queue icon:", error);

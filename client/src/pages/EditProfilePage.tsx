@@ -514,9 +514,15 @@ export default function EditProfilePage() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
       toast({ title: "Profile updated successfully!" });
+      // Invalidate both user and specific profile routes to ensure consistency
+      queryClient.setQueryData(["/api/user"], updatedUser);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // If there's a cached profile response, invalidate it too
+      if (updatedUser.username) {
+        queryClient.invalidateQueries({ queryKey: ["/api/users/by-username", updatedUser.username] });
+      }
       // Clear the selected profile image after successful update
       setSelectedProfileImage(null);
       setProfileImagePreview("");
@@ -531,6 +537,7 @@ export default function EditProfilePage() {
   });
 
   const onBasicProfileSubmit = (data: any) => {
+    console.log("Submitting profile update with image:", !!selectedProfileImage);
     updateBasicProfileMutation.mutate(data);
   };
 
@@ -538,6 +545,7 @@ export default function EditProfilePage() {
   const handleProfileImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log("File selected:", file.name, file.type, file.size);
       // Validate file type
       if (!file.type.startsWith('image/')) {
         toast({
