@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { useAuthGuard } from "@/lib/auth-guard";
-// import { formatDistanceToNow } from "date-fns";
+import { renderContentWithMentions } from "@/components/MentionTextarea";
 
 interface PlatformPostProps {
   post: {
@@ -499,7 +499,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         )}
 
         {/* Content Text */}
-        <p className="text-white text-sm leading-relaxed mb-3">{post.content}</p>
+        <p className="text-white text-sm leading-relaxed mb-3">{renderContentWithMentions(post.content)}</p>
 
         {/* Media Content - Dynamic aspect ratio like Twitter */}
         {post.mediaUrls && post.mediaUrls.length > 0 && post.mediaType !== "text" && (

@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, X, Upload, Image, Video, Type, Youtube } from "lucide-react";
+import { Plus, X, Upload, Image, Video, Type, Youtube, Loader2 } from "lucide-react";
+import { buildApiUrl } from "@/lib/api-config";
+import { MentionTextarea } from "@/components/MentionTextarea";
 
 interface CreatePostModalProps {
   trigger?: React.ReactNode;
@@ -37,6 +39,7 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
   });
   const [newTag, setNewTag] = useState("");
   const [newMediaUrl, setNewMediaUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -241,14 +244,15 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
           {/* Content */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-white">Content *</label>
-            <Textarea
+            <MentionTextarea
               value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="What would you like to share?"
+              onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+              placeholder="What would you like to share? Type @ to mention someone..."
               rows={4}
               className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
               required
             />
+            <p className="text-xs text-gray-500">Tip: Type @ followed by a username to tag someone</p>
           </div>
 
           {/* Media Type */}
@@ -302,16 +306,35 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                     type="file"
                     accept={formData.mediaType === "image" ? "image/*" : "video/*"}
                     className="hidden"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        // In a real app, you'd upload the file to a storage service
-                        // For now, we'll use a placeholder URL
-                        const fileUrl = URL.createObjectURL(file);
-                        setFormData(prev => ({
-                          ...prev,
-                          mediaUrls: [...prev.mediaUrls, fileUrl]
-                        }));
+                        setUploading(true);
+                        try {
+                          const uploadData = new FormData();
+                          uploadData.append(formData.mediaType === "image" ? 'image' : 'video', file);
+                          const response = await fetch(buildApiUrl('/api/upload'), {
+                            method: 'POST',
+                            body: uploadData,
+                            credentials: 'include',
+                          });
+                          if (!response.ok) throw new Error('Upload failed');
+                          const result = await response.json();
+                          setFormData(prev => ({
+                            ...prev,
+                            mediaUrls: [...prev.mediaUrls, result.url]
+                          }));
+                          toast({ title: "File uploaded successfully!" });
+                        } catch (error) {
+                          toast({
+                            title: "Upload failed",
+                            description: "Could not upload file. Please try again.",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setUploading(false);
+                          if (e.target) e.target.value = '';
+                        }
                       }
                     }}
                   />
@@ -319,12 +342,20 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                     type="button"
                     variant="outline"
                     className="mt-2 border-gray-800 text-gray-300 hover:bg-[#0A0A0A]"
+                    disabled={uploading}
                     onClick={(e) => {
                       const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
                       input?.click();
                     }}
                   >
-                    Choose File
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      'Choose File'
+                    )}
                   </Button>
                 </div>
               )}

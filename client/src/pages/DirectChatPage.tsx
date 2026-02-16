@@ -150,7 +150,7 @@ export default function DirectChatPage() {
   const otherUserName = otherUser?.displayName || otherUser?.firstName || otherUser?.username || "User";
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col">
+    <div className="h-screen bg-black text-white flex flex-col pb-20">
       <Helmet>
         <title>Direct Message - {otherUserName} | Christ Collective</title>
       </Helmet>

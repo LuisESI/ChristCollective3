@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
+import { FollowersModal } from "@/components/FollowersModal";
 import { useLocation, useParams } from "wouter";
 import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
@@ -27,6 +28,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'saved'>('posts');
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [followersModalOpen, setFollowersModalOpen] = useState(false);
+  const [followersModalTab, setFollowersModalTab] = useState<"followers" | "following">("followers");
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -35,7 +38,7 @@ export default function ProfilePage() {
     try {
       const formData = new FormData();
       formData.append('bannerImage', file);
-      const res = await fetch('/api/upload/banner-image', {
+      const res = await fetch(buildApiUrl('/api/upload/banner-image'), {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -119,6 +122,19 @@ export default function ProfilePage() {
 
   const isFollowing = isFollowingData?.isFollowing || false;
 
+  // Fetch user's platform posts
+  const { data: platformPosts = [], isLoading: platformPostsLoading } = useQuery<any[]>({
+    queryKey: ["/api/users", displayUser?.id, "posts"],
+    queryFn: async () => {
+      const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/posts`), {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!displayUser?.id,
+  });
+
   // Fetch saved posts for own profile
   const { data: savedPosts = [], isLoading: savedPostsLoading } = useQuery<any[]>({
     queryKey: ["/api/saved-posts"],
@@ -128,10 +144,15 @@ export default function ProfilePage() {
   // Follow mutation
   const followMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, {
+      const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/follow`), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to follow user');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to follow user');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -142,10 +163,10 @@ export default function ProfilePage() {
         description: `You are now following ${displayUser?.firstName || displayUser?.username}!`,
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to follow user. Please try again.",
+        description: error.message || "Failed to follow user. Please try again.",
         variant: "destructive",
       });
     },
@@ -154,10 +175,15 @@ export default function ProfilePage() {
   // Unfollow mutation
   const unfollowMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, {
+      const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/follow`), {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to unfollow user');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to unfollow user');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -168,10 +194,10 @@ export default function ProfilePage() {
         description: `You have unfollowed ${displayUser?.firstName || displayUser?.username}.`,
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to unfollow user. Please try again.",
+        description: error.message || "Failed to unfollow user. Please try again.",
         variant: "destructive",
       });
     },
@@ -325,9 +351,10 @@ export default function ProfilePage() {
                       }
                       const createDirectChat = async () => {
                         try {
-                          const response = await fetch('/api/direct-chats', {
+                          const response = await fetch(buildApiUrl('/api/direct-chats'), {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
                             body: JSON.stringify({ recipientId: displayUser.id })
                           });
                           if (response.ok) {
@@ -441,24 +468,41 @@ export default function ProfilePage() {
             <div className="flex justify-around text-center">
               <div>
                 <div className="text-lg font-semibold text-[#D4AF37]">
-                  {creator?.posts?.length || creator?.totalPosts || 0}
+                  {platformPosts.length || creator?.posts?.length || creator?.totalPosts || 0}
                 </div>
                 <div className="text-xs text-gray-400">Posts</div>
               </div>
-              <div>
+              <button
+                onClick={() => { setFollowersModalTab("followers"); setFollowersModalOpen(true); }}
+                className="hover:bg-gray-900 rounded-lg px-3 py-1 transition-colors"
+              >
                 <div className="text-lg font-semibold text-[#D4AF37]">
                   {(userStats as any)?.followersCount || creator?.totalFollowers || 0}
                 </div>
                 <div className="text-xs text-gray-400">Followers</div>
-              </div>
-              <div>
+              </button>
+              <button
+                onClick={() => { setFollowersModalTab("following"); setFollowersModalOpen(true); }}
+                className="hover:bg-gray-900 rounded-lg px-3 py-1 transition-colors"
+              >
                 <div className="text-lg font-semibold text-[#D4AF37]">
                   {(userStats as any)?.followingCount || (followingData as any)?.length || 0}
                 </div>
                 <div className="text-xs text-gray-400">Following</div>
-              </div>
+              </button>
             </div>
           </div>
+
+          {displayUser?.id && (
+            <FollowersModal
+              open={followersModalOpen}
+              onOpenChange={setFollowersModalOpen}
+              userId={displayUser.id}
+              initialTab={followersModalTab}
+              currentUserId={user?.id}
+              displayName={displayUser?.firstName || displayUser?.username}
+            />
+          )}
 
           {/* Welcome message for new users without creator profile - only show for own profile */}
           {isOwnProfile && !(creatorProfile as any)?.isCreator && (
@@ -469,7 +513,7 @@ export default function ProfilePage() {
               </p>
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={() => navigate("/edit-profile")}
+                  onClick={() => navigate("/sponsorship-application")}
                   className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium"
                 >
                   Become a Content Creator
@@ -538,7 +582,11 @@ export default function ProfilePage() {
           <div className="mt-5">
             {activeTab === 'posts' ? (
               <>
-                {!creator?.posts || creator.posts.length === 0 ? (
+                {platformPostsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto"></div>
+                  </div>
+                ) : platformPosts.length === 0 && (!creator?.posts || creator.posts.length === 0) ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Play className="w-8 h-8 text-gray-400" />
@@ -550,11 +598,11 @@ export default function ProfilePage() {
                           Your content will appear here once you start sharing.
                         </p>
                         <Button
-                          onClick={() => navigate("/edit-profile")}
+                          onClick={() => navigate("/create")}
                           className="mt-4 bg-[#D4AF37] text-black hover:bg-[#B8941F]"
                         >
                           <Edit className="w-4 h-4 mr-2" />
-                          Add Content
+                          Create Post
                         </Button>
                       </>
                     ) : (
@@ -564,42 +612,54 @@ export default function ProfilePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-1">
-                    {creator.posts.map((post: any) => (
-                      <button
-                        key={post.id}
-                        onClick={() => window.open(post.postUrl, '_blank')}
-                        className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
-                      >
-                        {post.thumbnailUrl ? (
-                          <img
-                            src={post.thumbnailUrl}
-                            alt={post.postTitle || 'Post'}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                            <Play className="w-8 h-8 text-gray-400" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="flex items-center gap-4 text-white text-sm">
-                            {post.likeCount && (
-                              <div className="flex items-center gap-1">
-                                <Heart className="w-4 h-4 fill-white" />
-                                <span>{post.likeCount.toLocaleString()}</span>
-                              </div>
-                            )}
-                            {post.viewCount && (
-                              <div className="flex items-center gap-1">
-                                <Eye className="w-4 h-4" />
-                                <span>{post.viewCount.toLocaleString()}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </button>
+                  <div className="space-y-4">
+                    {platformPosts.map((post: any) => (
+                      <PlatformPostCard
+                        key={`platform-${post.id}`}
+                        post={post}
+                        currentUserId={user?.id}
+                        showActions={true}
+                      />
                     ))}
+                    {creator?.posts && creator.posts.length > 0 && (
+                      <div className="grid grid-cols-3 gap-1 mt-4">
+                        {creator.posts.map((post: any) => (
+                          <button
+                            key={`creator-${post.id}`}
+                            onClick={() => window.open(post.postUrl, '_blank')}
+                            className="aspect-square bg-gray-900 rounded-lg overflow-hidden group relative hover:opacity-75 transition-opacity"
+                          >
+                            {post.thumbnailUrl ? (
+                              <img
+                                src={post.thumbnailUrl}
+                                alt={post.postTitle || 'Post'}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                                <Play className="w-8 h-8 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <div className="flex items-center gap-4 text-white text-sm">
+                                {post.likeCount && (
+                                  <div className="flex items-center gap-1">
+                                    <Heart className="w-4 h-4 fill-white" />
+                                    <span>{post.likeCount.toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {post.viewCount && (
+                                  <div className="flex items-center gap-1">
+                                    <Eye className="w-4 h-4" />
+                                    <span>{post.viewCount.toLocaleString()}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </>

@@ -2988,6 +2988,38 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Search users by username or name (for @mentions)
+  app.get("/api/users/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string' || q.length < 1) {
+        return res.json([]);
+      }
+      const users = await storage.getAllUsers();
+      const query = q.toLowerCase();
+      const results = users
+        .filter(user => 
+          user.username && 
+          user.username !== 'null' &&
+          (user.username.toLowerCase().includes(query) ||
+           (user.firstName && user.firstName.toLowerCase().includes(query)) ||
+           (user.lastName && user.lastName.toLowerCase().includes(query)))
+        )
+        .slice(0, 10)
+        .map(user => ({
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+        }));
+      res.json(results);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ message: "Failed to search users" });
+    }
+  });
+
   // Get user by username
   app.get("/api/users/by-username", async (req, res) => {
     try {
