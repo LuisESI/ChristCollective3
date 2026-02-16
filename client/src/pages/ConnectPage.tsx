@@ -592,6 +592,8 @@ export default function ConnectPage() {
                       worship: "from-[#D4AF37]/40 via-[#D4AF37]/20 to-black",
                     };
                     const gradient = bannerGradients[chat.intention] || bannerGradients.fellowship;
+                    const bannerImg = (chat as any).bannerImage;
+                    const profileImg = (chat as any).profileImage;
 
                     return (
                       <div
@@ -600,15 +602,15 @@ export default function ConnectPage() {
                         onClick={() => navigate(`/chat/${chat.id}`)}
                       >
                         {/* Banner */}
-                        <div className={`h-24 ${(chat as any).bannerImage ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
-                          {(chat as any).bannerImage ? (
-                            <img src={getImageUrl((chat as any).bannerImage)} alt="" className="w-full h-full object-cover" />
+                        <div className={`h-24 ${bannerImg ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
+                          {bannerImg ? (
+                            <img src={getImageUrl(bannerImg)} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center opacity-20">
                               <Icon className="w-16 h-16 text-white" />
                             </div>
                           )}
-                          {user?.isAdmin && (
+                          {(user?.isAdmin) && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleImageUpload('banner', 'chat', chat.id); }}
                               className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors z-10"
@@ -622,14 +624,14 @@ export default function ConnectPage() {
                         <div className="px-4 pb-4 -mt-8 relative">
                           <div className="flex items-end gap-3 mb-3">
                             <div className="relative flex-shrink-0">
-                              {(chat as any).profileImage ? (
-                                <img src={getImageUrl((chat as any).profileImage)} alt="" className="w-16 h-16 rounded-full border-4 border-black object-cover shadow-lg" />
+                              {profileImg ? (
+                                <img src={getImageUrl(profileImg)} alt="" className="w-16 h-16 rounded-full border-4 border-black object-cover shadow-lg" />
                               ) : (
                                 <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center shadow-lg`}>
                                   <Icon className="w-7 h-7 text-white" />
                                 </div>
                               )}
-                              {user?.isAdmin && (
+                              {(user?.isAdmin) && (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleImageUpload('icon', 'chat', chat.id); }}
                                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#D4AF37] hover:bg-[#B8941F] flex items-center justify-center transition-colors z-10"
