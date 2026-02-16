@@ -93,7 +93,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/user/profile', isAuthenticated, writeLimiter, validateBody(profileUpdateSchema), async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const updateData = req.body;
+      // Define specific allowed fields for profile update to avoid schema validation errors
+      const {
+        firstName,
+        lastName,
+        displayName,
+        username,
+        bio,
+        location,
+        phone,
+        profileImageUrl,
+        showEmail,
+        showPhone,
+        showLocation
+      } = req.body;
+
+      const updateData: any = {};
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (username !== undefined) updateData.username = username;
+      if (bio !== undefined) updateData.bio = bio;
+      if (location !== undefined) updateData.location = location;
+      if (phone !== undefined) updateData.phone = phone;
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+      if (showEmail !== undefined) updateData.showEmail = typeof showEmail === 'boolean' ? showEmail : showEmail === 'true';
+      if (showPhone !== undefined) updateData.showPhone = typeof showPhone === 'boolean' ? showPhone : showPhone === 'true';
+      if (showLocation !== undefined) updateData.showLocation = typeof showLocation === 'boolean' ? showLocation : showLocation === 'true';
 
       if (updateData.username) {
         const currentUser = await storage.getUser(userId);

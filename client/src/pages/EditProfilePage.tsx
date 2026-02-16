@@ -501,13 +501,25 @@ export default function EditProfilePage() {
       }
       
       console.log("Sending profile update request...");
-      // Changed endpoint from /api/user/profile to /api/user to match server/routes.ts
-      const response = await fetch('/api/user', {
+      // Changed endpoint from /api/user to /api/user/profile to match the correct route with validation
+      const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...data, profileImageUrl }),
+        body: JSON.stringify({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          displayName: data.displayName || "",
+          username: data.username || "",
+          bio: data.bio || "",
+          location: data.location || "",
+          phone: data.phone || "",
+          profileImageUrl: profileImageUrl || "",
+          showEmail: !!data.showEmail,
+          showPhone: !!data.showPhone,
+          showLocation: !!data.showLocation
+        }),
       });
       
       if (!response.ok) {
