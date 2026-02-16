@@ -686,11 +686,11 @@ export default function ProfilePage() {
                               <div className="flex items-center gap-2 text-[10px] text-gray-500">
                                 <div className="flex items-center gap-0.5">
                                   <Heart className="w-2.5 h-2.5" />
-                                  <span>{post.likeCount || 0}</span>
+                                  <span>{post.likesCount || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-0.5">
                                   <MessageCircle className="w-2.5 h-2.5" />
-                                  <span>{post.commentCount || 0}</span>
+                                  <span>{post.commentsCount || 0}</span>
                                 </div>
                               </div>
                             </div>
@@ -700,11 +700,11 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-3 text-white text-xs">
                               <div className="flex items-center gap-1">
                                 <Heart className="w-3.5 h-3.5 fill-white" />
-                                <span>{post.likeCount || 0}</span>
+                                <span>{post.likesCount || 0}</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <MessageCircle className="w-3.5 h-3.5" />
-                                <span>{post.commentCount || 0}</span>
+                                <span>{post.commentsCount || 0}</span>
                               </div>
                             </div>
                           </div>
