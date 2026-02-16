@@ -480,6 +480,7 @@ export default function EditProfilePage() {
       let profileImageUrl = data.profileImageUrl;
       
       if (selectedProfileImage) {
+        console.log("Uploading profile image...");
         const formData = new FormData();
         formData.append('profileImage', selectedProfileImage);
         
@@ -489,14 +490,19 @@ export default function EditProfilePage() {
         });
         
         if (!uploadResponse.ok) {
-          throw new Error('Failed to upload profile image');
+          const errorData = await uploadResponse.json();
+          console.error("Upload error details:", errorData);
+          throw new Error(errorData.message || 'Failed to upload profile image');
         }
         
         const uploadResult = await uploadResponse.json();
+        console.log("Upload successful, URL:", uploadResult.url);
         profileImageUrl = uploadResult.url;
       }
       
-      const response = await fetch('/api/user/profile', {
+      console.log("Sending profile update request...");
+      // Changed endpoint from /api/user/profile to /api/user to match server/routes.ts
+      const response = await fetch('/api/user', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -572,6 +578,7 @@ export default function EditProfilePage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setProfileImagePreview(e.target?.result as string);
+        console.log("Profile image preview set");
       };
       reader.readAsDataURL(file);
     }
