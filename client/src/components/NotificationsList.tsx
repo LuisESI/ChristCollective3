@@ -20,7 +20,10 @@ interface Notification {
   actorImage?: string;
 }
 
+import { useAuth } from "@/hooks/useAuth";
+
 export function NotificationsList() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
@@ -156,16 +159,18 @@ export function NotificationsList() {
     <div className="space-y-6">
       {/* Actions header */}
       <div className="flex justify-between items-center">
-        <Button
-          onClick={() => createTestNotificationsMutation.mutate()}
-          disabled={createTestNotificationsMutation.isPending}
-          variant="outline"
-          size="sm"
-          className="text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37]/20"
-        >
-          <Bell className="h-4 w-4 mr-2" />
-          Test Notifications
-        </Button>
+        {user?.isAdmin && (
+          <Button
+            onClick={() => createTestNotificationsMutation.mutate()}
+            disabled={createTestNotificationsMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37]/20"
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Test Notifications
+          </Button>
+        )}
         
         {notifications.length > 0 && (
           <Button

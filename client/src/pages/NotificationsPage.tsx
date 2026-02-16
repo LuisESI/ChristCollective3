@@ -25,7 +25,7 @@ export default function NotificationsPage() {
     mutationFn: async () => {
       await apiRequest("/api/notifications/test", {
         method: "POST",
-        body: { 
+        data: { 
           message: `Test notification created at ${new Date().toLocaleTimeString()}`,
           type: "info"
         }
@@ -86,17 +86,19 @@ export default function NotificationsPage() {
             )}
           </div>
           
-          {/* Test Button for Animation */}
-          <Button
-            onClick={() => createTestNotification.mutate()}
-            disabled={createTestNotification.isPending}
-            variant="outline" 
-            size="sm"
-            className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
-          >
-            <TestTube className="h-4 w-4 mr-2" />
-            {createTestNotification.isPending ? "Creating..." : "Test Animation"}
-          </Button>
+          {/* Test Button for Animation - Only visible to admins */}
+          {user.isAdmin && (
+            <Button
+              onClick={() => createTestNotification.mutate()}
+              disabled={createTestNotification.isPending}
+              variant="outline" 
+              size="sm"
+              className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black"
+            >
+              <TestTube className="h-4 w-4 mr-2" />
+              {createTestNotification.isPending ? "Creating..." : "Test Animation"}
+            </Button>
+          )}
         </div>
         
         <NotificationsList />
