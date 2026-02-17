@@ -28,13 +28,29 @@ export default function FeedPage() {
   });
 
   const allPosts = useMemo(() => {
-    const userPosts = (user && followingPosts && followingPosts.length > 0) ? followingPosts : (posts || []);
+    const allPlatformPosts = (posts as any[]) || [];
+    const followingList = (followingPosts as any[]) || [];
     const ministry = ministryPosts || [];
-    
+
+    let userPosts: any[];
+    if (user && followingList.length > 0) {
+      const followingIds = new Set(followingList.map((p: any) => p.id));
+      const ownPosts = allPlatformPosts.filter((p: any) => p.userId === user.id && !followingIds.has(p.id));
+      userPosts = [...followingList, ...ownPosts];
+    } else {
+      userPosts = allPlatformPosts;
+    }
+
+    const seenIds = new Set<string>();
     const combined = [
-      ...((userPosts as any[]) || []).map((post: any) => ({ ...post, postType: 'user' })),
+      ...userPosts.map((post: any) => ({ ...post, postType: 'user' })),
       ...((ministry as any[]) || []).map((post: any) => ({ ...post, postType: 'ministry' }))
-    ];
+    ].filter((post: any) => {
+      const key = `${post.postType}-${post.id}`;
+      if (seenIds.has(key)) return false;
+      seenIds.add(key);
+      return true;
+    });
     
     return combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [posts, followingPosts, ministryPosts, user]);
