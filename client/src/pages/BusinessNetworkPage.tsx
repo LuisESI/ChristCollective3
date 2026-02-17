@@ -251,10 +251,10 @@ export default function BusinessNetworkPage() {
                             <span className="truncate">{profile.location}</span>
                           </div>
                         )}
-                        {profile.user?.firstName && profile.user?.lastName && (
+                        {(profile.user?.displayName || (profile.user?.firstName && profile.user?.lastName)) && (
                           <div className="flex items-center text-xs text-gray-400">
                             <Users className="h-3 w-3 mr-2 text-primary" />
-                            <span className="truncate">{profile.user.firstName} {profile.user.lastName}</span>
+                            <span className="truncate">{profile.user.displayName || `${profile.user.firstName} ${profile.user.lastName}`}</span>
                           </div>
                         )}
                       </div>

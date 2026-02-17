@@ -24,9 +24,11 @@ function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: strin
         </Avatar>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">
-            {post.user?.firstName && post.user?.lastName 
-              ? `${post.user.firstName} ${post.user.lastName}`
-              : post.user?.username || 'User'}
+            {post.user?.displayName
+              ? post.user.displayName
+              : post.user?.firstName && post.user?.lastName 
+                ? `${post.user.firstName} ${post.user.lastName}`
+                : post.user?.username || 'User'}
           </p>
           <p className="text-gray-500 text-xs">@{post.user?.username || 'user'}</p>
         </div>
@@ -97,9 +99,11 @@ function ProfileCard({ item, navigate }: { item: { type: string; data: any }; na
       case 'creator': return item.data.name;
       case 'business': return item.data.companyName;
       case 'ministry': return item.data.name;
-      case 'user': return item.data.firstName && item.data.lastName 
-        ? `${item.data.firstName} ${item.data.lastName}` 
-        : item.data.username;
+      case 'user': return item.data.displayName
+        ? item.data.displayName
+        : item.data.firstName && item.data.lastName 
+          ? `${item.data.firstName} ${item.data.lastName}` 
+          : item.data.username;
       default: return '';
     }
   };

@@ -540,10 +540,14 @@ export default function EditProfilePage() {
       // Invalidate both user and specific profile routes to ensure consistency
       queryClient.setQueryData(["/api/user"], updatedUser);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      // If there's a cached profile response, invalidate it too
       if (updatedUser.username) {
         queryClient.invalidateQueries({ queryKey: ["/api/users/by-username", updatedUser.username] });
       }
+      if (updatedUser.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/users/by-id", updatedUser.id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/explore"] });
       // Clear the selected profile image after successful update
       setSelectedProfileImage(null);
       setProfileImagePreview("");
@@ -653,9 +657,11 @@ export default function EditProfilePage() {
               </Avatar>
               <div>
                 <h2 className="text-xl font-semibold">
-                  {user.firstName && user.lastName 
-                    ? `${user.firstName} ${user.lastName}`
-                    : user.username}
+                  {user.displayName
+                    ? user.displayName
+                    : user.firstName && user.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user.username}
                 </h2>
                 <p className="text-gray-400 text-sm">@{user.username}</p>
                 <div className="flex gap-2 mt-1">

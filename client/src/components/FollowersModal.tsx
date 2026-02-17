@@ -108,9 +108,11 @@ export function FollowersModal({ open, onOpenChange, userId, initialTab, current
   });
 
   const renderUserRow = (user: any, showFollowAction: boolean = true) => {
-    const name = user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user.displayName || user.username || 'User';
+    const name = user.displayName
+      ? user.displayName
+      : user.firstName && user.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user.username || 'User';
     const isFollowingUser = followingIds.has(user.id);
     const isCurrentUser = user.id === currentUserId;
 

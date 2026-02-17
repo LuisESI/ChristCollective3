@@ -156,9 +156,11 @@ export function FollowSuggestions() {
         .map((user: any) => ({
           ...user,
           type: 'user',
-          displayName: user.firstName && user.lastName 
-            ? `${user.firstName} ${user.lastName}` 
-            : user.username || user.email?.split('@')[0] || 'User',
+          displayName: user.displayName
+            ? user.displayName
+            : user.firstName && user.lastName 
+              ? `${user.firstName} ${user.lastName}` 
+              : user.username || user.email?.split('@')[0] || 'User',
           description: 'Community member',
           avatar: user.profileImageUrl,
           userId: user.id,

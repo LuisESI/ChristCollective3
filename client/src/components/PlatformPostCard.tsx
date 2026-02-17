@@ -417,6 +417,9 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   };
 
   const getUserInitials = () => {
+    if (postAuthor?.displayName) {
+      return postAuthor.displayName.split(' ').map((w: string) => w.charAt(0)).join('').slice(0, 2).toUpperCase();
+    }
     if (postAuthor?.firstName && postAuthor?.lastName) {
       return `${postAuthor.firstName.charAt(0)}${postAuthor.lastName.charAt(0)}`.toUpperCase();
     }
@@ -426,10 +429,13 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
     if (post.authorType) {
       return post.authorType.charAt(0).toUpperCase();
     }
-    return "U"; // Default fallback
+    return "U";
   };
 
   const getUserDisplayName = () => {
+    if (postAuthor?.displayName) {
+      return postAuthor.displayName;
+    }
     if (postAuthor?.firstName && postAuthor?.lastName) {
       return `${postAuthor.firstName} ${postAuthor.lastName}`;
     }

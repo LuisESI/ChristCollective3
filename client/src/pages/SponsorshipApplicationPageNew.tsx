@@ -53,9 +53,11 @@ function SponsorshipApplicationPage() {
   const form = useForm<ApplicationValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
-      name: user?.firstName && user?.lastName 
-        ? `${user.firstName} ${user.lastName}` 
-        : "",
+      name: user?.displayName
+        ? user.displayName
+        : user?.firstName && user?.lastName 
+          ? `${user.firstName} ${user.lastName}` 
+          : "",
       email: user?.email || "",
       platforms: [{ platform: "", profileUrl: "", subscriberCount: undefined }],
       content: "",

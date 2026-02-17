@@ -417,9 +417,11 @@ export default function CampaignDetailsPage() {
                   </Avatar>
                   <div>
                     <h3 className="font-medium">
-                      {campaign.user?.firstName 
-                        ? `${campaign.user.firstName} ${campaign.user.lastName || ''}`
-                        : "Campaign Creator"}
+                      {campaign.user?.displayName
+                        ? campaign.user.displayName
+                        : campaign.user?.firstName 
+                          ? `${campaign.user.firstName} ${campaign.user.lastName || ''}`
+                          : "Campaign Creator"}
                     </h3>
                     <p className="text-sm text-gray-800 dark:text-gray-300">
                       {campaign.user?.location || "Christ Collective Member"}
@@ -468,9 +470,11 @@ export default function CampaignDetailsPage() {
                         <h3 className="font-medium">
                           {donation.isAnonymous
                             ? "Anonymous"
-                            : (donation.user?.firstName
-                              ? `${donation.user.firstName} ${donation.user.lastName || ''}`
-                              : "Generous Donor")}
+                            : (donation.user?.displayName
+                              ? donation.user.displayName
+                              : donation.user?.firstName
+                                ? `${donation.user.firstName} ${donation.user.lastName || ''}`
+                                : "Generous Donor")}
                         </h3>
                       </div>
                       <div className="font-medium">{formatCurrency(donation.amount)}</div>

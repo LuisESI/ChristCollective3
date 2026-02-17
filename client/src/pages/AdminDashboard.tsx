@@ -614,11 +614,11 @@ export default function AdminDashboard() {
                                 <Avatar className="h-8 w-8">
                                   <AvatarImage src={user.profileImageUrl || undefined} />
                                   <AvatarFallback className="bg-gray-700 text-gray-300">
-                                    {user.firstName?.[0]}{user.lastName?.[0]}
+                                    {(user.displayName || `${user.firstName || ''} ${user.lastName || ''}`).trim().split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <p className="font-medium">{user.firstName} {user.lastName}</p>
+                                  <p className="font-medium">{user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username}</p>
                                   <p className="text-sm text-gray-500">@{user.username}</p>
                                 </div>
                               </div>
@@ -1119,12 +1119,12 @@ export default function AdminDashboard() {
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={selectedUser.profileImageUrl || undefined} />
                       <AvatarFallback className="bg-gray-700 text-gray-300 text-lg">
-                        {selectedUser.firstName?.[0]}{selectedUser.lastName?.[0]}
+                        {(selectedUser.displayName || `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`).trim().split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <DialogTitle className="text-2xl font-bold text-white">
-                        {selectedUser.firstName} {selectedUser.lastName}
+                        {selectedUser.displayName || `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || selectedUser.username}
                       </DialogTitle>
                       <DialogDescription className="text-gray-400">
                         @{selectedUser.username} • {selectedUser.isAdmin ? 'Administrator' : 'User'}

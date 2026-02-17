@@ -128,9 +128,11 @@ export function MentionTextarea({ value, onChange, placeholder, rows = 4, classN
           className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-gray-900 border border-gray-700 rounded-lg shadow-xl"
         >
           {suggestions.map((user, index) => {
-            const name = user.firstName && user.lastName
-              ? `${user.firstName} ${user.lastName}`
-              : user.username;
+            const name = user.displayName
+              ? user.displayName
+              : user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.username;
             return (
               <button
                 key={user.id}
