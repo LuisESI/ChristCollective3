@@ -461,7 +461,11 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
+          <Link
+            href={`/profile/${getUserUsername()}`}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
             <Avatar className="w-10 h-10">
               <AvatarImage src={getUserProfileImage()} alt="Profile" />
               <AvatarFallback className="bg-[#D4AF37] text-black">
@@ -472,7 +476,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
               <p className="font-medium text-white text-sm">{getUserDisplayName()}</p>
               <p className="text-xs text-gray-400">@{getUserUsername()}</p>
             </div>
-          </div>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
