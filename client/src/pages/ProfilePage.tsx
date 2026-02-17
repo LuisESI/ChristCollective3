@@ -406,9 +406,11 @@ export default function ProfilePage() {
           {/* Name / Username */}
           <div className="mt-3">
             <h2 className="text-2xl font-bold">
-              {displayUser?.firstName && displayUser?.lastName
-                ? `${displayUser.firstName} ${displayUser.lastName}`
-                : displayUser?.username}
+              {displayUser?.displayName
+                ? displayUser.displayName
+                : displayUser?.firstName && displayUser?.lastName
+                  ? `${displayUser.firstName} ${displayUser.lastName}`
+                  : displayUser?.username}
             </h2>
             <p className="text-gray-400 text-sm">@{displayUser?.username}</p>
             {(creatorProfile as any)?.isCreator && (

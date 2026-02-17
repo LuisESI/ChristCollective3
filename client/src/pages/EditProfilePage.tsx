@@ -194,6 +194,7 @@ const businessProfileSchema = z.object({
 });
 
 const basicProfileSchema = z.object({
+  displayName: z.string().optional(),
   username: z.string().min(1, "Username is required"),
   bio: z.string().optional(),
   profileImageUrl: z.string().optional(),
@@ -264,6 +265,7 @@ export default function EditProfilePage() {
   const basicProfileForm = useForm({
     resolver: zodResolver(basicProfileSchema),
     defaultValues: {
+      displayName: user?.displayName || (user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "") || "",
       username: user?.username || "",
       bio: user?.bio || "",
       profileImageUrl: user?.profileImageUrl || "",
@@ -316,6 +318,7 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (user) {
       basicProfileForm.reset({
+        displayName: user.displayName || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : "") || "",
         username: user.username || "",
         bio: user.bio || "",
         profileImageUrl: user.profileImageUrl || "",
@@ -847,6 +850,25 @@ export default function EditProfilePage() {
                     <form onSubmit={basicProfileForm.handleSubmit(onBasicProfileSubmit)} className="space-y-4">
                       <FormField
                         control={basicProfileForm.control}
+                        name="displayName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Name</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="Your display name"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-gray-500">This is the name shown on your profile and posts.</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={basicProfileForm.control}
                         name="username"
                         render={({ field }) => (
                           <FormItem>
@@ -858,6 +880,7 @@ export default function EditProfilePage() {
                                 placeholder="Enter your username"
                               />
                             </FormControl>
+                            <p className="text-xs text-gray-500">Your @tag that others use to mention you.</p>
                             <FormMessage />
                           </FormItem>
                         )}
