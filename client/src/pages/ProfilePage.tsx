@@ -682,7 +682,12 @@ export default function ProfilePage() {
                           ) : (
                             <div className="absolute inset-0 bg-black border border-gray-800 flex flex-col justify-between p-3">
                               <AlignLeft className="w-3.5 h-3.5 text-[#D4AF37]/60" />
-                              <p className="text-gray-200 text-[11px] line-clamp-4 leading-relaxed">{post.content}</p>
+                              <div className="flex-1 flex flex-col justify-center min-h-0">
+                                {post.title && (
+                                  <p className="text-[#D4AF37] text-[11px] font-semibold line-clamp-2 leading-snug mb-1">{post.title}</p>
+                                )}
+                                <p className="text-gray-200 text-[11px] line-clamp-3 leading-relaxed">{post.content}</p>
+                              </div>
                               <div className="flex items-center gap-2 text-[10px] text-gray-500">
                                 <div className="flex items-center gap-0.5">
                                   <Heart className="w-2.5 h-2.5" />
