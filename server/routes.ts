@@ -622,6 +622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             user: postUser ? {
               id: postUser.id,
               username: postUser.username,
+              displayName: postUser.displayName,
               firstName: postUser.firstName,
               lastName: postUser.lastName,
               profileImageUrl: postUser.profileImageUrl,
@@ -2991,6 +2992,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
           user.username && 
           user.username !== 'null' &&
           (user.username.toLowerCase().includes(query) ||
+           (user.displayName && user.displayName.toLowerCase().includes(query)) ||
            (user.firstName && user.firstName.toLowerCase().includes(query)) ||
            (user.lastName && user.lastName.toLowerCase().includes(query)))
         )
@@ -2998,6 +3000,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         .map(user => ({
           id: user.id,
           username: user.username,
+          displayName: user.displayName,
           firstName: user.firstName,
           lastName: user.lastName,
           profileImageUrl: user.profileImageUrl,
