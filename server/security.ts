@@ -220,6 +220,7 @@ export const shopOrderSchema = z.object({
 // Profile update
 export const profileUpdateSchema = z.object({
   username: safeString(50).optional(),
+  displayName: safeString(100).optional(),
   firstName: safeString(100).optional(),
   lastName: safeString(100).optional(),
   email: safeEmail.optional(),

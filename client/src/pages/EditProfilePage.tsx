@@ -504,25 +504,25 @@ export default function EditProfilePage() {
       }
       
       console.log("Sending profile update request...");
-      // Changed endpoint from /api/user to /api/user/profile to match the correct route with validation
+      const updatePayload: Record<string, any> = {};
+      if (data.displayName !== undefined) updatePayload.displayName = data.displayName;
+      if (data.username !== undefined) updatePayload.username = data.username;
+      if (data.bio !== undefined) updatePayload.bio = data.bio;
+      if (profileImageUrl !== undefined) updatePayload.profileImageUrl = profileImageUrl;
+      if (data.firstName !== undefined) updatePayload.firstName = data.firstName;
+      if (data.lastName !== undefined) updatePayload.lastName = data.lastName;
+      if (data.location !== undefined) updatePayload.location = data.location;
+      if (data.phone !== undefined) updatePayload.phone = data.phone;
+      if (data.showEmail !== undefined) updatePayload.showEmail = !!data.showEmail;
+      if (data.showPhone !== undefined) updatePayload.showPhone = !!data.showPhone;
+      if (data.showLocation !== undefined) updatePayload.showLocation = !!data.showLocation;
+
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          displayName: data.displayName || "",
-          username: data.username || "",
-          bio: data.bio || "",
-          location: data.location || "",
-          phone: data.phone || "",
-          profileImageUrl: profileImageUrl || "",
-          showEmail: !!data.showEmail,
-          showPhone: !!data.showPhone,
-          showLocation: !!data.showLocation
-        }),
+        body: JSON.stringify(updatePayload),
       });
       
       if (!response.ok) {
