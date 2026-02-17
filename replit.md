@@ -36,7 +36,7 @@ The platform detects the environment (iOS/Android app vs. web browser) for tailo
 -   **Language**: TypeScript
 -   **Authentication**: Passport.js (local strategy, session-based)
 -   **Session Storage**: Express sessions with PostgreSQL store, enhanced for Capacitor WebView by returning `sessionId` in login/register responses and using a custom `X-Session-ID` header for mobile. Session configuration includes `saveUninitialized: false`, `resave: false`, `rolling: true`, `maxAge: 1 year`, `httpOnly: true`, and `secure: production only`.
--   **File Uploads**: Multer, with files served from `public/uploads` via Express static middleware.
+-   **File Uploads**: Multer (memory storage) → Replit Object Storage (Google Cloud Storage). Files stored persistently in cloud bucket, served via `/objects/*` routes. Old `/uploads/*` paths served from local disk for backward compatibility. Helper `uploadBufferToObjectStorage()` in `server/routes.ts` handles the upload pipeline.
 -   **Password Reset**: Secure, email-based token verification using 32-byte cryptographically secure tokens, SHA256 hashing for storage, 1-hour expiry, and one-time use.
 
 **Data Storage:**

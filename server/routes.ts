@@ -36,29 +36,42 @@ import {
   groupChatMessageSchema, directChatMessageSchema, directChatCreateSchema,
   businessProfileCreateSchema, manualDonationSchema
 } from "./security";
+import { ObjectStorageService, objectStorageClient } from "./replit_integrations/object_storage";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+
+async function uploadBufferToObjectStorage(
+  buffer: Buffer,
+  contentType: string,
+  originalName: string
+): Promise<string> {
+  const objService = new ObjectStorageService();
+  const privateDir = objService.getPrivateObjectDir();
+  const objectId = uuidv4();
+  const ext = path.extname(originalName);
+  const fullPath = `${privateDir}/uploads/${objectId}${ext}`;
+
+  const pathParts = fullPath.startsWith('/') ? fullPath.slice(1).split('/') : fullPath.split('/');
+  const bucketName = pathParts[0];
+  const objectName = pathParts.slice(1).join('/');
+
+  const bucket = objectStorageClient.bucket(bucketName);
+  const file = bucket.file(objectName);
+  await file.save(buffer, { contentType, resumable: false });
+
+  return `/objects/uploads/${objectId}${ext}`;
+}
 
 let stripe: Stripe | undefined;
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up uploads directory if it doesn't exist
+  // Set up uploads directory for backward compatibility with old local uploads
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  // Configure multer for file uploads
-  const multerStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-      const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
-      cb(null, uniqueName);
-    }
-  });
-
+  // Configure multer with memory storage for Object Storage uploads
   const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    // Accept image and video files
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
@@ -67,15 +80,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   const upload = multer({ 
-    storage: multerStorage,
+    storage: multer.memoryStorage(),
     fileFilter,
     limits: {
-      fileSize: 50 * 1024 * 1024, // 50MB file size limit for videos
+      fileSize: 50 * 1024 * 1024,
     } 
   });
 
-  // Serve uploaded files statically
+  // Serve old local uploads for backward compatibility
   app.use('/uploads', express.static(uploadDir));
+
+  // Register Object Storage routes to serve /objects/* files
+  registerObjectStorageRoutes(app);
 
   // Serve favicon files
   app.get('/favicon.png', (req, res) => {
@@ -149,8 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      // Return the URL path for the uploaded file
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const imageUrl = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       res.json({ url: imageUrl });
     } catch (error) {
       console.error("Error uploading profile image:", error);
@@ -164,10 +179,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
       if (!req.file.mimetype.startsWith('image/')) {
-        fs.unlinkSync(req.file.path);
         return res.status(400).json({ message: "Only image files are allowed for banners" });
       }
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const imageUrl = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       await storage.updateUser(req.user.id, { bannerImageUrl: imageUrl });
       res.json({ url: imageUrl });
     } catch (error) {
@@ -1032,16 +1046,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      // Determine which file was uploaded (image, video, or file)
       const file = files.image ? files.image[0] : files.video ? files.video[0] : files.file[0];
 
-      // Create a public URL for the uploaded file
-      // Use relative path for flexibility across environments
-      const fileUrl = `/uploads/${file.filename}`;
+      const fileUrl = await uploadBufferToObjectStorage(file.buffer, file.mimetype, file.originalname);
 
       res.status(200).json({ 
         url: fileUrl,
-        filename: file.filename,
+        filename: path.basename(fileUrl),
         fileType: files.image ? 'image' : files.video ? 'video' : 'file',
         success: true 
       });
@@ -1970,14 +1981,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.id;
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const imageUrl = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
 
-      console.log(`Updating user ${userId} profile image to: ${imageUrl}`);
-
-      // Update user's profile image
       const updatedUser = await storage.updateUser(userId, { profileImageUrl: imageUrl });
-
-      console.log('Updated user:', JSON.stringify(updatedUser, null, 2));
 
       res.json({ imageUrl, profileImageUrl: updatedUser.profileImageUrl });
     } catch (error) {
@@ -1993,15 +1999,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.id;
-      const logoUrl = `/uploads/${req.file.filename}`;
+      const logoUrl = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
 
-      // Get user's business profile
       const profile = await storage.getUserBusinessProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: 'Business profile not found' });
       }
 
-      // Update business profile logo
       await storage.updateBusinessProfile(profile.id, { logo: logoUrl });
 
       res.json({ logoUrl });
@@ -3679,7 +3683,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       if (!chat) return res.status(404).json({ message: "Chat not found" });
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       if (!req.file.mimetype.startsWith('image/')) return res.status(400).json({ message: "Only image files are allowed" });
-      const bannerImage = `/uploads/${req.file.filename}`;
+      const bannerImage = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       const updated = await storage.updateGroupChatImages(chatId, { bannerImage });
       res.json(updated);
     } catch (error) {
@@ -3696,7 +3700,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       if (!chat) return res.status(404).json({ message: "Chat not found" });
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       if (!req.file.mimetype.startsWith('image/')) return res.status(400).json({ message: "Only image files are allowed" });
-      const profileImage = `/uploads/${req.file.filename}`;
+      const profileImage = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       const updated = await storage.updateGroupChatImages(chatId, { profileImage });
       res.json(updated);
     } catch (error) {
@@ -3713,7 +3717,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       if (!req.user.isAdmin && queue.creatorId !== req.user.id) return res.status(403).json({ message: "Not authorized" });
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       if (!req.file.mimetype.startsWith('image/')) return res.status(400).json({ message: "Only image files are allowed" });
-      const bannerImage = `/uploads/${req.file.filename}`;
+      const bannerImage = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       const updated = await storage.updateGroupChatQueueImages(queueId, { bannerImage });
       res.json(updated);
     } catch (error) {
@@ -3730,7 +3734,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       if (!req.user.isAdmin && queue.creatorId !== req.user.id) return res.status(403).json({ message: "Not authorized" });
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       if (!req.file.mimetype.startsWith('image/')) return res.status(400).json({ message: "Only image files are allowed" });
-      const profileImage = `/uploads/${req.file.filename}`;
+      const profileImage = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       const updated = await storage.updateGroupChatQueueImages(queueId, { profileImage });
       res.json(updated);
     } catch (error) {
@@ -4375,7 +4379,7 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const imageUrl = await uploadBufferToObjectStorage(req.file.buffer, req.file.mimetype, req.file.originalname);
       res.json({ imageUrl });
     } catch (error) {
       console.error("Error uploading product image:", error);

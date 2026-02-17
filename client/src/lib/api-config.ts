@@ -39,17 +39,14 @@ export function getImageUrl(imageUrl: string | null | undefined): string {
   if (isNativeApp()) {
     const baseUrl = getApiBaseUrl();
     
-    // If it's an absolute URL with /uploads/, extract just the path
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       try {
         const url = new URL(imageUrl);
-        // Extract the path (e.g., /uploads/filename.png)
         const path = url.pathname;
-        if (path.startsWith('/uploads/')) {
+        if (path.startsWith('/uploads/') || path.startsWith('/objects/')) {
           return `${baseUrl}${path}`;
         }
       } catch (e) {
-        // If URL parsing fails, return as-is
       }
       return imageUrl;
     }
@@ -59,17 +56,14 @@ export function getImageUrl(imageUrl: string | null | undefined): string {
     return `${baseUrl}${normalizedPath}`;
   }
   
-  // For web: if it's an absolute URL with /uploads/, extract path and use current origin
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     try {
       const url = new URL(imageUrl);
       const path = url.pathname;
-      // If it's an uploads path, use current origin to ensure it works
-      if (path.startsWith('/uploads/')) {
+      if (path.startsWith('/uploads/') || path.startsWith('/objects/')) {
         return `${window.location.origin}${path}`;
       }
     } catch (e) {
-      // If URL parsing fails, return as-is
     }
     return imageUrl;
   }
