@@ -821,6 +821,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if current user liked a post
+  app.get('/api/platform-posts/:id/liked', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      if (isNaN(postId)) {
+        return res.status(400).json({ liked: false });
+      }
+      const existingLike = await storage.getUserPostInteraction(postId, userId, 'like');
+      res.json({ liked: !!existingLike });
+    } catch (error) {
+      res.json({ liked: false });
+    }
+  });
+
   // Save/unsave a post (bookmark toggle)
   app.post('/api/platform-posts/:id/save', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {

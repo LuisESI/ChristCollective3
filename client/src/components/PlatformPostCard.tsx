@@ -67,6 +67,24 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
   const [isSaved, setIsSaved] = useState(false);
+
+  const { data: likedData } = useQuery({
+    queryKey: ["/api/platform-posts", post.id, "liked"],
+    queryFn: async () => {
+      const response = await fetch(buildApiUrl(`/api/platform-posts/${post.id}/liked`), {
+        credentials: 'include',
+      });
+      if (!response.ok) return { liked: false };
+      return response.json();
+    },
+    enabled: !!currentUserId,
+  });
+
+  useEffect(() => {
+    if (likedData) {
+      setIsLiked(likedData.liked);
+    }
+  }, [likedData]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     title: post.title || "",
@@ -94,9 +112,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/platform-posts/${post.id}/save`, {
+      const res = await apiRequest(`/api/platform-posts/${post.id}/save`, {
         method: "POST",
       });
+      return await res.json();
     },
     onSuccess: (data: any) => {
       setIsSaved(data.saved);
@@ -162,13 +181,15 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   const likeMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/platform-posts/${post.id}/like`, {
+      const res = await apiRequest(`/api/platform-posts/${post.id}/like`, {
         method: "POST",
       });
+      return await res.json();
     },
     onSuccess: (data: any) => {
       setIsLiked(data.liked);
       setLikesCount(data.likesCount);
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts", post.id, "liked"] });
     },
     onError: (error: any) => {
       toast({
