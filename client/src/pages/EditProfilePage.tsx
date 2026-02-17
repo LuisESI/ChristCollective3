@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 // Post Management Component
 function PostManagementSection({ creatorProfile, queryClient, toast }: any) {
@@ -652,16 +653,12 @@ export default function EditProfilePage() {
               <Avatar className="w-16 h-16 ring-2 ring-gray-700">
                 <AvatarImage src={user.profileImageUrl || ''} alt={user.firstName || user.username || ''} />
                 <AvatarFallback className="bg-gray-800 text-white text-lg font-bold">
-                  {(user.firstName?.[0] || user.username?.[0] || 'U').toUpperCase()}
+                  {getUserInitials(user)}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h2 className="text-xl font-semibold">
-                  {user.displayName
-                    ? user.displayName
-                    : user.firstName && user.lastName 
-                      ? `${user.firstName} ${user.lastName}`
-                      : user.username}
+                  {getUserDisplayName(user)}
                 </h2>
                 <p className="text-gray-400 text-sm">@{user.username}</p>
                 <div className="flex gap-2 mt-1">

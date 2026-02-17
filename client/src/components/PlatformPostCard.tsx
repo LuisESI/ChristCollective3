@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -417,31 +418,15 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   };
 
   const getUserInitials = () => {
-    if (postAuthor?.displayName) {
-      return postAuthor.displayName.split(' ').map((w: string) => w.charAt(0)).join('').slice(0, 2).toUpperCase();
-    }
-    if (postAuthor?.firstName && postAuthor?.lastName) {
-      return `${postAuthor.firstName.charAt(0)}${postAuthor.lastName.charAt(0)}`.toUpperCase();
-    }
-    if (postAuthor?.username) {
-      return postAuthor.username.charAt(0).toUpperCase();
-    }
-    if (post.authorType) {
-      return post.authorType.charAt(0).toUpperCase();
-    }
+    const initials = getInitials(postAuthor);
+    if (initials !== "U") return initials;
+    if (post.authorType) return post.authorType.charAt(0).toUpperCase();
     return "U";
   };
 
   const getUserDisplayName = () => {
-    if (postAuthor?.displayName) {
-      return postAuthor.displayName;
-    }
-    if (postAuthor?.firstName && postAuthor?.lastName) {
-      return `${postAuthor.firstName} ${postAuthor.lastName}`;
-    }
-    if (postAuthor?.username) {
-      return postAuthor.username;
-    }
+    const name = getDisplayName(postAuthor);
+    if (name !== "User") return name;
     return getAuthorDisplayName();
   };
 

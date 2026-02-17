@@ -1,4 +1,5 @@
 import { useParams, Link, useLocation } from "wouter";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
@@ -412,16 +413,12 @@ export default function CampaignDetailsPage() {
                       alt={campaign.user?.firstName || "Campaign Creator"} 
                     />
                     <AvatarFallback>
-                      {campaign.user?.firstName?.[0] || "C"}
+                      {getUserInitials(campaign.user)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="font-medium">
-                      {campaign.user?.displayName
-                        ? campaign.user.displayName
-                        : campaign.user?.firstName 
-                          ? `${campaign.user.firstName} ${campaign.user.lastName || ''}`
-                          : "Campaign Creator"}
+                      {getUserDisplayName(campaign.user)}
                     </h3>
                     <p className="text-sm text-gray-800 dark:text-gray-300">
                       {campaign.user?.location || "Christ Collective Member"}
@@ -463,18 +460,14 @@ export default function CampaignDetailsPage() {
                         <AvatarFallback>
                           {donation.isAnonymous 
                             ? "A" 
-                            : (donation.user?.firstName?.[0] || "D")}
+                            : getUserInitials(donation.user)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <h3 className="font-medium">
                           {donation.isAnonymous
                             ? "Anonymous"
-                            : (donation.user?.displayName
-                              ? donation.user.displayName
-                              : donation.user?.firstName
-                                ? `${donation.user.firstName} ${donation.user.lastName || ''}`
-                                : "Generous Donor")}
+                            : getUserDisplayName(donation.user)}
                         </h3>
                       </div>
                       <div className="font-medium">{formatCurrency(donation.amount)}</div>

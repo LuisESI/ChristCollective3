@@ -9,6 +9,7 @@ import { Plus, Users, Building2, Church, UserPlus, Heart, ChevronLeft, ChevronRi
 import React, { useRef, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 // Add CSS for hiding scrollbar
 const scrollbarHideStyle = `
@@ -156,11 +157,7 @@ export function FollowSuggestions() {
         .map((user: any) => ({
           ...user,
           type: 'user',
-          displayName: user.displayName
-            ? user.displayName
-            : user.firstName && user.lastName 
-              ? `${user.firstName} ${user.lastName}` 
-              : user.username || user.email?.split('@')[0] || 'User',
+          displayName: getUserDisplayName(user),
           description: 'Community member',
           avatar: user.profileImageUrl,
           userId: user.id,

@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, Briefcase, MapPin, Mail, ExternalLink, Eye, Globe } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { getUserDisplayName } from "@/lib/user-display";
 import { Helmet } from "react-helmet";
 
 type BusinessProfile = {
@@ -19,8 +20,10 @@ type BusinessProfile = {
   location: string;
   networkingGoals?: string;
   user: {
+    displayName?: string;
     firstName?: string;
     lastName?: string;
+    username?: string;
     profileImageUrl?: string;
   };
 };
@@ -251,10 +254,10 @@ export default function BusinessNetworkPage() {
                             <span className="truncate">{profile.location}</span>
                           </div>
                         )}
-                        {(profile.user?.displayName || (profile.user?.firstName && profile.user?.lastName)) && (
+                        {profile.user && (
                           <div className="flex items-center text-xs text-gray-400">
                             <Users className="h-3 w-3 mr-2 text-primary" />
-                            <span className="truncate">{profile.user.displayName || `${profile.user.firstName} ${profile.user.lastName}`}</span>
+                            <span className="truncate">{getUserDisplayName(profile.user)}</span>
                           </div>
                         )}
                       </div>

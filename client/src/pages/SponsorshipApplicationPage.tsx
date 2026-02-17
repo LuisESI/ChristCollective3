@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { getUserDisplayName } from "@/lib/user-display";
 import {
   Form,
   FormControl,
@@ -52,11 +53,7 @@ function SponsorshipApplicationPage() {
   const form = useForm<ApplicationValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
-      name: user?.displayName
-        ? user.displayName
-        : user?.firstName && user?.lastName 
-          ? `${user.firstName} ${user.lastName}` 
-          : "",
+      name: user ? getUserDisplayName(user) : "",
       email: user?.email || "",
       platforms: [{ platform: "", profileUrl: "", subscriberCount: undefined }],
       content: "",

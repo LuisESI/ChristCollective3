@@ -16,6 +16,7 @@ import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 export default function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -614,11 +615,11 @@ export default function AdminDashboard() {
                                 <Avatar className="h-8 w-8">
                                   <AvatarImage src={user.profileImageUrl || undefined} />
                                   <AvatarFallback className="bg-gray-700 text-gray-300">
-                                    {(user.displayName || `${user.firstName || ''} ${user.lastName || ''}`).trim().split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'U'}
+                                    {getUserInitials(user)}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <p className="font-medium">{user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username}</p>
+                                  <p className="font-medium">{getUserDisplayName(user)}</p>
                                   <p className="text-sm text-gray-500">@{user.username}</p>
                                 </div>
                               </div>
@@ -1119,12 +1120,12 @@ export default function AdminDashboard() {
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={selectedUser.profileImageUrl || undefined} />
                       <AvatarFallback className="bg-gray-700 text-gray-300 text-lg">
-                        {(selectedUser.displayName || `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`).trim().split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'U'}
+                        {getUserInitials(selectedUser)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <DialogTitle className="text-2xl font-bold text-white">
-                        {selectedUser.displayName || `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || selectedUser.username}
+                        {getUserDisplayName(selectedUser)}
                       </DialogTitle>
                       <DialogDescription className="text-gray-400">
                         @{selectedUser.username} • {selectedUser.isAdmin ? 'Administrator' : 'User'}

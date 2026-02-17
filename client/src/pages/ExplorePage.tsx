@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl } from "@/lib/api-config";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
   return (
@@ -19,16 +20,12 @@ function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: strin
         <Avatar className="w-9 h-9">
           <AvatarImage src={getImageUrl(post.user?.profileImageUrl)} />
           <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
-            {post.user?.firstName?.[0] || post.user?.username?.[0] || 'U'}
+            {getUserInitials(post.user)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">
-            {post.user?.displayName
-              ? post.user.displayName
-              : post.user?.firstName && post.user?.lastName 
-                ? `${post.user.firstName} ${post.user.lastName}`
-                : post.user?.username || 'User'}
+            {getUserDisplayName(post.user)}
           </p>
           <p className="text-gray-500 text-xs">@{post.user?.username || 'user'}</p>
         </div>

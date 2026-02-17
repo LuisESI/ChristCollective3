@@ -4,10 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "wouter";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 interface MentionUser {
   id: string;
   username: string;
+  displayName: string | null;
   firstName: string | null;
   lastName: string | null;
   profileImageUrl: string | null;
@@ -128,11 +130,6 @@ export function MentionTextarea({ value, onChange, placeholder, rows = 4, classN
           className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-gray-900 border border-gray-700 rounded-lg shadow-xl"
         >
           {suggestions.map((user, index) => {
-            const name = user.displayName
-              ? user.displayName
-              : user.firstName && user.lastName
-                ? `${user.firstName} ${user.lastName}`
-                : user.username;
             return (
               <button
                 key={user.id}
@@ -147,11 +144,11 @@ export function MentionTextarea({ value, onChange, placeholder, rows = 4, classN
                 <Avatar className="w-7 h-7">
                   <AvatarImage src={getImageUrl(user.profileImageUrl)} />
                   <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
-                    {(user.username || 'U').charAt(0).toUpperCase()}
+                    {getUserInitials(user)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{name}</p>
+                  <p className="text-sm font-medium truncate">{getUserDisplayName(user)}</p>
                   <p className="text-xs text-gray-400">@{user.username}</p>
                 </div>
               </button>

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 import { UserPlus, UserMinus, Users, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 
@@ -108,11 +109,7 @@ export function FollowersModal({ open, onOpenChange, userId, initialTab, current
   });
 
   const renderUserRow = (user: any, showFollowAction: boolean = true) => {
-    const name = user.displayName
-      ? user.displayName
-      : user.firstName && user.lastName
-        ? `${user.firstName} ${user.lastName}`
-        : user.username || 'User';
+    const name = getUserDisplayName(user);
     const isFollowingUser = followingIds.has(user.id);
     const isCurrentUser = user.id === currentUserId;
 
@@ -122,7 +119,7 @@ export function FollowersModal({ open, onOpenChange, userId, initialTab, current
           <Avatar className="w-11 h-11 cursor-pointer">
             <AvatarImage src={getImageUrl(user.profileImageUrl)} />
             <AvatarFallback className="bg-[#D4AF37] text-black font-semibold">
-              {name.charAt(0).toUpperCase()}
+              {getUserInitials(user)}
             </AvatarFallback>
           </Avatar>
         </Link>

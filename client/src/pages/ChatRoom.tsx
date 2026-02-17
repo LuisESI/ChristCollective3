@@ -1,6 +1,7 @@
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
+import { getUserDisplayName as sharedGetUserDisplayName, getUserInitials } from "@/lib/user-display";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -139,10 +140,7 @@ export default function ChatRoom() {
 
   const getUserDisplayName = (user?: ChatMessage['user']) => {
     if (!user) return "Unknown User";
-    if (user.displayName) return user.displayName;
-    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
-    if (user.firstName) return user.firstName;
-    return user.username || "Unknown User";
+    return sharedGetUserDisplayName(user);
   };
 
   const getIntentionIcon = () => {
@@ -159,8 +157,8 @@ export default function ChatRoom() {
   // Show actual chat members only - with null check
   const chatMembers = (members || []).map((member) => ({
     id: member.id,
-    username: member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "User"),
-    initials: (member.displayName || (member.firstName && member.lastName ? `${member.firstName} ${member.lastName}` : member.firstName || member.username || "U")).slice(0, 2).toUpperCase(),
+    username: sharedGetUserDisplayName(member),
+    initials: getUserInitials(member),
     color: member.id === currentUser?.id ? "bg-[#D4AF37]" : "bg-gray-700",
     profileImage: member.profileImageUrl
   }));
