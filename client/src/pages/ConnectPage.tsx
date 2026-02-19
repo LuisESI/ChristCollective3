@@ -247,8 +247,9 @@ export default function ConnectPage() {
   const checkScrollPosition = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      // Use a small buffer to handle zoom/rounding issues
+      setCanScrollLeft(scrollLeft > 2);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
     }
   };
 
@@ -711,9 +712,9 @@ export default function ConnectPage() {
                       variant="ghost"
                       size="sm"
                       onClick={scrollLeft}
-                      className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                      className="absolute -left-2 md:-left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/90 border border-[#D4AF37]/30 hover:bg-gray-800 text-[#D4AF37] p-0 shadow-lg shadow-black/50"
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <ChevronLeft className="w-5 h-5" />
                     </Button>
                   )}
                   {canScrollRight && (
@@ -721,9 +722,9 @@ export default function ConnectPage() {
                       variant="ghost"
                       size="sm"
                       onClick={scrollRight}
-                      className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/80 border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white p-0"
+                      className="absolute -right-2 md:-right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-gray-900/90 border border-[#D4AF37]/30 hover:bg-gray-800 text-[#D4AF37] p-0 shadow-lg shadow-black/50"
                     >
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-5 h-5" />
                     </Button>
                   )}
 
