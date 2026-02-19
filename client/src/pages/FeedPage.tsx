@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { CreatePostModal } from "@/components/CreatePostModal";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
-import { Plus, Sparkles, BookOpen } from "lucide-react";
+import { Sparkles, BookOpen } from "lucide-react";
 import { useMemo } from "react";
 import { getWordOfTheDay } from "@/lib/bible-verses";
 
@@ -138,7 +137,7 @@ export default function FeedPage() {
                   />
                 );
               }
-            }) as React.ReactNode[]
+            }) as any
           )}
         </div>
 
@@ -156,17 +155,6 @@ export default function FeedPage() {
         <FollowSuggestions />
       </div>
 
-      {user && (
-        <div className="fixed bottom-20 right-4 z-40">
-          <CreatePostModal 
-            trigger={
-              <button className="w-14 h-14 rounded-full bg-[#D4AF37] hover:bg-[#B8941F] text-black shadow-lg shadow-[#D4AF37]/30 flex items-center justify-center transition-all hover:scale-105" data-testid="button-create-post">
-                <Plus className="w-6 h-6" />
-              </button>
-            }
-          />
-        </div>
-      )}
     </div>
   );
 }
