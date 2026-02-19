@@ -82,6 +82,9 @@ import {
   webhookEvents,
   type WebhookEvent,
   type InsertWebhookEvent,
+  moderationLogs,
+  type ModerationLog,
+  type InsertModerationLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -275,6 +278,13 @@ export interface IStorage {
   unsavePost(userId: string, postId: number): Promise<void>;
   isPostSaved(userId: string, postId: number): Promise<boolean>;
   getUserSavedPosts(userId: string): Promise<PlatformPost[]>;
+
+  // Moderation operations
+  createModerationLog(logData: InsertModerationLog): Promise<ModerationLog>;
+  getModerationLog(id: number): Promise<ModerationLog | undefined>;
+  listModerationLogs(options?: { decision?: string; limit?: number; offset?: number }): Promise<ModerationLog[]>;
+  updateModerationLog(id: number, data: Partial<ModerationLog>): Promise<ModerationLog>;
+  getModerationStats(): Promise<{ total: number; approved: number; flagged: number; rejected: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2197,6 +2207,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(savedPosts.userId, userId))
       .orderBy(desc(savedPosts.createdAt));
     return saved.map(s => s.post);
+  }
+  // Moderation operations
+  async createModerationLog(logData: InsertModerationLog): Promise<ModerationLog> {
+    const [log] = await db.insert(moderationLogs).values(logData).returning();
+    return log;
+  }
+
+  async getModerationLog(id: number): Promise<ModerationLog | undefined> {
+    const [log] = await db.select().from(moderationLogs).where(eq(moderationLogs.id, id));
+    return log;
+  }
+
+  async listModerationLogs(options?: { decision?: string; limit?: number; offset?: number }): Promise<ModerationLog[]> {
+    const limit = options?.limit || 50;
+    const offset = options?.offset || 0;
+
+    if (options?.decision) {
+      return db
+        .select()
+        .from(moderationLogs)
+        .where(eq(moderationLogs.decision, options.decision))
+        .orderBy(desc(moderationLogs.createdAt))
+        .limit(limit)
+        .offset(offset);
+    }
+
+    return db
+      .select()
+      .from(moderationLogs)
+      .orderBy(desc(moderationLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async updateModerationLog(id: number, data: Partial<ModerationLog>): Promise<ModerationLog> {
+    const [log] = await db
+      .update(moderationLogs)
+      .set(data)
+      .where(eq(moderationLogs.id, id))
+      .returning();
+    return log;
+  }
+
+  async getModerationStats(): Promise<{ total: number; approved: number; flagged: number; rejected: number }> {
+    const allLogs = await db.select().from(moderationLogs);
+    const total = allLogs.length;
+    const approved = allLogs.filter(l => l.decision === "approved").length;
+    const flagged = allLogs.filter(l => l.decision === "flagged").length;
+    const rejected = allLogs.filter(l => l.decision === "rejected").length;
+    return { total, approved, flagged, rejected };
   }
 }
 

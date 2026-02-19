@@ -905,3 +905,22 @@ export const insertWebhookEventSchema = createInsertSchema(webhookEvents)
 
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
+
+export const moderationLogs = pgTable("moderation_logs", {
+  id: serial("id").primaryKey(),
+  contentId: integer("content_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  contentType: varchar("content_type").notNull(),
+  flagCategories: jsonb("flag_categories"),
+  confidenceScores: jsonb("confidence_scores"),
+  decision: varchar("decision").notNull().default("approved"),
+  reviewedBy: varchar("reviewed_by"),
+  contentPreview: text("content_preview"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertModerationLogSchema = createInsertSchema(moderationLogs)
+  .omit({ id: true, createdAt: true });
+
+export type ModerationLog = typeof moderationLogs.$inferSelect;
+export type InsertModerationLog = z.infer<typeof insertModerationLogSchema>;
