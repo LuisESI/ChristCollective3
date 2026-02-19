@@ -171,9 +171,9 @@ export default function ChatRoom() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">
               <Link href="/connect">
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white p-1">
+                <button className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-[#D4AF37] hover:bg-gray-700 transition-colors">
                   <ArrowLeft className="w-5 h-5" />
-                </Button>
+                </button>
               </Link>
               <div className="p-2 bg-[#D4AF37] rounded-lg">
                 <Icon className="w-6 h-6 text-white" />
