@@ -5,20 +5,12 @@ import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
-import { Plus, Sparkles, BookOpen, Clock } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
-import { getWordOfTheDay, getTimeUntilReset } from "@/lib/bible-verses";
+import { Plus, Sparkles, BookOpen } from "lucide-react";
+import { useMemo } from "react";
+import { getWordOfTheDay } from "@/lib/bible-verses";
 
 function WordOfTheDayCard() {
   const { verse, reference } = getWordOfTheDay();
-  const [timeLeft, setTimeLeft] = useState(getTimeUntilReset());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeUntilReset());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="bg-gradient-to-br from-[#0A0A0A] to-[#1a1506] border border-[#D4AF37]/30 rounded-2xl p-5 relative overflow-hidden">
@@ -35,10 +27,6 @@ function WordOfTheDayCard() {
               <h3 className="text-[#D4AF37] font-semibold text-sm">Word of the Day</h3>
               <p className="text-gray-500 text-[10px] uppercase tracking-wider">Daily Verse</p>
             </div>
-          </div>
-          <div className="flex items-center gap-1 text-gray-500 text-[10px]">
-            <Clock className="w-3 h-3" />
-            <span>Resets in {timeLeft}</span>
           </div>
         </div>
 
