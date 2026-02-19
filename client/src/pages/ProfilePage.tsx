@@ -449,7 +449,7 @@ export default function ProfilePage() {
                   onClick={() => window.open(platform.profileUrl, '_blank')}
                   className="flex flex-col items-center gap-2 min-w-[80px] p-3 bg-gray-900 rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
                     {getPlatformIcon(platform.platform)}
                   </div>
                   <div className="text-xs text-center">
