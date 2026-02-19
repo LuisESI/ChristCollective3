@@ -5,8 +5,54 @@ import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
-import { Plus, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { Plus, Sparkles, BookOpen, Clock } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { getWordOfTheDay, getTimeUntilReset } from "@/lib/bible-verses";
+
+function WordOfTheDayCard() {
+  const { verse, reference } = getWordOfTheDay();
+  const [timeLeft, setTimeLeft] = useState(getTimeUntilReset());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeUntilReset());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-gradient-to-br from-[#0A0A0A] to-[#1a1506] border border-[#D4AF37]/30 rounded-2xl p-5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#D4AF37]/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-[#D4AF37]" />
+            </div>
+            <div>
+              <h3 className="text-[#D4AF37] font-semibold text-sm">Word of the Day</h3>
+              <p className="text-gray-500 text-[10px] uppercase tracking-wider">Daily Verse</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500 text-[10px]">
+            <Clock className="w-3 h-3" />
+            <span>Resets in {timeLeft}</span>
+          </div>
+        </div>
+
+        <blockquote className="text-gray-200 text-sm leading-relaxed italic mb-3">
+          "{verse}"
+        </blockquote>
+
+        <p className="text-[#D4AF37] text-xs font-semibold text-right">
+          — {reference}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function FeedPage() {
   const { data: posts, isLoading } = useQuery({
@@ -75,6 +121,8 @@ export default function FeedPage() {
 
       <div className="max-w-lg mx-auto px-4 py-4">
         <div className="space-y-4">
+          <WordOfTheDayCard />
+
           {allPosts.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-gray-400">

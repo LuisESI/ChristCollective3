@@ -55,7 +55,7 @@ import AdminOrdersPage from "@/pages/AdminOrdersPage";
 import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
 import ShopSuccessPage from "@/pages/ShopSuccessPage";
 
-import PrivacySettingsPage from "@/pages/PrivacySettingsPage";
+import SettingsPage from "@/pages/SettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import MobileAuthPage from "@/pages/MobileAuthPage";
 import MobileLandingPage from "@/pages/MobileLandingPage";
@@ -118,7 +118,7 @@ function Router() {
       <Route path="/admin/products" component={AdminProductsPage} />
       <Route path="/admin/orders" component={AdminOrdersPage} />
 
-      <Route path="/privacy-settings" component={PrivacySettingsPage} />
+      <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

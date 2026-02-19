@@ -246,6 +246,13 @@ export const privacySettingsSchema = z.object({
   showLocation: z.boolean().optional(),
 }).strict();
 
+// Notification settings update
+export const notificationSettingsSchema = z.object({
+  wordOfDayNotification: z.boolean().optional(),
+  pushNotificationsEnabled: z.boolean().optional(),
+  emailNotificationsEnabled: z.boolean().optional(),
+}).strict();
+
 // Campaign creation
 export const campaignCreateSchema = z.object({
   title: safeString(200),

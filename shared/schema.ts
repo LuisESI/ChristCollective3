@@ -51,6 +51,10 @@ export const users = pgTable("users", {
   showEmail: boolean("show_email").default(false),
   showPhone: boolean("show_phone").default(false),
   showLocation: boolean("show_location").default(false),
+  // Notification settings
+  wordOfDayNotification: boolean("word_of_day_notification").default(true),
+  pushNotificationsEnabled: boolean("push_notifications_enabled").default(true),
+  emailNotificationsEnabled: boolean("email_notifications_enabled").default(true),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables

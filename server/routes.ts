@@ -31,7 +31,7 @@ import {
   paymentLimiter, uploadLimiter, writeLimiter,
   validateBody,
   donationPaymentIntentSchema, shopPaymentIntentSchema, shopOrderSchema,
-  profileUpdateSchema, privacySettingsSchema, campaignCreateSchema,
+  profileUpdateSchema, privacySettingsSchema, notificationSettingsSchema, campaignCreateSchema,
   platformPostSchema, commentSchema, groupChatQueueSchema,
   groupChatMessageSchema, directChatMessageSchema, directChatCreateSchema,
   businessProfileCreateSchema, manualDonationSchema
@@ -1113,6 +1113,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating privacy settings:", error);
       res.status(500).json({ message: "Failed to update privacy settings" });
+    }
+  });
+
+  // Notification settings route
+  app.put('/api/user/notification-settings', isAuthenticated, writeLimiter, validateBody(notificationSettingsSchema), async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { wordOfDayNotification, pushNotificationsEnabled, emailNotificationsEnabled } = req.body;
+
+      const notificationData: any = {};
+      if (wordOfDayNotification !== undefined) notificationData.wordOfDayNotification = Boolean(wordOfDayNotification);
+      if (pushNotificationsEnabled !== undefined) notificationData.pushNotificationsEnabled = Boolean(pushNotificationsEnabled);
+      if (emailNotificationsEnabled !== undefined) notificationData.emailNotificationsEnabled = Boolean(emailNotificationsEnabled);
+
+      const user = await storage.updateUser(userId, notificationData);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ message: "Failed to update notification settings" });
     }
   });
 

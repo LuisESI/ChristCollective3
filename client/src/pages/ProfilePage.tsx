@@ -328,7 +328,7 @@ export default function ProfilePage() {
                     Edit Profile
                   </Button>
                   <Button
-                    onClick={() => navigate("/privacy-settings")}
+                    onClick={() => navigate("/settings")}
                     variant="outline"
                     className="border-gray-700 text-white bg-transparent hover:bg-white/10"
                   >

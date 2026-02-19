@@ -1,231 +1,41 @@
 # Christ Collective - Replit Project Documentation
 
 ## Overview
-Christ Collective is a full-stack web application designed to unite Christians globally through faith, community, and collaborative purpose. The platform facilitates donations to charitable campaigns, fosters business networking among Christian professionals, and provides sponsorship opportunities for Christian content creators. It aims to be a comprehensive solution for community building, fundraising, and professional connections within the Christian community, featuring a unified authentication system, campaign management, payment processing via Stripe, business networking, a content creator platform with social media integration, and an administrative dashboard.
+Christ Collective is a full-stack web application aimed at uniting Christians globally. It facilitates charitable donations, professional networking among Christian professionals, and sponsorship for Christian content creators. The platform integrates community building, fundraising, and professional connections, featuring a unified authentication system, campaign management, Stripe payment processing, business networking, a content creator platform with social media integration, and an administrative dashboard. The project seeks to create a comprehensive digital ecosystem for the Christian community.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 ### UI/UX Decisions
-The platform detects the environment (iOS/Android app vs. web browser) for tailored user experience. Mobile apps feature a dedicated authentication flow, hidden footer, and bottom navigation. A consistent black/gold color scheme (`#D4AF37`) is used for branding. A unified authentication system leverages an `AuthExperience` component with platform-specific layouts.
-
-**Design System (Feb 2026):**
-- Full dark theme: black backgrounds (#000), dark cards (gray-900), subtle borders (gray-800)
-- Gold accent color: #D4AF37 for primary actions, active states, highlights
-- CSS variables set in both :root and .dark to gold palette (43 74% 52%)
-- Bottom navigation: Feed, Explore, Create (gold circle), Connect, Profile
-- Feed: Single-column layout with floating gold FAB for creating posts
-- Profile: Cover photo gradient, overlapping avatar with gold ring, stats in gold, Posts/Saved tabs
-- Explore: Dark search bar, gold filter chips (active), italic gold section headers, Follow buttons
-- Connect: Communities/Messages tab toggle (gold pill active), floating gold FAB
-- Auth pages: Dark backgrounds with gold-accented forms and buttons
+The platform offers a tailored user experience for both mobile apps (iOS/Android) and web browsers, including platform-specific authentication flows and navigation patterns. A consistent black and gold (`#D4AF37`) color scheme is used throughout, emphasizing a dark theme with gold accents for primary actions and highlights. Key navigation elements include a bottom navigation bar for mobile with Feed, Explore, Create, Connect, and Profile sections. Design elements like the Profile page feature cover photo gradients, overlapping avatars with gold rings, and gold-colored statistics.
 
 ### Technical Implementations
-**Frontend:**
--   **Framework**: React 18 with TypeScript
--   **Build Tool**: Vite
--   **Styling**: Tailwind CSS with shadcn/ui and Radix UI
--   **Routing**: Wouter
--   **State Management**: TanStack Query (React Query)
--   **Forms**: React Hook Form with Zod validation
--   **Mobile Optimization**: Capacitor for platform detection and UI adjustments. `getImageUrl()` helper function for correct media loading on mobile. `buildApiUrl()` and `credentials: 'include'` for API calls on mobile profile pages.
+**Frontend:** Developed with React 18 and TypeScript, using Vite for building. Styling is handled with Tailwind CSS, shadcn/ui, and Radix UI. Wouter manages routing, TanStack Query (React Query) for state, and React Hook Form with Zod for form validation. Capacitor is used for mobile optimization, including platform detection and helper functions for image URLs and API calls.
 
-**Backend:**
--   **Runtime**: Node.js with Express.js
--   **Language**: TypeScript
--   **Authentication**: Passport.js (local strategy, session-based)
--   **Session Storage**: Express sessions with PostgreSQL store, enhanced for Capacitor WebView by returning `sessionId` in login/register responses and using a custom `X-Session-ID` header for mobile. Session configuration includes `saveUninitialized: false`, `resave: false`, `rolling: true`, `maxAge: 1 year`, `httpOnly: true`, and `secure: production only`.
--   **File Uploads**: Multer (memory storage) → Replit Object Storage (Google Cloud Storage). Files stored persistently in cloud bucket, served via `/objects/*` routes. Old `/uploads/*` paths served from local disk for backward compatibility. Helper `uploadBufferToObjectStorage()` in `server/routes.ts` handles the upload pipeline.
--   **Password Reset**: Secure, email-based token verification using 32-byte cryptographically secure tokens, SHA256 hashing for storage, 1-hour expiry, and one-time use.
+**Backend:** Built with Node.js and Express.js in TypeScript. Passport.js handles session-based authentication, with session data stored in PostgreSQL. File uploads are processed via Multer to Replit Object Storage (Google Cloud Storage). Secure, email-based password reset functionality is implemented with token verification and hashing. Security measures include robust rate limiting, Zod-based input validation, and secure handling of API keys and secrets.
 
-**Data Storage:**
--   **Database**: PostgreSQL (Neon serverless hosting)
--   **ORM**: Drizzle ORM
--   **Migrations**: Drizzle Kit
--   **Connection**: @neondatabase/serverless for connection pooling
+**Data Storage:** Utilizes PostgreSQL (Neon serverless hosting) with Drizzle ORM and Drizzle Kit for migrations. Connection pooling is managed by `@neondatabase/serverless`.
 
 ### Feature Specifications
--   **Unified Authentication System**: Centralized login/registration, session-based, admin roles, profile management, password reset. Unauthenticated pages redirect to `/auth` (web) or `/auth/mobile` (native app) with query parameter support for post-login redirect.
--   **Campaign Management**: Creation, editing, media uploads, goal tracking, admin approval, search/filtering.
--   **Payment Processing**: Stripe integration for donations and membership subscriptions.
--   **Business Networking**: Business profiles, membership tiers, industry-based filtering.
--   **Content Creator Platform**: Creator profiles, social media integration (YouTube, TikTok, Instagram verification), sponsorship applications.
--   **Platform Posts**: Users can create posts with multiple media types (image, video, text, YouTube channel links).
--   **Administrative Dashboard**: Campaign/user management, donation tracking, sponsorship review.
+-   **Unified Authentication System**: Centralized user management with admin roles and password recovery.
+-   **Campaign Management**: Tools for creating, managing, and tracking charitable campaigns with media uploads and admin approval.
+-   **Payment Processing**: Integration with Stripe for donations and subscriptions.
+-   **Business Networking**: Business profiles, membership tiers, and industry-based filtering.
+-   **Content Creator Platform**: Profiles for creators, social media integration (YouTube, TikTok, Instagram), and sponsorship opportunities.
+-   **Platform Posts**: Users can create multi-media posts (image, video, text, YouTube links).
+-   **Administrative Dashboard**: Comprehensive tools for managing users, campaigns, donations, and sponsorships.
 -   **Notification System**: Real-time notifications with read/unread status.
--   **E-commerce Shop**: Product management with image uploads, product variants (color/size combinations), Stripe integration for checkout. Admin dashboard for creating/managing products. Each variant creates a separate Stripe Price with metadata (color, size, sku). Featured products can be highlighted on the shop page.
-
-### Payment Safety Implementation (Jan 2026)
-The shop e-commerce system follows payment safety best practices:
-
-**Data Model:**
-- `shop_orders` - Order records with Stripe payment intent IDs
-- `money_event_logs` - Immutable audit trail for all payment events
-- `webhook_events` - Deduplication storage for Stripe webhook events
-
-**Safety Features:**
-1. **No Raw Card Data**: Uses Stripe Elements for payment collection; server only sees tokens/IDs
-2. **Idempotency**: Payment intent creation uses stable idempotency keys based on user + price + time window
-3. **Server-Side Verification**: Orders only created after verifying payment_intent.status === 'succeeded'
-4. **Webhook Deduplication**: Each Stripe event ID is stored and checked to prevent duplicate processing
-5. **Signature Verification**: Webhook handler verifies Stripe signature using STRIPE_SHOP_WEBHOOK_SECRET
-6. **Audit Trail**: All payment events logged to money_event_logs (immutable, append-only)
-7. **Failure UX**: User-friendly error messages with support reference IDs
-
-**Middleware Configuration:**
-- Webhook endpoints (`/api/shop/webhook`, `/api/donations/webhook`) skip JSON body parsing in `server/index.ts` to preserve raw body for signature verification
-
-**Required Secrets:**
-- `STRIPE_SECRET_KEY` - Stripe API secret key
-- `STRIPE_SHOP_WEBHOOK_SECRET` - Shop webhook endpoint signing secret (configure in Stripe Dashboard)
+-   **E-commerce Shop**: Product management, image uploads, variants, and Stripe integration for secure checkout. Includes featured product functionality. The e-commerce system implements robust payment safety practices including no raw card data storage, idempotency, server-side verification, webhook deduplication, signature verification, and a comprehensive audit trail.
+-   **Word of the Day Feature**: Displays a daily Bible verse on the FeedPage, selected deterministically from a curated list.
+-   **Settings Page Overhaul**: A comprehensive settings interface with sections for Account, Notifications, Privacy, App preferences, and Support.
 
 ### System Design Choices
--   **Deployment**: Development uses local environment with HMR, Vite dev server. Production uses optimized static assets, Express server, automatic database migrations, and environment-specific configuration.
--   **Database Management**: Drizzle migrations, automated backups, connection pooling, query optimization.
+Deployment strategies include a local development environment with HMR and a Vite dev server, and a production environment with optimized static assets, an Express server, and automated database migrations. Database management emphasizes Drizzle migrations, automated backups, connection pooling, and query optimization.
 
 ## External Dependencies
 -   **Payment Processing**: Stripe, Stripe Elements
--   **Social Media APIs**: YouTube Data API, Apify (TikTok/Instagram scraping), custom scrapers
--   **Email Services**: Resend (production & development), Ethereal (development fallback)
+-   **Social Media APIs**: YouTube Data API, Apify (for TikTok/Instagram data)
+-   **Email Services**: Resend (production), Ethereal (development)
 -   **UI and Styling**: Tailwind CSS, shadcn/ui, Radix UI, Lucide React (icons)
 -   **Development Tools**: TypeScript, ESLint, Prettier, Vite
-
-## Recent Fixes (Oct 31, 2025)
-
-### Profile Pages API Fix
-**Problem:** Business, ministry, and creator profiles showed "not found" errors when clicked from explore page in mobile apps.
-
-**Root Cause:** Profile pages used relative URLs (`/api/ministries/${id}`) which don't work on `capacitor://` protocol.
-
-**Solution:** Updated all profile page API calls to use `buildApiUrl()` and `credentials: 'include'`:
-- MinistryProfileViewPage
-- CreatorProfilePage  
-- BusinessProfilePage
-
-**Benefits:**
-- ✅ Profiles load correctly in both web and mobile apps
-- ✅ Explore page links work properly
-- ✅ Follow/unfollow functionality works on mobile
-
-### Connect Page Black Screen Fix (FINAL FIX - Nov 5, 2025)
-**Problem:** After logging in through the Connect section in mobile app, users saw a black screen instead of the Connect page content.
-
-**Root Cause:** ConnectPage was firing API queries BEFORE authentication completed:
-1. User clicks "Connect" before logging in
-2. ConnectPage loads and immediately fires queries: `/api/group-chat-queues`, `/api/group-chats/active`, `/api/direct-chats`
-3. All queries return 401 errors (unauthenticated)
-4. React Query caches these errors
-5. User logs in successfully
-6. ConnectPage loads again, but cached queries are still in error state and never retry
-7. Page stays in loading/error state → black screen
-
-**Solution:** Gate all queries behind authentication check using `enabled: !!user`:
-```typescript
-// In ConnectPage.tsx - All queries now wait for authentication
-const { data: queues = [] } = useQuery<GroupChatQueue[]>({
-  queryKey: ["/api/group-chat-queues"],
-  enabled: !!user, // Only fetch when authenticated
-  refetchInterval: 5000,
-});
-
-const { data: activeChats = [] } = useQuery<GroupChat[]>({
-  queryKey: ["/api/group-chats/active"],
-  enabled: !!user, // Only fetch when authenticated
-  refetchInterval: 10000,
-});
-
-const { data: directChats = [] } = useQuery<any[]>({
-  queryKey: ["/api/direct-chats"],
-  enabled: !!user, // Only fetch when authenticated
-  refetchInterval: 10000,
-});
-```
-
-**How It Works:**
-1. User clicks "Connect" → redirected to login
-2. User logs in successfully → React Query updates user data
-3. MobileAuthPage navigates to `/connect`
-4. ConnectPage checks `user` exists
-5. Queries are enabled and fire for the first time (no 401 errors to cache)
-6. Page renders with fresh data
-
-**Benefits:**
-- ✅ No more pre-authentication 401 errors
-- ✅ No cached error states in React Query
-- ✅ Queries only fire when user is authenticated
-- ✅ Consistent with other protected pages (e.g., ProfilePage, ExplorePage)
-- ✅ Simple, clean solution following React Query best practices
-
-### Logout 404 Error Fix
-**Problem:** Users couldn't sign out - clicking "Log Out" led to a 404 error in mobile apps.
-
-**Root Cause:** Header component used `<a href="/api/logout">` which tries to navigate to `capacitor://localhost/api/logout` on mobile instead of the actual server.
-
-**Solution:** Updated Header component to use the `logoutMutation` from `useAuth()` instead of direct links:
-```typescript
-// Desktop dropdown
-<DropdownMenuItem onClick={() => logoutMutation.mutate()}>
-  Log Out
-</DropdownMenuItem>
-
-// Mobile menu
-<button onClick={() => logoutMutation.mutate()}>
-  Log Out
-</button>
-```
-
-**Benefits:**
-- ✅ Logout works correctly in both web and mobile apps
-- ✅ Uses proper API calls with credentials and session management
-- ✅ No more 404 errors when signing out
-
-### Security Hardening (Feb 2026)
-**Changes applied following OWASP best practices:**
-
-**Rate Limiting (`server/security.ts`):**
-- Global limiter: 200 req/15min on all /api routes (applied in server/index.ts)
-- Auth limiter: 10 req/15min on login, register, password reset endpoints
-- Payment limiter: 20 req/15min on Stripe payment intent and subscription creation
-- Upload limiter: 30 req/15min on all file upload endpoints
-- Write limiter: 60 req/15min on all POST/PUT/DELETE data mutation routes
-- User-aware key generation: authenticated users tracked by userId, guests by IPv6-safe IP
-- Graceful 429 JSON responses with Retry-After headers
-- Webhook endpoints (Stripe) are exempt from rate limiting
-
-**Input Validation & Sanitization:**
-- Zod-based validation middleware (`validateBody()`) applied to 14+ endpoints
-- Schemas with `.strict()` reject unexpected fields on sensitive endpoints
-- Length limits on all string fields, email normalization, type coercion
-- Sanitization: trim whitespace, collapse internal spaces
-- Covers: donations, shop payments, orders, profiles, campaigns, posts, comments, chats, business profiles
-
-**API Key & Secret Security:**
-- Removed hardcoded session secret fallback; requires `SESSION_SECRET` env var (fail-fast)
-- Body size limit: 1MB on JSON/URL-encoded payloads to prevent DoS
-- All API keys read from environment variables (YOUTUBE_API_KEY, TIKTOK_API_KEY, RESEND_API_KEY, Stripe keys)
-- Only Stripe publishable key exposed to client (by design)
-- Image-only MIME type validation on community image upload endpoints
-
-### Profile Pictures Not Loading Fix (Nov 5, 2025)
-**Problem:** Profile pictures/avatars were not loading on the Explore, Connect, and Feed pages in mobile apps.
-
-**Root Cause:** These pages were rendering images with relative URLs directly without converting them to absolute URLs for mobile apps. While profile pages used `getImageUrl()` helper (and worked correctly), the explore/connect pages were passing relative paths like `/uploads/image.jpg` directly to `<AvatarImage>`, which doesn't work on the `capacitor://` protocol.
-
-**Solution:** Wrapped all avatar/profile image sources with `getImageUrl()` helper on:
-- **ExplorePage.tsx**: Creator avatars, business logos, ministry logos, member profile pictures
-- **ConnectPage.tsx**: Direct chat user profile pictures
-- **Feed components**: Already using `getImageUrl()` correctly
-
-```typescript
-// Before (broken on mobile)
-<AvatarImage src={creator.profileImage} />
-
-// After (works on both web and mobile)
-<AvatarImage src={getImageUrl(creator.profileImage)} />
-```
-
-**Benefits:**
-- ✅ Profile pictures load correctly on all pages in mobile apps
-- ✅ Consistent image handling across entire application
-- ✅ Follows same pattern as other working pages (ProfilePage, etc.)
