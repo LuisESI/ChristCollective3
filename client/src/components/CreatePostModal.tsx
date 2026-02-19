@@ -59,22 +59,46 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
 
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      return await apiRequest("/api/platform-posts", {
+      const res = await apiRequest("/api/platform-posts", {
         method: "POST",
         data: postData,
       });
+      const data = await res.json();
+      return { status: res.status, data };
     },
-    onSuccess: () => {
-      toast({ title: "Post created successfully!" });
+    onSuccess: (result) => {
+      if (result.status === 202) {
+        toast({
+          title: "Post submitted for review",
+          description: "Your post will be visible once approved by a moderator.",
+        });
+      } else {
+        toast({ title: "Post created successfully!" });
+      }
       setOpen(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
-      onPostCreated?.(); // Call the callback when post is created
+      onPostCreated?.();
     },
     onError: (error: any) => {
+      const msg = error.message || "";
+      let description = "Something went wrong. Please try again.";
+      if (msg.includes("community guidelines")) {
+        description = "Your post contains content that violates our community guidelines.";
+      } else if (msg.includes("400:")) {
+        try {
+          const jsonStr = msg.substring(msg.indexOf("{"));
+          const parsed = JSON.parse(jsonStr);
+          description = parsed.message || description;
+        } catch {
+          description = msg;
+        }
+      } else {
+        description = msg;
+      }
       toast({
         title: "Failed to create post",
-        description: error.message,
+        description,
         variant: "destructive",
       });
     },

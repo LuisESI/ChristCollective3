@@ -26,6 +26,7 @@ import CreatorsPage from "@/pages/CreatorsPage";
 import CreatorProfilePage from "@/pages/CreatorProfilePage";
 import CreatorProfileManagePage from "@/pages/CreatorProfileManagePage";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminModerationPage from "@/pages/AdminModerationPage";
 import AuthPage from "@/pages/AuthPage";
 import AuthTestPage from "@/pages/AuthTestPage";
 import AboutPage from "@/pages/AboutPage";
@@ -117,6 +118,7 @@ function Router() {
       <Route path="/shop/success" component={ShopSuccessPage} />
       <Route path="/admin/products" component={AdminProductsPage} />
       <Route path="/admin/orders" component={AdminOrdersPage} />
+      <Route path="/admin/moderation" component={AdminModerationPage} />
 
       <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />

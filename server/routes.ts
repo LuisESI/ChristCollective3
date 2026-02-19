@@ -38,6 +38,7 @@ import {
 } from "./security";
 import { ObjectStorageService, objectStorageClient } from "./replit_integrations/object_storage";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { moderateContent } from "./services/moderationService";
 
 async function uploadBufferToObjectStorage(
   buffer: Buffer,
@@ -395,6 +396,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin moderation routes
+  app.get('/api/admin/moderation', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { decision, limit, offset } = req.query;
+      const logs = await storage.listModerationLogs({
+        decision: decision as string,
+        limit: parseInt(limit as string) || 50,
+        offset: parseInt(offset as string) || 0,
+      });
+
+      const logsWithUsers = await Promise.all(
+        logs.map(async (log) => {
+          const user = await storage.getUser(log.userId);
+          return {
+            ...log,
+            user: user ? {
+              id: user.id,
+              username: user.username,
+              displayName: user.displayName || user.firstName || user.username,
+              profileImageUrl: user.profileImageUrl,
+            } : null,
+          };
+        })
+      );
+
+      res.json(logsWithUsers);
+    } catch (error) {
+      console.error("Error fetching moderation logs:", error);
+      res.status(500).json({ message: "Failed to fetch moderation logs" });
+    }
+  });
+
+  app.get('/api/admin/moderation/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getModerationStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching moderation stats:", error);
+      res.status(500).json({ message: "Failed to fetch moderation stats" });
+    }
+  });
+
+  app.post('/api/admin/moderation/:id/approve', isAuthenticated, isAdmin, writeLimiter, async (req: any, res) => {
+    try {
+      const logId = parseInt(req.params.id);
+      if (isNaN(logId)) return res.status(400).json({ message: "Invalid log ID" });
+
+      const log = await storage.getModerationLog(logId);
+      if (!log) return res.status(404).json({ message: "Moderation log not found" });
+
+      await storage.updateModerationLog(logId, {
+        decision: "approved",
+        reviewedBy: req.user.id,
+      });
+
+      if (log.contentType === "platform_post" && log.contentId) {
+        await storage.updatePlatformPost(log.contentId, { isPublished: true });
+      }
+
+      res.json({ message: "Content approved successfully" });
+    } catch (error) {
+      console.error("Error approving content:", error);
+      res.status(500).json({ message: "Failed to approve content" });
+    }
+  });
+
+  app.post('/api/admin/moderation/:id/reject', isAuthenticated, isAdmin, writeLimiter, async (req: any, res) => {
+    try {
+      const logId = parseInt(req.params.id);
+      if (isNaN(logId)) return res.status(400).json({ message: "Invalid log ID" });
+
+      const log = await storage.getModerationLog(logId);
+      if (!log) return res.status(404).json({ message: "Moderation log not found" });
+
+      await storage.updateModerationLog(logId, {
+        decision: "rejected",
+        reviewedBy: req.user.id,
+      });
+
+      if (log.contentType === "platform_post" && log.contentId) {
+        await storage.updatePlatformPost(log.contentId, { isPublished: false });
+      }
+
+      res.json({ message: "Content rejected successfully" });
+    } catch (error) {
+      console.error("Error rejecting content:", error);
+      res.status(500).json({ message: "Failed to reject content" });
+    }
+  });
+
   // Content creator routes
   app.get('/api/content-creators', async (req, res) => {
     try {
@@ -590,6 +681,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      const modResult = await moderateContent({
+        text: content,
+        imageUrls: mediaUrls || [],
+      });
+
+      if (modResult.decision === "rejected") {
+        await storage.createModerationLog({
+          contentId: 0,
+          userId,
+          contentType: "platform_post",
+          flagCategories: modResult.flagCategories,
+          confidenceScores: modResult.confidenceScores,
+          decision: "rejected",
+          contentPreview: content.substring(0, 200),
+        });
+        return res.status(400).json({
+          message: "Your post contains content that violates our community guidelines and cannot be published.",
+          moderationResult: { decision: "rejected", categories: modResult.flagCategories },
+        });
+      }
+
+      const isPublished = modResult.decision === "approved";
+
       const post = await storage.createPlatformPost({
         userId,
         authorType,
@@ -599,8 +713,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mediaUrls: mediaUrls || [],
         mediaType: mediaType || 'image',
         tags: tags || [],
-        isPublished: true,
+        isPublished,
       });
+
+      await storage.createModerationLog({
+        contentId: post.id,
+        userId,
+        contentType: "platform_post",
+        flagCategories: modResult.flagCategories,
+        confidenceScores: modResult.confidenceScores,
+        decision: modResult.decision,
+        contentPreview: content.substring(0, 200),
+      });
+
+      if (modResult.decision === "flagged") {
+        return res.status(202).json({
+          ...post,
+          moderationStatus: "flagged",
+          message: "Your post has been submitted for review and will be visible once approved by a moderator.",
+        });
+      }
 
       res.status(201).json(post);
     } catch (error) {
@@ -911,6 +1043,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
 
+      const modResult = await moderateContent({ text: content.trim() });
+
+      if (modResult.decision === "rejected") {
+        await storage.createModerationLog({
+          contentId: postId,
+          userId,
+          contentType: "comment",
+          flagCategories: modResult.flagCategories,
+          confidenceScores: modResult.confidenceScores,
+          decision: "rejected",
+          contentPreview: content.trim().substring(0, 200),
+        });
+        return res.status(400).json({
+          message: "Your comment contains content that violates our community guidelines.",
+          moderationResult: { decision: "rejected", categories: modResult.flagCategories },
+        });
+      }
+
+      if (modResult.decision === "flagged") {
+        await storage.createModerationLog({
+          contentId: postId,
+          userId,
+          contentType: "comment",
+          flagCategories: modResult.flagCategories,
+          confidenceScores: modResult.confidenceScores,
+          decision: "flagged",
+          contentPreview: content.trim().substring(0, 200),
+        });
+      }
+
       const comment = await storage.createPostInteraction({
         postId,
         userId,
@@ -922,7 +1084,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         commentsCount: (post.commentsCount || 0) + 1 
       });
 
-      // Create notification for comment
       await storage.createNotificationForComment(userId, postId, post.userId, content.trim());
 
       res.status(201).json(comment);

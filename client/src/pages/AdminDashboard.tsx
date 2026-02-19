@@ -433,6 +433,12 @@ export default function AdminDashboard() {
                 Manage Orders
               </Button>
             </Link>
+            <Link href="/admin/moderation">
+              <Button className="bg-yellow-700 hover:bg-yellow-600 text-white gap-2" data-testid="link-admin-moderation">
+                <Eye className="h-4 w-4" />
+                Content Moderation
+              </Button>
+            </Link>
           </div>
         </div>
 

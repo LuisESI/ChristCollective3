@@ -214,9 +214,22 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       queryClient.invalidateQueries({ queryKey: [`/api/platform-posts/${post.id}/comments`] });
     },
     onError: (error: any) => {
+      const msg = error.message || "";
+      let description = msg;
+      if (msg.includes("community guidelines")) {
+        description = "Your comment contains content that violates our community guidelines.";
+      } else if (msg.includes("400:")) {
+        try {
+          const jsonStr = msg.substring(msg.indexOf("{"));
+          const parsed = JSON.parse(jsonStr);
+          description = parsed.message || description;
+        } catch {
+          // use original
+        }
+      }
       toast({
-        title: "Error adding comment",
-        description: error.message,
+        title: "Comment not allowed",
+        description,
         variant: "destructive",
       });
     },
