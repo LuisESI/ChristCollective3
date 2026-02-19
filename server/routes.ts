@@ -486,6 +486,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin post report routes
+  app.get('/api/admin/reports', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { status, limit, offset } = req.query;
+      const reports = await storage.listPostReports({
+        status: status as string,
+        limit: parseInt(limit as string) || 50,
+        offset: parseInt(offset as string) || 0,
+      });
+
+      const reportsWithDetails = await Promise.all(
+        reports.map(async (report) => {
+          const reporter = await storage.getUser(report.reporterId);
+          const post = await storage.getPlatformPost(report.postId);
+          const postAuthor = post ? await storage.getUser(post.userId) : null;
+          return {
+            ...report,
+            reporter: reporter ? {
+              id: reporter.id,
+              username: reporter.username,
+              displayName: reporter.displayName || reporter.firstName || reporter.username,
+              profileImageUrl: reporter.profileImageUrl,
+            } : null,
+            post: post ? {
+              id: post.id,
+              content: post.content,
+              mediaUrls: post.mediaUrls,
+              mediaType: post.mediaType,
+              isPublished: post.isPublished,
+            } : null,
+            postAuthor: postAuthor ? {
+              id: postAuthor.id,
+              username: postAuthor.username,
+              displayName: postAuthor.displayName || postAuthor.firstName || postAuthor.username,
+            } : null,
+          };
+        })
+      );
+
+      res.json(reportsWithDetails);
+    } catch (error) {
+      console.error("Error fetching post reports:", error);
+      res.status(500).json({ message: "Failed to fetch post reports" });
+    }
+  });
+
+  app.get('/api/admin/reports/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getPostReportStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching report stats:", error);
+      res.status(500).json({ message: "Failed to fetch report stats" });
+    }
+  });
+
+  app.post('/api/admin/reports/:id/restore', isAuthenticated, isAdmin, writeLimiter, async (req: any, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      if (isNaN(reportId)) return res.status(400).json({ message: "Invalid report ID" });
+
+      const report = await storage.listPostReports();
+      const found = report.find(r => r.id === reportId);
+      if (!found) return res.status(404).json({ message: "Report not found" });
+
+      await storage.updatePostReport(reportId, { status: "dismissed", reviewedBy: req.user.id });
+      await storage.updatePlatformPost(found.postId, { isPublished: true });
+
+      res.json({ message: "Post restored and report dismissed" });
+    } catch (error) {
+      console.error("Error restoring post:", error);
+      res.status(500).json({ message: "Failed to restore post" });
+    }
+  });
+
+  app.post('/api/admin/reports/:id/confirm', isAuthenticated, isAdmin, writeLimiter, async (req: any, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      if (isNaN(reportId)) return res.status(400).json({ message: "Invalid report ID" });
+
+      const report = await storage.listPostReports();
+      const found = report.find(r => r.id === reportId);
+      if (!found) return res.status(404).json({ message: "Report not found" });
+
+      await storage.updatePostReport(reportId, { status: "reviewed", reviewedBy: req.user.id });
+
+      res.json({ message: "Report confirmed, post remains hidden" });
+    } catch (error) {
+      console.error("Error confirming report:", error);
+      res.status(500).json({ message: "Failed to confirm report" });
+    }
+  });
+
   // Content creator routes
   app.get('/api/content-creators', async (req, res) => {
     try {
@@ -1019,6 +1112,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching saved posts:", error);
       res.status(500).json({ message: "Failed to fetch saved posts" });
+    }
+  });
+
+  // Report a post
+  app.post('/api/platform-posts/:id/report', isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { reason, details } = req.body;
+
+      if (isNaN(postId)) return res.status(400).json({ message: "Invalid post ID" });
+
+      const validReasons = [
+        "spam",
+        "harassment",
+        "hate_speech",
+        "violence",
+        "nudity",
+        "false_information",
+        "scam",
+        "inappropriate",
+        "other",
+      ];
+      if (!reason || !validReasons.includes(reason)) {
+        return res.status(400).json({ message: "Please select a valid report reason" });
+      }
+
+      const post = await storage.getPlatformPost(postId);
+      if (!post) return res.status(404).json({ message: "Post not found" });
+
+      if (post.userId === userId) {
+        return res.status(400).json({ message: "You cannot report your own post" });
+      }
+
+      const alreadyReported = await storage.hasUserReportedPost(userId, postId);
+      if (alreadyReported) {
+        return res.status(400).json({ message: "You have already reported this post" });
+      }
+
+      await storage.createPostReport({
+        postId,
+        reporterId: userId,
+        reason,
+        details: details || null,
+      });
+
+      await storage.updatePlatformPost(postId, { isPublished: false });
+
+      res.json({ message: "Post reported successfully. It has been removed from public view and sent for review." });
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      res.status(500).json({ message: "Failed to report post" });
     }
   });
 

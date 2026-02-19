@@ -9,10 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
 import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { useAuthGuard } from "@/lib/auth-guard";
 import { renderContentWithMentions } from "@/components/MentionTextarea";
@@ -86,6 +88,10 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       setIsLiked(likedData.liked);
     }
   }, [likedData]);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     title: post.title || "",
@@ -143,6 +149,36 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       saveMutation.mutate();
     }, "Please sign in to save posts");
   };
+
+  const reportMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest(`/api/platform-posts/${post.id}/report`, {
+        method: "POST",
+        body: JSON.stringify({ reason: reportReason, details: reportDetails }),
+        headers: { "Content-Type": "application/json" },
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting this post. Our team will review it shortly.",
+      });
+      setShowReportModal(false);
+      setReportReason("");
+      setReportDetails("");
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/explore"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Report Failed",
+        description: error.message || "Could not submit report. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch user data for the post author
   const { data: postAuthor } = useQuery({
@@ -518,6 +554,21 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                   </DropdownMenuItem>
                 </>
               )}
+              {currentUserId && post.userId !== currentUserId && (
+                <>
+                  {currentUserId && post.userId === currentUserId && <DropdownMenuSeparator className="bg-gray-700" />}
+                  <DropdownMenuItem
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      requireAuth(() => setShowReportModal(true), "Please sign in to report posts");
+                    }}
+                  >
+                    <Flag className="w-4 h-4 mr-2" />
+                    Report Post
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -871,6 +922,79 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 className="bg-[#D4AF37] text-black hover:bg-[#B8941F]"
               >
                 {editPostMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report Post Modal */}
+      <Dialog open={showReportModal} onOpenChange={(open) => {
+        setShowReportModal(open);
+        if (!open) {
+          setReportReason("");
+          setReportDetails("");
+        }
+      }}>
+        <DialogContent className="max-w-md bg-gray-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Flag className="w-5 h-5 text-red-400" />
+              Report Post
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Help us keep the community safe. Select a reason for reporting this post.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <RadioGroup value={reportReason} onValueChange={setReportReason} className="space-y-2">
+              {[
+                { value: "spam", label: "Spam" },
+                { value: "harassment", label: "Harassment or Bullying" },
+                { value: "hate_speech", label: "Hate Speech" },
+                { value: "violence", label: "Violence or Threats" },
+                { value: "nudity", label: "Nudity or Sexual Content" },
+                { value: "false_information", label: "False Information" },
+                { value: "scam", label: "Scam or Fraud" },
+                { value: "inappropriate", label: "Inappropriate Content" },
+                { value: "other", label: "Other" },
+              ].map((option) => (
+                <div key={option.value} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 transition-colors">
+                  <RadioGroupItem value={option.value} id={`report-${option.value}`} className="border-gray-600 text-[#D4AF37]" />
+                  <Label htmlFor={`report-${option.value}`} className="text-gray-300 cursor-pointer flex-1">{option.label}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-white">Additional Details (Optional)</Label>
+              <Textarea
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                placeholder="Provide any additional context..."
+                rows={3}
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                maxLength={500}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowReportModal(false)}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => reportMutation.mutate()}
+                disabled={!reportReason || reportMutation.isPending}
+                className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {reportMutation.isPending ? "Submitting..." : "Submit Report"}
               </Button>
             </div>
           </div>

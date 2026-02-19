@@ -924,3 +924,20 @@ export const insertModerationLogSchema = createInsertSchema(moderationLogs)
 
 export type ModerationLog = typeof moderationLogs.$inferSelect;
 export type InsertModerationLog = z.infer<typeof insertModerationLogSchema>;
+
+export const postReports = pgTable("post_reports", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => platformPosts.id),
+  reporterId: varchar("reporter_id").notNull().references(() => users.id),
+  reason: varchar("reason").notNull(),
+  details: text("details"),
+  status: varchar("status").notNull().default("pending"),
+  reviewedBy: varchar("reviewed_by"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPostReportSchema = createInsertSchema(postReports)
+  .omit({ id: true, createdAt: true, status: true, reviewedBy: true });
+
+export type PostReport = typeof postReports.$inferSelect;
+export type InsertPostReport = z.infer<typeof insertPostReportSchema>;

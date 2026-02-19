@@ -85,6 +85,9 @@ import {
   moderationLogs,
   type ModerationLog,
   type InsertModerationLog,
+  postReports,
+  type PostReport,
+  type InsertPostReport,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -285,6 +288,14 @@ export interface IStorage {
   listModerationLogs(options?: { decision?: string; limit?: number; offset?: number }): Promise<ModerationLog[]>;
   updateModerationLog(id: number, data: Partial<ModerationLog>): Promise<ModerationLog>;
   getModerationStats(): Promise<{ total: number; approved: number; flagged: number; rejected: number }>;
+
+  // Post report operations
+  createPostReport(reportData: InsertPostReport): Promise<PostReport>;
+  getPostReports(postId: number): Promise<PostReport[]>;
+  listPostReports(options?: { status?: string; limit?: number; offset?: number }): Promise<PostReport[]>;
+  updatePostReport(id: number, data: Partial<PostReport>): Promise<PostReport>;
+  hasUserReportedPost(userId: string, postId: number): Promise<boolean>;
+  getPostReportStats(): Promise<{ total: number; pending: number; reviewed: number; dismissed: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2257,6 +2268,54 @@ export class DatabaseStorage implements IStorage {
     const flagged = allLogs.filter(l => l.decision === "flagged").length;
     const rejected = allLogs.filter(l => l.decision === "rejected").length;
     return { total, approved, flagged, rejected };
+  }
+
+  // Post report operations
+  async createPostReport(reportData: InsertPostReport): Promise<PostReport> {
+    const [report] = await db.insert(postReports).values(reportData).returning();
+    return report;
+  }
+
+  async getPostReports(postId: number): Promise<PostReport[]> {
+    return db.select().from(postReports).where(eq(postReports.postId, postId)).orderBy(desc(postReports.createdAt));
+  }
+
+  async listPostReports(options?: { status?: string; limit?: number; offset?: number }): Promise<PostReport[]> {
+    const limit = options?.limit || 50;
+    const offset = options?.offset || 0;
+
+    if (options?.status) {
+      return db.select().from(postReports)
+        .where(eq(postReports.status, options.status))
+        .orderBy(desc(postReports.createdAt))
+        .limit(limit).offset(offset);
+    }
+
+    return db.select().from(postReports)
+      .orderBy(desc(postReports.createdAt))
+      .limit(limit).offset(offset);
+  }
+
+  async updatePostReport(id: number, data: Partial<PostReport>): Promise<PostReport> {
+    const [report] = await db.update(postReports).set(data).where(eq(postReports.id, id)).returning();
+    return report;
+  }
+
+  async hasUserReportedPost(userId: string, postId: number): Promise<boolean> {
+    const [existing] = await db.select().from(postReports)
+      .where(and(eq(postReports.reporterId, userId), eq(postReports.postId, postId)))
+      .limit(1);
+    return !!existing;
+  }
+
+  async getPostReportStats(): Promise<{ total: number; pending: number; reviewed: number; dismissed: number }> {
+    const all = await db.select().from(postReports);
+    return {
+      total: all.length,
+      pending: all.filter(r => r.status === "pending").length,
+      reviewed: all.filter(r => r.status === "reviewed").length,
+      dismissed: all.filter(r => r.status === "dismissed").length,
+    };
   }
 }
 
