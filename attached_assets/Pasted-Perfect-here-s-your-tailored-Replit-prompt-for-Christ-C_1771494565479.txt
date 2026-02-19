@@ -1,0 +1,56 @@
+Perfect, here's your tailored Replit prompt for Christ Collective:
+
+
+"Add a content moderation system to my existing Christ Collective social media app. Before any post, comment, or media upload goes live it must pass through moderation. Here is my full stack: React 18 + TypeScript frontend, Vite, Tailwind CSS, Node.js + Express.js backend, Passport.js auth, PostgreSQL via Neon serverless, Drizzle ORM, Replit Object Storage (Google Cloud Storage) for file uploads, TanStack Query on the frontend.
+1. Install these packages:
+
+openai (for OpenAI Moderation API)
+@google-cloud/vision (for Safe Search on images/video)
+
+2. Create a moderation service file at server/services/moderationService.ts:
+
+moderateText(text: string) — calls OpenAI Moderation API, returns decision + scores
+moderateImage(fileUrl: string) — calls Google Vision Safe Search on the file URL from Replit Object Storage, returns decision + scores
+moderateContent({ text, imageUrl }) — combines both checks and returns a single unified decision
+Decision logic: score above 0.85 or VERY_LIKELY = rejected, 0.60–0.85 or LIKELY = flagged, below that = approved
+
+3. Add a moderation_log table using Drizzle ORM with these fields:
+
+id, content_id, user_id, content_type (text/image/video), flag_categories (jsonb), confidence_scores (jsonb), decision (approved/flagged/rejected), reviewed_by, created_at
+Run the migration automatically
+
+4. Wrap the existing post creation and comment endpoints with moderation middleware:
+
+Intercept the request before it hits the database
+Run moderateContent() on the submitted text and any uploaded media URL from Replit Object Storage
+If rejected → return 400 with message: 'Your post violates our community guidelines' and log the decision
+If flagged → save the post as pending status, log it, and return 202 with message: 'Your post is under review'
+If approved → proceed normally to post creation
+
+5. Add admin moderation dashboard at /admin/moderation:
+
+Protected route, only accessible to users with admin role via Passport.js session
+Show all flagged posts with content preview, flag categories, confidence scores, user info, timestamp
+Approve or reject buttons that update the post status and notify the user via Resend email
+Summary stats card showing: total posts today, auto-rejection rate, pending review count, top flag categories
+Style everything using the existing black and gold Tailwind theme (#D4AF37) with shadcn/ui components and Lucide React icons
+
+6. User notifications:
+
+On rejection: send a Resend email to the user explaining their post was removed for community guideline violations (general category only, no scores)
+On flagged: send email saying 'Your post is under review and will be visible once approved'
+On admin approval of a flagged post: send email saying 'Your post has been approved and is now live'
+
+7. Frontend (React + TanStack Query):
+
+Add optimistic UI feedback — if post returns 202 (flagged), show a gold banner: 'Your post is under review'
+If post returns 400 (rejected), show a red toast notification with the guideline violation message
+Update the post submission form to handle both new response states
+
+8. Environment variables to add to Replit Secrets:
+
+OPENAI_API_KEY
+GOOGLE_CLOUD_API_KEY
+
+9. Rate limit the moderation endpoint using the existing rate limiting setup in Express to prevent abuse.
+Do not break any existing functionality. Moderation should wrap around the existing post and comment creation logic as middleware, not replace it.
