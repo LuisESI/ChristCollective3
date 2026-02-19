@@ -13,7 +13,7 @@ import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
   return (
     <div 
-      className="bg-gray-900 border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-gray-800 transition-colors w-full shadow-sm"
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors w-full shadow-sm"
       onClick={() => navigate(`/post/${post.id}`)}
     >
       <div className="flex items-center gap-3 mb-3">
@@ -130,7 +130,7 @@ function ProfileCard({ item, navigate }: { item: { type: string; data: any }; na
 
   return (
     <div 
-      className="bg-gray-900 border border-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-800 transition-colors flex flex-col items-center text-center shadow-sm"
+      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 cursor-pointer hover:bg-[#111] transition-colors flex flex-col items-center text-center shadow-sm"
       onClick={() => navigate(getRoute())}
     >
       <Avatar className="w-14 h-14 mb-2 border-2 border-gray-700">
@@ -346,7 +346,7 @@ export default function ExplorePage() {
               placeholder="Search for people, topics, or posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus:border-[#D4AF37]"
+              className="pl-10 bg-[#0A0A0A] border-gray-800 text-white placeholder:text-gray-500 focus:border-[#D4AF37]"
             />
           </div>
         </div>
