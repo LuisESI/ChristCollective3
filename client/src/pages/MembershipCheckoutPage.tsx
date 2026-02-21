@@ -65,13 +65,16 @@ export default function MembershipCheckoutPage() {
       });
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/membership-subscriptions/me"] });
-      toast({
-        title: "Welcome to " + (tier?.name || "the membership") + "!",
-        description: "Your membership is now active.",
-      });
-      navigate("/profile");
+    onSuccess: (data: { checkoutUrl: string; subscriptionId: number }) => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to start checkout. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -255,7 +258,7 @@ export default function MembershipCheckoutPage() {
                         </>
                       ) : (
                         <>
-                          Complete Membership
+                          Purchase Membership
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       )}

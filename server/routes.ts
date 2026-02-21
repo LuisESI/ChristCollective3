@@ -2125,27 +2125,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!tier || !fullName || !email) {
         return res.status(400).json({ message: "Tier, full name, and email are required" });
       }
+
+      const tierPrices: Record<string, number> = {
+        collective: 3000,
+        guild: 6000,
+      };
+      const tierNames: Record<string, string> = {
+        collective: "The Collective Membership",
+        guild: "The Guild Membership",
+      };
+
+      const priceInCents = tierPrices[tier];
+      const tierName = tierNames[tier];
+      if (!priceInCents || !tierName) {
+        return res.status(400).json({ message: "Invalid membership tier" });
+      }
+
       const userId = req.user.id;
       const existing = await storage.getUserMembershipSubscription(userId);
       if (existing) {
         return res.status(409).json({ message: "You already have an active membership" });
       }
+
       const subscription = await storage.createMembershipSubscription({
         userId,
         tier,
         fullName,
         email,
         phone: phone || null,
-        status: "active",
+        status: "pending",
         startDate: new Date(),
         endDate: null,
         stripeSubscriptionId: null,
         stripeCustomerId: null,
       });
-      res.json(subscription);
+
+      let stripeClient;
+      try {
+        stripeClient = await getUncachableStripeClient();
+      } catch (error) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+      if (!stripeClient) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: email,
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: tierName,
+              description: `Monthly ${tierName} - Christ Collective`,
+            },
+            unit_amount: priceInCents,
+            recurring: { interval: 'month' },
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          membershipSubscriptionId: String(subscription.id),
+          userId,
+          tier,
+        },
+        success_url: `${req.protocol}://${req.get('host')}/membership/success?session_id={CHECKOUT_SESSION_ID}&sub_id=${subscription.id}`,
+        cancel_url: `${req.protocol}://${req.get('host')}/memberships`,
+      });
+
+      await storage.updateMembershipSubscription(subscription.id, {
+        stripeSubscriptionId: session.id,
+      });
+
+      res.json({ checkoutUrl: session.url, subscriptionId: subscription.id });
     } catch (error) {
       console.error("Error creating membership subscription:", error);
       res.status(500).json({ message: "Failed to create membership subscription" });
+    }
+  });
+
+  app.get('/api/membership-subscriptions/:id/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const sub = await storage.getMembershipSubscription(id);
+      if (!sub || sub.userId !== req.user.id) {
+        return res.status(404).json({ message: "Membership not found" });
+      }
+      if (sub.status === "active") {
+        return res.json(sub);
+      }
+      const updated = await storage.updateMembershipSubscription(id, { status: "active" });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error activating membership:", error);
+      res.status(500).json({ message: "Failed to activate membership" });
     }
   });
 
