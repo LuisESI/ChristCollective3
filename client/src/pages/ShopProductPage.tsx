@@ -213,7 +213,7 @@ export default function ShopProductPage() {
                 </div>
               )}
 
-              {/* Title and Description (visible on mobile, hidden on desktop) */}
+              {/* Title (visible on mobile, hidden on desktop) */}
               <div className="lg:hidden">
                 <div className="flex items-center gap-3 mb-2">
                   {product.metadata?.category && (
@@ -231,14 +231,6 @@ export default function ShopProductPage() {
                 <h1 className="text-2xl font-bold text-black mb-4" data-testid="text-product-name-mobile">
                   {product.name}
                 </h1>
-              </div>
-
-              {/* Description */}
-              <div className="prose prose-gray max-w-none">
-                <h3 className="text-lg font-semibold text-black mb-3">Description</h3>
-                <p className="text-gray-700 whitespace-pre-line" data-testid="text-product-description">
-                  {product.description || 'No description available.'}
-                </p>
               </div>
             </div>
 
@@ -391,6 +383,15 @@ export default function ShopProductPage() {
               {/* Additional Info */}
               <div className="text-sm text-gray-500 text-center">
                 Secure checkout powered by Stripe
+              </div>
+
+              {/* Description */}
+              <Separator />
+              <div className="prose prose-gray max-w-none">
+                <h3 className="text-lg font-semibold text-black mb-3">Description</h3>
+                <p className="text-gray-700 whitespace-pre-line" data-testid="text-product-description">
+                  {product.description || 'No description available.'}
+                </p>
               </div>
             </div>
           </div>
