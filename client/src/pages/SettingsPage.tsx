@@ -11,8 +11,9 @@ import {
   ArrowLeft, Settings, Mail, Phone, MapPin,
   Bell, BookOpen, Shield, User, Palette,
   LogOut, HelpCircle, Info, Lock, Globe, MessageSquare,
-  Volume2, Smartphone
+  Volume2, Smartphone, Star
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 import { isNativeApp } from "@/lib/platform";
