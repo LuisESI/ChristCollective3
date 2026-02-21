@@ -170,11 +170,11 @@ export default function ShopProductPage() {
       </section>
 
       {/* Product Content */}
-      <section className="py-12 bg-white">
+      <section className="py-6 bg-white pb-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left Side - Images, Title, Description */}
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Side - Images */}
+            <div className="space-y-3">
               {/* Main Image */}
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 {product.images && product.images[selectedImageIndex] ? (
@@ -228,14 +228,14 @@ export default function ShopProductPage() {
                     </Badge>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-black mb-4" data-testid="text-product-name-mobile">
+                <h1 className="text-2xl font-bold text-black mb-1" data-testid="text-product-name-mobile">
                   {product.name}
                 </h1>
               </div>
             </div>
 
             {/* Right Side - Price, Variations, Quantity, Buy Button */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Title (hidden on mobile, visible on desktop) */}
               <div className="hidden lg:block">
                 <div className="flex items-center gap-3 mb-2">
