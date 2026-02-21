@@ -93,7 +93,7 @@ export default function MembershipsPage() {
         <div className="text-center mb-16">
           <Badge className="bg-[#D4AF37] text-black mb-4 text-xs tracking-widest">MEMBERSHIPS</Badge>
           <img src="/assets/logo.png" alt="Christ Collective" className="h-20 md:h-28 mx-auto mb-4 object-contain" />
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-2xl mx-auto text-sm">
             Choose the tier that best fits your journey and help us build a global community of faith.
           </p>
         </div>
