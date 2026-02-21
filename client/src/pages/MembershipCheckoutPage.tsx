@@ -1,339 +1,272 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Check, Loader2, Crown, HeartHandshake, ArrowRight, ShieldCheck } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
-// Make sure to call loadStripe outside of a component's render
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  console.warn('Missing Stripe public key. Payment functionality will be limited.');
-}
-
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-  : null;
-
-function CheckoutForm({ tier }: { tier: any }) {
-  const [, navigate] = useLocation();
-  const { toast } = useToast();
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-    setErrorMessage(undefined);
-
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.origin + "/profile",
-        },
-      });
-
-      if (error) {
-        setErrorMessage(error.message);
-        toast({
-          title: "Payment failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message);
-      toast({
-        title: "Unexpected error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className="mb-6">
-        <h3 className="text-lg font-medium mb-2">Billing Summary</h3>
-        <div className="bg-gray-50 p-4 rounded-md">
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-600">{tier.name}</span>
-            <span>${tier.price}/month</span>
-          </div>
-          <div className="flex justify-between pt-2 border-t border-gray-200">
-            <span className="font-medium">Total</span>
-            <span className="font-medium">${tier.price}/month</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h3 className="text-lg font-medium mb-2">Payment Details</h3>
-        <div className="bg-white border border-gray-200 rounded-md p-4">
-          <PaymentElement />
-        </div>
-      </div>
-
-      {errorMessage && (
-        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md text-sm">
-          {errorMessage}
-        </div>
-      )}
-
-      <div className="flex justify-between">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => navigate("/business")}
-          disabled={isProcessing}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-        
-        <Button 
-          type="submit" 
-          disabled={!stripe || !elements || isProcessing}
-          className="min-w-[150px]"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            'Subscribe Now'
-          )}
-        </Button>
-      </div>
-    </form>
-  );
-}
+const tierDetails: Record<string, { name: string; price: string; icon: any; benefits: string[]; emoji: string }> = {
+  collective: {
+    name: "The Collective",
+    price: "$30/month",
+    icon: HeartHandshake,
+    emoji: "🕊️",
+    benefits: [
+      "Access to the Christ Collective private community & member directory",
+      "Weekly team leader program calls",
+      "Bi-weekly networking calls",
+      "Spiritual counsel access",
+      "Public outreach & ministry events",
+      "Private member events — standard access",
+      "Shared resource library & newsletter"
+    ]
+  },
+  guild: {
+    name: "The Guild",
+    price: "$60/month",
+    icon: Crown,
+    emoji: "✨",
+    benefits: [
+      "Everything in The Collective",
+      "Priority access to private events",
+      "Early access to programs & collabs",
+      "Pitch & co-lead collective projects",
+      "Private member events — priority access",
+      "Featured Guild member recognition"
+    ]
+  }
+};
 
 export default function MembershipCheckoutPage() {
   const { tierId } = useParams();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const [clientSecret, setClientSecret] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: isAuthLoading } = useAuth();
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
-    }
-  }, [isAuthLoading, isAuthenticated]);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
-  // Fetch membership tier
-  const { data: tier, isLoading: isTierLoading } = useQuery({
-    queryKey: [`/api/membership-tiers/${tierId}`],
-    enabled: !!tierId && isAuthenticated,
-    onError: () => {
+  const tier = tierId ? tierDetails[tierId] : null;
+
+  const subscribeMutation = useMutation({
+    mutationFn: async (data: { tier: string; fullName: string; email: string; phone: string }) => {
+      const res = await apiRequest("/api/membership-subscriptions", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/membership-subscriptions/me"] });
+      toast({
+        title: "Welcome to " + (tier?.name || "the membership") + "!",
+        description: "Your membership is now active.",
+      });
+      navigate("/profile");
+    },
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Unable to load membership tier information. Please try again.",
+        description: error.message || "Failed to create membership. Please try again.",
         variant: "destructive",
       });
-      navigate("/business");
-    }
+    },
   });
 
-  // If tier not found in the API, use a default tier object based on the ID
-  const defaultTiers = [
-    {
-      id: 1,
-      name: "Basic Membership",
-      price: "9",
-      description: "Perfect for startups and small businesses",
-      features: [
-        "Basic profile in our business directory",
-        "Access to monthly virtual networking events",
-        "Join industry-specific groups",
-        "Email support"
-      ]
-    },
-    {
-      id: 2,
-      name: "Professional Membership",
-      price: "29",
-      description: "For established businesses and professionals",
-      features: [
-        "Enhanced profile with portfolio showcase",
-        "Priority access to all networking events",
-        "1:1 business matchmaking service",
-        "Access to exclusive resources and training",
-        "Priority support"
-      ]
-    },
-    {
-      id: 3,
-      name: "Executive Membership",
-      price: "99",
-      description: "For industry leaders and executives",
-      features: [
-        "Premium featured profile with brand spotlight",
-        "VIP access to all events including exclusive executive roundtables",
-        "Dedicated business advisor",
-        "Opportunity to host and speak at events",
-        "All Professional benefits plus executive coaching sessions"
-      ]
-    }
-  ];
-
-  const currentTier = tier || defaultTiers.find(t => t.id === parseInt(tierId || "0"));
-
-  // Create subscription when component mounts
-  useEffect(() => {
-    if (!isAuthenticated || !currentTier) return;
-
-    setIsLoading(true);
-    
-    apiRequest("POST", "/api/create-subscription", { tierID: tierId })
-      .then(res => res.json())
-      .then(data => {
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else {
-          throw new Error("No client secret returned");
-        }
-      })
-      .catch(error => {
-        toast({
-          title: "Error",
-          description: "Unable to create subscription. Please try again later.",
-          variant: "destructive",
-        });
-        console.error("Subscription error:", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || !email.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in your full name and email.",
+        variant: "destructive",
       });
-  }, [isAuthenticated, tierId, currentTier, toast]);
+      return;
+    }
+    subscribeMutation.mutate({
+      tier: tierId || "",
+      fullName: fullName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+    });
+  };
 
-  if (isAuthLoading || !isAuthenticated) {
+  if (isAuthLoading) {
     return (
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
       </div>
     );
   }
 
-  if (!currentTier) {
+  if (!user) {
+    navigate(`/auth?redirect=/membership/checkout/${tierId}`);
+    return null;
+  }
+
+  if (!tier || !tierId) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Membership tier not found</h1>
-          <p className="text-gray-600 mb-6">The membership tier you're looking for doesn't exist.</p>
-          <Button asChild>
-            <Link href="/business">
-              <a>View Available Memberships</a>
-            </Link>
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Membership tier not found</h2>
+          <p className="text-gray-400 mb-6">The membership tier you selected doesn't exist.</p>
+          <Button className="bg-[#D4AF37] text-black" onClick={() => navigate("/memberships")}>
+            View Memberships
           </Button>
         </div>
       </div>
     );
   }
 
+  const TierIcon = tier.icon;
+
   return (
     <>
       <Helmet>
-        <title>Subscribe to {currentTier.name} - Christ Collective</title>
-        <meta name="description" content={`Join our ${currentTier.name} and connect with other Christian business owners and professionals.`} />
+        <title>Join {tier.name} | Christ Collective</title>
+        <meta name="description" content={`Subscribe to ${tier.name} and unlock exclusive membership benefits at Christ Collective.`} />
       </Helmet>
-      
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <Button 
-              asChild
-              variant="ghost"
-              className="mb-4"
-            >
-              <Link href="/business">
-                <a className="flex items-center">
-                  <ArrowLeft className="mr-2" size={16} />
-                  Back to Membership Options
-                </a>
-              </Link>
-            </Button>
-            
-            <h1 className="text-3xl font-bold mb-2">Subscribe to {currentTier.name}</h1>
-            <p className="text-gray-600">Complete your subscription to start connecting with Christian business professionals.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            <div className="md:col-span-7">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Checkout</CardTitle>
-                  <CardDescription>
-                    Secure payment processing powered by Stripe
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading || !stripePromise ? (
-                    <div className="py-8 flex flex-col items-center justify-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                      <p className="text-gray-500">Preparing your subscription...</p>
-                    </div>
-                  ) : clientSecret ? (
-                    <Elements 
-                      stripe={stripePromise} 
-                      options={{ clientSecret, appearance: { theme: 'stripe' } }}
-                    >
-                      <CheckoutForm tier={currentTier} />
-                    </Elements>
-                  ) : (
-                    <div className="py-8 text-center text-gray-500">
-                      <p>Unable to initialize payment. Please try again later.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="md:col-span-5">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{currentTier.name}</CardTitle>
-                  <CardDescription>{currentTier.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-4">
-                    ${currentTier.price}<span className="text-lg font-normal text-gray-400">/month</span>
+
+      <div className="min-h-screen bg-black text-white pb-24">
+        <div className="container mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            className="text-gray-400 hover:text-white mb-6"
+            onClick={() => navigate("/memberships")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Memberships
+          </Button>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-2">
+              <Card className="bg-gradient-to-b from-[#D4AF37]/15 via-[#0A0A0A] to-[#0A0A0A] border-[#D4AF37]/40 sticky top-8">
+                <CardHeader className="text-center pb-4">
+                  <div className="inline-flex p-3 rounded-2xl bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]/30 mx-auto mb-3">
+                    <TierIcon className="w-7 h-7 text-[#D4AF37]" />
                   </div>
-                  
-                  <h3 className="font-medium mb-2">Includes:</h3>
-                  <ul className="space-y-2">
-                    {currentTier.features.map((feature: string, i: number) => (
-                      <li key={i} className="flex items-start">
-                        <Check className="text-primary mt-1 mr-2 flex-shrink-0" size={16} />
-                        <span className="text-gray-600">{feature}</span>
+                  <CardTitle className="text-xl text-[#D4AF37] flex items-center justify-center gap-2">
+                    <span>{tier.emoji}</span> {tier.name}
+                  </CardTitle>
+                  <p className="text-3xl font-bold text-white mt-2">{tier.price}</p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Separator className="bg-[#D4AF37]/20 mb-4" />
+                  <ul className="space-y-3">
+                    {tier.benefits.map((benefit, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm">
+                        <div className="mt-0.5 rounded-full p-0.5 bg-[#D4AF37]/20 flex-shrink-0">
+                          <Check className="w-3 h-3 text-[#D4AF37]" />
+                        </div>
+                        <span className="text-gray-300 leading-tight">{benefit}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter className="bg-gray-50 border-t">
-                  <p className="text-sm text-gray-500">
-                    Your subscription will renew automatically each month. You can cancel anytime from your profile.
-                  </p>
+                <CardFooter className="pt-0">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 w-full justify-center">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Cancel anytime</span>
+                  </div>
                 </CardFooter>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-3">
+              <Card className="bg-[#0A0A0A] border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white">Your Information</CardTitle>
+                  <p className="text-gray-500 text-sm">
+                    Please provide your details to complete your membership registration.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName" className="text-gray-300">Full Name *</Label>
+                      <Input
+                        id="fullName"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
+                        className="bg-black border-gray-700 text-white placeholder:text-gray-600 focus:border-[#D4AF37]"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-gray-300">Email Address *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email address"
+                        className="bg-black border-gray-700 text-white placeholder:text-gray-600 focus:border-[#D4AF37]"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-gray-300">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Enter your phone number (optional)"
+                        className="bg-black border-gray-700 text-white placeholder:text-gray-600 focus:border-[#D4AF37]"
+                      />
+                    </div>
+
+                    <Separator className="bg-gray-800" />
+
+                    <div className="bg-black/50 border border-gray-800 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-300 mb-2">Order Summary</h3>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-500">{tier.name} membership</span>
+                        <span className="text-white">{tier.price}</span>
+                      </div>
+                      <Separator className="bg-gray-800 my-2" />
+                      <div className="flex justify-between text-sm font-bold">
+                        <span className="text-gray-300">Total</span>
+                        <span className="text-[#D4AF37]">{tier.price}</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full py-6 text-base font-bold bg-[#D4AF37] hover:bg-[#C4A030] text-black"
+                      disabled={subscribeMutation.isPending}
+                    >
+                      {subscribeMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          Complete Membership
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-center text-xs text-gray-600 mt-2">
+                      By joining, you agree to our terms of service. Your membership will renew automatically each month.
+                    </p>
+                  </form>
+                </CardContent>
               </Card>
             </div>
           </div>

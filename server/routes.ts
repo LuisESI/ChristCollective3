@@ -2119,6 +2119,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/membership-subscriptions', isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const { tier, fullName, email, phone } = req.body;
+      if (!tier || !fullName || !email) {
+        return res.status(400).json({ message: "Tier, full name, and email are required" });
+      }
+      const userId = req.user.id;
+      const existing = await storage.getUserMembershipSubscription(userId);
+      if (existing) {
+        return res.status(409).json({ message: "You already have an active membership" });
+      }
+      const subscription = await storage.createMembershipSubscription({
+        userId,
+        tier,
+        fullName,
+        email,
+        phone: phone || null,
+        status: "active",
+        startDate: new Date(),
+        endDate: null,
+        stripeSubscriptionId: null,
+        stripeCustomerId: null,
+      });
+      res.json(subscription);
+    } catch (error) {
+      console.error("Error creating membership subscription:", error);
+      res.status(500).json({ message: "Failed to create membership subscription" });
+    }
+  });
+
+  app.get('/api/membership-subscriptions/me', isAuthenticated, async (req: any, res) => {
+    try {
+      const sub = await storage.getUserMembershipSubscription(req.user.id);
+      res.json(sub || null);
+    } catch (error) {
+      console.error("Error fetching user membership:", error);
+      res.status(500).json({ message: "Failed to fetch membership" });
+    }
+  });
+
+  app.get('/api/admin/membership-subscriptions', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) return res.status(403).json({ message: "Forbidden" });
+      const subs = await storage.listMembershipSubscriptions();
+      res.json(subs);
+    } catch (error) {
+      console.error("Error listing membership subscriptions:", error);
+      res.status(500).json({ message: "Failed to list memberships" });
+    }
+  });
+
+  app.patch('/api/admin/membership-subscriptions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) return res.status(403).json({ message: "Forbidden" });
+      const id = parseInt(req.params.id);
+      const sub = await storage.updateMembershipSubscription(id, req.body);
+      res.json(sub);
+    } catch (error) {
+      console.error("Error updating membership subscription:", error);
+      res.status(500).json({ message: "Failed to update membership" });
+    }
+  });
+
   // Statistics endpoint
   app.get("/api/statistics", async (req, res) => {
     try {

@@ -88,6 +88,9 @@ import {
   postReports,
   type PostReport,
   type InsertPostReport,
+  membershipSubscriptions,
+  type MembershipSubscription,
+  type InsertMembershipSubscription,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -296,6 +299,12 @@ export interface IStorage {
   updatePostReport(id: number, data: Partial<PostReport>): Promise<PostReport>;
   hasUserReportedPost(userId: string, postId: number): Promise<boolean>;
   getPostReportStats(): Promise<{ total: number; pending: number; reviewed: number; dismissed: number }>;
+
+  createMembershipSubscription(data: InsertMembershipSubscription): Promise<MembershipSubscription>;
+  getMembershipSubscription(id: number): Promise<MembershipSubscription | undefined>;
+  getUserMembershipSubscription(userId: string): Promise<MembershipSubscription | undefined>;
+  listMembershipSubscriptions(): Promise<MembershipSubscription[]>;
+  updateMembershipSubscription(id: number, data: Partial<MembershipSubscription>): Promise<MembershipSubscription>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2317,6 +2326,33 @@ export class DatabaseStorage implements IStorage {
       reviewed: all.filter(r => r.status === "reviewed").length,
       dismissed: all.filter(r => r.status === "dismissed").length,
     };
+  }
+
+  async createMembershipSubscription(data: InsertMembershipSubscription): Promise<MembershipSubscription> {
+    const [sub] = await db.insert(membershipSubscriptions).values(data).returning();
+    return sub;
+  }
+
+  async getMembershipSubscription(id: number): Promise<MembershipSubscription | undefined> {
+    const [sub] = await db.select().from(membershipSubscriptions).where(eq(membershipSubscriptions.id, id));
+    return sub;
+  }
+
+  async getUserMembershipSubscription(userId: string): Promise<MembershipSubscription | undefined> {
+    const [sub] = await db.select().from(membershipSubscriptions)
+      .where(and(eq(membershipSubscriptions.userId, userId), eq(membershipSubscriptions.status, "active")))
+      .orderBy(desc(membershipSubscriptions.createdAt))
+      .limit(1);
+    return sub;
+  }
+
+  async listMembershipSubscriptions(): Promise<MembershipSubscription[]> {
+    return db.select().from(membershipSubscriptions).orderBy(desc(membershipSubscriptions.createdAt));
+  }
+
+  async updateMembershipSubscription(id: number, data: Partial<MembershipSubscription>): Promise<MembershipSubscription> {
+    const [sub] = await db.update(membershipSubscriptions).set(data).where(eq(membershipSubscriptions.id, id)).returning();
+    return sub;
   }
 }
 

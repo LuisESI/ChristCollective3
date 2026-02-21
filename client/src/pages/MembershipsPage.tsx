@@ -1,9 +1,10 @@
 import { useLocation } from "wouter";
-import { Check, ArrowLeft, Shield, Users, Star, Zap, Globe, MessageSquare, Calendar, Share2, Library, Users2, Mic2, Compass, HeartHandshake, Sparkles } from "lucide-react";
+import { Check, Globe, HeartHandshake, Sparkles, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Helmet } from "react-helmet";
+import { useAuth } from "@/hooks/useAuth";
 
 const tiers = [
   {
@@ -15,12 +16,12 @@ const tiers = [
       "Connect with other christians",
       "Explore communities near you",
       "RSVP for public events",
-      "Post content on Christ collective",
+      "Post content on Christ Collective",
       "Exclusive access to pre-released CC content"
     ],
-    icon: <Globe className="w-6 h-6 text-gray-400" />,
+    icon: <Globe className="w-7 h-7 text-gray-400" />,
     buttonText: "Get Started",
-    popular: false
+    paid: false
   },
   {
     id: "collective",
@@ -37,8 +38,9 @@ const tiers = [
       "Private member events — standard access",
       "Shared resource library & newsletter"
     ],
-    icon: <HeartHandshake className="w-6 h-6 text-[#D4AF37]" />,
+    icon: <HeartHandshake className="w-7 h-7 text-[#D4AF37]" />,
     buttonText: "Join The Collective",
+    paid: true,
     popular: true,
     emoji: "🕊️"
   },
@@ -56,29 +58,40 @@ const tiers = [
       "Private member events — priority access",
       "Featured Guild member recognition"
     ],
-    icon: <Sparkles className="w-6 h-6 text-[#D4AF37]" />,
+    icon: <Crown className="w-7 h-7 text-[#D4AF37]" />,
     buttonText: "Join The Guild",
-    popular: false,
+    paid: true,
+    elite: true,
     emoji: "✨"
   }
 ];
 
 export default function MembershipsPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const handleSelectTier = (tierId: string) => {
     if (tierId === "free") {
       setLocation("/auth");
     } else {
-      setLocation(`/membership/checkout/${tierId}`);
+      if (!user) {
+        setLocation(`/auth?redirect=/membership/checkout/${tierId}`);
+      } else {
+        setLocation(`/membership/checkout/${tierId}`);
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-black text-white pb-24">
+      <Helmet>
+        <title>Membership Tiers | Christ Collective</title>
+        <meta name="description" content="Join the Christ Collective membership - connect, grow, and serve with fellow Christians worldwide." />
+      </Helmet>
+
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-16">
-          <Badge className="bg-[#D4AF37] text-black mb-4">MEMBERSHIPS</Badge>
+          <Badge className="bg-[#D4AF37] text-black mb-4 text-xs tracking-widest">MEMBERSHIPS</Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Unite with the <span className="text-[#D4AF37]">Collective</span>
           </h1>
@@ -87,67 +100,104 @@ export default function MembershipsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {tiers.map((tier) => (
-            <Card 
-              key={tier.id} 
-              className={`relative bg-[#0A0A0A] border-gray-800 flex flex-col h-full transition-all duration-300 hover:border-[#D4AF37]/50 ${
-                tier.popular ? "ring-2 ring-[#D4AF37] scale-105 md:scale-110 z-10" : ""
-              }`}
-            >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-[#D4AF37] text-black px-4 py-1">MOST POPULAR</Badge>
-                </div>
-              )}
-              
-              <CardHeader className="text-center pb-2">
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 rounded-full bg-gray-900/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto items-stretch">
+          {tiers.map((tier) => {
+            const isPaid = tier.paid;
+            const isElite = (tier as any).elite;
+            const isPopular = (tier as any).popular;
+
+            return (
+              <div
+                key={tier.id}
+                className={`relative rounded-2xl flex flex-col h-full transition-all duration-300 ${
+                  isElite
+                    ? "bg-gradient-to-b from-[#D4AF37]/20 via-[#0A0A0A] to-[#0A0A0A] border-2 border-[#D4AF37] shadow-[0_0_40px_rgba(212,175,55,0.15)]"
+                    : isPopular
+                    ? "bg-gradient-to-b from-[#D4AF37]/10 via-[#0A0A0A] to-[#0A0A0A] border-2 border-[#D4AF37]/60 shadow-[0_0_25px_rgba(212,175,55,0.1)]"
+                    : "bg-[#0A0A0A] border border-gray-800 hover:border-gray-700"
+                }`}
+              >
+                {isPopular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <Badge className="bg-[#D4AF37] text-black px-5 py-1.5 text-xs font-bold tracking-wider shadow-lg">
+                      MOST POPULAR
+                    </Badge>
+                  </div>
+                )}
+                {isElite && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F5E6A3] text-black px-5 py-1.5 text-xs font-bold tracking-wider shadow-lg">
+                      PREMIUM
+                    </Badge>
+                  </div>
+                )}
+
+                <div className="p-6 pt-8 text-center">
+                  <div className={`inline-flex p-4 rounded-2xl mb-4 ${
+                    isPaid 
+                      ? "bg-[#D4AF37]/10 ring-1 ring-[#D4AF37]/30" 
+                      : "bg-gray-900/50"
+                  }`}>
                     {tier.icon}
                   </div>
-                </div>
-                <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-                  {tier.emoji && <span>{tier.emoji}</span>}
-                  {tier.name}
-                </CardTitle>
-                <div className="mt-4 flex items-baseline justify-center">
-                  <span className="text-4xl font-extrabold text-[#D4AF37]">{tier.price}</span>
-                  {tier.period && <span className="text-gray-500 ml-1">{tier.period}</span>}
-                </div>
-                <CardDescription className="text-gray-400 mt-2">
-                  {tier.description}
-                </CardDescription>
-              </CardHeader>
 
-              <CardContent className="flex-grow pt-6">
-                <Separator className="bg-gray-800 mb-6" />
-                <ul className="space-y-4">
-                  {tier.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start gap-3 text-sm">
-                      <div className="mt-1 bg-[#D4AF37]/20 rounded-full p-0.5">
-                        <Check className="w-3 h-3 text-[#D4AF37]" />
-                      </div>
-                      <span className="text-gray-300 leading-tight">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
+                  <h3 className="text-2xl font-bold flex items-center justify-center gap-2 mb-1">
+                    {tier.emoji && <span>{tier.emoji}</span>}
+                    <span className={isPaid ? "text-[#D4AF37]" : "text-white"}>{tier.name}</span>
+                  </h3>
+                  
+                  <div className="mt-3 flex items-baseline justify-center">
+                    <span className={`text-5xl font-extrabold ${isPaid ? "text-[#D4AF37]" : "text-white"}`}>
+                      {tier.price}
+                    </span>
+                    {tier.period && (
+                      <span className="text-gray-500 ml-1 text-lg">{tier.period}</span>
+                    )}
+                  </div>
+                  <p className="text-gray-500 text-sm mt-2">{tier.description}</p>
+                </div>
 
-              <CardFooter className="pt-6 pb-8">
-                <Button 
-                  className={`w-full py-6 text-lg font-bold transition-all ${
-                    tier.popular 
-                      ? "bg-[#D4AF37] hover:bg-[#C4A030] text-black" 
-                      : "bg-transparent border-2 border-gray-800 hover:border-[#D4AF37] text-white hover:bg-[#D4AF37] hover:text-black"
-                  }`}
-                  onClick={() => handleSelectTier(tier.id)}
-                >
-                  {tier.buttonText}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                <div className="px-6 flex-grow">
+                  <Separator className={isPaid ? "bg-[#D4AF37]/20" : "bg-gray-800"} />
+                  <ul className="space-y-3.5 py-6">
+                    {tier.benefits.map((benefit, index) => (
+                      <li key={index} className="flex items-start gap-3 text-sm">
+                        <div className={`mt-0.5 rounded-full p-0.5 flex-shrink-0 ${
+                          isPaid ? "bg-[#D4AF37]/20" : "bg-gray-700"
+                        }`}>
+                          <Check className={`w-3.5 h-3.5 ${isPaid ? "text-[#D4AF37]" : "text-gray-400"}`} />
+                        </div>
+                        <span className={`leading-tight ${isPaid ? "text-gray-200" : "text-gray-400"}`}>
+                          {benefit}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="p-6 pt-2">
+                  <Button
+                    className={`w-full py-6 text-base font-bold transition-all ${
+                      isElite
+                        ? "bg-gradient-to-r from-[#D4AF37] to-[#F5E6A3] hover:from-[#C4A030] hover:to-[#E5D693] text-black shadow-lg shadow-[#D4AF37]/20"
+                        : isPopular
+                        ? "bg-[#D4AF37] hover:bg-[#C4A030] text-black shadow-md"
+                        : "bg-transparent border-2 border-gray-700 hover:border-[#D4AF37] text-white hover:bg-[#D4AF37]/10"
+                    }`}
+                    onClick={() => handleSelectTier(tier.id)}
+                  >
+                    {tier.buttonText}
+                    {isPaid && <ArrowRight className="w-4 h-4 ml-2" />}
+                  </Button>
+                  {isPaid && (
+                    <p className="text-center text-gray-600 text-xs mt-3">
+                      Cancel anytime. Secure payment via Stripe.
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mt-20 text-center max-w-3xl mx-auto bg-[#0A0A0A] p-8 rounded-2xl border border-gray-800">

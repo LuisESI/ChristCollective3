@@ -941,3 +941,25 @@ export const insertPostReportSchema = createInsertSchema(postReports)
 
 export type PostReport = typeof postReports.$inferSelect;
 export type InsertPostReport = z.infer<typeof insertPostReportSchema>;
+
+export const membershipSubscriptions = pgTable("membership_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tier: varchar("tier").notNull(),
+  status: varchar("status").notNull().default("active"),
+  fullName: varchar("full_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMembershipSubscriptionSchema = createInsertSchema(membershipSubscriptions)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export type MembershipSubscription = typeof membershipSubscriptions.$inferSelect;
+export type InsertMembershipSubscription = z.infer<typeof insertMembershipSubscriptionSchema>;

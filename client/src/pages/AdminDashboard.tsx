@@ -11,11 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package, Crown } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Campaign, User, Donation, SponsorshipApplication } from "@shared/schema";
+import type { Campaign, User, Donation, SponsorshipApplication, MembershipSubscription } from "@shared/schema";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 export default function AdminDashboard() {
@@ -72,6 +72,11 @@ export default function AdminDashboard() {
   // Fetch pending ministries for approval
   const { data: pendingMinistries = [], isLoading: ministriesLoading } = useQuery({
     queryKey: ["/api/ministries/pending"],
+    enabled: user?.isAdmin === true,
+  });
+
+  const { data: membershipSubs = [], isLoading: membershipsLoading } = useQuery<MembershipSubscription[]>({
+    queryKey: ["/api/admin/membership-subscriptions"],
     enabled: user?.isAdmin === true,
   });
 
@@ -443,7 +448,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 pt-2 gap-3 shadow-lg shadow-black/20 items-start min-h-[90px]">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 pt-2 gap-3 shadow-lg shadow-black/20 items-start min-h-[90px]">
             <TabsTrigger value="ministries" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
               <div className="flex flex-col items-center justify-center gap-1.5 h-full">
                 <span className="font-semibold text-xs">Ministries</span>
@@ -481,6 +486,14 @@ export default function AdminDashboard() {
                 <span className="font-semibold text-xs">Transactions</span>
                 <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
                   View
+                </span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="members" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
+              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
+                <span className="font-semibold text-xs">Members</span>
+                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
+                  {Array.isArray(membershipSubs) ? membershipSubs.length : 0}
                 </span>
               </div>
             </TabsTrigger>
@@ -560,6 +573,133 @@ export default function AdminDashboard() {
                     </Table>
                   </CardContent>
                 </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="members" className="space-y-6">
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                <Crown className="h-6 w-6" />
+                Membership Subscriptions
+              </h2>
+              {membershipsLoading ? (
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardContent className="p-6">
+                    <div className="animate-pulse space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-4 bg-gray-700 rounded"></div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : !Array.isArray(membershipSubs) || membershipSubs.length === 0 ? (
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardContent className="p-6 text-center">
+                    <Crown className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No membership subscriptions yet.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <Card className="bg-gray-900/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Members</p>
+                        <p className="text-2xl font-bold text-primary mt-1">{membershipSubs.length}</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gray-900/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Active</p>
+                        <p className="text-2xl font-bold text-green-400 mt-1">
+                          {membershipSubs.filter((s: MembershipSubscription) => s.status === "active").length}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gray-900/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Collective</p>
+                        <p className="text-2xl font-bold text-[#D4AF37] mt-1">
+                          {membershipSubs.filter((s: MembershipSubscription) => s.tier === "collective").length}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-gray-900/50 border-gray-700">
+                      <CardContent className="p-4">
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Guild</p>
+                        <p className="text-2xl font-bold text-[#D4AF37] mt-1">
+                          {membershipSubs.filter((s: MembershipSubscription) => s.tier === "guild").length}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardContent className="p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-gray-700">
+                            <TableHead className="text-gray-300">Member</TableHead>
+                            <TableHead className="text-gray-300">Email</TableHead>
+                            <TableHead className="text-gray-300">Phone</TableHead>
+                            <TableHead className="text-gray-300">Tier</TableHead>
+                            <TableHead className="text-gray-300">Status</TableHead>
+                            <TableHead className="text-gray-300">Joined</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {membershipSubs.map((sub: MembershipSubscription) => (
+                            <TableRow key={sub.id} className="border-gray-800 hover:bg-gray-800/50">
+                              <TableCell className="text-white font-medium">{sub.fullName}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2 text-gray-300">
+                                  <Mail className="h-3.5 w-3.5 text-gray-500" />
+                                  <span className="text-sm">{sub.email}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {sub.phone ? (
+                                  <div className="flex items-center gap-2 text-gray-300">
+                                    <Phone className="h-3.5 w-3.5 text-gray-500" />
+                                    <span className="text-sm">{sub.phone}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-600 text-sm">—</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  sub.tier === "guild"
+                                    ? "bg-gradient-to-r from-[#D4AF37] to-[#F5E6A3] text-black"
+                                    : sub.tier === "collective"
+                                    ? "bg-[#D4AF37] text-black"
+                                    : "bg-gray-700 text-gray-300"
+                                }>
+                                  {sub.tier === "collective" ? "The Collective" : sub.tier === "guild" ? "The Guild" : sub.tier}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  sub.status === "active" ? "bg-green-600/20 text-green-400 border border-green-600/30" :
+                                  sub.status === "cancelled" ? "bg-red-600/20 text-red-400 border border-red-600/30" :
+                                  "bg-gray-600/20 text-gray-400 border border-gray-600/30"
+                                }>
+                                  {sub.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-gray-400 text-sm">
+                                {new Date(sub.createdAt).toLocaleDateString("en-US", {
+                                  year: "numeric", month: "short", day: "numeric"
+                                })}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
               )}
             </div>
           </TabsContent>
