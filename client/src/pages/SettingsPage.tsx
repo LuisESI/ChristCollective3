@@ -131,6 +131,26 @@ export default function SettingsPage() {
 
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
 
+          {/* Membership Upgrade Card */}
+          <div className="p-4 bg-gray-900/40 rounded-xl border border-[#D4AF37]/30">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="font-bold text-white text-sm">Collective Membership</h3>
+              </div>
+              <Badge className="bg-[#D4AF37] text-black text-[10px] px-2 py-0 h-4 font-bold tracking-tight uppercase">Upgrade</Badge>
+            </div>
+            <p className="text-xs text-gray-400 mb-3">
+              Unlock private community access, networking calls, and exclusive member events.
+            </p>
+            <Button 
+              className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold h-9 text-xs"
+              onClick={() => navigate("/memberships")}
+            >
+              View Membership Tiers
+            </Button>
+          </div>
+
           {/* Account Section */}
           <div>
             <div className="flex items-center gap-2 mb-3">
