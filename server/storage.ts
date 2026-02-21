@@ -1115,9 +1115,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePlatformPost(id: number): Promise<void> {
-    await db
-      .delete(platformPosts)
-      .where(eq(platformPosts.id, id));
+    await db.delete(postInteractions).where(eq(postInteractions.postId, id));
+    await db.delete(savedPosts).where(eq(savedPosts.postId, id));
+    await db.delete(postReports).where(eq(postReports.postId, id));
+    await db.delete(platformPosts).where(eq(platformPosts.id, id));
   }
 
   // Post interaction operations
