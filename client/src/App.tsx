@@ -17,6 +17,7 @@ import ManageCampaignsPage from "@/pages/ManageCampaignsPage";
 import BusinessNetworkPage from "@/pages/BusinessNetworkPage";
 import BusinessProfilePage from "@/pages/BusinessProfilePage";
 import MembershipCheckoutPage from "@/pages/MembershipCheckoutPage";
+import MembershipsPage from "@/pages/MembershipsPage";
 import DonationCheckoutPage from "@/pages/DonationCheckoutPage";
 import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -85,6 +86,7 @@ function Router() {
       <Route path="/ministry/create" component={MinistryCreatePage} />
       <Route path="/edit-ministry-profile" component={EditMinistryProfilePage} />
       <Route path="/membership/checkout/:tierId" component={MembershipCheckoutPage} />
+      <Route path="/memberships" component={MembershipsPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/profile/:username" component={ProfilePage} />
       <Route path="/edit-profile" component={EditProfilePage} />
