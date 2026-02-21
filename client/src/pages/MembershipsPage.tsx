@@ -92,9 +92,7 @@ export default function MembershipsPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-16">
           <Badge className="bg-[#D4AF37] text-black mb-4 text-xs tracking-widest">MEMBERSHIPS</Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Unite with the <span className="text-[#D4AF37]">Collective</span>
-          </h1>
+          <img src="/assets/logo.png" alt="Christ Collective" className="h-20 md:h-28 mx-auto mb-4 object-contain" />
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
             Choose the tier that best fits your journey and help us build a global community of faith.
           </p>
