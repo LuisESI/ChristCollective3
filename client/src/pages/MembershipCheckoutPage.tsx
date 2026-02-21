@@ -61,8 +61,7 @@ export default function MembershipCheckoutPage() {
     mutationFn: async (data: { tier: string; fullName: string; email: string; phone: string }) => {
       const res = await apiRequest("/api/membership-subscriptions", {
         method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
+        data,
       });
       return res.json();
     },
