@@ -2209,6 +2209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/membership-subscriptions/:id/activate', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const isUpgrade = req.query.upgrade === "true";
       const sub = await storage.getMembershipSubscription(id);
       if (!sub || sub.userId !== req.user.id) {
         return res.status(404).json({ message: "Membership not found" });
@@ -2218,19 +2219,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.status = "active";
       }
 
-      if (sub.stripeSubscriptionId && !sub.stripeCustomerId) {
+      if (sub.stripeSubscriptionId) {
         try {
           const stripeClient = await getUncachableStripeClient();
           if (stripeClient) {
-            const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
-            if (checkoutSession.customer) {
-              updateData.stripeCustomerId = typeof checkoutSession.customer === 'string' 
-                ? checkoutSession.customer 
-                : checkoutSession.customer.id;
+            const newCheckoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+
+            // Capture customer ID
+            if (!sub.stripeCustomerId && newCheckoutSession.customer) {
+              updateData.stripeCustomerId = typeof newCheckoutSession.customer === 'string' 
+                ? newCheckoutSession.customer 
+                : newCheckoutSession.customer.id;
+            }
+
+            // Handle upgrade: cancel the old Stripe subscription and update tier
+            if (isUpgrade && newCheckoutSession.metadata?.isUpgrade === "true") {
+              const oldSubId = newCheckoutSession.metadata.oldStripeSubscriptionId;
+              if (oldSubId) {
+                try {
+                  await stripeClient.subscriptions.cancel(oldSubId);
+                  console.log(`Upgrade: cancelled old Stripe subscription ${oldSubId}`);
+                } catch (cancelErr) {
+                  console.error("Error cancelling old subscription during upgrade activation:", cancelErr);
+                }
+              }
+              updateData.tier = newCheckoutSession.metadata.tier || "guild";
             }
           }
         } catch (stripeError) {
-          console.error("Error fetching Stripe customer ID during activation:", stripeError);
+          console.error("Error during activation Stripe operations:", stripeError);
         }
       }
 
@@ -2390,22 +2407,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ message: "Payment service is not available" });
       }
 
-      // Cancel existing Stripe subscription if any
+      // Resolve the Stripe customer from the existing subscription so the new
+      // checkout session is linked to the same customer (prevents duplicate charges).
+      let stripeCustomer: string | undefined;
+      let oldStripeSubscriptionId: string | undefined;
+
       if (sub.stripeSubscriptionId) {
         try {
           const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+          if (checkoutSession.customer) {
+            stripeCustomer = typeof checkoutSession.customer === 'string'
+              ? checkoutSession.customer
+              : checkoutSession.customer.id;
+          }
           if (checkoutSession.subscription) {
-            await stripeClient.subscriptions.cancel(checkoutSession.subscription as string);
+            oldStripeSubscriptionId = typeof checkoutSession.subscription === 'string'
+              ? checkoutSession.subscription
+              : checkoutSession.subscription.id;
           }
         } catch (stripeError) {
-          console.error("Error cancelling old Stripe subscription for upgrade:", stripeError);
+          console.error("Error retrieving old checkout session for upgrade:", stripeError);
         }
       }
 
-      const session = await stripeClient.checkout.sessions.create({
+      // Store old session/subscription IDs so we can cancel after successful payment
+      const oldStripeSessionId = sub.stripeSubscriptionId;
+
+      const checkoutParams: any = {
         payment_method_types: ['card'],
         mode: 'subscription',
-        customer_email: sub.email,
         line_items: [{
           price_data: {
             currency: 'usd',
@@ -2423,14 +2453,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: req.user.id,
           tier: "guild",
           isUpgrade: "true",
+          oldStripeSubscriptionId: oldStripeSubscriptionId || "",
+          oldStripeSessionId: oldStripeSessionId || "",
         },
         success_url: `${req.protocol}://${req.get('host')}/membership/success?session_id={CHECKOUT_SESSION_ID}&sub_id=${sub.id}&upgrade=true`,
         cancel_url: `${req.protocol}://${req.get('host')}/memberships`,
-      });
+      };
 
+      // Reuse existing Stripe customer to avoid creating a duplicate
+      if (stripeCustomer) {
+        checkoutParams.customer = stripeCustomer;
+      } else {
+        checkoutParams.customer_email = sub.email;
+      }
+
+      const session = await stripeClient.checkout.sessions.create(checkoutParams);
+
+      // Keep the current tier active until payment succeeds — only store
+      // the new checkout session ID so the activate endpoint can process it.
+      // We do NOT change tier or status yet to avoid leaving the user without
+      // an active membership if they abandon checkout.
       await storage.updateMembershipSubscription(sub.id, {
-        tier: "guild",
-        status: "pending",
         stripeSubscriptionId: session.id,
       });
 
