@@ -91,7 +91,7 @@ const tiers = [
 
 function MembershipManagement({ membership }: { membership: any }) {
   const { toast } = useToast();
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
   const currentTier = tierInfo[membership.tier];
   const TierIcon = currentTier?.icon || Crown;
   const canUpgrade = membership.tier === "collective";
@@ -113,16 +113,14 @@ function MembershipManagement({ membership }: { membership: any }) {
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('/api/membership-subscriptions/cancel', { method: 'POST' });
+      const res = await apiRequest('/api/membership-subscriptions/billing-portal', { method: 'POST' });
       return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Membership cancelled", description: "Your membership has been cancelled. We're sorry to see you go." });
-      queryClient.invalidateQueries({ queryKey: ["/api/membership-subscriptions/me"] });
-      setShowCancelConfirm(false);
+    onSuccess: (data: any) => {
+      if (data.url) window.location.href = data.url;
     },
     onError: () => {
-      toast({ title: "Failed to cancel membership", description: "Please try again or contact support.", variant: "destructive" });
+      toast({ title: "Unable to open billing portal", description: "Please try again or contact support.", variant: "destructive" });
     },
   });
 
@@ -245,41 +243,19 @@ function MembershipManagement({ membership }: { membership: any }) {
               Manage Billing & Payment Method
             </Button>
 
-            {!showCancelConfirm ? (
-              <Button
-                variant="ghost"
-                className="w-full text-gray-500 hover:text-red-400 hover:bg-red-500/10"
-                onClick={() => setShowCancelConfirm(true)}
-              >
+            <Button
+              variant="ghost"
+              className="w-full text-gray-500 hover:text-red-400 hover:bg-red-500/10"
+              onClick={() => cancelMutation.mutate()}
+              disabled={cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
                 <XCircle className="w-4 h-4 mr-2" />
-                Cancel Membership
-              </Button>
-            ) : (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 space-y-3">
-                <p className="text-red-400 text-sm text-center">
-                  Are you sure you want to cancel? You'll lose access to all member benefits immediately.
-                </p>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-gray-700 text-white hover:bg-gray-900"
-                    onClick={() => setShowCancelConfirm(false)}
-                  >
-                    Keep Membership
-                  </Button>
-                  <Button
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => cancelMutation.mutate()}
-                    disabled={cancelMutation.isPending}
-                  >
-                    {cancelMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : null}
-                    Yes, Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
+              )}
+              Cancel Membership
+            </Button>
           </div>
         </div>
       </div>

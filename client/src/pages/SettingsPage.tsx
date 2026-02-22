@@ -31,7 +31,7 @@ export default function SettingsPage() {
   const [wordOfDayNotification, setWordOfDayNotification] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
 
   const { data: membership, isLoading: membershipLoading } = useQuery({
     queryKey: ["/api/membership-subscriptions/me"],
@@ -62,16 +62,14 @@ export default function SettingsPage() {
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest('/api/membership-subscriptions/cancel', { method: 'POST' });
+      const res = await apiRequest('/api/membership-subscriptions/billing-portal', { method: 'POST' });
       return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Membership cancelled", description: "We're sorry to see you go." });
-      queryClient.invalidateQueries({ queryKey: ["/api/membership-subscriptions/me"] });
-      setShowCancelConfirm(false);
+    onSuccess: (data: any) => {
+      if (data.url) window.location.href = data.url;
     },
     onError: () => {
-      toast({ title: "Failed to cancel", description: "Please try again or contact support.", variant: "destructive" });
+      toast({ title: "Unable to open billing portal", description: "Please try again or contact support.", variant: "destructive" });
     },
   });
 
@@ -270,40 +268,18 @@ export default function SettingsPage() {
 
               <Separator className="bg-gray-800" />
 
-              {!showCancelConfirm ? (
-                <button
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-red-500/5 transition-colors"
-                >
+              <button
+                onClick={() => cancelMutation.mutate()}
+                disabled={cancelMutation.isPending}
+                className="w-full flex items-center gap-3 p-4 hover:bg-red-500/5 transition-colors"
+              >
+                {cancelMutation.isPending ? (
+                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                ) : (
                   <XCircle className="w-5 h-5 text-gray-600" />
-                  <p className="text-gray-500 text-sm">Cancel Membership</p>
-                </button>
-              ) : (
-                <div className="p-4 bg-red-500/5 space-y-3">
-                  <p className="text-red-400 text-xs text-center">
-                    Are you sure? You'll lose access to all member benefits immediately.
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-gray-700 text-white hover:bg-gray-900 text-xs h-8"
-                      onClick={() => setShowCancelConfirm(false)}
-                    >
-                      Keep Membership
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs h-8"
-                      onClick={() => cancelMutation.mutate()}
-                      disabled={cancelMutation.isPending}
-                    >
-                      {cancelMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                      Yes, Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
+                )}
+                <p className="text-gray-500 text-sm">Cancel Membership</p>
+              </button>
             </div>
           ) : (
             <div className="p-4 bg-gray-900/40 rounded-xl border border-[#D4AF37]/30">
