@@ -99,7 +99,7 @@ function MembershipManagement({ membership }: { membership: any }) {
   const billingPortalMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest('/api/membership-subscriptions/billing-portal', { method: 'POST' });
-      return res;
+      return res.json();
     },
     onSuccess: (data: any) => {
       if (data.url) {
@@ -113,7 +113,8 @@ function MembershipManagement({ membership }: { membership: any }) {
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/membership-subscriptions/cancel', { method: 'POST' });
+      const res = await apiRequest('/api/membership-subscriptions/cancel', { method: 'POST' });
+      return res.json();
     },
     onSuccess: () => {
       toast({ title: "Membership cancelled", description: "Your membership has been cancelled. We're sorry to see you go." });
@@ -127,7 +128,8 @@ function MembershipManagement({ membership }: { membership: any }) {
 
   const upgradeMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/membership-subscriptions/upgrade', { method: 'POST' });
+      const res = await apiRequest('/api/membership-subscriptions/upgrade', { method: 'POST' });
+      return res.json();
     },
     onSuccess: (data: any) => {
       if (data.checkoutUrl) {
