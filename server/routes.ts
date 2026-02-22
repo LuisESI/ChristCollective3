@@ -2213,11 +2213,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!sub || sub.userId !== req.user.id) {
         return res.status(404).json({ message: "Membership not found" });
       }
-      if (sub.status === "active") {
-        return res.json(sub);
+      const updateData: any = {};
+      if (sub.status !== "active") {
+        updateData.status = "active";
       }
-      const updated = await storage.updateMembershipSubscription(id, { status: "active" });
-      res.json(updated);
+
+      if (sub.stripeSubscriptionId && !sub.stripeCustomerId) {
+        try {
+          const stripeClient = await getUncachableStripeClient();
+          if (stripeClient) {
+            const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+            if (checkoutSession.customer) {
+              updateData.stripeCustomerId = typeof checkoutSession.customer === 'string' 
+                ? checkoutSession.customer 
+                : checkoutSession.customer.id;
+            }
+          }
+        } catch (stripeError) {
+          console.error("Error fetching Stripe customer ID during activation:", stripeError);
+        }
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        const updated = await storage.updateMembershipSubscription(id, updateData);
+        res.json(updated);
+      } else {
+        res.json(sub);
+      }
     } catch (error) {
       console.error("Error activating membership:", error);
       res.status(500).json({ message: "Failed to activate membership" });
@@ -2254,6 +2276,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating membership subscription:", error);
       res.status(500).json({ message: "Failed to update membership" });
+    }
+  });
+
+  // Stripe Billing Portal - manage billing info, payment method, invoice history
+  app.post('/api/membership-subscriptions/billing-portal', isAuthenticated, async (req: any, res) => {
+    try {
+      const sub = await storage.getUserMembershipSubscription(req.user.id);
+      if (!sub) {
+        return res.status(404).json({ message: "No active membership found" });
+      }
+
+      let stripeClient;
+      try {
+        stripeClient = await getUncachableStripeClient();
+      } catch (error) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+      if (!stripeClient) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+
+      let customerId = sub.stripeCustomerId;
+
+      if (!customerId && sub.stripeSubscriptionId) {
+        try {
+          const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+          if (checkoutSession.customer) {
+            customerId = typeof checkoutSession.customer === 'string' 
+              ? checkoutSession.customer 
+              : checkoutSession.customer.id;
+            await storage.updateMembershipSubscription(sub.id, { stripeCustomerId: customerId });
+          }
+        } catch (stripeError) {
+          console.error("Error fetching Stripe customer from session:", stripeError);
+        }
+      }
+
+      if (!customerId) {
+        return res.status(400).json({ message: "No billing information available. Please contact support." });
+      }
+
+      const portalSession = await stripeClient.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${req.protocol}://${req.get('host')}/memberships`,
+      });
+
+      res.json({ url: portalSession.url });
+    } catch (error) {
+      console.error("Error creating billing portal session:", error);
+      res.status(500).json({ message: "Failed to open billing portal" });
+    }
+  });
+
+  // Cancel membership subscription
+  app.post('/api/membership-subscriptions/cancel', isAuthenticated, async (req: any, res) => {
+    try {
+      const sub = await storage.getUserMembershipSubscription(req.user.id);
+      if (!sub) {
+        return res.status(404).json({ message: "No active membership found" });
+      }
+
+      if (sub.stripeSubscriptionId) {
+        let stripeClient;
+        try {
+          stripeClient = await getUncachableStripeClient();
+        } catch (error) {
+          return res.status(503).json({ message: "Payment service is not available" });
+        }
+        if (!stripeClient) {
+          return res.status(503).json({ message: "Payment service is not available" });
+        }
+
+        try {
+          const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+          if (checkoutSession.subscription) {
+            await stripeClient.subscriptions.cancel(checkoutSession.subscription as string);
+          }
+        } catch (stripeError) {
+          console.error("Error cancelling Stripe subscription:", stripeError);
+        }
+      }
+
+      const updated = await storage.updateMembershipSubscription(sub.id, {
+        status: "cancelled",
+        endDate: new Date(),
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error cancelling membership:", error);
+      res.status(500).json({ message: "Failed to cancel membership" });
+    }
+  });
+
+  // Upgrade membership (collective -> guild)
+  app.post('/api/membership-subscriptions/upgrade', isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const sub = await storage.getUserMembershipSubscription(req.user.id);
+      if (!sub || sub.status !== "active") {
+        return res.status(404).json({ message: "No active membership found" });
+      }
+      if (sub.tier === "guild") {
+        return res.status(400).json({ message: "You are already on the highest tier" });
+      }
+
+      let stripeClient;
+      try {
+        stripeClient = await getUncachableStripeClient();
+      } catch (error) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+      if (!stripeClient) {
+        return res.status(503).json({ message: "Payment service is not available" });
+      }
+
+      // Cancel existing Stripe subscription if any
+      if (sub.stripeSubscriptionId) {
+        try {
+          const checkoutSession = await stripeClient.checkout.sessions.retrieve(sub.stripeSubscriptionId);
+          if (checkoutSession.subscription) {
+            await stripeClient.subscriptions.cancel(checkoutSession.subscription as string);
+          }
+        } catch (stripeError) {
+          console.error("Error cancelling old Stripe subscription for upgrade:", stripeError);
+        }
+      }
+
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        customer_email: sub.email,
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: "The Guild Membership",
+              description: "Monthly The Guild Membership - Christ Collective (Upgrade)",
+            },
+            unit_amount: 6000,
+            recurring: { interval: 'month' },
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          membershipSubscriptionId: String(sub.id),
+          userId: req.user.id,
+          tier: "guild",
+          isUpgrade: "true",
+        },
+        success_url: `${req.protocol}://${req.get('host')}/membership/success?session_id={CHECKOUT_SESSION_ID}&sub_id=${sub.id}&upgrade=true`,
+        cancel_url: `${req.protocol}://${req.get('host')}/memberships`,
+      });
+
+      await storage.updateMembershipSubscription(sub.id, {
+        tier: "guild",
+        status: "pending",
+        stripeSubscriptionId: session.id,
+      });
+
+      res.json({ checkoutUrl: session.url });
+    } catch (error) {
+      console.error("Error upgrading membership:", error);
+      res.status(500).json({ message: "Failed to upgrade membership" });
     }
   });
 
