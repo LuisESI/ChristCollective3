@@ -140,7 +140,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 {creatorStatus?.isCreator && (
                   <DropdownMenuItem asChild>
-                    <Link href="/creator-profile">
+                    <Link href="/edit-profile">
                       <div className="cursor-pointer w-full">Creator Profile</div>
                     </Link>
                   </DropdownMenuItem>

@@ -172,8 +172,10 @@ import { z } from "zod";
 
 // Form schemas
 const creatorProfileSchema = z.object({
+  name: z.string().optional(),
   content: z.string().optional(),
   audience: z.string().optional(),
+  bio: z.string().optional(),
   youtubeUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
   tiktokUrl: z.string().optional(),
@@ -235,8 +237,10 @@ export default function EditProfilePage() {
   const creatorForm = useForm({
     resolver: zodResolver(creatorProfileSchema),
     defaultValues: {
+      name: creatorStatus?.creatorProfile?.name || "",
       content: creatorStatus?.creatorProfile?.content || "",
       audience: creatorStatus?.creatorProfile?.audience || "",
+      bio: creatorStatus?.creatorProfile?.bio || "",
       youtubeUrl: "",
       instagramUrl: "",
       tiktokUrl: "",
@@ -288,8 +292,10 @@ export default function EditProfilePage() {
       const linkedinUrl = platforms.find((p: any) => p.platform === 'linkedin')?.profileUrl || "";
       
       creatorForm.reset({
+        name: creator.name || "",
         content: creator.content || "",
         audience: creator.audience || "",
+        bio: creator.bio || "",
         youtubeUrl,
         instagramUrl,
         tiktokUrl,
@@ -1008,6 +1014,24 @@ export default function EditProfilePage() {
                 <CardContent>
                   <Form {...creatorForm}>
                     <form onSubmit={creatorForm.handleSubmit(onCreatorSubmit)} className="space-y-4">
+                      <FormField
+                        control={creatorForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Creator Name</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-800 border-gray-600 text-white"
+                                placeholder="Your creator name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={creatorForm.control}
@@ -1045,6 +1069,25 @@ export default function EditProfilePage() {
                           )}
                         />
                       </div>
+
+                      <FormField
+                        control={creatorForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Bio</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                {...field} 
+                                className="w-full bg-gray-800 border border-gray-600 text-white rounded-md px-3 py-2 text-sm min-h-[80px] resize-none focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                                placeholder="Tell us about yourself and your mission"
+                                rows={3}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       {/* Social Media URLs */}
                       <div className="space-y-3">

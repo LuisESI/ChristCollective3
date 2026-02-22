@@ -26,7 +26,7 @@ import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
 import CreatorsPage from "@/pages/CreatorsPage";
 import CreatorProfilePage from "@/pages/CreatorProfilePage";
-import CreatorProfileManagePage from "@/pages/CreatorProfileManagePage";
+
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminModerationPage from "@/pages/AdminModerationPage";
 import AuthPage from "@/pages/AuthPage";
@@ -95,7 +95,7 @@ function Router() {
       <Route path="/sponsored-creators" component={SponsoredCreatorsPage} />
       <Route path="/creators" component={CreatorsPage} />
       <Route path="/creators/:id" component={CreatorProfilePage} />
-      <Route path="/creator-profile" component={CreatorProfileManagePage} />
+
       <Route path="/ministries" component={MinistriesPage} />
       <Route path="/ministry/:id" component={MinistryProfileViewPage} />
       <Route path="/sponsorship-application" component={SponsorshipApplicationPage} />

@@ -160,7 +160,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
           title: "Welcome, Creator! 🎬",
           description: "Ready to share your faith-based content? Let's set up your creator profile and get you started with sponsorship opportunities.",
         });
-        setLocation("/creator-profile");
+        setLocation("/edit-profile");
       } else if (registerData.userType === "business_owner") {
         toast({
           title: "Welcome, Business Owner! 💼",
