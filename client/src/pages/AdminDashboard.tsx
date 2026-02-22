@@ -5,39 +5,43 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package, Crown } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package, Crown, Shield, LayoutDashboard, FileText, Handshake, CreditCard } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication, MembershipSubscription } from "@shared/schema";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
+type AdminSection = "overview" | "ministries" | "campaigns" | "all-campaigns" | "sponsorships" | "transactions" | "members" | "users";
+
+const sidebarItems: { id: AdminSection; label: string; icon: any; badge?: boolean }[] = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "ministries", label: "Ministries", icon: Building, badge: true },
+  { id: "campaigns", label: "Pending Campaigns", icon: Clock, badge: true },
+  { id: "all-campaigns", label: "All Campaigns", icon: FileText },
+  { id: "sponsorships", label: "Sponsorships", icon: Handshake, badge: true },
+  { id: "transactions", label: "Transactions", icon: Receipt },
+  { id: "members", label: "Members", icon: Crown },
+  { id: "users", label: "Users", icon: Users },
+];
+
 export default function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState<AdminSection>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-
-
-  // Redirect if not authenticated or not admin
   useEffect(() => {
     if (!authLoading && user && !user.isAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access this page.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 500);
-      return;
+      toast({ title: "Access Denied", description: "You don't have permission to access this page.", variant: "destructive" });
+      setTimeout(() => { window.location.href = "/"; }, 500);
     }
   }, [user, authLoading, toast]);
 
@@ -51,25 +55,21 @@ export default function AdminDashboard() {
     enabled: user?.isAdmin === true,
   });
 
-  // Fetch all users for admin management
   const { data: allUsers = [], isLoading: usersLoading } = useQuery({
     queryKey: ["/api/admin/users"],
     enabled: user?.isAdmin === true,
   });
 
-  // Fetch all transactions
   const { data: allTransactions = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/admin/transactions"],
     enabled: user?.isAdmin === true,
   });
 
-  // Fetch sponsorship applications
   const { data: sponsorshipApplications = [], isLoading: applicationsLoading } = useQuery({
     queryKey: ["/api/admin/sponsorship-applications"],
     enabled: user?.isAdmin === true,
   });
 
-  // Fetch pending ministries for approval
   const { data: pendingMinistries = [], isLoading: ministriesLoading } = useQuery({
     queryKey: ["/api/ministries/pending"],
     enabled: user?.isAdmin === true,
@@ -80,233 +80,86 @@ export default function AdminDashboard() {
     enabled: user?.isAdmin === true,
   });
 
+  const handleMutationError = (error: Error) => {
+    if (isUnauthorizedError(error)) {
+      toast({ title: "Unauthorized", description: "You are logged out. Logging in again...", variant: "destructive" });
+      setTimeout(() => { window.location.href = "/api/login"; }, 500);
+      return;
+    }
+    toast({ title: "Error", description: error.message, variant: "destructive" });
+  };
+
   const approveMutation = useMutation({
-    mutationFn: async (campaignId: string) => {
-      await apiRequest(`/api/admin/campaigns/${campaignId}/approve`, { method: "POST" });
-    },
+    mutationFn: async (campaignId: string) => { await apiRequest(`/api/admin/campaigns/${campaignId}/approve`, { method: "POST" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
-      toast({
-        title: "Campaign Approved",
-        description: "The campaign has been approved and is now live.",
-      });
+      toast({ title: "Campaign Approved", description: "The campaign has been approved and is now live." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async (campaignId: string) => {
-      await apiRequest(`/api/admin/campaigns/${campaignId}/reject`, { method: "POST" });
-    },
+    mutationFn: async (campaignId: string) => { await apiRequest(`/api/admin/campaigns/${campaignId}/reject`, { method: "POST" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
-      toast({
-        title: "Campaign Rejected",
-        description: "The campaign has been rejected.",
-      });
+      toast({ title: "Campaign Rejected", description: "The campaign has been rejected." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (campaignId: string) => {
-      await apiRequest(`/api/admin/campaigns/${campaignId}`, { method: "DELETE" });
-    },
+    mutationFn: async (campaignId: string) => { await apiRequest(`/api/admin/campaigns/${campaignId}`, { method: "DELETE" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
-      toast({
-        title: "Campaign Deleted",
-        description: "The campaign has been permanently removed.",
-      });
+      toast({ title: "Campaign Deleted", description: "The campaign has been permanently removed." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
-  // Sponsorship application mutations
   const approveApplicationMutation = useMutation({
-    mutationFn: async (applicationId: number) => {
-      await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/approve`, { method: "POST" });
-    },
+    mutationFn: async (applicationId: number) => { await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/approve`, { method: "POST" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
-      toast({
-        title: "Application Approved",
-        description: "The sponsorship application has been approved.",
-      });
+      toast({ title: "Application Approved", description: "The sponsorship application has been approved." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
   const rejectApplicationMutation = useMutation({
-    mutationFn: async (applicationId: number) => {
-      await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/reject`, { method: "POST" });
-    },
+    mutationFn: async (applicationId: number) => { await apiRequest(`/api/admin/sponsorship-applications/${applicationId}/reject`, { method: "POST" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/sponsorship-applications"] });
-      toast({
-        title: "Application Rejected",
-        description: "The sponsorship application has been rejected.",
-      });
+      toast({ title: "Application Rejected", description: "The sponsorship application has been rejected." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
-  // Ministry approval mutations
   const approveMinistryMutation = useMutation({
-    mutationFn: async (ministryId: number) => {
-      await apiRequest(`/api/ministries/${ministryId}/approve`, { method: "PATCH" });
-    },
+    mutationFn: async (ministryId: number) => { await apiRequest(`/api/ministries/${ministryId}/approve`, { method: "PATCH" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/ministries"] });
-      toast({
-        title: "Ministry Approved",
-        description: "The ministry profile has been approved and is now live.",
-      });
+      toast({ title: "Ministry Approved", description: "The ministry profile has been approved and is now live." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
   const rejectMinistryMutation = useMutation({
-    mutationFn: async (ministryId: number) => {
-      await apiRequest(`/api/ministries/${ministryId}/reject`, { method: "PATCH" });
-    },
+    mutationFn: async (ministryId: number) => { await apiRequest(`/api/ministries/${ministryId}/reject`, { method: "PATCH" }); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ministries/pending"] });
-      toast({
-        title: "Ministry Rejected",
-        description: "The ministry profile has been rejected and removed.",
-      });
+      toast({ title: "Ministry Rejected", description: "The ministry profile has been rejected and removed." });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onError: handleMutationError,
   });
 
   if (authLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -315,1111 +168,804 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-primary mb-2">Access Denied</h2>
+          <Shield className="h-12 w-12 text-[#D4AF37] mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">Access Denied</h2>
           <p className="text-gray-400">You don't have permission to access this page.</p>
         </div>
       </div>
     );
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+  const formatDate = (date: string | Date) => new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Filter users based on search query
   const filteredUsers = Array.isArray(allUsers) ? allUsers.filter((user: User) =>
-    !searchQuery || 
+    !searchQuery ||
     user.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.username?.toLowerCase().includes(searchQuery.toLowerCase())
   ) : [];
 
+  const pendingMinistriesCount = Array.isArray(pendingMinistries) ? pendingMinistries.length : 0;
+  const pendingCampaignsCount = Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0;
+  const pendingSponsorshipsCount = Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((a: SponsorshipApplication) => a.status === "pending").length : 0;
+  const totalRaised = Array.isArray(allTransactions) ? allTransactions.reduce((sum: number, t: Donation) => sum + (Number(t.amount) || 0), 0) : 0;
+
+  const getBadgeCount = (id: AdminSection): number => {
+    if (id === "ministries") return pendingMinistriesCount;
+    if (id === "campaigns") return pendingCampaignsCount;
+    if (id === "sponsorships") return pendingSponsorshipsCount;
+    return 0;
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">Admin Dashboard</h1>
-          <p className="text-gray-400">Manage campaigns, transactions, and user accounts.</p>
-        </div>
+    <div className="min-h-screen bg-black text-white flex">
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
+      )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Pending Ministries</p>
-                  <p className="text-2xl font-bold text-green-400 mt-1">
-                    {ministriesLoading ? "..." : Array.isArray(pendingMinistries) ? pendingMinistries.length : 0}
-                  </p>
-                </div>
-                <Building className="h-8 w-8 text-green-400/50" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Pending Campaigns</p>
-                  <p className="text-2xl font-bold text-primary mt-1">
-                    {pendingLoading ? "..." : Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0}
-                  </p>
-                </div>
-                <Clock className="h-8 w-8 text-primary/50" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Users</p>
-                  <p className="text-2xl font-bold text-blue-400 mt-1">
-                    {usersLoading ? "..." : Array.isArray(allUsers) ? allUsers.length : 0}
-                  </p>
-                </div>
-                <Users className="h-8 w-8 text-gray-400/50" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Raised</p>
-                  <p className="text-xl font-bold text-primary mt-1">
-                    {transactionsLoading 
-                      ? "..." 
-                      : formatCurrency(
-                          Array.isArray(allTransactions) ? allTransactions.reduce((sum: number, transaction: Donation) => 
-                            sum + (Number(transaction.amount) || 0), 0
-                          ) : 0
-                        )
-                    }
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-primary/50" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Shop Management Quick Links */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white mb-3">Shop Management</h3>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/admin/products">
-              <Button className="bg-primary hover:bg-primary/90 text-black gap-2" data-testid="link-admin-products">
-                <ShoppingBag className="h-4 w-4" />
-                Manage Products
-              </Button>
-            </Link>
-            <Link href="/admin/orders">
-              <Button className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 gap-2" data-testid="link-admin-orders">
-                <Package className="h-4 w-4" />
-                Manage Orders
-              </Button>
-            </Link>
-            <Link href="/admin/moderation">
-              <Button className="bg-yellow-700 hover:bg-yellow-600 text-white gap-2" data-testid="link-admin-moderation">
-                <Eye className="h-4 w-4" />
-                Content Moderation
-              </Button>
-            </Link>
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-screen w-64 bg-[#0A0A0A] border-r border-gray-800/60 flex flex-col transition-transform duration-200 ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+        <div className="p-5 border-b border-gray-800/60">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center">
+              <Shield className="h-5 w-5 text-[#D4AF37]" />
+            </div>
+            <div>
+              <h2 className="font-bold text-white text-sm">Admin Panel</h2>
+              <p className="text-xs text-gray-500">Christ Collective</p>
+            </div>
           </div>
         </div>
 
-        <Tabs defaultValue="ministries" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 pt-2 gap-3 shadow-lg shadow-black/20 items-start min-h-[90px]">
-            <TabsTrigger value="ministries" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Ministries</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  {Array.isArray(pendingMinistries) ? pendingMinistries.length : 0}
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Campaigns</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  {Array.isArray(pendingCampaigns) ? pendingCampaigns.length : 0}
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Sponsors</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  {Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((app: SponsorshipApplication) => app.status === 'pending').length : 0}
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="campaigns" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">All Campaigns</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  Manage
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="transactions" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Transactions</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  View
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="members" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Members</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  {Array.isArray(membershipSubs) ? membershipSubs.length : 0}
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="users" className="relative text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/90 data-[state=active]:text-black data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:bg-gray-800/50 hover:text-white transition-all duration-200 px-3 py-3 rounded-lg border border-transparent data-[state=active]:border-primary/20 hidden lg:flex h-[70px]">
-              <div className="flex flex-col items-center justify-center gap-1.5 h-full">
-                <span className="font-semibold text-xs">Users</span>
-                <span className="text-xs opacity-75 bg-gray-700/60 data-[state=active]:bg-black/20 px-2 py-0.5 rounded-full">
-                  Manage
-                </span>
-              </div>
-            </TabsTrigger>
-          </TabsList>
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            const badgeCount = item.badge ? getBadgeCount(item.id) : 0;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActiveSection(item.id); setMobileSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20" : "text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent"}`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">{item.label}</span>
+                {badgeCount > 0 && (
+                  <span className="min-w-[20px] h-5 flex items-center justify-center rounded-full bg-[#D4AF37] text-black text-xs font-bold px-1.5">
+                    {badgeCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
 
-          <TabsContent value="transactions" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">All Transactions</h2>
-              {transactionsLoading ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="h-3 bg-gray-700 rounded"></div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : Array.isArray(allTransactions) && allTransactions.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Receipt className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No transactions found.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-gray-700">
-                          <TableHead className="text-gray-300">Date</TableHead>
-                          <TableHead className="text-gray-300">Amount</TableHead>
-                          <TableHead className="text-gray-300">Campaign</TableHead>
-                          <TableHead className="text-gray-300">Transaction ID</TableHead>
-                          <TableHead className="text-gray-300">Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {Array.isArray(allTransactions) && allTransactions.map((transaction: Donation) => (
-                          <TableRow key={transaction.id} className="border-gray-700">
-                            <TableCell className="text-gray-300">
-                              <div className="flex items-center space-x-2">
-                                <Calendar className="h-4 w-4 text-gray-500" />
-                                <span>{formatDate(transaction.createdAt || new Date())}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-green-400 font-medium">
-                              {formatCurrency(Number(transaction.amount))}
-                            </TableCell>
-                            <TableCell className="text-gray-300">
-                              {transaction.campaignId}
-                            </TableCell>
-                            <TableCell className="text-gray-400 font-mono text-sm">
-                              {transaction.stripePaymentId}
-                            </TableCell>
-                            <TableCell>
-                              <Badge className="bg-green-900 text-green-300">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Completed
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              )}
+          <div className="pt-3 mt-3 border-t border-gray-800/60 space-y-1">
+            <Link href="/admin/products">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                <ShoppingBag className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Products</span>
+              </button>
+            </Link>
+            <Link href="/admin/orders">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                <Package className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Orders</span>
+              </button>
+            </Link>
+            <Link href="/admin/moderation">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                <Eye className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Moderation</span>
+              </button>
+            </Link>
+          </div>
+        </nav>
+      </aside>
+
+      <main className="flex-1 min-h-screen pb-24">
+        <header className="sticky top-0 z-30 bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-gray-800/60 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setMobileSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-800 text-gray-400">
+                <LayoutDashboard className="h-5 w-5" />
+              </button>
+              <h1 className="text-xl font-bold text-white">
+                {sidebarItems.find(s => s.id === activeSection)?.label || "Dashboard"}
+              </h1>
             </div>
-          </TabsContent>
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                Admin Active
+              </div>
+            </div>
+          </div>
+        </header>
 
-          <TabsContent value="members" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
-                <Crown className="h-6 w-6" />
-                Membership Subscriptions
-              </h2>
-              {membershipsLoading ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-3">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-4 bg-gray-700 rounded"></div>
-                      ))}
+        <div className="p-6">
+          {activeSection === "overview" && <OverviewSection
+            pendingMinistriesCount={pendingMinistriesCount}
+            pendingCampaignsCount={pendingCampaignsCount}
+            totalUsers={Array.isArray(allUsers) ? allUsers.length : 0}
+            totalRaised={totalRaised}
+            membershipSubs={membershipSubs}
+            formatCurrency={formatCurrency}
+            ministriesLoading={ministriesLoading}
+            pendingLoading={pendingLoading}
+            usersLoading={usersLoading}
+            transactionsLoading={transactionsLoading}
+            membershipsLoading={membershipsLoading}
+            setActiveSection={setActiveSection}
+          />}
+
+          {activeSection === "ministries" && <MinistriesSection
+            pendingMinistries={pendingMinistries}
+            ministriesLoading={ministriesLoading}
+            approveMinistryMutation={approveMinistryMutation}
+            rejectMinistryMutation={rejectMinistryMutation}
+            formatDate={formatDate}
+          />}
+
+          {activeSection === "campaigns" && <PendingCampaignsSection
+            pendingCampaigns={pendingCampaigns}
+            pendingLoading={pendingLoading}
+            approveMutation={approveMutation}
+            rejectMutation={rejectMutation}
+            deleteMutation={deleteMutation}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+          />}
+
+          {activeSection === "all-campaigns" && <AllCampaignsSection
+            allCampaigns={allCampaigns}
+            campaignsLoading={campaignsLoading}
+            deleteMutation={deleteMutation}
+            formatCurrency={formatCurrency}
+          />}
+
+          {activeSection === "sponsorships" && <SponsorshipsSection
+            sponsorshipApplications={sponsorshipApplications}
+            applicationsLoading={applicationsLoading}
+            approveApplicationMutation={approveApplicationMutation}
+            rejectApplicationMutation={rejectApplicationMutation}
+          />}
+
+          {activeSection === "transactions" && <TransactionsSection
+            allTransactions={allTransactions}
+            transactionsLoading={transactionsLoading}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+          />}
+
+          {activeSection === "members" && <MembersSection
+            membershipSubs={membershipSubs}
+            membershipsLoading={membershipsLoading}
+          />}
+
+          {activeSection === "users" && <UsersSection
+            filteredUsers={filteredUsers}
+            usersLoading={usersLoading}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setSelectedUser={setSelectedUser}
+            formatDate={formatDate}
+          />}
+        </div>
+      </main>
+
+      {selectedUser && (
+        <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+          <DialogContent className="max-w-4xl bg-[#0A0A0A] border-gray-800 text-white">
+            <DialogHeader>
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-14 w-14 border-2 border-[#D4AF37]/30">
+                  <AvatarImage src={selectedUser.profileImageUrl || undefined} />
+                  <AvatarFallback className="bg-gray-800 text-[#D4AF37] text-lg font-bold">{getUserInitials(selectedUser)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-white">{getUserDisplayName(selectedUser)}</DialogTitle>
+                  <DialogDescription className="text-gray-400">@{selectedUser.username} · {selectedUser.isAdmin ? "Administrator" : "User"}</DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800/60">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Contact</h4>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2.5 text-sm">
+                      <Mail className="h-4 w-4 text-[#D4AF37]" />
+                      <span className="text-gray-300">{selectedUser.email || "No email"}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ) : !Array.isArray(membershipSubs) || membershipSubs.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Crown className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No membership subscriptions yet.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <Card className="bg-gray-900/50 border-gray-700">
-                      <CardContent className="p-4">
-                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Members</p>
-                        <p className="text-2xl font-bold text-primary mt-1">{membershipSubs.length}</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-gray-900/50 border-gray-700">
-                      <CardContent className="p-4">
-                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Active</p>
-                        <p className="text-2xl font-bold text-green-400 mt-1">
-                          {membershipSubs.filter((s: MembershipSubscription) => s.status === "active").length}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-gray-900/50 border-gray-700">
-                      <CardContent className="p-4">
-                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Collective</p>
-                        <p className="text-2xl font-bold text-[#D4AF37] mt-1">
-                          {membershipSubs.filter((s: MembershipSubscription) => s.tier === "collective").length}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-gray-900/50 border-gray-700">
-                      <CardContent className="p-4">
-                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Guild</p>
-                        <p className="text-2xl font-bold text-[#D4AF37] mt-1">
-                          {membershipSubs.filter((s: MembershipSubscription) => s.tier === "guild").length}
-                        </p>
-                      </CardContent>
-                    </Card>
+                    {selectedUser.phone && (
+                      <div className="flex items-center gap-2.5 text-sm">
+                        <Phone className="h-4 w-4 text-[#D4AF37]" />
+                        <span className="text-gray-300">{selectedUser.phone}</span>
+                      </div>
+                    )}
+                    {selectedUser.location && (
+                      <div className="flex items-center gap-2.5 text-sm">
+                        <MapPin className="h-4 w-4 text-[#D4AF37]" />
+                        <span className="text-gray-300">{selectedUser.location}</span>
+                      </div>
+                    )}
                   </div>
-
-                  <Card className="bg-gray-900 border-gray-800">
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-gray-700">
-                            <TableHead className="text-gray-300">Member</TableHead>
-                            <TableHead className="text-gray-300">Email</TableHead>
-                            <TableHead className="text-gray-300">Phone</TableHead>
-                            <TableHead className="text-gray-300">Tier</TableHead>
-                            <TableHead className="text-gray-300">Status</TableHead>
-                            <TableHead className="text-gray-300">Joined</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {membershipSubs.map((sub: MembershipSubscription) => (
-                            <TableRow key={sub.id} className="border-gray-800 hover:bg-gray-800/50">
-                              <TableCell className="text-white font-medium">{sub.fullName}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2 text-gray-300">
-                                  <Mail className="h-3.5 w-3.5 text-gray-500" />
-                                  <span className="text-sm">{sub.email}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {sub.phone ? (
-                                  <div className="flex items-center gap-2 text-gray-300">
-                                    <Phone className="h-3.5 w-3.5 text-gray-500" />
-                                    <span className="text-sm">{sub.phone}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-600 text-sm">—</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={
-                                  sub.tier === "guild"
-                                    ? "bg-gradient-to-r from-[#D4AF37] to-[#F5E6A3] text-black"
-                                    : sub.tier === "collective"
-                                    ? "bg-[#D4AF37] text-black"
-                                    : "bg-gray-700 text-gray-300"
-                                }>
-                                  {sub.tier === "collective" ? "The Collective" : sub.tier === "guild" ? "The Guild" : sub.tier}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={
-                                  sub.status === "active" ? "bg-green-600/20 text-green-400 border border-green-600/30" :
-                                  sub.status === "cancelled" ? "bg-red-600/20 text-red-400 border border-red-600/30" :
-                                  "bg-gray-600/20 text-gray-400 border border-gray-600/30"
-                                }>
-                                  {sub.status}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-gray-400 text-sm">
-                                {new Date(sub.createdAt).toLocaleDateString("en-US", {
-                                  year: "numeric", month: "short", day: "numeric"
-                                })}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="users" className="space-y-6">
-            <div className="mt-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-primary">User Management</h2>
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <Input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-gray-800 border-gray-700 text-white"
-                  />
                 </div>
-              </div>
 
-              {usersLoading ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="h-3 bg-gray-700 rounded"></div>
-                        ))}
-                      </div>
+                <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800/60">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Account</h4>
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">ID</span>
+                      <span className="text-gray-300 font-mono text-xs">{selectedUser.id}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ) : filteredUsers.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No users found.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-gray-700">
-                          <TableHead className="text-gray-300">User</TableHead>
-                          <TableHead className="text-gray-300">Email</TableHead>
-                          <TableHead className="text-gray-300">Joined</TableHead>
-                          <TableHead className="text-gray-300">Status</TableHead>
-                          <TableHead className="text-gray-300">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredUsers.map((user: User) => (
-                          <TableRow key={user.id} className="border-gray-700">
-                            <TableCell className="text-gray-300">
-                              <div className="flex items-center space-x-3">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage src={user.profileImageUrl || undefined} />
-                                  <AvatarFallback className="bg-gray-700 text-gray-300">
-                                    {getUserInitials(user)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">{getUserDisplayName(user)}</p>
-                                  <p className="text-sm text-gray-500">@{user.username}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-gray-300">
-                              <div className="flex items-center space-x-2">
-                                <Mail className="h-4 w-4 text-gray-500" />
-                                <span>{user.email}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-gray-400">
-                              {formatDate(user.createdAt || new Date())}
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={user.isAdmin ? "bg-purple-900 text-purple-300" : "bg-green-900 text-green-300"}>
-                                <UserCheck className="h-3 w-3 mr-1" />
-                                {user.isAdmin ? "Admin" : "User"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                                onClick={() => setSelectedUser(user)}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View Details
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="campaigns" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">All Campaigns</h2>
-              {campaignsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Card key={i} className="bg-gray-900 border-gray-800">
-                      <CardContent className="p-6">
-                        <div className="animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
-                          <div className="h-8 bg-gray-700 rounded w-20"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : Array.isArray(allCampaigns) && allCampaigns.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Building className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No active campaigns found.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {Array.isArray(allCampaigns) && allCampaigns.map((campaign: Campaign) => (
-                    <Card key={campaign.id} className="bg-gray-900 border-gray-800">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-white">{campaign.title}</CardTitle>
-                            <CardDescription className="text-gray-400 mt-2">
-                              {formatCurrency(Number(campaign.currentAmount))} of {formatCurrency(Number(campaign.goal))} raised • 
-                              Status: {campaign.status}
-                            </CardDescription>
-                          </div>
-                          <Badge className="bg-green-900 text-green-300">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between items-center">
-                          <div className="flex-1">
-                            <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                              <div
-                                className="bg-primary h-2 rounded-full shadow-lg shadow-primary/50"
-                                style={{
-                                  width: `${Math.min(
-                                    (Number(campaign.currentAmount) / Number(campaign.goal)) * 100,
-                                    100
-                                  )}%`,
-                                }}
-                              ></div>
-                            </div>
-                            <p className="text-sm text-gray-400">
-                              {Math.round((Number(campaign.currentAmount) / Number(campaign.goal)) * 100)}% funded
-                            </p>
-                          </div>
-                          <div className="ml-4 flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
-                              onClick={() => {/* Add view transactions functionality */}}
-                            >
-                              <Receipt className="h-4 w-4 mr-1" />
-                              Transactions
-                            </Button>
-                            <Button
-                              onClick={() => deleteMutation.mutate(campaign.id)}
-                              disabled={deleteMutation.isPending}
-                              variant="outline"
-                              size="sm"
-                              className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="sponsorships" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Sponsorship Applications</h2>
-              {applicationsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="bg-gray-900 border-gray-800">
-                      <CardContent className="p-6">
-                        <div className="animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
-                          <div className="h-8 bg-gray-700 rounded w-20"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : Array.isArray(sponsorshipApplications) && sponsorshipApplications.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <UserCheck className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No sponsorship applications yet.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {Array.isArray(sponsorshipApplications) && sponsorshipApplications.map((application: SponsorshipApplication) => (
-                    <Card key={application.id} className="bg-gray-900 border-gray-800">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="text-white">{application.name}</CardTitle>
-                            <CardDescription className="text-gray-400 mt-1">
-                              {application.email}
-                            </CardDescription>
-                            
-                            {/* Platforms */}
-                            <div className="mt-3">
-                              <p className="text-sm font-medium text-gray-300 mb-2">Platforms:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {Array.isArray(application.platforms) && application.platforms.map((platform: any, index: number) => (
-                                  <a
-                                    key={index}
-                                    href={platform.profileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-block"
-                                  >
-                                    <Badge variant="outline" className="text-xs hover:bg-blue-900 hover:border-blue-600 transition-colors cursor-pointer">
-                                      <ExternalLink className="h-3 w-3 mr-1" />
-                                      {platform.platform} ({platform.subscriberCount ? platform.subscriberCount.toLocaleString() : 'N/A'} followers)
-                                    </Badge>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Content Description */}
-                            <div className="mt-3">
-                              <p className="text-sm font-medium text-gray-300">Content:</p>
-                              <p className="text-gray-400 text-sm mt-1 line-clamp-2">{application.content}</p>
-                            </div>
-
-                            {/* Target Audience */}
-                            {application.audience && (
-                              <div className="mt-2">
-                                <p className="text-sm font-medium text-gray-300">Target Audience:</p>
-                                <p className="text-gray-400 text-sm">{application.audience}</p>
-                              </div>
-                            )}
-
-                            {/* Message */}
-                            {application.message && (
-                              <div className="mt-3">
-                                <p className="text-sm font-medium text-gray-300">Why they want to join:</p>
-                                <p className="text-gray-400 text-sm mt-1 line-clamp-3">{application.message}</p>
-                              </div>
-                            )}
-
-                            <div className="mt-3 text-xs text-gray-500">
-                              Applied: {application.createdAt ? formatDate(application.createdAt) : 'Unknown'}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 ml-4">
-                            <Badge 
-                              className={
-                                application.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
-                                application.status === 'approved' ? 'bg-green-900 text-green-300' :
-                                'bg-red-900 text-red-300'
-                              }
-                            >
-                              {application.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                              {application.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
-                              {application.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
-                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      {application.status === 'pending' && (
-                        <CardContent>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-green-700 hover:bg-green-600 text-white"
-                              onClick={() => approveApplicationMutation.mutate(application.id)}
-                              disabled={approveApplicationMutation.isPending}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              {approveApplicationMutation.isPending ? "Approving..." : "Approve"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => rejectApplicationMutation.mutate(application.id)}
-                              disabled={rejectApplicationMutation.isPending}
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              {rejectApplicationMutation.isPending ? "Rejecting..." : "Reject"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ministries" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Ministry Profile Approvals</h2>
-              {ministriesLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="bg-gray-900 border-gray-800">
-                      <CardContent className="p-6">
-                        <div className="animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
-                          <div className="h-8 bg-gray-700 rounded w-20"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : Array.isArray(pendingMinistries) && pendingMinistries.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Building className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No pending ministry profiles.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-6">
-                  {Array.isArray(pendingMinistries) && pendingMinistries.map((ministry: any) => (
-                    <Card key={ministry.id} className="bg-gray-900/50 border-gray-700 backdrop-blur overflow-hidden">
-                      <div className="p-6">
-                        <div className="flex flex-col sm:flex-row gap-6">
-                          {/* Ministry Logo */}
-                          <div className="flex-shrink-0">
-                            <Avatar className="h-20 w-20 mx-auto sm:mx-0">
-                              <AvatarImage src={ministry.logo} alt={ministry.name} />
-                              <AvatarFallback className="bg-primary text-black text-2xl font-bold">
-                                {ministry.name?.charAt(0) || 'M'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </div>
-                          
-                          {/* Ministry Details */}
-                          <div className="flex-1 min-w-0 text-center sm:text-left">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                              <div>
-                                <h3 className="text-xl font-bold text-white mb-2">{ministry.name}</h3>
-                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                                  {ministry.denomination && (
-                                    <Badge variant="outline" className="text-xs bg-blue-900/30 border-blue-600 text-blue-300">
-                                      {ministry.denomination}
-                                    </Badge>
-                                  )}
-                                  <Badge className="bg-yellow-900/30 border-yellow-600 text-yellow-300">
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    Pending Review
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Description */}
-                            <div className="mb-6">
-                              <p className="text-gray-300 text-sm leading-relaxed">
-                                {ministry.description}
-                              </p>
-                            </div>
-
-                            {/* Contact Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
-                                  <Mail className="h-4 w-4 mr-2 text-primary" />
-                                  <span className="break-all">{ministry.email}</span>
-                                </div>
-                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
-                                  <Phone className="h-4 w-4 mr-2 text-primary" />
-                                  <span>{ministry.phone}</span>
-                                </div>
-                              </div>
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
-                                  <MapPin className="h-4 w-4 mr-2 text-primary" />
-                                  <span className="break-words">{ministry.address}</span>
-                                </div>
-                                {ministry.website && (
-                                  <div className="flex items-center justify-center sm:justify-start text-sm text-gray-400">
-                                    <ExternalLink className="h-4 w-4 mr-2 text-primary" />
-                                    <a 
-                                      href={ministry.website} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-primary hover:underline break-all"
-                                    >
-                                      {ministry.website}
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-3 items-center">
-                              <div className="flex gap-3">
-                                <Button
-                                  size="sm"
-                                  className="bg-green-700 hover:bg-green-600 text-white px-6"
-                                  onClick={() => approveMinistryMutation.mutate(ministry.id)}
-                                  disabled={approveMinistryMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  {approveMinistryMutation.isPending ? "Approving..." : "Approve"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="px-6"
-                                  onClick={() => rejectMinistryMutation.mutate(ministry.id)}
-                                  disabled={rejectMinistryMutation.isPending}
-                                >
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  {rejectMinistryMutation.isPending ? "Rejecting..." : "Reject"}
-                                </Button>
-                              </div>
-                              <div className="text-xs text-gray-500 sm:ml-auto">
-                                Submitted: {ministry.createdAt ? formatDate(ministry.createdAt) : 'Unknown'}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="pending" className="space-y-6">
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Pending Campaign Approvals</h2>
-              {pendingLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="bg-gray-900 border-gray-800">
-                      <CardContent className="p-6">
-                        <div className="animate-pulse">
-                          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
-                          <div className="h-8 bg-gray-700 rounded w-20"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : Array.isArray(pendingCampaigns) && pendingCampaigns.length === 0 ? (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-6 text-center">
-                    <Clock className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No pending campaigns to review.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {Array.isArray(pendingCampaigns) && pendingCampaigns.map((campaign: Campaign) => (
-                    <Card key={campaign.id} className="bg-gray-900 border-gray-800">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="text-white">{campaign.title}</CardTitle>
-                            <CardDescription className="text-gray-400 mt-2">
-                              Goal: {formatCurrency(Number(campaign.goal))}
-                            </CardDescription>
-                            <p className="text-gray-300 mt-3 line-clamp-3">{campaign.description}</p>
-                          </div>
-                          <Badge className="bg-yellow-900 text-yellow-300 ml-4">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pending
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm text-gray-400">
-                            <p>Created: {formatDate(campaign.createdAt || new Date())}</p>
-                            {campaign.image && (
-                              <p className="mt-1">
-                                <span className="text-green-400">✓</span> Image attached
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex space-x-3">
-                            <Button
-                              onClick={() => approveMutation.mutate(campaign.id)}
-                              disabled={approveMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700 text-white"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Approve
-                            </Button>
-                            <Button
-                              onClick={() => rejectMutation.mutate(campaign.id)}
-                              disabled={rejectMutation.isPending}
-                              variant="outline"
-                              className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Reject
-                            </Button>
-                            <Button
-                              onClick={() => deleteMutation.mutate(campaign.id)}
-                              disabled={deleteMutation.isPending}
-                              variant="outline"
-                              className="border-gray-600 text-gray-400 hover:bg-gray-600 hover:text-white"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* User Details Modal */}
-        {selectedUser && (
-          <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-            <DialogContent className="max-w-4xl bg-gray-900 border-gray-800 text-white">
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={selectedUser.profileImageUrl || undefined} />
-                      <AvatarFallback className="bg-gray-700 text-gray-300 text-lg">
-                        {getUserInitials(selectedUser)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <DialogTitle className="text-2xl font-bold text-white">
-                        {getUserDisplayName(selectedUser)}
-                      </DialogTitle>
-                      <DialogDescription className="text-gray-400">
-                        @{selectedUser.username} • {selectedUser.isAdmin ? 'Administrator' : 'User'}
-                      </DialogDescription>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Role</span>
+                      <Badge className={selectedUser.isAdmin ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30" : "bg-gray-800 text-gray-300 border border-gray-700"}>
+                        {selectedUser.isAdmin ? "Admin" : "User"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Joined</span>
+                      <span className="text-gray-300">{formatDate(selectedUser.createdAt || new Date())}</span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedUser(null)}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
                 </div>
-              </DialogHeader>
-
-              <div className="space-y-6 mt-6">
-                {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="bg-gray-800 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-white flex items-center">
-                        <Mail className="h-5 w-5 mr-2 text-primary" />
-                        Contact Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <Mail className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-300">{selectedUser.email || 'No email provided'}</span>
-                      </div>
-                      {selectedUser.phone && (
-                        <div className="flex items-center space-x-3">
-                          <Phone className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-300">{selectedUser.phone}</span>
-                        </div>
-                      )}
-                      {selectedUser.location && (
-                        <div className="flex items-center space-x-3">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-300">{selectedUser.location}</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gray-800 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-white flex items-center">
-                        <Calendar className="h-5 w-5 mr-2 text-primary" />
-                        Account Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">User ID:</span>
-                        <span className="text-gray-300 font-mono text-sm">{selectedUser.id}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Account Type:</span>
-                        <Badge className={selectedUser.isAdmin ? "bg-purple-900 text-purple-300" : "bg-green-900 text-green-300"}>
-                          {selectedUser.isAdmin ? "Administrator" : "Standard User"}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Member Since:</span>
-                        <span className="text-gray-300">{formatDate(selectedUser.createdAt || new Date())}</span>
-                      </div>
-                      {selectedUser.updatedAt && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Last Updated:</span>
-                          <span className="text-gray-300">{formatDate(selectedUser.updatedAt)}</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Bio Section */}
-                {selectedUser.bio && (
-                  <Card className="bg-gray-800 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-white">Biography</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-300 leading-relaxed">{selectedUser.bio}</p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Stripe Information */}
-                {selectedUser.stripeCustomerId && (
-                  <Card className="bg-gray-800 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-white flex items-center">
-                        <Receipt className="h-5 w-5 mr-2 text-primary" />
-                        Payment Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Stripe Customer ID:</span>
-                        <span className="text-gray-300 font-mono text-sm">{selectedUser.stripeCustomerId}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Quick Actions */}
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Email
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
-                      >
-                        <UserCheck className="h-4 w-4 mr-2" />
-                        Toggle Admin
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-gray-600 text-gray-400 hover:bg-gray-600 hover:text-white"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Activity
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+
+              {selectedUser.bio && (
+                <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800/60">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Bio</h4>
+                  <p className="text-gray-300 text-sm leading-relaxed">{selectedUser.bio}</p>
+                </div>
+              )}
+
+              {selectedUser.stripeCustomerId && (
+                <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800/60">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Payment</h4>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CreditCard className="h-4 w-4 text-[#D4AF37]" />
+                    <span className="text-gray-400">Stripe:</span>
+                    <span className="text-gray-300 font-mono text-xs">{selectedUser.stripeCustomerId}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                  <Mail className="h-3.5 w-3.5 mr-1.5" /> Send Email
+                </Button>
+                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                  <UserCheck className="h-3.5 w-3.5 mr-1.5" /> Toggle Admin
+                </Button>
+                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                  <Eye className="h-3.5 w-3.5 mr-1.5" /> View Activity
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, color, loading, onClick }: { icon: any; label: string; value: string | number; color: string; loading?: boolean; onClick?: () => void }) {
+  return (
+    <button onClick={onClick} disabled={!onClick} className={`text-left w-full ${onClick ? "cursor-pointer" : ""}`}>
+      <div className="bg-[#0A0A0A] border border-gray-800/60 rounded-xl p-4 hover:border-gray-700/60 transition-colors">
+        <div className="flex items-center justify-between mb-3">
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${color}`}>
+            <Icon className="h-4.5 w-4.5" />
+          </div>
+        </div>
+        <p className="text-2xl font-bold text-white">{loading ? "..." : value}</p>
+        <p className="text-xs text-gray-500 mt-1">{label}</p>
       </div>
+    </button>
+  );
+}
+
+function EmptyState({ icon: Icon, message }: { icon: any; message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-gray-900/50 flex items-center justify-center mb-4">
+        <Icon className="h-8 w-8 text-gray-600" />
+      </div>
+      <p className="text-gray-500 text-sm">{message}</p>
+    </div>
+  );
+}
+
+function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-[#0A0A0A] border border-gray-800/60 rounded-xl overflow-hidden ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function LoadingSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <div className="p-6 space-y-3">
+      {[...Array(rows)].map((_, i) => (
+        <div key={i} className="h-4 bg-gray-800 rounded animate-pulse" style={{ width: `${75 - i * 15}%` }} />
+      ))}
+    </div>
+  );
+}
+
+function OverviewSection({ pendingMinistriesCount, pendingCampaignsCount, totalUsers, totalRaised, membershipSubs, formatCurrency, ministriesLoading, pendingLoading, usersLoading, transactionsLoading, membershipsLoading, setActiveSection }: any) {
+  const activeMemberships = Array.isArray(membershipSubs) ? membershipSubs.filter((s: MembershipSubscription) => s.status === "active").length : 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Building} label="Pending Ministries" value={pendingMinistriesCount} color="bg-green-500/10 text-green-400" loading={ministriesLoading} onClick={() => setActiveSection("ministries")} />
+        <StatCard icon={Clock} label="Pending Campaigns" value={pendingCampaignsCount} color="bg-[#D4AF37]/10 text-[#D4AF37]" loading={pendingLoading} onClick={() => setActiveSection("campaigns")} />
+        <StatCard icon={Users} label="Total Users" value={totalUsers} color="bg-blue-500/10 text-blue-400" loading={usersLoading} onClick={() => setActiveSection("users")} />
+        <StatCard icon={DollarSign} label="Total Raised" value={formatCurrency(totalRaised)} color="bg-[#D4AF37]/10 text-[#D4AF37]" loading={transactionsLoading} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SectionCard>
+          <div className="p-5 border-b border-gray-800/60">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+              <Crown className="h-4 w-4 text-[#D4AF37]" /> Membership Overview
+            </h3>
+          </div>
+          {membershipsLoading ? <LoadingSkeleton /> : (
+            <div className="p-5">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#D4AF37]">{Array.isArray(membershipSubs) ? membershipSubs.length : 0}</p>
+                  <p className="text-xs text-gray-500 mt-1">Total</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-400">{activeMemberships}</p>
+                  <p className="text-xs text-gray-500 mt-1">Active</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-400">
+                    {Array.isArray(membershipSubs) ? membershipSubs.filter((s: MembershipSubscription) => s.tier === "guild").length : 0}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Guild</p>
+                </div>
+              </div>
+              <Button variant="ghost" className="w-full mt-4 text-[#D4AF37] hover:bg-[#D4AF37]/10" onClick={() => setActiveSection("members")}>
+                View All Members
+              </Button>
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard>
+          <div className="p-5 border-b border-gray-800/60">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-[#D4AF37]" /> Quick Links
+            </h3>
+          </div>
+          <div className="p-5 space-y-2">
+            <Link href="/admin/products">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-900/50 hover:bg-gray-800/50 border border-gray-800/60 transition-colors text-left">
+                <ShoppingBag className="h-4 w-4 text-[#D4AF37]" />
+                <span className="text-sm text-gray-300">Manage Products</span>
+              </button>
+            </Link>
+            <Link href="/admin/orders">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-900/50 hover:bg-gray-800/50 border border-gray-800/60 transition-colors text-left">
+                <Package className="h-4 w-4 text-[#D4AF37]" />
+                <span className="text-sm text-gray-300">Manage Orders</span>
+              </button>
+            </Link>
+            <Link href="/admin/moderation">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-900/50 hover:bg-gray-800/50 border border-gray-800/60 transition-colors text-left">
+                <Eye className="h-4 w-4 text-[#D4AF37]" />
+                <span className="text-sm text-gray-300">Content Moderation</span>
+              </button>
+            </Link>
+          </div>
+        </SectionCard>
+      </div>
+    </div>
+  );
+}
+
+function MinistriesSection({ pendingMinistries, ministriesLoading, approveMinistryMutation, rejectMinistryMutation, formatDate }: any) {
+  if (ministriesLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(pendingMinistries) || pendingMinistries.length === 0) return <EmptyState icon={Building} message="No pending ministry profiles to review." />;
+
+  return (
+    <div className="space-y-4">
+      {pendingMinistries.map((ministry: any) => (
+        <SectionCard key={ministry.id}>
+          <div className="p-5">
+            <div className="flex flex-col sm:flex-row gap-5">
+              <Avatar className="h-16 w-16 mx-auto sm:mx-0 border-2 border-[#D4AF37]/20">
+                <AvatarImage src={ministry.logo} alt={ministry.name} />
+                <AvatarFallback className="bg-[#D4AF37]/10 text-[#D4AF37] text-xl font-bold">{ministry.name?.charAt(0) || "M"}</AvatarFallback>
+              </Avatar>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                  <h3 className="text-lg font-bold text-white">{ministry.name}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {ministry.denomination && (
+                      <Badge variant="outline" className="text-xs border-blue-800/50 text-blue-300 bg-blue-900/20">{ministry.denomination}</Badge>
+                    )}
+                    <Badge className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs">
+                      <Clock className="h-3 w-3 mr-1" /> Pending
+                    </Badge>
+                  </div>
+                </div>
+
+                <p className="text-gray-400 text-sm leading-relaxed mb-4">{ministry.description}</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 text-sm">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Mail className="h-3.5 w-3.5 text-[#D4AF37]" />
+                    <span className="break-all">{ministry.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Phone className="h-3.5 w-3.5 text-[#D4AF37]" />
+                    <span>{ministry.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" />
+                    <span className="break-words">{ministry.address}</span>
+                  </div>
+                  {ministry.website && (
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <ExternalLink className="h-3.5 w-3.5 text-[#D4AF37]" />
+                      <a href={ministry.website} target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline break-all">{ministry.website}</a>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="flex gap-2">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveMinistryMutation.mutate(ministry.id)} disabled={approveMinistryMutation.isPending}>
+                      <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> {approveMinistryMutation.isPending ? "..." : "Approve"}
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => rejectMinistryMutation.mutate(ministry.id)} disabled={rejectMinistryMutation.isPending}>
+                      <XCircle className="h-3.5 w-3.5 mr-1.5" /> {rejectMinistryMutation.isPending ? "..." : "Reject"}
+                    </Button>
+                  </div>
+                  <span className="text-xs text-gray-600 sm:ml-auto">Submitted {ministry.createdAt ? formatDate(ministry.createdAt) : "Unknown"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
+}
+
+function PendingCampaignsSection({ pendingCampaigns, pendingLoading, approveMutation, rejectMutation, deleteMutation, formatCurrency, formatDate }: any) {
+  if (pendingLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(pendingCampaigns) || pendingCampaigns.length === 0) return <EmptyState icon={Clock} message="No pending campaigns to review." />;
+
+  return (
+    <div className="space-y-4">
+      {pendingCampaigns.map((campaign: Campaign) => (
+        <SectionCard key={campaign.id}>
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-white mb-1">{campaign.title}</h3>
+                <p className="text-sm text-[#D4AF37]">Goal: {formatCurrency(Number(campaign.goal))}</p>
+              </div>
+              <Badge className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs shrink-0 ml-3">
+                <Clock className="h-3 w-3 mr-1" /> Pending
+              </Badge>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-2 mb-4">{campaign.description}</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Created: {formatDate(campaign.createdAt || new Date())}</p>
+                {campaign.image && <p className="text-green-500">Image attached</p>}
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveMutation.mutate(campaign.id)} disabled={approveMutation.isPending}>
+                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Approve
+                </Button>
+                <Button size="sm" variant="outline" className="border-red-800/50 text-red-400 hover:bg-red-900/30" onClick={() => rejectMutation.mutate(campaign.id)} disabled={rejectMutation.isPending}>
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" /> Reject
+                </Button>
+                <Button size="sm" variant="outline" className="border-gray-700 text-gray-400 hover:bg-gray-800" onClick={() => deleteMutation.mutate(campaign.id)} disabled={deleteMutation.isPending}>
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
+}
+
+function AllCampaignsSection({ allCampaigns, campaignsLoading, deleteMutation, formatCurrency }: any) {
+  if (campaignsLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(allCampaigns) || allCampaigns.length === 0) return <EmptyState icon={FileText} message="No campaigns found." />;
+
+  return (
+    <div className="space-y-4">
+      {allCampaigns.map((campaign: Campaign) => (
+        <SectionCard key={campaign.id}>
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">{campaign.title}</h3>
+                <p className="text-sm text-gray-400">
+                  {formatCurrency(Number(campaign.currentAmount))} of {formatCurrency(Number(campaign.goal))} raised
+                </p>
+              </div>
+              <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-xs">
+                <CheckCircle className="h-3 w-3 mr-1" /> {campaign.status}
+              </Badge>
+            </div>
+            <div className="w-full bg-gray-800 rounded-full h-1.5 mb-4">
+              <div className="bg-[#D4AF37] h-1.5 rounded-full" style={{ width: `${Math.min((Number(campaign.currentAmount) / Number(campaign.goal)) * 100, 100)}%` }} />
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">{Math.round((Number(campaign.currentAmount) / Number(campaign.goal)) * 100)}% funded</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-gray-700 text-gray-400 hover:bg-gray-800 text-xs">
+                  <Receipt className="h-3 w-3 mr-1" /> Transactions
+                </Button>
+                <Button variant="outline" size="sm" className="border-red-800/50 text-red-400 hover:bg-red-900/30 text-xs" onClick={() => deleteMutation.mutate(campaign.id)} disabled={deleteMutation.isPending}>
+                  <Trash2 className="h-3 w-3 mr-1" /> Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
+}
+
+function SponsorshipsSection({ sponsorshipApplications, applicationsLoading, approveApplicationMutation, rejectApplicationMutation }: any) {
+  if (applicationsLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(sponsorshipApplications) || sponsorshipApplications.length === 0) return <EmptyState icon={Handshake} message="No sponsorship applications yet." />;
+
+  return (
+    <div className="space-y-4">
+      {sponsorshipApplications.map((application: SponsorshipApplication) => (
+        <SectionCard key={application.id}>
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="text-lg font-semibold text-white">{application.name}</h3>
+                <p className="text-sm text-gray-400">{application.email}</p>
+              </div>
+              <Badge className={
+                application.status === "approved" ? "bg-green-500/10 text-green-400 border border-green-500/20" :
+                application.status === "rejected" ? "bg-red-500/10 text-red-400 border border-red-500/20" :
+                "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+              }>
+                {application.status}
+              </Badge>
+            </div>
+
+            {Array.isArray(application.platforms) && application.platforms.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Platforms</p>
+                <div className="flex flex-wrap gap-2">
+                  {application.platforms.map((platform: any, index: number) => (
+                    <a key={index} href={platform.profileUrl} target="_blank" rel="noopener noreferrer">
+                      <Badge variant="outline" className="text-xs border-gray-700 text-gray-300 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] transition-colors cursor-pointer">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        {platform.platform} ({platform.subscriberCount ? platform.subscriberCount.toLocaleString() : "N/A"})
+                      </Badge>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {application.message && (
+              <div className="mb-4">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Message</p>
+                <p className="text-sm text-gray-400">{application.message}</p>
+              </div>
+            )}
+
+            {application.status === "pending" && (
+              <div className="flex gap-2 pt-2 border-t border-gray-800/60">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveApplicationMutation.mutate(application.id)} disabled={approveApplicationMutation.isPending}>
+                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> {approveApplicationMutation.isPending ? "..." : "Approve"}
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => rejectApplicationMutation.mutate(application.id)} disabled={rejectApplicationMutation.isPending}>
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" /> {rejectApplicationMutation.isPending ? "..." : "Reject"}
+                </Button>
+              </div>
+            )}
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  );
+}
+
+function TransactionsSection({ allTransactions, transactionsLoading, formatCurrency, formatDate }: any) {
+  if (transactionsLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(allTransactions) || allTransactions.length === 0) return <EmptyState icon={Receipt} message="No transactions found." />;
+
+  return (
+    <SectionCard>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-gray-800/60 hover:bg-transparent">
+              <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Date</TableHead>
+              <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Amount</TableHead>
+              <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Campaign</TableHead>
+              <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Transaction ID</TableHead>
+              <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {allTransactions.map((transaction: Donation) => (
+              <TableRow key={transaction.id} className="border-gray-800/60 hover:bg-gray-900/30">
+                <TableCell className="text-gray-300 text-sm">{formatDate(transaction.createdAt || new Date())}</TableCell>
+                <TableCell className="text-[#D4AF37] font-semibold">{formatCurrency(Number(transaction.amount))}</TableCell>
+                <TableCell className="text-gray-300 text-sm">{transaction.campaignId}</TableCell>
+                <TableCell className="text-gray-500 font-mono text-xs">{transaction.stripePaymentId}</TableCell>
+                <TableCell>
+                  <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-xs">
+                    <CheckCircle className="h-3 w-3 mr-1" /> Completed
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </SectionCard>
+  );
+}
+
+function MembersSection({ membershipSubs, membershipsLoading }: any) {
+  if (membershipsLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(membershipSubs) || membershipSubs.length === 0) return <EmptyState icon={Crown} message="No membership subscriptions yet." />;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Crown} label="Total Members" value={membershipSubs.length} color="bg-[#D4AF37]/10 text-[#D4AF37]" />
+        <StatCard icon={CheckCircle} label="Active" value={membershipSubs.filter((s: MembershipSubscription) => s.status === "active").length} color="bg-green-500/10 text-green-400" />
+        <StatCard icon={Crown} label="Collective" value={membershipSubs.filter((s: MembershipSubscription) => s.tier === "collective").length} color="bg-[#D4AF37]/10 text-[#D4AF37]" />
+        <StatCard icon={Crown} label="Guild" value={membershipSubs.filter((s: MembershipSubscription) => s.tier === "guild").length} color="bg-[#D4AF37]/10 text-[#D4AF37]" />
+      </div>
+
+      <SectionCard>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-gray-800/60 hover:bg-transparent">
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Member</TableHead>
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Email</TableHead>
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Phone</TableHead>
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Tier</TableHead>
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Status</TableHead>
+                <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Joined</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {membershipSubs.map((sub: MembershipSubscription) => (
+                <TableRow key={sub.id} className="border-gray-800/60 hover:bg-gray-900/30">
+                  <TableCell className="text-white font-medium text-sm">{sub.fullName}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                      <Mail className="h-3 w-3 text-gray-600" />
+                      {sub.email}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {sub.phone ? (
+                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <Phone className="h-3 w-3 text-gray-600" />
+                        {sub.phone}
+                      </div>
+                    ) : <span className="text-gray-700">—</span>}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={
+                      sub.tier === "guild" ? "bg-gradient-to-r from-[#D4AF37] to-[#F5E6A3] text-black text-xs" :
+                      sub.tier === "collective" ? "bg-[#D4AF37] text-black text-xs" :
+                      "bg-gray-800 text-gray-400 text-xs"
+                    }>
+                      {sub.tier === "collective" ? "The Collective" : sub.tier === "guild" ? "The Guild" : sub.tier}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={
+                      sub.status === "active" ? "bg-green-500/10 text-green-400 border border-green-500/20 text-xs" :
+                      sub.status === "cancelled" ? "bg-red-500/10 text-red-400 border border-red-500/20 text-xs" :
+                      "bg-gray-800/50 text-gray-500 border border-gray-700 text-xs"
+                    }>
+                      {sub.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-sm">
+                    {new Date(sub.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function UsersSection({ filteredUsers, usersLoading, searchQuery, setSearchQuery, setSelectedUser, formatDate }: any) {
+  return (
+    <div className="space-y-4">
+      <div className="relative w-full max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+        <Input
+          type="text"
+          placeholder="Search by name, email, or username..."
+          value={searchQuery}
+          onChange={(e: any) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-[#0A0A0A] border-gray-800/60 text-white placeholder:text-gray-600 focus:border-[#D4AF37]/50"
+        />
+      </div>
+
+      {usersLoading ? <SectionCard><LoadingSkeleton rows={5} /></SectionCard> :
+       filteredUsers.length === 0 ? <EmptyState icon={Users} message="No users found." /> : (
+        <SectionCard>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-800/60 hover:bg-transparent">
+                  <TableHead className="text-gray-500 text-xs uppercase tracking-wider">User</TableHead>
+                  <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Email</TableHead>
+                  <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Joined</TableHead>
+                  <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Role</TableHead>
+                  <TableHead className="text-gray-500 text-xs uppercase tracking-wider">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user: User) => (
+                  <TableRow key={user.id} className="border-gray-800/60 hover:bg-gray-900/30">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border border-gray-700">
+                          <AvatarImage src={user.profileImageUrl || undefined} />
+                          <AvatarFallback className="bg-gray-800 text-gray-400 text-xs">{getUserInitials(user)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-white text-sm font-medium">{getUserDisplayName(user)}</p>
+                          <p className="text-gray-600 text-xs">@{user.username}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-400 text-sm">{user.email}</TableCell>
+                    <TableCell className="text-gray-500 text-sm">{formatDate(user.createdAt || new Date())}</TableCell>
+                    <TableCell>
+                      <Badge className={user.isAdmin ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 text-xs" : "bg-gray-800 text-gray-400 border border-gray-700 text-xs"}>
+                        {user.isAdmin ? "Admin" : "User"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/10" onClick={() => setSelectedUser(user)}>
+                        <Eye className="h-3.5 w-3.5 mr-1.5" /> View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </SectionCard>
+      )}
     </div>
   );
 }
