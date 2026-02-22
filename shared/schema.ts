@@ -55,6 +55,10 @@ export const users = pgTable("users", {
   wordOfDayNotification: boolean("word_of_day_notification").default(true),
   pushNotificationsEnabled: boolean("push_notifications_enabled").default(true),
   emailNotificationsEnabled: boolean("email_notifications_enabled").default(true),
+  // Email verification
+  emailVerified: boolean("email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token"),
+  emailVerificationExpires: timestamp("email_verification_expires"),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables
