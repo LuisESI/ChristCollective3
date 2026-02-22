@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -54,6 +54,16 @@ export default function MembershipCheckoutPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      const u = user as any;
+      const name = u.displayName || (u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : u.firstName || u.username || "");
+      if (name && !fullName) setFullName(name);
+      if (u.email && !email) setEmail(u.email);
+      if (u.phone && !phone) setPhone(u.phone);
+    }
+  }, [user]);
 
   const tier = tierId ? tierDetails[tierId] : null;
 
