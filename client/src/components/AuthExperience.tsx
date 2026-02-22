@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { buildApiUrl } from "@/lib/api-config";
+import { Mail, Loader2 } from "lucide-react";
 
 type LayoutVariant = "desktop" | "mobile";
 
@@ -27,6 +28,33 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+
+  const resendVerificationMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await fetch(buildApiUrl('/api/auth/resend-verification'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email }),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification Email Sent",
+        description: "Please check your inbox for a new verification link.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to resend verification email. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
   
   const [loginData, setLoginData] = useState({
     usernameOrEmail: "",
@@ -111,6 +139,11 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
         }
       },
       onError: (error: any) => {
+        if (error.requiresVerification) {
+          setVerificationEmail(error.email || "");
+          setVerificationSent(true);
+          return;
+        }
         toast({
           title: "Login Failed",
           description: error.message || "Please check your credentials and try again",
@@ -127,6 +160,15 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
       toast({
         title: "Missing Information",
         description: "Username, password, and phone number are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registerData.email) {
+      toast({
+        title: "Missing Information",
+        description: "Email is required for account verification",
         variant: "destructive",
       });
       return;
@@ -153,32 +195,11 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
     
     try {
       const { confirmPassword, ...registrationData } = registerData;
-      await registerMutation.mutateAsync(registrationData);
+      const result = await registerMutation.mutateAsync(registrationData);
       
-      if (registerData.userType === "creator") {
-        toast({
-          title: "Welcome, Creator! 🎬",
-          description: "Ready to share your faith-based content? Let's set up your creator profile and get you started with sponsorship opportunities.",
-        });
-        setLocation("/edit-profile");
-      } else if (registerData.userType === "business_owner") {
-        toast({
-          title: "Welcome, Business Owner! 💼",
-          description: "Time to connect with fellow Christian professionals. Let's create your business profile and explore networking opportunities.",
-        });
-        setLocation("/business");
-      } else if (registerData.userType === "ministry") {
-        toast({
-          title: "Welcome to Ministry! ⛪",
-          description: "Called to serve? Let's help you connect with your community and organize impactful ministry events.",
-        });
-        setLocation("/ministry-profile");
-      } else {
-        toast({
-          title: "Welcome to Christ Collective! ✨",
-          description: "Explore our community and discover how you can make a difference through faith.",
-        });
-        setLocation("/");
+      if (result.requiresVerification) {
+        setVerificationEmail(result.email || registerData.email);
+        setVerificationSent(true);
       }
     } catch (error: any) {
       toast({
@@ -188,6 +209,60 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
       });
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className={variant === "desktop" ? "w-full max-w-6xl flex justify-center items-center" : "w-full max-w-md"}>
+        <div className="w-full max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <Logo className="h-12 mx-auto mb-4" />
+          </div>
+          <Card className="bg-[#0A0A0A] border-gray-800 shadow-xl">
+            <CardContent className="pt-8 text-center space-y-6">
+              <Mail className="h-16 w-16 text-[#D4AF37] mx-auto" />
+              <h2 className="text-xl font-bold text-white">Check Your Email</h2>
+              <p className="text-gray-400">
+                We've sent a verification link to{" "}
+                <span className="text-[#D4AF37] font-medium">{verificationEmail}</span>.
+                Please click the link to verify your account.
+              </p>
+              <p className="text-gray-500 text-sm">
+                The link will expire in 24 hours.
+              </p>
+              <div className="space-y-3 pt-2">
+                <Button
+                  onClick={() => resendVerificationMutation.mutate(verificationEmail)}
+                  variant="outline"
+                  className="w-full border-gray-700 text-gray-300 hover:bg-gray-800"
+                  disabled={resendVerificationMutation.isPending}
+                >
+                  {resendVerificationMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Resend Verification Email"
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setVerificationSent(false);
+                    setVerificationEmail("");
+                    setMode("login");
+                  }}
+                  variant="ghost"
+                  className="w-full text-gray-400 hover:text-white"
+                >
+                  Back to Sign In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   // Desktop layout with hero section
   if (variant === "desktop") {

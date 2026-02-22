@@ -30,6 +30,7 @@ The platform offers a tailored user experience for both mobile apps (iOS/Android
 -   **Word of the Day Feature**: Displays a daily Bible verse on the FeedPage, selected deterministically from a curated list.
 -   **Settings Page Overhaul**: A comprehensive settings interface with sections for Account, Notifications, Privacy, App preferences, and Support.
 -   **AI Content Moderation**: Automated content moderation using OpenAI Moderation API (text) and GPT-4o-mini Vision (images). Posts and comments are checked before publishing. Rejected content returns 400, flagged content returns 202 (posts hidden until admin approval). Admin moderation dashboard at `/admin/moderation` with approve/reject actions. Moderation logs stored in `moderation_logs` table.
+-   **Email Verification**: New user registration requires email verification before login. Verification tokens are SHA256-hashed for storage, with 24-hour expiry. Users see a "check your email" screen after registration. Unverified users receive a 403 on login with a `requiresVerification` flag. Resend verification endpoint available. Verify email page at `/verify-email?token=...`. Existing users were bulk-marked as verified during migration.
 
 ### System Design Choices
 Deployment strategies include a local development environment with HMR and a Vite dev server, and a production environment with optimized static assets, an Express server, and automated database migrations. Database management emphasizes Drizzle migrations, automated backups, connection pooling, and query optimization.

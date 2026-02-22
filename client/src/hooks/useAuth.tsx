@@ -10,13 +10,19 @@ import { isNativeApp } from "@/lib/platform";
 
 import { User } from "@shared/schema";
 
+type RegisterResponse = {
+  message: string;
+  requiresVerification: boolean;
+  email: string;
+};
+
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<User, Error, RegisterData>;
+  registerMutation: UseMutationResult<RegisterResponse, Error, RegisterData>;
 };
 
 type LoginData = {
@@ -56,9 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: credentials,
       });
       
-      // Check if login failed
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: "Login failed" }));
+        if (errorData.requiresVerification) {
+          const err = new Error(errorData.message || "Please verify your email");
+          (err as any).requiresVerification = true;
+          (err as any).email = errorData.email;
+          throw err;
+        }
         throw new Error(errorData.message || "Incorrect password");
       }
       
@@ -96,28 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(errorData.message || `Registration failed: ${response.status}`);
       }
       
-      return await response.json();
-    },
-    onSuccess: (user: any) => {
-      // Store session ID for mobile apps
-      if (user.sessionId) {
-        localStorage.setItem('sessionId', user.sessionId);
-        console.log('📱 Session ID stored in localStorage:', user.sessionId);
-      }
-      
-      // Immediately set user data - no need to refetch since we already have fresh data
-      queryClient.setQueryData(["/api/user"], user);
-      console.log('✅ Registration successful, user data cached:', user.username);
-      
-      toast({
-        title: "Account created!",
-        description: "Welcome to Christ Collective.",
-      });
+      return await response.json() as RegisterResponse;
     },
     onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: "Please try again with different details.",
+        description: error.message || "Please try again with different details.",
         variant: "destructive",
       });
     },

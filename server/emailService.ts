@@ -151,6 +151,93 @@ class EmailService {
     }
   }
 
+  async sendEmailVerification(to: string, verificationToken: string, userName?: string): Promise<boolean> {
+    try {
+      let baseUrl = 'http://localhost:5000';
+      if (process.env.REPLIT_DOMAINS) {
+        const domain = process.env.REPLIT_DOMAINS.split(',')[0];
+        baseUrl = `https://${domain}`;
+      }
+
+      const verifyLink = `${baseUrl}/verify-email?token=${encodeURIComponent(verificationToken)}`;
+
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #000; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="color: #D4AF37; margin: 0;">Christ Collective</h1>
+            </div>
+            <div style="background-color: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+              ${userName ? `<p>Hello ${userName},</p>` : '<p>Hello,</p>'}
+              <p>Welcome to Christ Collective! Please verify your email address to activate your account.</p>
+              <p>Click the button below to verify your email:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${verifyLink}" style="background-color: #D4AF37; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+              </div>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 14px;">${verifyLink}</p>
+              <p style="color: #e74c3c; font-weight: bold; margin-top: 20px;">This link expires after 24 hours</p>
+              <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                If you didn't create an account with Christ Collective, you can safely ignore this email.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+              <p style="font-size: 12px; color: #999; text-align: center;">
+                &copy; ${new Date().getFullYear()} Christ Collective. All rights reserved.
+              </p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      if (this.useResend && this.resend) {
+        const { data, error } = await this.resend.emails.send({
+          from: 'Christ Collective <contact@christcollective.info>',
+          to: [to],
+          subject: 'Verify Your Email - Christ Collective',
+          html: emailHtml,
+        });
+
+        if (error) {
+          console.error('Error sending verification email via Resend:', error);
+          throw new Error(`Failed to send email: ${error.message}`);
+        }
+
+        console.log('Verification email sent via Resend:', data?.id);
+        return true;
+      } else {
+        if (!this.transporter) {
+          console.error('Email transporter not initialized');
+          return false;
+        }
+
+        const mailOptions = {
+          from: '"Christ Collective" <contact@christcollective.info>',
+          to: to,
+          subject: 'Verify Your Email - Christ Collective',
+          html: emailHtml,
+        };
+
+        const info = await this.transporter.sendMail(mailOptions);
+        console.log('Verification email sent:', info.messageId);
+
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) {
+          console.log('Verification email preview URL:', previewUrl);
+        }
+
+        return true;
+      }
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+      return false;
+    }
+  }
+
   async sendDonationConfirmation(data: DonationEmailData): Promise<boolean> {
     try {
       if (!this.transporter) {

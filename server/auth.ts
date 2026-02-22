@@ -170,58 +170,50 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Username, password, and phone number are required" });
       }
 
+      if (!email) {
+        return res.status(400).json({ message: "Email is required for account verification" });
+      }
+
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
-      if (email) {
-        const existingEmail = await storage.getUserByEmail(email);
-        if (existingEmail) {
-          return res.status(400).json({ message: "Email already exists" });
-        }
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
       }
+
+      const verificationToken = randomBytes(32).toString('hex');
+      const hashedVerificationToken = createHash('sha256').update(verificationToken).digest('hex');
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       const user = await storage.createUser({
         id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         username,
-        email: email || null,
+        email,
         password: await hashPassword(password),
         firstName: firstName || null,
         lastName: lastName || null,
         phone: phone,
         userType: userType || null,
+        emailVerified: false,
+        emailVerificationToken: hashedVerificationToken,
+        emailVerificationExpires: verificationExpires,
       });
 
-      // Automatically follow Christ Collective Ministry
       await storage.autoFollowChristCollectiveMinistry(user.id);
 
-      req.login(user, (err) => {
-        if (err) return next(err);
-        
-        // Force session to save to the store before responding
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("Session save error:", saveErr);
-            return res.status(500).json({ message: "Session creation failed" });
-          }
-          
-          console.log("💾 Registration session saved for:", user.username);
-          
-          res.status(201).json({ 
-            id: user.id, 
-            username: user.username, 
-            email: user.email,
-            displayName: user.displayName,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            phone: user.phone,
-            profileImageUrl: user.profileImageUrl,
-            bannerImageUrl: user.bannerImageUrl,
-            isAdmin: user.isAdmin,
-            sessionId: req.sessionID // Return session ID for mobile apps
-          });
-        });
+      await emailService.sendEmailVerification(
+        email,
+        verificationToken,
+        firstName || username
+      );
+
+      res.status(201).json({ 
+        message: "Account created. Please check your email to verify your account.",
+        requiresVerification: true,
+        email: user.email,
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -249,6 +241,13 @@ export function setupAuth(app: Express) {
       if (!user) {
         console.log("Authentication failed for user:", req.body.username);
         return res.status(401).json({ message: "Incorrect password" });
+      }
+      if (!user.emailVerified) {
+        return res.status(403).json({ 
+          message: "Please verify your email before signing in. Check your inbox for a verification link.",
+          requiresVerification: true,
+          email: user.email
+        });
       }
       req.logIn(user, (err) => {
         if (err) {
@@ -445,6 +444,81 @@ export function setupAuth(app: Express) {
     } catch (error) {
       console.error("Password reset error:", error);
       res.status(500).json({ message: "Password reset failed. Please try again." });
+    }
+  });
+
+  app.get("/api/auth/verify-email", authLimiter, async (req, res) => {
+    try {
+      const { token } = req.query;
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Verification token is required" });
+      }
+
+      const hashedToken = createHash('sha256').update(token).digest('hex');
+
+      const user = await storage.getUserByVerificationToken(hashedToken);
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid verification link" });
+      }
+
+      if (user.emailVerified) {
+        return res.json({ message: "Email already verified. You can sign in.", alreadyVerified: true });
+      }
+
+      if (user.emailVerificationExpires && new Date() > new Date(user.emailVerificationExpires)) {
+        return res.status(400).json({ message: "Verification link has expired. Please request a new one.", expired: true });
+      }
+
+      await storage.updateUser(user.id, {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      });
+
+      res.json({ message: "Email verified successfully! You can now sign in.", verified: true });
+    } catch (error) {
+      console.error("Email verification error:", error);
+      res.status(500).json({ message: "Verification failed. Please try again." });
+    }
+  });
+
+  app.post("/api/auth/resend-verification", authLimiter, async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+
+      if (!user) {
+        return res.json({ message: "If an account with that email exists, a verification link has been sent." });
+      }
+
+      if (user.emailVerified) {
+        return res.json({ message: "Email is already verified. You can sign in." });
+      }
+
+      const verificationToken = randomBytes(32).toString('hex');
+      const hashedVerificationToken = createHash('sha256').update(verificationToken).digest('hex');
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await storage.updateUser(user.id, {
+        emailVerificationToken: hashedVerificationToken,
+        emailVerificationExpires: verificationExpires,
+      });
+
+      await emailService.sendEmailVerification(
+        email,
+        verificationToken,
+        user.firstName || user.username || undefined
+      );
+
+      res.json({ message: "If an account with that email exists, a verification link has been sent." });
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      res.status(500).json({ message: "Failed to resend verification email. Please try again." });
     }
   });
 

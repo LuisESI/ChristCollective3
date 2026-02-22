@@ -58,6 +58,7 @@ import AdminOrdersPage from "@/pages/AdminOrdersPage";
 import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
 import ShopSuccessPage from "@/pages/ShopSuccessPage";
 
+import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import MobileAuthPage from "@/pages/MobileAuthPage";
@@ -73,6 +74,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/auth/mobile" component={MobileAuthPage} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/verify-email" component={VerifyEmailPage} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />
