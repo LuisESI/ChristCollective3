@@ -9,14 +9,19 @@ export default function MobileAuthPage() {
   const { user, isLoading } = useAuth();
   const hasRedirected = useRef(false);
 
-  // Get redirect parameter from URL
-  const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/';
+  const urlRedirect = new URLSearchParams(window.location.search).get('redirect');
+  const redirectTo = urlRedirect || localStorage.getItem('authRedirect') || '/';
 
-  // Redirect when user is authenticated
+  useEffect(() => {
+    if (urlRedirect) {
+      localStorage.setItem('authRedirect', urlRedirect);
+    }
+  }, [urlRedirect]);
+
   useEffect(() => {
     if (!isLoading && user && !hasRedirected.current) {
       hasRedirected.current = true;
-      // Small delay to ensure everything is ready
+      localStorage.removeItem('authRedirect');
       setTimeout(() => {
         setLocation(redirectTo);
       }, 100);

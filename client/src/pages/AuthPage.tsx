@@ -8,12 +8,18 @@ export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
 
-  // Get redirect parameter from URL
-  const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/';
+  const urlRedirect = new URLSearchParams(window.location.search).get('redirect');
+  const redirectTo = urlRedirect || localStorage.getItem('authRedirect') || '/';
 
-  // Redirect if already logged in
+  useEffect(() => {
+    if (urlRedirect) {
+      localStorage.setItem('authRedirect', urlRedirect);
+    }
+  }, [urlRedirect]);
+
   useEffect(() => {
     if (!isLoading && user) {
+      localStorage.removeItem('authRedirect');
       setLocation(redirectTo);
     }
   }, [isLoading, user, setLocation, redirectTo]);
@@ -27,7 +33,7 @@ export default function AuthPage() {
   }
 
   const handleLoginSuccess = () => {
-    // Navigate to redirect URL after login
+    localStorage.removeItem('authRedirect');
     setTimeout(() => {
       setLocation(redirectTo);
     }, 400);
