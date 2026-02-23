@@ -290,17 +290,18 @@ export const groupChatQueueSchema = z.object({
 
 // Group chat message
 export const groupChatMessageSchema = z.object({
-  content: safeString(5000),
+  message: safeString(5000),
+  type: z.enum(["message", "prayer_request", "system"]).optional(),
 }).strict();
 
 // Direct chat message
 export const directChatMessageSchema = z.object({
-  content: safeString(5000),
+  message: safeString(5000),
 }).strict();
 
 // Direct chat creation
 export const directChatCreateSchema = z.object({
-  otherUserId: z.string().min(1).max(100),
+  recipientId: z.string().min(1).max(100),
 }).strict();
 
 // Business profile creation
