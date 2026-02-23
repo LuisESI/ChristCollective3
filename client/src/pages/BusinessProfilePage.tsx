@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Globe, Phone, Mail, Calendar, Users, Star } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Calendar, Star, ArrowLeft, Share2, Briefcase } from "lucide-react";
 import { BusinessProfile } from "@shared/schema";
-import { buildApiUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { Link } from "wouter";
 
 export default function BusinessProfilePage() {
   const { id } = useParams();
@@ -28,16 +28,16 @@ export default function BusinessProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="animate-pulse space-y-8">
-              <div className="h-8 bg-slate-200 rounded w-1/3"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-slate-200 rounded w-full"></div>
-                <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-              </div>
+      <div className="min-h-screen bg-black text-white">
+        <div className="animate-pulse">
+          <div className="h-40 md:h-48 bg-gray-800" />
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="w-24 h-24 rounded-full bg-gray-700 -mt-12 ring-2 ring-[#D4AF37] border-4 border-black" />
+            <div className="mt-4 space-y-3">
+              <div className="h-7 bg-gray-700 rounded w-1/3" />
+              <div className="h-4 bg-gray-700 rounded w-1/4" />
+              <div className="h-4 bg-gray-700 rounded w-full" />
+              <div className="h-4 bg-gray-700 rounded w-5/6" />
             </div>
           </div>
         </div>
@@ -47,173 +47,185 @@ export default function BusinessProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl font-bold text-slate-900 mb-4">Business Profile Not Found</h1>
-            <p className="text-slate-600 mb-8">The business profile you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => window.history.back()}>Go Back</Button>
-          </div>
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <Link href="/connect">
+            <Button variant="ghost" className="mb-6 text-gray-300 hover:text-white">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Network
+            </Button>
+          </Link>
+          <Card className="bg-[#0A0A0A] border-gray-800">
+            <CardContent className="p-8 text-center">
+              <Briefcase className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">Business Profile Not Found</h3>
+              <p className="text-gray-500">The business profile you're looking for doesn't exist or has been removed.</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
-          
-          {/* Header Section */}
-          <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-6">
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-                  <AvatarImage src={profile?.logo || undefined} alt={profile?.companyName} />
-                  <AvatarFallback className="bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xl font-bold">
-                    {profile?.companyName?.charAt(0) || "B"}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-3xl font-bold text-slate-900 mb-2">{profile?.companyName || "Business Name"}</CardTitle>
-                      <CardDescription className="text-lg text-slate-600">{profile?.industry || "Industry"}</CardDescription>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                        <Users className="w-3 h-3 mr-1" />
-                        Active Member
-                      </Badge>
-                      {(profile as any)?.membershipTier && (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
-                          <Star className="w-3 h-3 mr-1" />
-                          {(profile as any).membershipTier.name}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
+    <div className="min-h-screen bg-black text-white pb-20">
+      <div className="relative h-40 md:h-48 bg-gradient-to-b from-gray-900 to-black overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 via-gray-900 to-black" />
+        <Link href="/connect">
+          <Button variant="ghost" className="absolute top-4 left-4 z-10 text-white/80 hover:text-white hover:bg-white/10">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </Link>
+      </div>
 
-          {/* Company Description */}
-          {profile.description && (
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-slate-900">About {profile.companyName}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-700 leading-relaxed">{profile.description}</p>
-              </CardContent>
-            </Card>
-          )}
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="flex items-end justify-between">
+          <Avatar className="w-24 h-24 -mt-12 ring-2 ring-[#D4AF37] border-4 border-black">
+            <AvatarImage src={getImageUrl(profile?.logo || undefined)} alt={profile?.companyName} />
+            <AvatarFallback className="bg-gray-800 text-[#D4AF37] text-2xl font-bold">
+              {profile?.companyName?.charAt(0) || "B"}
+            </AvatarFallback>
+          </Avatar>
 
-          {/* Contact Information */}
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-slate-900">Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                {profile.website && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-slate-500" />
-                    <a 
-                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#D4AF37] hover:underline transition-colors"
-                    >
-                      {profile.website}
-                    </a>
-                  </div>
-                )}
-                
-                {profile?.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-slate-500" />
-                    <a href={`tel:${profile.phone}`} className="text-slate-700 hover:text-slate-900 transition-colors">
-                      {profile.phone}
-                    </a>
-                  </div>
-                )}
-                
-                {profile?.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-slate-500" />
-                    <a href={`mailto:${profile.email}`} className="text-slate-700 hover:text-slate-900 transition-colors">
-                      {profile.email}
-                    </a>
-                  </div>
-                )}
-                
-                {profile.location && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-slate-500" />
-                    <span className="text-slate-700">{profile.location}</span>
-                  </div>
-                )}
-              </div>
-              
-              {profile.createdAt && (
-                <div className="pt-4 border-t border-slate-200">
-                  <div className="flex items-center gap-3 text-sm text-slate-500">
-                    <Calendar className="w-4 h-4" />
-                    <span>Member since {new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Services */}
-          {profile?.services && profile.services.length > 0 && (
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-slate-900">Services</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {profile.services.map((service: string, index: number) => (
-                    <Badge key={index} variant="outline" className="bg-slate-50 text-slate-700 border-slate-300">
-                      {service}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Contact CTA */}
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <h3 className="text-xl font-semibold text-slate-900">Ready to Connect?</h3>
-                <p className="text-slate-600">Reach out to {profile.companyName} to explore collaboration opportunities.</p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {profile.email && (
-                    <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Send Email
-                    </Button>
-                  )}
-                  {profile.website && (
-                    <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
-                      <Globe className="w-4 h-4 mr-2" />
-                      Visit Website
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
+          <div className="flex gap-2 pb-2">
+            {profile.email && (
+              <a href={`mailto:${profile.email}`}>
+                <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Contact
+                </Button>
+              </a>
+            )}
+            <Button variant="outline" className="border-gray-700 text-white bg-transparent hover:bg-white/10">
+              <Share2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
+        <div className="mt-3">
+          <h1 className="text-2xl font-bold">{profile?.companyName || "Business Name"}</h1>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {profile?.industry && (
+              <Badge variant="outline" className="bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]">
+                <Briefcase className="w-3 h-3 mr-1" />
+                {profile.industry}
+              </Badge>
+            )}
+            <Badge className="bg-green-900/30 border-green-600 text-green-300 text-xs">
+              Active Member
+            </Badge>
+            {(profile as any)?.membershipTier && (
+              <Badge variant="outline" className="bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]">
+                <Star className="w-3 h-3 mr-1" />
+                {(profile as any).membershipTier.name}
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {profile.description && (
+          <div className="mt-3">
+            <p className="text-sm text-gray-300 leading-relaxed">{profile.description}</p>
+          </div>
+        )}
+
+        <div className="mt-4 space-y-2">
+          {profile.location && (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <MapPin className="h-4 w-4 text-[#D4AF37]" />
+              <span>{profile.location}</span>
+            </div>
+          )}
+          {profile?.email && (
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-[#D4AF37]" />
+              <a href={`mailto:${profile.email}`} className="text-[#D4AF37] hover:underline">{profile.email}</a>
+            </div>
+          )}
+          {profile?.phone && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-4 w-4 text-[#D4AF37]" />
+              <a href={`tel:${profile.phone}`} className="text-[#D4AF37] hover:underline">{profile.phone}</a>
+            </div>
+          )}
+          {profile.website && (
+            <div className="flex items-center gap-2 text-sm">
+              <Globe className="h-4 w-4 text-[#D4AF37]" />
+              <a 
+                href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#D4AF37] hover:underline break-all"
+              >
+                {profile.website}
+              </a>
+            </div>
+          )}
+          {profile.createdAt && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Calendar className="h-4 w-4 text-gray-600" />
+              <span>Member since {new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</span>
+            </div>
+          )}
+        </div>
+
+        {profile?.services && profile.services.length > 0 && (
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Services</h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.services.map((service: string, index: number) => (
+                <Badge key={index} variant="outline" className="border-gray-700 text-gray-300 bg-[#0A0A0A]">
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {profile.networkingGoals && (
+          <div className="mt-5">
+            <Card className="bg-[#0A0A0A] border-gray-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-lg">Networking Goals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-300 leading-relaxed">{profile.networkingGoals}</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {(profile.email || profile.website) && (
+          <div className="mt-6">
+            <Card className="bg-gradient-to-r from-[#D4AF37]/10 to-[#0A0A0A] border-[#D4AF37]/30">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <h3 className="text-lg font-semibold text-white">Ready to Connect?</h3>
+                  <p className="text-gray-400 text-sm">Reach out to {profile.companyName} to explore collaboration opportunities.</p>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {profile.email && (
+                      <a href={`mailto:${profile.email}`}>
+                        <Button className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-medium">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Send Email
+                        </Button>
+                      </a>
+                    )}
+                    {profile.website && (
+                      <a href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10">
+                          <Globe className="w-4 h-4 mr-2" />
+                          Visit Website
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
