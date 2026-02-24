@@ -184,12 +184,12 @@ export const registerSchema = z.object({
 // Donation payment intent
 export const donationPaymentIntentSchema = z.object({
   amount: safeAmount,
-  campaignId: z.coerce.number().int().positive(),
+  campaignId: z.union([z.string().uuid(), z.coerce.number().int().positive()]),
   tip: z.coerce.number().min(0).max(1_000_000).optional().default(0),
   guestInfo: z.object({
-    firstName: safeString(100),
-    lastName: safeString(100),
-    email: safeEmail,
+    firstName: z.string().max(100).optional().default(''),
+    lastName: z.string().max(100).optional().default(''),
+    email: z.union([safeEmail, z.literal('')]).optional(),
   }).optional(),
 }).strict();
 
