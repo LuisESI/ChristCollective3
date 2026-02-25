@@ -2079,6 +2079,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed hidden coupon codes on startup
+  storage.seedCouponCode('BURGERS', 50).catch(err => console.error('Failed to seed coupon codes:', err));
+
+  // Coupon code validation endpoint
+  app.post('/api/coupon/validate', async (req, res) => {
+    try {
+      const { code } = req.body;
+      if (!code || typeof code !== 'string') {
+        return res.status(400).json({ valid: false, message: 'Coupon code is required' });
+      }
+      const coupon = await storage.validateCouponCode(code.trim());
+      if (!coupon) {
+        return res.status(404).json({ valid: false, message: 'Invalid or expired coupon code' });
+      }
+      res.json({ valid: true, discountPercent: coupon.discountPercent });
+    } catch (error) {
+      console.error('Error validating coupon:', error);
+      res.status(500).json({ valid: false, message: 'Failed to validate coupon' });
+    }
+  });
+
   // Membership tiers
   app.get('/api/membership-tiers', async (req, res) => {
     try {
@@ -2167,7 +2188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/membership-subscriptions', isAuthenticated, writeLimiter, async (req: any, res) => {
     try {
-      const { tier, fullName, email, phone } = req.body;
+      const { tier, fullName, email, phone, couponCode } = req.body;
       if (!tier || !fullName || !email) {
         return res.status(400).json({ message: "Tier, full name, and email are required" });
       }
@@ -2186,6 +2207,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!priceInCents || !tierName) {
         return res.status(400).json({ message: "Invalid membership tier" });
       }
+
+      // Validate coupon code if provided
+      let discountPercent = 0;
+      let validatedCouponCode: string | null = null;
+      if (couponCode && couponCode.trim()) {
+        const coupon = await storage.validateCouponCode(couponCode.trim());
+        if (coupon) {
+          discountPercent = coupon.discountPercent;
+          validatedCouponCode = coupon.code;
+        }
+      }
+
+      const finalPriceInCents = discountPercent > 0
+        ? Math.round(priceInCents * (1 - discountPercent / 100))
+        : priceInCents;
 
       const userId = req.user.id;
       const existing = await storage.getUserMembershipSubscription(userId);
@@ -2217,6 +2253,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ message: "Payment service initialization failed" });
       }
 
+      const productName = discountPercent > 0
+        ? `${tierName} (${discountPercent}% off)`
+        : tierName;
+
       const session = await stripeClient.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'subscription',
@@ -2225,10 +2265,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: tierName,
+              name: productName,
               description: `Monthly ${tierName} - Christ Collective`,
             },
-            unit_amount: priceInCents,
+            unit_amount: finalPriceInCents,
             recurring: { interval: 'month' },
           },
           quantity: 1,
@@ -2237,10 +2277,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           membershipSubscriptionId: String(subscription.id),
           userId,
           tier,
+          couponCode: validatedCouponCode || '',
+          discountPercent: String(discountPercent),
         },
         success_url: `${req.protocol}://${req.get('host')}/membership/success?session_id={CHECKOUT_SESSION_ID}&sub_id=${subscription.id}`,
         cancel_url: `${req.protocol}://${req.get('host')}/memberships`,
       });
+
+      // Increment coupon usage after successful session creation
+      if (validatedCouponCode) {
+        await storage.incrementCouponUsage(validatedCouponCode);
+      }
 
       await storage.updateMembershipSubscription(subscription.id, {
         stripeSubscriptionId: session.id,

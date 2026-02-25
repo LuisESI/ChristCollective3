@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Check, Loader2, Crown, HeartHandshake, ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Crown, HeartHandshake, ArrowRight, ShieldCheck, Tag, X } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -54,6 +54,9 @@ export default function MembershipCheckoutPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -67,8 +70,36 @@ export default function MembershipCheckoutPage() {
 
   const tier = tierId ? tierDetails[tierId] : null;
 
+  const tierBasePrices: Record<string, number> = { collective: 30, guild: 60 };
+  const basePrice = tier ? tierBasePrices[tierId || ""] || 0 : 0;
+  const discountedPrice = appliedCoupon
+    ? basePrice * (1 - appliedCoupon.discountPercent / 100)
+    : basePrice;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const res = await apiRequest("/api/coupon/validate", {
+        method: "POST",
+        data: { code: couponCode.trim() },
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setAppliedCoupon({ code: couponCode.trim().toUpperCase(), discountPercent: data.discountPercent });
+        toast({ title: "Coupon applied!", description: `${data.discountPercent}% discount applied.` });
+      } else {
+        toast({ title: "Invalid coupon", description: data.message || "This code is not valid.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not validate coupon code.", variant: "destructive" });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
   const subscribeMutation = useMutation({
-    mutationFn: async (data: { tier: string; fullName: string; email: string; phone: string }) => {
+    mutationFn: async (data: { tier: string; fullName: string; email: string; phone: string; couponCode?: string }) => {
       const res = await apiRequest("/api/membership-subscriptions", {
         method: "POST",
         data,
@@ -110,6 +141,7 @@ export default function MembershipCheckoutPage() {
       fullName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
+      couponCode: appliedCoupon?.code || undefined,
     });
   };
 
@@ -243,16 +275,63 @@ export default function MembershipCheckoutPage() {
 
                     <Separator className="bg-gray-800" />
 
+                    {/* Coupon Code */}
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5" /> Coupon Code
+                      </Label>
+                      {appliedCoupon ? (
+                        <div className="flex items-center gap-2 bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2">
+                          <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                          <span className="text-green-400 text-sm font-medium flex-1">
+                            {appliedCoupon.code} — {appliedCoupon.discountPercent}% off applied
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { setAppliedCoupon(null); setCouponCode(""); }}
+                            className="text-gray-500 hover:text-white"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Input
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+                            placeholder="Enter coupon code"
+                            className="bg-black border-gray-700 text-white placeholder:text-gray-600 focus:border-[#D4AF37] uppercase"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleApplyCoupon}
+                            disabled={couponLoading || !couponCode.trim()}
+                            className="border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800 flex-shrink-0"
+                          >
+                            {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="bg-black/50 border border-gray-800 rounded-lg p-4">
                       <h3 className="text-sm font-semibold text-gray-300 mb-2">Order Summary</h3>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-gray-500">{tier.name} membership</span>
-                        <span className="text-white">{tier.price}</span>
+                        <span className={appliedCoupon ? "text-gray-500 line-through" : "text-white"}>${basePrice}/month</span>
                       </div>
+                      {appliedCoupon && (
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-green-400">Discount ({appliedCoupon.discountPercent}% off)</span>
+                          <span className="text-green-400">-${(basePrice - discountedPrice).toFixed(2)}</span>
+                        </div>
+                      )}
                       <Separator className="bg-gray-800 my-2" />
                       <div className="flex justify-between text-sm font-bold">
                         <span className="text-gray-300">Total</span>
-                        <span className="text-[#D4AF37]">{tier.price}</span>
+                        <span className="text-[#D4AF37]">${discountedPrice.toFixed(2)}/month</span>
                       </div>
                     </div>
 

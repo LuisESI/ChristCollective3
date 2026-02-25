@@ -946,6 +946,20 @@ export const insertPostReportSchema = createInsertSchema(postReports)
 export type PostReport = typeof postReports.$inferSelect;
 export type InsertPostReport = z.infer<typeof insertPostReportSchema>;
 
+export const couponCodes = pgTable("coupon_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  discountPercent: integer("discount_percent").notNull(),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  maxUsage: integer("max_usage"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCouponCodeSchema = createInsertSchema(couponCodes).omit({ id: true, createdAt: true });
+export type CouponCode = typeof couponCodes.$inferSelect;
+export type InsertCouponCode = z.infer<typeof insertCouponCodeSchema>;
+
 export const membershipSubscriptions = pgTable("membership_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),

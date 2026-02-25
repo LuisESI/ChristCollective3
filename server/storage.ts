@@ -14,6 +14,8 @@ import {
   ministryPostRsvps,
   eventRegistrations,
   notifications,
+  couponCodes,
+  type CouponCode,
   type User,
   type UpsertUser,
   type Campaign,
@@ -306,6 +308,10 @@ export interface IStorage {
   getUserMembershipSubscription(userId: string): Promise<MembershipSubscription | undefined>;
   listMembershipSubscriptions(): Promise<MembershipSubscription[]>;
   updateMembershipSubscription(id: number, data: Partial<MembershipSubscription>): Promise<MembershipSubscription>;
+
+  validateCouponCode(code: string): Promise<CouponCode | null>;
+  incrementCouponUsage(code: string): Promise<void>;
+  seedCouponCode(code: string, discountPercent: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2359,6 +2365,38 @@ export class DatabaseStorage implements IStorage {
   async updateMembershipSubscription(id: number, data: Partial<MembershipSubscription>): Promise<MembershipSubscription> {
     const [sub] = await db.update(membershipSubscriptions).set(data).where(eq(membershipSubscriptions.id, id)).returning();
     return sub;
+  }
+
+  async validateCouponCode(code: string): Promise<CouponCode | null> {
+    const [coupon] = await db.select().from(couponCodes)
+      .where(eq(couponCodes.code, code.toUpperCase()));
+    if (!coupon) return null;
+    if (!coupon.isActive) return null;
+    if (coupon.maxUsage !== null && coupon.usageCount !== null && coupon.usageCount >= coupon.maxUsage) return null;
+    return coupon;
+  }
+
+  async incrementCouponUsage(code: string): Promise<void> {
+    const [coupon] = await db.select().from(couponCodes).where(eq(couponCodes.code, code.toUpperCase()));
+    if (coupon) {
+      await db.update(couponCodes)
+        .set({ usageCount: (coupon.usageCount || 0) + 1 })
+        .where(eq(couponCodes.code, code.toUpperCase()));
+    }
+  }
+
+  async seedCouponCode(code: string, discountPercent: number): Promise<void> {
+    const upper = code.toUpperCase();
+    const [existing] = await db.select().from(couponCodes).where(eq(couponCodes.code, upper));
+    if (!existing) {
+      await db.insert(couponCodes).values({
+        code: upper,
+        discountPercent,
+        isActive: true,
+        usageCount: 0,
+        maxUsage: null,
+      });
+    }
   }
 }
 
