@@ -1641,7 +1641,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let customerId: string | undefined = undefined;
       if (req.user?.id) {
         const user = await storage.getUser(req.user.id);
-        customerId = user?.stripeCustomerId || undefined;
+        const storedCustomerId = user?.stripeCustomerId || undefined;
+
+        if (storedCustomerId) {
+          // Verify the stored customer still exists in Stripe
+          try {
+            await stripe.customers.retrieve(storedCustomerId);
+            customerId = storedCustomerId;
+          } catch (err: any) {
+            // Customer no longer exists in Stripe — clear stale ID and create fresh
+            if (err?.code === 'resource_missing') {
+              await storage.updateStripeCustomerId(req.user.id, '');
+            }
+          }
+        }
 
         if (!customerId && user?.email) {
           const customer = await stripe.customers.create({
@@ -2080,8 +2093,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User email is required for subscription" });
       }
 
-      // Create or retrieve customer
-      let customerId = user.stripeCustomerId;
+      // Create or retrieve customer (verify it still exists in Stripe)
+      let customerId = user.stripeCustomerId || '';
+
+      if (customerId) {
+        try {
+          await stripe.customers.retrieve(customerId);
+        } catch (err: any) {
+          if (err?.code === 'resource_missing') {
+            await storage.updateStripeCustomerId(userId, '');
+            customerId = '';
+          }
+        }
+      }
 
       if (!customerId) {
         const customer = await stripe.customers.create({
