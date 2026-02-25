@@ -227,6 +227,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public route: get creator status for any user by ID (used when viewing another user's profile)
+  app.get('/api/users/creator-status/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+      const creator = await storage.getUserContentCreator(userId);
+      if (!creator) {
+        return res.json({ isCreator: false });
+      }
+
+      const posts = await storage.getSocialMediaPostsByCreator(creator.id);
+      const platforms = creator.platforms || [];
+      const totalFollowers = Array.isArray(platforms)
+        ? platforms.reduce((sum: number, platform: any) => sum + (platform.subscriberCount || 0), 0)
+        : 0;
+
+      const enhancedCreator = {
+        ...creator,
+        posts,
+        totalPosts: posts?.length || 0,
+        totalFollowers,
+        platformCount: Array.isArray(platforms) ? platforms.length : 0,
+      };
+
+      res.json({ isCreator: true, creatorProfile: enhancedCreator });
+    } catch (error) {
+      console.error("Error fetching creator status for user:", error);
+      res.status(500).json({ message: "Failed to fetch creator status" });
+    }
+  });
+
   // Admin middleware
   const isAdmin = async (req: any, res: any, next: any) => {
     try {
