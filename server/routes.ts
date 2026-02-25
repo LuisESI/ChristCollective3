@@ -4983,11 +4983,51 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
           metadata: paymentIntent.metadata || {},
         });
         
-        // Check if order exists - if not, the client-side create-order will handle it
+        // Handle Donation (if metadata exists)
+        if (paymentIntent.metadata?.campaignId) {
+          const { campaignId, userId } = paymentIntent.metadata;
+          const donationAmount = paymentIntent.amount / 100;
+          await storage.createDonation({
+            campaignId,
+            userId: userId || 'guest',
+            amount: donationAmount.toString(),
+            isAnonymous: false,
+            stripePaymentId: paymentIntent.id,
+          }, paymentIntent.id);
+          await storage.updateDonationAmount(campaignId, donationAmount);
+        }
+
+        // Handle Shop Order
         const existingOrder = await storage.getShopOrderByPaymentIntent(paymentIntent.id);
         if (existingOrder && existingOrder.status === 'pending') {
-          // Update order to paid
           await storage.updateShopOrder(existingOrder.id, { status: 'paid' });
+        }
+      } else if (eventType === 'customer.subscription.created' || eventType === 'customer.subscription.updated') {
+        const subscription = event.data.object as any;
+        console.log(`📋 Subscription ${eventType}: ${subscription.id}`);
+        
+        const metadata = subscription.metadata || {};
+        const membershipSubId = metadata.membershipSubscriptionId;
+        
+        if (membershipSubId) {
+          await storage.updateMembershipSubscription(parseInt(membershipSubId), {
+            status: subscription.status,
+            stripeSubscriptionId: subscription.id,
+            stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
+            endDate: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          });
+        }
+      } else if (eventType === 'customer.subscription.deleted') {
+        const subscription = event.data.object as any;
+        console.log(`❌ Subscription deleted: ${subscription.id}`);
+        
+        const metadata = subscription.metadata || {};
+        const membershipSubId = metadata.membershipSubscriptionId;
+        
+        if (membershipSubId) {
+          await storage.updateMembershipSubscription(parseInt(membershipSubId), {
+            status: 'canceled',
+          });
         }
       } else if (eventType === 'payment_intent.payment_failed') {
         const paymentIntent = event.data.object as any;
