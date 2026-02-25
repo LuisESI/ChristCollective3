@@ -30,12 +30,24 @@ async function getCredentials() {
     }
   });
 
-  const data = await response.json();
-  
-  connectionSettings = data.items?.[0];
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.warn(`Stripe connector fetch failed: ${response.status} ${errorText}. Falling back to environment variables.`);
+  } else {
+    const data = await response.json();
+    connectionSettings = data.items?.[0];
+  }
 
-  if (!connectionSettings || (!connectionSettings.settings.publishable || !connectionSettings.settings.secret)) {
-    throw new Error(`Stripe ${targetEnvironment} connection not found`);
+  // Fallback to environment variables if connector fails or is not configured
+  if (!connectionSettings || !connectionSettings.settings.publishable || !connectionSettings.settings.secret) {
+    if (process.env.STRIPE_SECRET_KEY && process.env.VITE_STRIPE_PUBLIC_KEY) {
+      console.log('Using Stripe environment variables as fallback');
+      return {
+        publishableKey: process.env.VITE_STRIPE_PUBLIC_KEY,
+        secretKey: process.env.STRIPE_SECRET_KEY,
+      };
+    }
+    throw new Error(`Stripe ${targetEnvironment} connection not found and no environment variables available`);
   }
 
   return {

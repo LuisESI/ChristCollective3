@@ -2209,11 +2209,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let stripeClient;
       try {
         stripeClient = await getUncachableStripeClient();
-      } catch (error) {
-        return res.status(503).json({ message: "Payment service is not available" });
+      } catch (error: any) {
+        console.error("Stripe initialization error:", error);
+        return res.status(503).json({ message: `Payment service is currently unavailable: ${error.message || 'Unknown error'}` });
       }
       if (!stripeClient) {
-        return res.status(503).json({ message: "Payment service is not available" });
+        return res.status(503).json({ message: "Payment service initialization failed" });
       }
 
       const session = await stripeClient.checkout.sessions.create({
@@ -2353,11 +2354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let stripeClient;
       try {
         stripeClient = await getUncachableStripeClient();
-      } catch (error) {
-        return res.status(503).json({ message: "Payment service is not available" });
+      } catch (error: any) {
+        console.error("Stripe initialization error:", error);
+        return res.status(503).json({ message: `Payment service is currently unavailable: ${error.message || 'Unknown error'}` });
       }
       if (!stripeClient) {
-        return res.status(503).json({ message: "Payment service is not available" });
+        return res.status(503).json({ message: "Payment service initialization failed" });
       }
 
       let customerId = sub.stripeCustomerId;
@@ -2446,11 +2448,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let stripeClient;
       try {
         stripeClient = await getUncachableStripeClient();
-      } catch (error) {
-        return res.status(503).json({ message: "Payment service is not available" });
+      } catch (error: any) {
+        console.error("Stripe initialization error:", error);
+        return res.status(503).json({ message: `Payment service is currently unavailable: ${error.message || 'Unknown error'}` });
       }
       if (!stripeClient) {
-        return res.status(503).json({ message: "Payment service is not available" });
+        return res.status(503).json({ message: "Payment service initialization failed" });
       }
 
       // Resolve the Stripe customer from the existing subscription so the new
