@@ -337,10 +337,14 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                         try {
                           const uploadData = new FormData();
                           uploadData.append(formData.mediaType === "image" ? 'image' : 'video', file);
+                          const uploadHeaders: Record<string, string> = {};
+                          const sessionId = localStorage.getItem('sessionId');
+                          if (sessionId) uploadHeaders['X-Session-ID'] = sessionId;
                           const response = await fetch(buildApiUrl('/api/upload'), {
                             method: 'POST',
                             body: uploadData,
                             credentials: 'include',
+                            headers: uploadHeaders,
                           });
                           if (!response.ok) throw new Error('Upload failed');
                           const result = await response.json();
@@ -384,33 +388,29 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
                 </div>
               )}
 
-              {/* Add Media URL */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-500">
-                  {formData.mediaType === "youtube_channel" 
-                    ? "Enter your YouTube channel URL:" 
-                    : "Or add media URL:"}
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newMediaUrl}
-                    onChange={(e) => setNewMediaUrl(e.target.value)}
-                    placeholder={
-                      formData.mediaType === "youtube_channel" 
-                        ? "https://www.youtube.com/@yourchannel or https://www.youtube.com/channel/UCxxx..."
-                        : `https://example.com/${formData.mediaType === "image" ? "image.jpg" : "video.mp4"}`
-                    }
-                    className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
-                  />
-                  <Button
-                    type="button"
-                    onClick={addMediaUrl}
-                    className="bg-gray-800 hover:bg-gray-700 text-white"
-                  >
-                    Add
-                  </Button>
+              {/* Add Media URL - Only for YouTube Channel */}
+              {formData.mediaType === "youtube_channel" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-500">
+                    Enter your YouTube channel URL:
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMediaUrl}
+                      onChange={(e) => setNewMediaUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/@yourchannel or https://www.youtube.com/channel/UCxxx..."
+                      className="bg-[#0A0A0A] border-gray-800 text-white placeholder-gray-500"
+                    />
+                    <Button
+                      type="button"
+                      onClick={addMediaUrl}
+                      className="bg-gray-800 hover:bg-gray-700 text-white"
+                    >
+                      Add
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Media Preview */}
               {formData.mediaUrls.length > 0 && (
