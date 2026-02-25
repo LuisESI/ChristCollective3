@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +11,9 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
-import { ArrowLeft, Heart, Users, Lock } from 'lucide-react';
+import { buildApiUrl } from '@/lib/api-config';
+import { ArrowLeft, Heart, Lock } from 'lucide-react';
 import { Campaign } from '@shared/schema';
-
-// Load Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
 const PRESET_AMOUNTS = [10, 20, 30, 50, 100, 150];
 
@@ -109,12 +107,25 @@ export default function DonationCheckoutPage() {
   const [customAmount, setCustomAmount] = useState('');
   const [tip, setTip] = useState(0);
   const [clientSecret, setClientSecret] = useState('');
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
   const isAuthenticated = !!user;
+
+  // Fetch the publishable key from the server (same Stripe account as backend)
+  useEffect(() => {
+    fetch(buildApiUrl('/api/stripe/publishable-key'))
+      .then(r => r.json())
+      .then(data => {
+        if (data.publishableKey) {
+          setStripePromise(loadStripe(data.publishableKey));
+        }
+      })
+      .catch(err => console.error('Failed to load Stripe publishable key:', err));
+  }, []);
 
   const { data: campaign, isLoading: isLoadingCampaign } = useQuery<Campaign>({
     queryKey: [`/api/campaigns/${campaignId}`],
