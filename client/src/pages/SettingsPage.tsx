@@ -11,7 +11,7 @@ import {
   ArrowLeft, Settings, Mail, Phone, MapPin,
   Bell, BookOpen, Shield, User, Palette,
   LogOut, HelpCircle, Info, Lock, Globe, MessageSquare,
-  Volume2, Smartphone, Star, Crown, CreditCard, ArrowUpCircle, XCircle, Loader2, Check
+  Volume2, Smartphone, Star, Crown, CreditCard, ArrowUpCircle, XCircle, Loader2, Check, History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
@@ -248,6 +248,22 @@ export default function SettingsPage() {
                 ) : (
                   <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
                 )}
+              </button>
+
+              <Separator className="bg-gray-800" />
+
+              <button
+                onClick={() => navigate("/billing-history")}
+                className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <History className="w-5 h-5 text-gray-400" />
+                  <div className="text-left">
+                    <p className="text-white text-sm font-medium">Donation History</p>
+                    <p className="text-gray-500 text-xs">View all your past donations & receipts</p>
+                  </div>
+                </div>
+                <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
               </button>
 
               <Separator className="bg-gray-800" />

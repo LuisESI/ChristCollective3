@@ -240,6 +240,27 @@ class EmailService {
 
   async sendDonationConfirmation(data: DonationEmailData): Promise<boolean> {
     try {
+      const html = this.generateDonationReceiptHTML(data);
+      const text = this.generateDonationReceiptText(data);
+
+      if (this.useResend && this.resend) {
+        const { data: result, error } = await this.resend.emails.send({
+          from: 'Christ Collective <contact@christcollective.info>',
+          to: [data.recipientEmail],
+          subject: 'Thank You for Your Donation - Christ Collective',
+          html,
+          text,
+        });
+
+        if (error) {
+          console.error('Error sending donation confirmation via Resend:', error);
+          return false;
+        }
+
+        console.log('Donation confirmation email sent via Resend:', result?.id);
+        return true;
+      }
+
       if (!this.transporter) {
         console.error('Email transporter not initialized');
         return false;
@@ -248,17 +269,16 @@ class EmailService {
       const mailOptions = {
         from: '"Christ Collective" <contact@christcollective.info>',
         to: data.recipientEmail,
-        subject: 'Thank you for your donation to Christ Collective',
-        html: this.generateDonationReceiptHTML(data),
-        text: this.generateDonationReceiptText(data),
+        subject: 'Thank You for Your Donation - Christ Collective',
+        html,
+        text,
       };
 
       const info = await this.transporter.sendMail(mailOptions);
       console.log('Donation confirmation email sent:', info.messageId);
-      
-      // For development with Ethereal email, log the preview URL
-      if (info.response?.includes('ethereal')) {
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      if (previewUrl) {
+        console.log('📧 Donation email preview URL:', previewUrl);
       }
       
       return true;

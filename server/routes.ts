@@ -1681,10 +1681,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata.guestEmail = guestInfo.email;
       }
 
+      // Determine receipt email for Stripe's automatic receipt
+      let receiptEmail: string | undefined;
+      if (req.user?.id) {
+        const user = await storage.getUser(req.user.id);
+        receiptEmail = user?.email || undefined;
+      } else if (guestInfo?.email) {
+        receiptEmail = guestInfo.email;
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(totalAmount * 100), // Convert to cents
         currency: "usd",
         customer: customerId,
+        receipt_email: receiptEmail,
         metadata
       });
 
@@ -1799,13 +1809,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Updating campaign total by $${donationAmount}`);
       await storage.updateDonationAmount(campaignId, donationAmount);
 
-      // Send confirmation email if guest information is available
-      if (guestEmail && guestFirstName && guestLastName) {
-        console.log(`Sending confirmation email to ${guestEmail}`);
+      // Send confirmation email - to guest or logged-in user
+      let recipientEmail: string | undefined;
+      let recipientName: string | undefined;
+      
+      if (guestEmail && guestFirstName) {
+        recipientEmail = guestEmail;
+        recipientName = `${guestFirstName} ${guestLastName || ''}`.trim();
+      } else if (userId && userId !== 'guest') {
+        const donorUser = await storage.getUser(userId);
+        if (donorUser?.email) {
+          recipientEmail = donorUser.email;
+          recipientName = `${donorUser.firstName || ''} ${donorUser.lastName || ''}`.trim() || donorUser.username || 'Donor';
+        }
+      }
+
+      if (recipientEmail) {
+        console.log(`Sending confirmation email to ${recipientEmail}`);
         try {
-          const emailData = {
-            recipientEmail: guestEmail,
-            recipientName: `${guestFirstName} ${guestLastName}`,
+          const emailSent = await emailService.sendDonationConfirmation({
+            recipientEmail,
+            recipientName: recipientName || 'Valued Donor',
             donation: {
               amount: donationAmount,
               tip: tipAmount,
@@ -1817,9 +1841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: campaign.title,
               description: campaign.description,
             },
-          };
-
-          const emailSent = await emailService.sendDonationConfirmation(emailData);
+          });
           if (emailSent) {
             console.log('Confirmation email sent successfully');
           } else {
@@ -4714,12 +4736,20 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
       const userId = req.user?.id || 'guest';
       const stableIdempotencyKey = idempotencyKey || `shop_pi_${userId}_${priceId}_${timeWindow}`;
 
+      // Get user email for Stripe receipt
+      let shopReceiptEmail: string | undefined;
+      if (req.user?.id) {
+        const shopUser = await storage.getUser(req.user.id);
+        shopReceiptEmail = shopUser?.email || undefined;
+      }
+
       const paymentIntent = await stripeClient.paymentIntents.create({
         amount: price.unit_amount,
         currency: price.currency,
         automatic_payment_methods: {
           enabled: true,
         },
+        receipt_email: shopReceiptEmail,
         metadata: {
           priceId,
           productId: typeof price.product === 'string' ? price.product : price.product.id,

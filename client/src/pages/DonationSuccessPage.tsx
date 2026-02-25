@@ -42,9 +42,9 @@ export default function DonationSuccessPage() {
     // Complete the donation recording
     const completeDonation = async () => {
       try {
-        const response = await apiRequest('POST', '/api/donations/complete', {
-          paymentIntentId,
-          campaignId,
+        const response = await apiRequest('/api/donations/complete', {
+          method: 'POST',
+          data: { paymentIntentId, campaignId },
         });
 
         if (response.ok) {

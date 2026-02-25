@@ -43,14 +43,15 @@ function CheckoutForm({ campaign, amount, tip }: { campaign: Campaign; amount: n
       if (error) {
         toast({
           title: "Payment Failed",
-          description: error.message,
+          description: error.message || "Your payment could not be processed. Please check your card details and try again.",
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (err: any) {
+      console.error("Stripe confirmPayment error:", err);
       toast({
         title: "Payment Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: err?.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
