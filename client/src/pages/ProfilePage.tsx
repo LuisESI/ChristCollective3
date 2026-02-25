@@ -30,6 +30,9 @@ export default function ProfilePage() {
   const [bannerUploading, setBannerUploading] = useState(false);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followersModalTab, setFollowersModalTab] = useState<"followers" | "following">("followers");
+  const [welcomeDismissed, setWelcomeDismissed] = useState(() => {
+    return localStorage.getItem('welcomeCardDismissed') === 'true';
+  });
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -507,8 +510,20 @@ export default function ProfilePage() {
           )}
 
           {/* Welcome message for new users without creator profile - only show for own profile */}
-          {isOwnProfile && !(creatorProfile as any)?.isCreator && (
-            <div className="text-center mt-5 p-6 bg-gray-900 rounded-xl border border-gray-700">
+          {isOwnProfile && !(creatorProfile as any)?.isCreator && !welcomeDismissed && (
+            <div className="relative text-center mt-5 p-6 bg-gray-900 rounded-xl border border-gray-700">
+              <button
+                onClick={() => {
+                  setWelcomeDismissed(true);
+                  localStorage.setItem('welcomeCardDismissed', 'true');
+                }}
+                className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors"
+                aria-label="Dismiss"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
               <h3 className="text-lg font-semibold text-white mb-2">Welcome to Christ Collective!</h3>
               <p className="text-gray-400 text-sm mb-4">
                 Choose your path to connect with the Christian community and share your faith journey.
