@@ -61,6 +61,8 @@ import ShopSuccessPage from "@/pages/ShopSuccessPage";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BillingHistoryPage from "@/pages/BillingHistoryPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import MobileAuthPage from "@/pages/MobileAuthPage";
 import MobileLandingPage from "@/pages/MobileLandingPage";
@@ -129,6 +131,8 @@ function Router() {
 
       <Route path="/settings" component={SettingsPage} />
       <Route path="/billing-history" component={BillingHistoryPage} />
+      <Route path="/privacy" component={PrivacyPolicyPage} />
+      <Route path="/terms" component={TermsOfServicePage} />
       <Route component={NotFound} />
     </Switch>
   );
