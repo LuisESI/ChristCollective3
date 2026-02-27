@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -11,9 +11,8 @@ import {
   ArrowLeft, Settings, Mail, Phone, MapPin,
   Bell, BookOpen, Shield, User, Palette,
   LogOut, HelpCircle, Info, Lock, Globe, MessageSquare,
-  Volume2, Smartphone, Star, Crown, CreditCard, ArrowUpCircle, XCircle, Loader2, Check, History
+  Volume2, Smartphone, History
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 import { isNativeApp } from "@/lib/platform";
@@ -32,59 +31,6 @@ export default function SettingsPage() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
-
-  const { data: membership, isLoading: membershipLoading } = useQuery({
-    queryKey: ["/api/membership-subscriptions/me"],
-    enabled: !!user,
-  });
-
-  const hasActiveMembership = !membershipLoading && membership && (membership as any).status === "active";
-  const membershipTier = (membership as any)?.tier;
-  const canUpgrade = membershipTier === "collective";
-
-  const tierDisplayInfo: Record<string, { name: string; price: string; icon: any }> = {
-    collective: { name: "The Collective", price: "$30/mo", icon: Star },
-    guild: { name: "The Guild", price: "$60/mo", icon: Crown },
-  };
-
-  const billingPortalMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('/api/membership-subscriptions/billing-portal', { method: 'POST' });
-      return res.json();
-    },
-    onSuccess: (data: any) => {
-      if (data.url) window.location.href = data.url;
-    },
-    onError: () => {
-      toast({ title: "Unable to open billing portal", description: "Please try again later.", variant: "destructive" });
-    },
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('/api/membership-subscriptions/billing-portal', { method: 'POST' });
-      return res.json();
-    },
-    onSuccess: (data: any) => {
-      if (data.url) window.location.href = data.url;
-    },
-    onError: () => {
-      toast({ title: "Unable to open billing portal", description: "Please try again or contact support.", variant: "destructive" });
-    },
-  });
-
-  const upgradeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest('/api/membership-subscriptions/upgrade', { method: 'POST' });
-      return res.json();
-    },
-    onSuccess: (data: any) => {
-      if (data.checkoutUrl) window.location.href = data.checkoutUrl;
-    },
-    onError: () => {
-      toast({ title: "Failed to start upgrade", description: "Please try again.", variant: "destructive" });
-    },
-  });
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -186,137 +132,22 @@ export default function SettingsPage() {
 
         <div className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
 
-          {/* Membership Section */}
-          {hasActiveMembership ? (
-            <div className="bg-[#0A0A0A] rounded-xl border border-[#D4AF37]/30 overflow-hidden">
-              <div className="p-4 bg-gradient-to-r from-[#D4AF37]/10 to-transparent border-b border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const TierIcon = tierDisplayInfo[membershipTier]?.icon || Star;
-                      return <TierIcon className="w-5 h-5 text-[#D4AF37]" />;
-                    })()}
-                    <div>
-                      <h3 className="font-bold text-[#D4AF37] text-sm">{tierDisplayInfo[membershipTier]?.name || membershipTier}</h3>
-                      <p className="text-gray-500 text-xs">{tierDisplayInfo[membershipTier]?.price}</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] px-2 h-5">
-                    Active
-                  </Badge>
+          {/* Donation History */}
+          <div className="bg-[#0A0A0A] rounded-xl border border-gray-800 overflow-hidden">
+            <button
+              onClick={() => navigate("/billing-history")}
+              className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <History className="w-5 h-5 text-gray-400" />
+                <div className="text-left">
+                  <p className="text-white text-sm font-medium">Donation History</p>
+                  <p className="text-gray-500 text-xs">View all your past donations & receipts</p>
                 </div>
               </div>
-
-              {canUpgrade && (
-                <>
-                  <button
-                    onClick={() => upgradeMutation.mutate()}
-                    disabled={upgradeMutation.isPending}
-                    className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <ArrowUpCircle className="w-5 h-5 text-[#D4AF37]" />
-                      <div className="text-left">
-                        <p className="text-white text-sm font-medium">Upgrade to The Guild</p>
-                        <p className="text-gray-500 text-xs">$60/mo — unlock priority access & more</p>
-                      </div>
-                    </div>
-                    {upgradeMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 text-[#D4AF37] animate-spin" />
-                    ) : (
-                      <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
-                    )}
-                  </button>
-                  <Separator className="bg-gray-800" />
-                </>
-              )}
-
-              <button
-                onClick={() => billingPortalMutation.mutate()}
-                disabled={billingPortalMutation.isPending}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <CreditCard className="w-5 h-5 text-gray-400" />
-                  <div className="text-left">
-                    <p className="text-white text-sm font-medium">Billing & Payment</p>
-                    <p className="text-gray-500 text-xs">Manage payment method, view invoices</p>
-                  </div>
-                </div>
-                {billingPortalMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                ) : (
-                  <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
-                )}
-              </button>
-
-              <Separator className="bg-gray-800" />
-
-              <button
-                onClick={() => navigate("/billing-history")}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <History className="w-5 h-5 text-gray-400" />
-                  <div className="text-left">
-                    <p className="text-white text-sm font-medium">Donation History</p>
-                    <p className="text-gray-500 text-xs">View all your past donations & receipts</p>
-                  </div>
-                </div>
-                <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
-              </button>
-
-              <Separator className="bg-gray-800" />
-
-              <button
-                onClick={() => navigate("/memberships")}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <div className="text-left">
-                    <p className="text-white text-sm font-medium">View Membership Details</p>
-                    <p className="text-gray-500 text-xs">See your benefits and membership info</p>
-                  </div>
-                </div>
-                <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
-              </button>
-
-              <Separator className="bg-gray-800" />
-
-              <button
-                onClick={() => cancelMutation.mutate()}
-                disabled={cancelMutation.isPending}
-                className="w-full flex items-center gap-3 p-4 hover:bg-red-500/5 transition-colors"
-              >
-                {cancelMutation.isPending ? (
-                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-gray-600" />
-                )}
-                <p className="text-gray-500 text-sm">Cancel Membership</p>
-              </button>
-            </div>
-          ) : (
-            <div className="p-4 bg-gray-900/40 rounded-xl border border-[#D4AF37]/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-[#D4AF37]" />
-                  <h3 className="font-bold text-white text-sm">Collective Membership</h3>
-                </div>
-                <Badge className="bg-[#D4AF37] text-black text-[10px] px-2 py-0 h-4 font-bold tracking-tight uppercase">Upgrade</Badge>
-              </div>
-              <p className="text-xs text-gray-400 mb-3">
-                Unlock private community access, networking calls, and exclusive member events.
-              </p>
-              <Button 
-                className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold h-9 text-xs"
-                onClick={() => navigate("/memberships")}
-              >
-                View Membership Tiers
-              </Button>
-            </div>
-          )}
+              <ArrowLeft className="w-4 h-4 text-gray-600 rotate-180" />
+            </button>
+          </div>
 
           {/* Account Section */}
           <div>

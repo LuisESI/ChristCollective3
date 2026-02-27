@@ -2,7 +2,6 @@ import HeroSection from "@/components/home/HeroSection";
 import MissionSection from "@/components/home/MissionSection";
 import DonationSection from "@/components/home/DonationSection";
 import BusinessSection from "@/components/home/BusinessSection";
-import MembershipSection from "@/components/home/MembershipSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CTASection from "@/components/home/CTASection";
 import { Helmet } from "react-helmet";
@@ -22,7 +21,6 @@ export default function HomePage() {
       <MissionSection />
       <DonationSection />
       <BusinessSection />
-      <MembershipSection />
       <TestimonialsSection />
       <CTASection />
     </>
