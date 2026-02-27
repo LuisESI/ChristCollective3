@@ -1,41 +1,4 @@
 workflows:
-  ionic-capacitor:
-    name: Build Ionic Capacitor app (iOS Simulator)
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-    environment:
-      vars:
-        NODE_VERSION: 18
-        VITE_API_URL: https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev
-      flutter: stable
-      xcode: latest
-    scripts:
-      - name: Install dependencies
-        script: |
-          npm ci
-      - name: Build web assets
-        script: |
-          npm run build
-      - name: Sync Capacitor
-        script: |
-          npx cap sync ios
-      - name: Build iOS simulator app
-        script: |
-          cd ios/App
-          xcodebuild clean
-          xcodebuild \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -derivedDataPath ../../ios-build
-    artifacts:
-      - ios-build/Build/Products/Debug-iphonesimulator/*.app
-    publishing:
-      email:
-        recipients:
-          - christcollective369@gmail.com
-
   ios-app-store:
     name: iOS App Store Build
     max_build_duration: 60
@@ -47,6 +10,8 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.christcollective.app
       vars:
+        XCODE_WORKSPACE: App.xcworkspace
+        XCODE_SCHEME: App
         NODE_VERSION: 18
         VITE_API_URL: https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev
       xcode: latest
@@ -62,20 +27,17 @@ workflows:
           npx cap sync ios
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
-      - name: Build iOS app
+      - name: Build ipa for distribution
         script: |
-          cd ios/App
-          xcodebuild clean archive \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -archivePath ../../ios-build/App.xcarchive
-          xcodebuild -exportArchive \
-            -archivePath ../../ios-build/App.xcarchive \
-            -exportOptionsPlist ../../ios-build/ExportOptions.plist \
-            -exportPath ../../ios-build/ipa
+          cd $CM_BUILD_DIR/ios/App
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME" \
+            --archive-flags="-destination 'generic/platform=iOS'"
     artifacts:
-      - ios-build/ipa/*.ipa
+      - build/ios/xcarchive/*.xcarchive
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
         auth: integration
@@ -83,7 +45,6 @@ workflows:
       email:
         recipients:
           - christcollective369@gmail.com
-
   android-workflow:
     name: Android Build
     max_build_duration: 120
