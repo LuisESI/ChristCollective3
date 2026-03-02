@@ -27,6 +27,10 @@ workflows:
           npx cap sync ios
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
+      - name: Increment build number
+        script: |
+          cd $CM_BUILD_DIR/ios/App
+          agvtool new-version -all $BUILD_NUMBER
       - name: Build ipa for distribution
         script: |
           cd $CM_BUILD_DIR/ios/App
