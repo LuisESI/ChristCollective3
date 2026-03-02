@@ -16,8 +16,19 @@ export function getApiBaseUrl(): string {
 }
 
 /**
- * Build full API URL
+ * Returns headers required for authenticated mobile API calls.
+ * On mobile the session cookie isn't sent cross-domain, so we include
+ * the session ID from localStorage as an X-Session-ID header instead.
  */
+export function getMobileAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const sessionId = localStorage.getItem('sessionId');
+  if (sessionId) {
+    headers['X-Session-ID'] = sessionId;
+  }
+  return headers;
+}
+
 export function buildApiUrl(path: string): string {
   const baseUrl = getApiBaseUrl();
   

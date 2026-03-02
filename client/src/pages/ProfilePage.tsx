@@ -12,7 +12,7 @@ import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl, getMobileAuthHeaders } from "@/lib/api-config";
 import instagramLogo from "@/assets/instagram-icon-new.png";
 import tiktokLogo from "@assets/9e020c743d8609911095831c2a867c84-32bits-32_1753981722521.png";
 import youtubeIconPath from "@assets/6ed49f7596c2f434dba2edeb8fb15b54-32bits-32_1753981720269.png";
@@ -45,6 +45,7 @@ export default function ProfilePage() {
         method: 'POST',
         body: formData,
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
@@ -79,6 +80,7 @@ export default function ProfilePage() {
       }
       const response = await fetch(buildApiUrl(`/api/users/by-username?username=${encodeURIComponent(username)}`), {
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!response.ok) {
         throw new Error('User not found');
@@ -116,6 +118,7 @@ export default function ProfilePage() {
       if (!user || !displayUser?.id || isOwnProfile) return { isFollowing: false };
       const response = await fetch(buildApiUrl(`/api/users/${displayUser.id}/is-following`), {
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!response.ok) return { isFollowing: false };
       return response.json();
@@ -131,6 +134,7 @@ export default function ProfilePage() {
     queryFn: async () => {
       const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/posts`), {
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!response.ok) return [];
       return response.json();
@@ -147,11 +151,7 @@ export default function ProfilePage() {
   // Follow mutation
   const followMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/follow`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, { method: 'POST' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to follow user');
@@ -178,11 +178,7 @@ export default function ProfilePage() {
   // Unfollow mutation
   const unfollowMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(buildApiUrl(`/api/users/${displayUser?.id}/follow`), {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      const response = await apiRequest(`/api/users/${displayUser?.id}/follow`, { method: 'DELETE' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to unfollow user');
@@ -354,11 +350,9 @@ export default function ProfilePage() {
                       }
                       const createDirectChat = async () => {
                         try {
-                          const response = await fetch(buildApiUrl('/api/direct-chats'), {
+                          const response = await apiRequest('/api/direct-chats', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ recipientId: displayUser.id })
+                            data: { recipientId: displayUser.id },
                           });
                           if (response.ok) {
                             const chat = await response.json();

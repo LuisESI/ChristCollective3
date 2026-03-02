@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { MinistryEvent } from "@shared/schema";
-import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl, getMobileAuthHeaders } from "@/lib/api-config";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function MinistryProfileViewPage() {
   const [match, params] = useRoute("/ministry/:id");
@@ -63,6 +64,7 @@ export default function MinistryProfileViewPage() {
     queryFn: async () => {
       const response = await fetch(buildApiUrl("/api/user"), {
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!response.ok) return null;
       return response.json();
@@ -75,6 +77,7 @@ export default function MinistryProfileViewPage() {
       if (!currentUser || !ministryId) return false;
       const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/following`), {
         credentials: 'include',
+        headers: getMobileAuthHeaders(),
       });
       if (!response.ok) return false;
       const data = await response.json();
@@ -85,11 +88,7 @@ export default function MinistryProfileViewPage() {
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/follow`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      const response = await apiRequest(`/api/ministries/${ministryId}/follow`, { method: 'POST' });
       if (!response.ok) throw new Error('Failed to follow ministry');
       return response.json();
     },
@@ -105,11 +104,7 @@ export default function MinistryProfileViewPage() {
 
   const unfollowMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(buildApiUrl(`/api/ministries/${ministryId}/follow`), {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+      const response = await apiRequest(`/api/ministries/${ministryId}/follow`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to unfollow ministry');
       return response.json();
     },

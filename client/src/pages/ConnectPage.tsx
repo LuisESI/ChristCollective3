@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
-import { getImageUrl } from "@/lib/api-config";
+import { getImageUrl, buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
 
 const createQueueSchema = insertGroupChatQueueSchema.extend({
   minPeople: z.coerce.number().min(2, "Minimum 2 people").max(12, "Maximum 12 people"),
@@ -204,10 +204,11 @@ export default function ConnectPage() {
       ? `/api/group-chats/${entityId}/${type}` 
       : `/api/group-chat-queues/${entityId}/${type}`;
     console.log(`Uploading to ${endpoint}...`);
-    const response = await fetch(endpoint, {
+    const response = await fetch(buildApiUrl(endpoint), {
       method: 'POST',
       body: formData,
       credentials: 'include',
+      headers: getMobileAuthHeaders(),
     });
     if (!response.ok) {
       const errorText = await response.text();
