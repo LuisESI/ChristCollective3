@@ -8,7 +8,7 @@ import { isNativeApp } from "./platform";
 export function getApiBaseUrl(): string {
   if (isNativeApp()) {
     // Mobile app: use the deployed backend URL
-    return import.meta.env.VITE_API_URL || 'https://f854b4eb-c67e-4b56-9fcf-97d9ce2c746c-00-e7qm2jhf778p.picard.replit.dev';
+    return import.meta.env.VITE_API_URL || 'https://christcollective.com';
   }
   
   // Web: use relative URLs (same origin)
