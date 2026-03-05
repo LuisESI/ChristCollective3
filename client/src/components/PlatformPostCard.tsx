@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
 import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -92,6 +92,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
 
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     title: post.title || "",
@@ -654,6 +655,46 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 <source src={getImageUrl(post.mediaUrls[0])} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+            ) : post.mediaUrls.length > 1 ? (
+              <div className="relative w-full rounded-lg overflow-hidden bg-gray-900">
+                <img
+                  src={getImageUrl(post.mediaUrls[carouselIndex])}
+                  alt={`${post.title || "Post media"} ${carouselIndex + 1} of ${post.mediaUrls.length}`}
+                  className="w-full object-cover"
+                  style={{ maxHeight: '500px', objectFit: 'cover' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+                {/* Prev/Next buttons */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCarouselIndex(i => (i - 1 + post.mediaUrls!.length) % post.mediaUrls!.length); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCarouselIndex(i => (i + 1) % post.mediaUrls!.length); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                {/* Dot indicators */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {post.mediaUrls.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setCarouselIndex(i); }}
+                      className={`w-2 h-2 rounded-full transition-colors ${i === carouselIndex ? 'bg-[#D4AF37]' : 'bg-white/50'}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                {/* Image counter */}
+                <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+                  {carouselIndex + 1}/{post.mediaUrls.length}
+                </div>
+              </div>
             ) : (
               <img
                 src={getImageUrl(post.mediaUrls[0])}

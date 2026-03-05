@@ -156,10 +156,10 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!registerData.username || !registerData.password || !registerData.phone) {
+    if (!registerData.username || !registerData.password) {
       toast({
         title: "Missing Information",
-        description: "Username, password, and phone number are required",
+        description: "Username and password are required",
         variant: "destructive",
       });
       return;
@@ -178,16 +178,6 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
       toast({
         title: "Password Mismatch",
         description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (!phoneRegex.test(registerData.phone.replace(/[\s\-\(\)]/g, ''))) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid phone number",
         variant: "destructive",
       });
       return;
@@ -400,14 +390,13 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone">Phone Number (Optional)</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={registerData.phone}
                         onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
                         placeholder="(555) 123-4567"
-                        required
                         data-testid="input-phone"
                       />
                     </div>
@@ -683,7 +672,7 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
             />
           </div>
           <div>
-            <Label htmlFor="mobile-phone" className="text-white">Phone Number</Label>
+            <Label htmlFor="mobile-phone" className="text-white">Phone Number (Optional)</Label>
             <Input
               id="mobile-phone"
               type="tel"
@@ -691,7 +680,6 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
               onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
               placeholder="(555) 123-4567"
               className="h-12"
-              required
               data-testid="input-phone"
             />
           </div>
