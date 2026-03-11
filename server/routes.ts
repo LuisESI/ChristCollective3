@@ -1454,6 +1454,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Account deletion route
+  app.delete('/api/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      // Destroy the session first so the user is logged out
+      req.session.destroy(() => {});
+      await storage.deleteUser(userId);
+      res.json({ message: "Account deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account. Please try again." });
+    }
+  });
+
   // Notification settings route
   app.put('/api/user/notification-settings', isAuthenticated, writeLimiter, validateBody(notificationSettingsSchema), async (req: any, res) => {
     try {

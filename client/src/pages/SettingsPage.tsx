@@ -7,11 +7,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   ArrowLeft, Settings, Mail, Phone, MapPin,
   Bell, BookOpen, Shield, User, Palette,
   LogOut, HelpCircle, Info, Lock, Globe, MessageSquare,
-  Volume2, Smartphone, History
+  Volume2, Smartphone, History, Trash2, AlertTriangle
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
@@ -30,6 +32,29 @@ export default function SettingsPage() {
   const [wordOfDayNotification, setWordOfDayNotification] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/user', { method: 'DELETE' });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to delete account');
+      }
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      localStorage.removeItem('sessionId');
+      const authRoute = isNativeApp() ? "/auth/mobile" : "/auth";
+      navigate(authRoute);
+      toast({ title: "Account deleted", description: "Your account has been permanently deleted." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
 
 
   useEffect(() => {
@@ -471,13 +496,23 @@ export default function SettingsPage() {
 
           {/* Danger Zone */}
           <div>
-            <div className="bg-[#0A0A0A] border border-gray-800 rounded-xl overflow-hidden">
+            <div className="bg-[#0A0A0A] border border-gray-800 rounded-xl overflow-hidden divide-y divide-gray-800">
               <button
                 onClick={() => logoutMutation.mutate()}
                 className="w-full flex items-center gap-3 p-4 hover:bg-[#111] transition-colors"
               >
                 <LogOut className="w-5 h-5 text-red-400" />
                 <p className="text-red-400 text-sm font-medium">Log Out</p>
+              </button>
+              <button
+                onClick={() => { setDeleteConfirmText(""); setShowDeleteDialog(true); }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-[#111] transition-colors"
+              >
+                <Trash2 className="w-5 h-5 text-red-600" />
+                <div className="text-left">
+                  <p className="text-red-600 text-sm font-medium">Delete Account</p>
+                  <p className="text-gray-500 text-xs">Permanently remove your account and all data</p>
+                </div>
               </button>
             </div>
           </div>
@@ -487,6 +522,60 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="bg-[#0A0A0A] border border-red-900/50 text-white max-w-sm mx-4">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 rounded-full bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+              </div>
+              <DialogTitle className="text-white text-lg">Delete Account</DialogTitle>
+            </div>
+            <DialogDescription className="text-gray-400 text-sm leading-relaxed">
+              This action is <span className="text-red-400 font-semibold">permanent and cannot be undone</span>. All your posts, follows, and profile data will be deleted immediately.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div>
+              <Label className="text-gray-300 text-sm mb-2 block">
+                Type <span className="font-mono text-red-400 font-bold">DELETE</span> to confirm
+              </Label>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="bg-gray-900 border-gray-700 text-white placeholder-gray-600 font-mono"
+                autoCapitalize="none"
+                autoCorrect="off"
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 border-gray-700 text-white bg-transparent hover:bg-white/10"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={deleteAccountMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-700 hover:bg-red-800 text-white font-medium"
+                onClick={() => deleteAccountMutation.mutate()}
+                disabled={deleteConfirmText !== "DELETE" || deleteAccountMutation.isPending}
+              >
+                {deleteAccountMutation.isPending ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  "Delete My Account"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

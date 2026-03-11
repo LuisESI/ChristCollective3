@@ -112,6 +112,7 @@ export interface IStorage {
   updateUserPassword(userId: string, hashedPassword: string): Promise<User>;
   getUsersCount(): Promise<number>;
   getAllUsers(): Promise<User[]>;
+  deleteUser(id: string): Promise<void>;
   
   // Stripe related user updates
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
@@ -389,6 +390,26 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    // Delete records from tables without ON DELETE CASCADE first
+    await db.delete(postInteractions).where(eq(postInteractions.userId, id));
+    await db.delete(savedPosts).where(eq(savedPosts.userId, id));
+    await db.delete(userFollows).where(eq(userFollows.followerId, id));
+    await db.delete(userFollows).where(eq(userFollows.followingId, id));
+    await db.delete(businessFollows).where(eq(businessFollows.userId, id));
+    await db.delete(ministryFollowers).where(eq(ministryFollowers.userId, id));
+    await db.delete(eventRegistrations).where(eq(eventRegistrations.userId, id));
+    await db.delete(ministryPostRsvps).where(eq(ministryPostRsvps.userId, id));
+    await db.delete(platformPosts).where(eq(platformPosts.userId, id));
+    await db.delete(contentCreators).where(eq(contentCreators.userId, id));
+    await db.delete(ministryProfiles).where(eq(ministryProfiles.userId, id));
+    await db.delete(sponsorshipApplications).where(eq(sponsorshipApplications.userId, id));
+    // Anonymize donations (preserve financial records but remove user link)
+    await db.update(donations).set({ userId: null }).where(eq(donations.userId, id));
+    // Delete the user (CASCADE handles: passwordResetTokens, businessProfiles, campaigns, notifications)
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {
