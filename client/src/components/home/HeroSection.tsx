@@ -33,7 +33,7 @@ export default function HeroSection() {
       id: 1,
       image: worldCrossBackground,
       heading: "Uniting Christians Worldwide",
-      subheading: "Christ Collective is a community of creatives, who have chosen to use their gifts & influence to bridge the gap betweeen sacred & secular spaces, bringing jesus to the creative community through content creation & various creative means.",
+      subheading: "Christ Collective is a community of creatives, who have chosen to use their gifts & influence to bridge the gap between sacred & secular spaces, bringing jesus to the creative community through content creation & various creative means.",
       primaryButtonText: isAuthenticated ? "My Account" : "Join the Collective",
       primaryButtonLink: isAuthenticated ? "/profile" : "/auth",
       secondaryButtonText: "Learn More",
