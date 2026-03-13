@@ -191,7 +191,7 @@ export default function EditCampaignPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/campaigns", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
-      navigate("/manage-campaigns");
+      navigate("/");
     },
     onError: (error: any) => {
       console.error("Update error:", error);
@@ -267,7 +267,7 @@ export default function EditCampaignPage() {
           </p>
           <div className="space-x-4">
             <Button asChild variant="outline">
-              <Link to="/manage-campaigns">Back to My Campaigns</Link>
+              <Link to="/">Back to Home</Link>
             </Button>
             {campaignError.message === "Authentication required" && (
               <Button asChild>
@@ -432,7 +432,7 @@ export default function EditCampaignPage() {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={() => navigate("/manage-campaigns")}
+                      onClick={() => navigate("/")}
                     >
                       Cancel
                     </Button>

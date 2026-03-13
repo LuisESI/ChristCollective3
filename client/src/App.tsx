@@ -13,7 +13,6 @@ import DonationsPage from "@/pages/DonationsPage";
 import CampaignDetailsPage from "@/pages/CampaignDetailsPage";
 import CreateCampaignPage from "@/pages/CreateCampaignPage";
 import EditCampaignPage from "@/pages/EditCampaignPage";
-import ManageCampaignsPage from "@/pages/ManageCampaignsPage";
 import BusinessNetworkPage from "@/pages/BusinessNetworkPage";
 import BusinessProfilePage from "@/pages/BusinessProfilePage";
 import MembershipCheckoutPage from "@/pages/MembershipCheckoutPage";
@@ -84,7 +83,6 @@ function Router() {
       <Route path="/donate/checkout/:campaignId" component={DonationCheckoutPage} />
       <Route path="/donate/success" component={DonationSuccessPage} />
       <Route path="/donate/:slug" component={CampaignDetailsPage} />
-      <Route path="/manage-campaigns" component={ManageCampaignsPage} />
       <Route path="/business" component={BusinessNetworkPage} />
       <Route path="/business/profile/:id" component={BusinessProfilePage} />
       <Route path="/business-profile" component={BusinessNetworkPage} />

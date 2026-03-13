@@ -133,11 +133,6 @@ export default function Header() {
                     <div className="cursor-pointer w-full">Profile</div>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/manage-campaigns">
-                    <div className="cursor-pointer w-full">Manage Campaigns</div>
-                  </Link>
-                </DropdownMenuItem>
                 {creatorStatus?.isCreator && (
                   <DropdownMenuItem asChild>
                     <Link href="/edit-profile">
