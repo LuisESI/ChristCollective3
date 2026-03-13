@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera, AlignLeft } from "lucide-react";
+import { Settings, Edit, ArrowLeft, MessageCircle, User, ExternalLink, Play, Heart, Eye, Bookmark, Camera, AlignLeft, MoreHorizontal, UserMinus } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { FollowersModal } from "@/components/FollowersModal";
 import { Link, useLocation, useParams } from "wouter";
@@ -210,6 +211,21 @@ export default function ProfilePage() {
     }
   };
 
+  const blockUserMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest(`/api/users/${displayUser?.id}/block`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to block user');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      toast({ title: "User blocked", description: `You will no longer see content from this user.` });
+      navigate("/feed");
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not block user. Please try again.", variant: "destructive" });
+    },
+  });
+
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'youtube': return <img src={youtubeIconPath} alt="YouTube" className="w-6 h-6" />;
@@ -395,6 +411,27 @@ export default function ProfilePage() {
                       : isFollowing ? 'Unfollow' : 'Follow'
                     }
                   </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="border-gray-700 text-gray-400 bg-transparent hover:bg-white/10 hover:text-white w-9 h-9 flex-shrink-0"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                      <DropdownMenuItem
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20 cursor-pointer"
+                        onClick={() => blockUserMutation.mutate()}
+                        disabled={blockUserMutation.isPending}
+                      >
+                        <UserMinus className="w-4 h-4 mr-2" />
+                        Block User
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               )}
             </div>
