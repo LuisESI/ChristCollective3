@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getImageUrl } from "@/lib/api-config";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, Briefcase, MapPin, Mail, ExternalLink, Eye, Globe } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -224,7 +225,7 @@ export default function BusinessNetworkPage() {
                   <Card key={profile.id} className="bg-black border-gray-800 hover:bg-gray-900 transition-all duration-300 flex flex-col h-full">
                     <CardHeader className="text-center pb-4">
                       <Avatar className="h-20 w-20 mx-auto mb-4">
-                        <AvatarImage src={profile.logo} alt={profile.companyName} />
+                        <AvatarImage src={profile.logo ? getImageUrl(profile.logo) : undefined} alt={profile.companyName} />
                         <AvatarFallback className="bg-primary text-black text-2xl font-bold">
                           {profile.companyName?.charAt(0) || 'B'}
                         </AvatarFallback>

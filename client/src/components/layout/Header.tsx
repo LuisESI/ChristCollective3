@@ -148,7 +148,7 @@ export default function Header() {
                 {ministryProfile && (
                   <DropdownMenuItem asChild>
                     <Link href="/edit-ministry-profile">
-                      <div className="cursor-pointer w-full">Edit Ministry Profile</div>
+                      <div className="cursor-pointer w-full">Ministry Profile</div>
                     </Link>
                   </DropdownMenuItem>
                 )}

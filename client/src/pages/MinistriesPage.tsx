@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getImageUrl } from "@/lib/api-config";
 import { Input } from "@/components/ui/input";
 import { 
   Building, 
@@ -153,7 +154,7 @@ export default function MinistriesPage() {
                   <Card key={ministry.id} className="bg-black border-gray-800 hover:bg-gray-900 transition-all duration-300">
                     <CardHeader className="text-center pb-4">
                       <Avatar className="h-20 w-20 mx-auto mb-4">
-                        <AvatarImage src={ministry.logo || undefined} alt={ministry.name} />
+                        <AvatarImage src={ministry.logo ? getImageUrl(ministry.logo) : undefined} alt={ministry.name} />
                         <AvatarFallback className="bg-primary text-black text-2xl font-bold">
                           {ministry.name?.charAt(0) || 'M'}
                         </AvatarFallback>
