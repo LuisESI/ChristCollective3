@@ -1,4 +1,5 @@
 import { Heart } from "lucide-react";
+import donationBanner from "@assets/37b13fba-30b6-4eee-b6cf-85c1045fafa3_1773430362625.webp";
 
 export default function DonationSection() {
   return (
@@ -14,8 +15,11 @@ export default function DonationSection() {
 
         <div className="max-w-md mx-auto">
           <div className="rounded-2xl overflow-hidden border border-[#D4AF37]/40 shadow-lg bg-black">
-            <div className="w-full h-48 bg-gradient-to-br from-[#D4AF37]/20 via-black to-black flex items-center justify-center">
-              <Heart className="w-16 h-16 text-[#D4AF37]" strokeWidth={1.5} />
+            <div className="relative w-full h-48 overflow-hidden">
+              <img src={donationBanner} alt="Donate" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Heart className="w-14 h-14 text-[#D4AF37] drop-shadow-lg" strokeWidth={1.5} />
+              </div>
             </div>
             <div className="p-6 text-center">
               <h4 className="text-xl font-bold text-white mb-2">Donate to Change Lives Through Christ</h4>
