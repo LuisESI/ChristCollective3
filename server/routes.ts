@@ -2641,11 +2641,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const businessProfiles = await storage.listBusinessProfiles();
       const users = await storage.getUsersCount();
 
-      // Calculate total donations raised from campaigns
-      const totalDonations = campaigns.reduce((sum, campaign) => {
-        const amount = parseFloat(campaign.currentAmount || '0');
-        return sum + amount;
-      }, 0);
+      // Zeffy total — update this manually when syncing from Zeffy dashboard
+      const ZEFFY_DONATIONS_RAISED = 964;
+      const totalDonations = ZEFFY_DONATIONS_RAISED;
 
       // Get unique industries from business profiles
       const industries = new Set(businessProfiles.map(profile => profile.industry).filter(Boolean));
