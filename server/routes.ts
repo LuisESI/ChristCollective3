@@ -870,7 +870,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/platform-posts', async (req: any, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-      const posts = await storage.listPlatformPosts(limit);
+      let posts = await storage.listPlatformPosts(limit);
+      // Filter out posts from users that the current user has blocked
+      if (req.user?.id) {
+        const blockedIds = await storage.getBlockedUserIds(req.user.id);
+        if (blockedIds.length > 0) {
+          const blockedSet = new Set(blockedIds);
+          posts = posts.filter(p => !blockedSet.has(p.userId));
+        }
+      }
       const postsWithUsers = await Promise.all(
         posts.map(async (post) => {
           const postUser = await storage.getUser(post.userId);
@@ -4107,6 +4115,47 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     } catch (error) {
       console.error("Error checking follow status:", error);
       res.status(500).json({ message: "Failed to check follow status" });
+    }
+  });
+
+  // Block / unblock user
+  app.post("/api/users/:userId/block", isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const { userId: targetUserId } = req.params;
+      const blockerId = req.user.id;
+      if (blockerId === targetUserId) {
+        return res.status(400).json({ message: "You cannot block yourself" });
+      }
+      await storage.blockUser(blockerId, targetUserId);
+      // Log for developer visibility (Apple 1.2 requirement)
+      console.warn(`[BLOCK] User ${blockerId} blocked user ${targetUserId}`);
+      res.json({ blocked: true });
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      res.status(500).json({ message: "Failed to block user" });
+    }
+  });
+
+  app.delete("/api/users/:userId/block", isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId: targetUserId } = req.params;
+      const blockerId = req.user.id;
+      await storage.unblockUser(blockerId, targetUserId);
+      res.json({ blocked: false });
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      res.status(500).json({ message: "Failed to unblock user" });
+    }
+  });
+
+  app.get("/api/users/:userId/is-blocked", isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId: targetUserId } = req.params;
+      const blockerId = req.user.id;
+      const isBlocked = await storage.isUserBlocked(blockerId, targetUserId);
+      res.json({ isBlocked });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check block status" });
     }
   });
 

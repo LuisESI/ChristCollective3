@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl } from "@/lib/api-config";
 import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag, ChevronLeft, ChevronRight, UserMinus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -178,6 +178,25 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
         description: error.message || "Could not submit report. Please try again.",
         variant: "destructive",
       });
+    },
+  });
+
+  const blockUserMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest(`/api/users/${post.userId}/block`, { method: "POST" });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "User Blocked",
+        description: "You will no longer see posts from this user.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/explore"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Could not block user. Please try again.", variant: "destructive" });
     },
   });
 
@@ -567,6 +586,17 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                   >
                     <Flag className="w-4 h-4 mr-2" />
                     Report Post
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-orange-400 hover:text-orange-300 hover:bg-orange-900/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      requireAuth(() => blockUserMutation.mutate(), "Please sign in to block users");
+                    }}
+                    disabled={blockUserMutation.isPending}
+                  >
+                    <UserMinus className="w-4 h-4 mr-2" />
+                    Block User
                   </DropdownMenuItem>
                 </>
               )}

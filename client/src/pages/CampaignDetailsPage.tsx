@@ -383,11 +383,14 @@ export default function CampaignDetailsPage() {
                     </div>
                   </div>
 
-                  <Link href={`/donate/checkout/${campaign.id}`}>
-                    <button className="w-full mb-3 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                      Donate Now
-                    </button>
-                  </Link>
+                  <a
+                    href="https://www.zeffy.com/en-US/donation-form/donate-to-change-lives-through-christ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full mb-3 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  >
+                    Donate Now
+                  </a>
 
                   <div className="flex space-x-2">
                     <Button variant="outline" className="flex-1 flex items-center justify-center">
@@ -479,11 +482,14 @@ export default function CampaignDetailsPage() {
               <Card className="rounded-2xl">
                 <CardContent className="p-6 text-center bg-black rounded-2xl">
                   <p className="text-gray-300 mb-4">No donations yet. Be the first to contribute!</p>
-                  <Link href={`/donate/checkout/${campaign.id}`}>
-                    <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-                      Make a Donation
-                    </button>
-                  </Link>
+                  <a
+                    href="https://www.zeffy.com/en-US/donation-form/donate-to-change-lives-through-christ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  >
+                    Make a Donation
+                  </a>
                 </CardContent>
               </Card>
             )}

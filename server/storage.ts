@@ -93,6 +93,8 @@ import {
   membershipSubscriptions,
   type MembershipSubscription,
   type InsertMembershipSubscription,
+  userBlocks,
+  type UserBlock,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
@@ -113,6 +115,10 @@ export interface IStorage {
   getUsersCount(): Promise<number>;
   getAllUsers(): Promise<User[]>;
   deleteUser(id: string): Promise<void>;
+  blockUser(blockerId: string, blockedId: string): Promise<void>;
+  unblockUser(blockerId: string, blockedId: string): Promise<void>;
+  getBlockedUserIds(userId: string): Promise<string[]>;
+  isUserBlocked(blockerId: string, blockedId: string): Promise<boolean>;
   
   // Stripe related user updates
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
@@ -410,6 +416,29 @@ export class DatabaseStorage implements IStorage {
     await db.update(donations).set({ userId: null }).where(eq(donations.userId, id));
     // Delete the user (CASCADE handles: passwordResetTokens, businessProfiles, campaigns, notifications)
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  async blockUser(blockerId: string, blockedId: string): Promise<void> {
+    await db.insert(userBlocks).values({ blockerId, blockedId }).onConflictDoNothing();
+  }
+
+  async unblockUser(blockerId: string, blockedId: string): Promise<void> {
+    await db.delete(userBlocks).where(
+      and(eq(userBlocks.blockerId, blockerId), eq(userBlocks.blockedId, blockedId))
+    );
+  }
+
+  async getBlockedUserIds(userId: string): Promise<string[]> {
+    const blocks = await db.select({ blockedId: userBlocks.blockedId })
+      .from(userBlocks)
+      .where(eq(userBlocks.blockerId, userId));
+    return blocks.map(b => b.blockedId);
+  }
+
+  async isUserBlocked(blockerId: string, blockedId: string): Promise<boolean> {
+    const [block] = await db.select().from(userBlocks)
+      .where(and(eq(userBlocks.blockerId, blockerId), eq(userBlocks.blockedId, blockedId)));
+    return !!block;
   }
 
   async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {

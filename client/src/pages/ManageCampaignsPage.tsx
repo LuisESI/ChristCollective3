@@ -401,9 +401,13 @@ function CampaignCard({
       
       <CardFooter className="border-t pt-4 flex justify-between">
         <Button variant="outline" asChild>
-          <Link href={`/donate/checkout/${campaign.id}`}>
+          <a
+            href="https://www.zeffy.com/en-US/donation-form/donate-to-change-lives-through-christ"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Donate
-          </Link>
+          </a>
         </Button>
         <Button variant="outline" asChild>
           <Link href={`/donate/edit/${campaign.id}`}>

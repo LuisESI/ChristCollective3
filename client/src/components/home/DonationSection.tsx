@@ -139,18 +139,15 @@ export default function DonationSection() {
                         <span>{formatCurrency(campaign.goal)} goal</span>
                       </div>
                     </div>
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        requireAuth(() => {
-                          window.location.href = `/donate/checkout/${campaign.id}`;
-                        }, "Please sign in to donate");
-                      }}
-                      className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                    <a
+                      href="https://www.zeffy.com/en-US/donation-form/donate-to-change-lives-through-christ"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
                       data-testid="button-donate"
                     >
                       <span>Donate Now</span>
-                    </button>
+                    </a>
                   </CardContent>
                 </Card>
               ))}

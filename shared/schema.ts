@@ -981,3 +981,17 @@ export const insertMembershipSubscriptionSchema = createInsertSchema(membershipS
 
 export type MembershipSubscription = typeof membershipSubscriptions.$inferSelect;
 export type InsertMembershipSubscription = z.infer<typeof insertMembershipSubscriptionSchema>;
+
+
+export const userBlocks = pgTable("user_blocks", {
+  id: serial("id").primaryKey(),
+  blockerId: varchar("blocker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  blockedId: varchar("blocked_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueBlock: uniqueIndex("unique_user_block").on(table.blockerId, table.blockedId),
+}));
+
+export const insertUserBlockSchema = createInsertSchema(userBlocks).omit({ id: true, createdAt: true });
+export type UserBlock = typeof userBlocks.$inferSelect;
+export type InsertUserBlock = z.infer<typeof insertUserBlockSchema>;
