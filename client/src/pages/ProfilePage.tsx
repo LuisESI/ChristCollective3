@@ -247,31 +247,52 @@ export default function ProfilePage() {
         <meta name="description" content="Your profile on Christ Collective - connect with the Christian community." />
       </Helmet>
 
-      {/* Hidden photo upload input */}
+      {/* Hidden photo upload inputs */}
       <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
 
       <div className="min-h-screen bg-black text-white pb-20">
 
-        {/* ── Top bar (username centered, back left, settings right) ── */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <button onClick={() => navigate(-1 as any)} className="text-white p-1 -ml-1">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <span className="font-bold text-[15px] tracking-tight truncate max-w-[60%] text-center">
-            {displayUser?.username || displayName}
-          </span>
-          {isOwnProfile ? (
-            <button onClick={() => navigate("/settings")} className="text-white p-1 -mr-1">
-              <Settings className="w-5 h-5" />
+        {/* ── Banner ── */}
+        <div className="relative h-32 bg-gradient-to-br from-gray-800 via-gray-900 to-black overflow-hidden">
+          {displayUser?.bannerImageUrl && (
+            <img
+              src={getImageUrl(displayUser.bannerImageUrl)}
+              alt="Profile banner"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          {/* Top bar overlaid on banner */}
+          <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-4 pb-2">
+            <button onClick={() => navigate(-1 as any)} className="text-white bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+              <ArrowLeft className="w-5 h-5" />
             </button>
-          ) : (
-            <div className="w-7" />
+            <span className="font-bold text-[15px] tracking-tight truncate max-w-[60%] text-center text-white drop-shadow">
+              {displayUser?.username || displayName}
+            </span>
+            {isOwnProfile ? (
+              <button onClick={() => navigate("/settings")} className="text-white bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+                <Settings className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-8" />
+            )}
+          </div>
+          {isOwnProfile && (
+            <button
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={bannerUploading}
+              className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white p-1.5 rounded-full"
+            >
+              {bannerUploading
+                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : <Camera className="w-4 h-4" />}
+            </button>
           )}
         </div>
 
         <div className="px-4">
-          {/* ── Avatar + Stats row ── */}
-          <div className="flex items-center gap-6 mt-2">
+          {/* ── Avatar + Stats row (avatar overlaps banner) ── */}
+          <div className="flex items-end gap-6 -mt-10">
             <div className="relative flex-shrink-0">
               <Avatar className="w-[84px] h-[84px] ring-2 ring-[#D4AF37] border-2 border-black">
                 <AvatarImage src={getImageUrl(displayUser?.profileImageUrl || creator?.profileImage)} alt={displayName || ''} />
@@ -279,17 +300,6 @@ export default function ProfilePage() {
                   {displayUser?.firstName?.[0] || displayUser?.username?.[0]}
                 </AvatarFallback>
               </Avatar>
-              {isOwnProfile && (
-                <button
-                  onClick={() => bannerInputRef.current?.click()}
-                  disabled={bannerUploading}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#D4AF37] rounded-full flex items-center justify-center border-2 border-black"
-                >
-                  {bannerUploading
-                    ? <div className="w-3 h-3 border border-black border-t-transparent rounded-full animate-spin" />
-                    : <Camera className="w-3 h-3 text-black" />}
-                </button>
-              )}
             </div>
 
             <div className="flex flex-1 justify-around text-center">
