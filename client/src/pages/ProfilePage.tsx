@@ -393,8 +393,8 @@ export default function ProfilePage() {
                       createDirectChat();
                     }}
                   >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Message
+                    <MessageCircle className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Message</span>
                   </Button>
                   <Button
                     onClick={handleFollowToggle}
@@ -405,11 +405,13 @@ export default function ProfilePage() {
                         : 'bg-[#D4AF37] text-black hover:bg-[#B8941F]'
                     }`}
                   >
-                    <User className="w-4 h-4 mr-2" />
-                    {followMutation.isPending || unfollowMutation.isPending
-                      ? '...'
-                      : isFollowing ? 'Unfollow' : 'Follow'
-                    }
+                    <User className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">
+                      {followMutation.isPending || unfollowMutation.isPending
+                        ? '...'
+                        : isFollowing ? 'Unfollow' : 'Follow'
+                      }
+                    </span>
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
