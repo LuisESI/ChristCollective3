@@ -1,5 +1,6 @@
 import { ExternalLink, Heart } from "lucide-react";
 import { Helmet } from "react-helmet";
+import donationBanner from "@assets/37b13fba-30b6-4eee-b6cf-85c1045fafa3_1773430362625.webp";
 
 const ZEFFY_URL = "https://www.zeffy.com/en-US/donation-form/donate-to-change-lives-through-christ";
 
@@ -7,34 +8,23 @@ export default function DonationsPage() {
   return (
     <>
       <Helmet>
-        <title>Donate - Christ Collective</title>
-        <meta name="description" content="Support our mission to change lives through Christ. Make a donation through our secure giving portal." />
+        <title>Help fund our mission! - Christ Collective</title>
+        <meta name="description" content="Help fund our mission to change lives through Christ. Make a donation through our secure giving portal." />
       </Helmet>
 
       <div className="min-h-screen bg-black flex flex-col items-center justify-start py-10 px-4">
         <div className="w-full max-w-lg">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center mx-auto mb-4">
-              <Heart className="w-8 h-8 text-[#D4AF37]" />
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Support Our Mission</h1>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Your generosity helps change lives through Christ. Every gift makes an eternal difference.
-            </p>
-          </div>
-
           {/* Preview Card */}
           <div className="bg-[#0A0A0A] border border-[#D4AF37]/20 rounded-2xl overflow-hidden mb-6">
-            {/* Preview image / banner */}
-            <div className="w-full h-48 bg-gradient-to-br from-[#1a1400] via-[#0A0A0A] to-[#1a1400] flex flex-col items-center justify-center gap-3 border-b border-[#D4AF37]/10">
-              <div className="text-6xl">✝️</div>
-              <p className="text-[#D4AF37] font-semibold text-lg tracking-wide">Donate to Change Lives</p>
-              <p className="text-gray-500 text-xs">Powered by Zeffy — 0% platform fees</p>
-            </div>
+            {/* Preview image */}
+            <img
+              src={donationBanner}
+              alt="Help fund our mission"
+              className="w-full object-cover"
+            />
 
             <div className="p-6">
-              <h2 className="text-white font-semibold text-xl mb-2">Donate to Change Lives Through Christ</h2>
+              <h2 className="text-white font-semibold text-xl mb-2">Help fund our mission!</h2>
               <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                 100% of your donation goes directly to our mission. Zeffy charges zero platform fees, so every dollar you give counts.
               </p>
