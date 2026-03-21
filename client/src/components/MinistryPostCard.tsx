@@ -236,7 +236,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               <img
                 src={getImageUrl(post.mediaUrls![0])}
                 alt="Event"
-                className="w-full aspect-[4/3] object-cover"
+                className="w-full object-cover max-h-[560px]"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
               {/* Ministry overlay top-left */}
@@ -368,7 +368,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               <img
                 src={getImageUrl(post.mediaUrls![0])}
                 alt="Event"
-                className="w-full object-cover max-h-80"
+                className="w-full object-contain max-h-[620px]"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
