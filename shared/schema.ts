@@ -393,6 +393,19 @@ export const ministryPostRsvps = pgTable("ministry_post_rsvps", {
   uniqueRsvp: uniqueIndex("unique_ministry_post_rsvp").on(table.userId, table.postId),
 }));
 
+// Ministry post comments (for event posts and general ministry posts)
+export const ministryPostComments = pgTable("ministry_post_comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => ministryPosts.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMinistryPostCommentSchema = createInsertSchema(ministryPostComments).omit({ id: true, createdAt: true });
+export type InsertMinistryPostComment = z.infer<typeof insertMinistryPostCommentSchema>;
+export type MinistryPostComment = typeof ministryPostComments.$inferSelect;
+
 // Relations
 export const contentCreatorsRelations = relations(contentCreators, ({ one, many }) => ({
   user: one(users, {

@@ -12,6 +12,7 @@ import {
   ministryEvents,
   ministryFollowers,
   ministryPostRsvps,
+  ministryPostComments,
   eventRegistrations,
   notifications,
   couponCodes,
@@ -40,6 +41,7 @@ import {
   type MinistryFollower,
   type MinistryPostRsvp,
   type InsertMinistryPostRsvp,
+  type MinistryPostComment,
   type EventRegistration,
   type Notification,
   type InsertNotification,
@@ -97,7 +99,7 @@ import {
   type UserBlock,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, ilike, like, sql, isNull } from "drizzle-orm";
+import { eq, desc, asc, and, ilike, like, sql, isNull } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -1125,6 +1127,73 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(ministryPostRsvps)
       .where(and(eq(ministryPostRsvps.userId, userId), eq(ministryPostRsvps.postId, postId)));
+  }
+
+  async getMinistryPostAttendees(postId: number): Promise<Array<{
+    userId: string; status: string; plusOnes: number;
+    username: string | null; firstName: string | null; lastName: string | null; profileImageUrl: string | null;
+  }>> {
+    const rows = await db
+      .select({
+        userId: ministryPostRsvps.userId,
+        status: ministryPostRsvps.status,
+        plusOnes: ministryPostRsvps.plusOnes,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(ministryPostRsvps)
+      .innerJoin(users, eq(ministryPostRsvps.userId, users.id))
+      .where(and(
+        eq(ministryPostRsvps.postId, postId),
+        sql`${ministryPostRsvps.status} IN ('going', 'maybe')`
+      ))
+      .orderBy(desc(ministryPostRsvps.createdAt));
+    return rows;
+  }
+
+  // Ministry post comment operations
+  async createMinistryPostComment(userId: string, postId: number, content: string): Promise<MinistryPostComment> {
+    const [comment] = await db
+      .insert(ministryPostComments)
+      .values({ userId, postId, content })
+      .returning();
+    return comment;
+  }
+
+  async getMinistryPostComments(postId: number): Promise<Array<MinistryPostComment & {
+    username: string | null; firstName: string | null; lastName: string | null; profileImageUrl: string | null;
+  }>> {
+    const rows = await db
+      .select({
+        id: ministryPostComments.id,
+        postId: ministryPostComments.postId,
+        userId: ministryPostComments.userId,
+        content: ministryPostComments.content,
+        createdAt: ministryPostComments.createdAt,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(ministryPostComments)
+      .innerJoin(users, eq(ministryPostComments.userId, users.id))
+      .where(eq(ministryPostComments.postId, postId))
+      .orderBy(asc(ministryPostComments.createdAt));
+    return rows;
+  }
+
+  async deleteMinistryPostComment(commentId: number): Promise<void> {
+    await db.delete(ministryPostComments).where(eq(ministryPostComments.id, commentId));
+  }
+
+  async getMinistryPostComment(commentId: number): Promise<MinistryPostComment | undefined> {
+    const [comment] = await db
+      .select()
+      .from(ministryPostComments)
+      .where(eq(ministryPostComments.id, commentId));
+    return comment;
   }
 
   async isUserFollowingMinistry(userId: string, ministryId: number): Promise<boolean> {

@@ -3614,6 +3614,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get attendees list (going + maybe, with user profiles)
+  app.get("/api/ministry-posts/:id/attendees", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      if (isNaN(postId)) return res.status(400).json({ message: "Invalid post ID" });
+      const attendees = await storage.getMinistryPostAttendees(postId);
+      res.json(attendees);
+    } catch (error) {
+      console.error("Error fetching attendees:", error);
+      res.status(500).json({ message: "Failed to fetch attendees" });
+    }
+  });
+
+  // Get comments for a ministry post
+  app.get("/api/ministry-posts/:id/comments", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      if (isNaN(postId)) return res.status(400).json({ message: "Invalid post ID" });
+      const comments = await storage.getMinistryPostComments(postId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching ministry post comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
+  // Add a comment to a ministry post
+  app.post("/api/ministry-posts/:id/comments", isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+      const postId = parseInt(req.params.id);
+      if (isNaN(postId)) return res.status(400).json({ message: "Invalid post ID" });
+      const { content } = req.body;
+      if (!content || typeof content !== "string" || content.trim().length === 0) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+      if (content.trim().length > 1000) {
+        return res.status(400).json({ message: "Comment must be under 1000 characters" });
+      }
+      const comment = await storage.createMinistryPostComment(userId, postId, content.trim());
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error creating ministry post comment:", error);
+      res.status(500).json({ message: "Failed to add comment" });
+    }
+  });
+
+  // Delete a ministry post comment (owner only)
+  app.delete("/api/ministry-post-comments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+      const commentId = parseInt(req.params.id);
+      if (isNaN(commentId)) return res.status(400).json({ message: "Invalid comment ID" });
+      const comment = await storage.getMinistryPostComment(commentId);
+      if (!comment) return res.status(404).json({ message: "Comment not found" });
+      if (comment.userId !== userId) return res.status(403).json({ message: "Not authorized" });
+      await storage.deleteMinistryPostComment(commentId);
+      res.json({ message: "Comment deleted" });
+    } catch (error) {
+      console.error("Error deleting ministry post comment:", error);
+      res.status(500).json({ message: "Failed to delete comment" });
+    }
+  });
+
   app.post('/api/ministries/:id/posts', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;

@@ -136,6 +136,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvp`] });
       queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvps`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/attendees`] });
     }
   });
 
@@ -146,6 +147,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvp`] });
       queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/rsvps`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/ministry-posts/${post.id}/attendees`] });
     }
   });
 
