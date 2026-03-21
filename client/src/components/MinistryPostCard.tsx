@@ -547,16 +547,14 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             ) : null}
 
             {/* Description */}
-            <div>
-              <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">About</h3>
-              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                {post.content
-                  .replace(/📅[^\n]*/g, '')
-                  .replace(/📍[^\n]*/g, '')
-                  .replace(/\n{3,}/g, '\n\n')
-                  .trim()}
-              </p>
-            </div>
+            {(eventData?.description || post.content) && (
+              <div>
+                <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">About</h3>
+                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+                  {eventData?.description || post.content}
+                </p>
+              </div>
+            )}
 
             {/* RSVP section */}
             <div>
