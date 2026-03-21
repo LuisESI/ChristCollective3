@@ -279,10 +279,11 @@ export const ministryPosts = pgTable("ministry_posts", {
   ministryId: integer("ministry_id").notNull().references(() => ministryProfiles.id),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
-  type: varchar("type").notNull().default("post"), // post, announcement, update
+  type: varchar("type").notNull().default("post"), // post, announcement, update, event_announcement
   mediaUrls: text("media_urls").array(), // Array of image/video URLs
   links: jsonb("links"), // Array of external links with titles
   isPublished: boolean("is_published").default(true),
+  eventId: integer("event_id").references(() => ministryEvents.id), // linked event (if any)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -547,6 +548,7 @@ export const insertMinistryPostSchema = createInsertSchema(ministryPosts)
       title: z.string(),
       url: z.string().url(),
     })).optional(),
+    eventId: z.number().int().optional().nullable(),
   });
 
 export const insertMinistryEventSchema = createInsertSchema(ministryEvents)

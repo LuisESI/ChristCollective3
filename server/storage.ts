@@ -194,6 +194,7 @@ export interface IStorage {
   // Ministry events operations
   createMinistryEvent(eventData: InsertMinistryEvent & { ministryId: number }): Promise<MinistryEvent>;
   getMinistryEvents(ministryId: number): Promise<MinistryEvent[]>;
+  getMinistryEventById(id: number): Promise<MinistryEvent | undefined>;
   
   // Ministry followers operations
   followMinistry(userId: string, ministryId: number): Promise<void>;
@@ -963,6 +964,14 @@ export class DatabaseStorage implements IStorage {
       .from(ministryEvents)
       .where(and(eq(ministryEvents.ministryId, ministryId), eq(ministryEvents.isPublished, true)))
       .orderBy(ministryEvents.startDate);
+  }
+
+  async getMinistryEventById(id: number): Promise<MinistryEvent | undefined> {
+    const [event] = await db
+      .select()
+      .from(ministryEvents)
+      .where(eq(ministryEvents.id, id));
+    return event;
   }
 
   // Ministry followers operations

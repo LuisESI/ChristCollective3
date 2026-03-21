@@ -3643,6 +3643,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Single event by ID (with ministry info and attendee count)
+  app.get('/api/events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const event = await storage.getMinistryEventById(parseInt(id));
+      if (!event) return res.status(404).json({ message: "Event not found" });
+      const ministry = await storage.getMinistry(event.ministryId);
+      res.json({ ...event, ministry: ministry || null });
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
   // Ministry events routes
   app.get('/api/ministries/:id/events', async (req, res) => {
     try {
@@ -3691,7 +3705,8 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
         content: eventPostContent,
         type: 'event_announcement',
         mediaUrls: eventData.flyerImage ? [eventData.flyerImage] : [],
-        isPublished: true
+        isPublished: true,
+        eventId: event.id,
       });
 
       res.status(201).json(event);
