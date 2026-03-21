@@ -112,6 +112,7 @@ function Router() {
       <Route path="/explore" component={ExplorePage} />
       <Route path="/create" component={CreatePage} />
       <Route path="/events/create" component={EventCreatePage} />
+      <Route path="/events/:id/edit" component={EventCreatePage} />
       <Route path="/creators/share" component={CreatorSocialSharePage} />
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />

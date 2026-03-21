@@ -3719,6 +3719,42 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Get single ministry event
+  app.get('/api/ministries/:id/events/:eventId', async (req, res) => {
+    try {
+      const event = await storage.getMinistryEventById(parseInt(req.params.eventId));
+      if (!event) return res.status(404).json({ message: "Event not found" });
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  // Update a ministry event
+  app.put('/api/ministries/:id/events/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id, eventId } = req.params;
+      const userId = req.user.id;
+
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) return res.status(404).json({ message: "Ministry not found" });
+      if (ministry.userId !== userId) return res.status(403).json({ message: "Not authorized" });
+
+      const event = await storage.getMinistryEventById(parseInt(eventId));
+      if (!event) return res.status(404).json({ message: "Event not found" });
+
+      const updateData = insertMinistryEventSchema.partial().parse(req.body);
+      const updated = await storage.updateMinistryEvent(parseInt(eventId), updateData);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
   // Follow/unfollow ministry
   app.post('/api/ministries/:id/follow', isAuthenticated, async (req: any, res) => {
     try {

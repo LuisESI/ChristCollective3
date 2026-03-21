@@ -19,7 +19,8 @@ import {
   Clock,
   Globe,
   UserPlus,
-  UserMinus
+  UserMinus,
+  Pencil
 } from "lucide-react";
 import { Link } from "wouter";
 import { MinistryEvent } from "@shared/schema";
@@ -339,26 +340,25 @@ export default function MinistryProfileViewPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {events.map((event: MinistryEvent) => (
+                    {events.map((event: MinistryEvent) => {
+                      const isOwner = currentUser?.id === ministry?.userId;
+                      return (
                       <div 
                         key={event.id} 
-                        className="border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors cursor-pointer"
-                        onClick={() => {
-                          navigate(`/ministry-post/${event.id}`);
-                        }}
+                        className="border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
                       >
                         <div className="flex gap-4">
                           {event.flyerImage && (
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate(`/events/${event.id}`)}>
                               <img
-                                src={event.flyerImage}
+                                src={getImageUrl(event.flyerImage)}
                                 alt={`${event.title} flyer`}
                                 className="w-16 h-16 object-cover rounded-lg border border-gray-700"
                               />
                             </div>
                           )}
                           
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/events/${event.id}`)}>
                             <h4 className="text-white font-semibold mb-1">{event.title}</h4>
                             <p className="text-gray-400 text-sm mb-2 line-clamp-2">{event.description}</p>
                             
@@ -392,9 +392,27 @@ export default function MinistryProfileViewPage() {
                               )}
                             </div>
                           </div>
+
+                          {isOwner && (
+                            <div className="flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-[#D4AF37] hover:bg-[#D4AF37]/10 h-8 w-8 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/events/${event.id}/edit`);
+                                }}
+                                title="Edit event"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
