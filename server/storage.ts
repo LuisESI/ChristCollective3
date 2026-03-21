@@ -929,6 +929,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: ministryPosts.id,
         ministryId: ministryPosts.ministryId,
+        eventId: ministryPosts.eventId,
         title: ministryPosts.title,
         content: ministryPosts.content,
         type: ministryPosts.type,
@@ -1136,6 +1137,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: ministryPosts.id,
         ministryId: ministryPosts.ministryId,
+        eventId: ministryPosts.eventId,
         title: ministryPosts.title,
         content: ministryPosts.content,
         type: ministryPosts.type,
