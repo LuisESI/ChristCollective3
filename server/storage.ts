@@ -196,6 +196,7 @@ export interface IStorage {
   getMinistryEvents(ministryId: number): Promise<MinistryEvent[]>;
   getMinistryEventById(id: number): Promise<MinistryEvent | undefined>;
   updateMinistryEvent(id: number, data: Partial<InsertMinistryEvent>): Promise<MinistryEvent>;
+  deleteMinistryEvent(id: number): Promise<void>;
   
   // Ministry followers operations
   followMinistry(userId: string, ministryId: number): Promise<void>;
@@ -982,6 +983,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(ministryEvents.id, id))
       .returning();
     return updated;
+  }
+
+  async deleteMinistryEvent(id: number): Promise<void> {
+    await db.delete(ministryEvents).where(eq(ministryEvents.id, id));
   }
 
   // Ministry followers operations

@@ -1,7 +1,23 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Clock, Church, ExternalLink, Crown, X, Video, Globe } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Calendar, MapPin, Clock, Church, ExternalLink, Crown, X, Video, Globe, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { MinistryPost } from "@shared/schema";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthGuard } from "@/lib/auth-guard";
 import { getImageUrl } from "@/lib/api-config";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 interface MinistryPostCardProps {
   post: MinistryPost & {
@@ -54,15 +71,39 @@ function formatEventDateRange(start: string | Date | null | undefined, end: stri
 
 export function MinistryPostCard({ post, disableClick = false, flatLayout = false }: MinistryPostCardProps) {
   const [showRsvpModal, setShowRsvpModal] = useState(false);
-  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useAuth();
   const isAuthenticated = !!user;
   const queryClient = useQueryClient();
   const { requireAuth } = useAuthGuard();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   const isEventPost = post.type === 'event_announcement';
   const eventId = (post as any).eventId as number | null | undefined;
+
+  // Check if current user owns this ministry
+  const { data: myMinistry } = useQuery<any>({
+    queryKey: ["/api/user/ministry-profile"],
+    enabled: isAuthenticated && isEventPost,
+  });
+  const isOwner = isAuthenticated && !!myMinistry && myMinistry.id === post.ministry?.id;
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async () => {
+      if (!myMinistry?.id || !eventId) throw new Error("Cannot delete");
+      return apiRequest(`/api/ministries/${myMinistry.id}/events/${eventId}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      toast({ title: "Event deleted", description: "The event has been deleted." });
+      queryClient.invalidateQueries({ queryKey: ["/api/ministries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ministry-posts"] });
+      navigate("/profile");
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete event.", variant: "destructive" });
+    },
+  });
 
   // Fetch linked event details if eventId exists
   const { data: eventData } = useQuery<any>({
@@ -224,11 +265,65 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
     </div>
   );
 
+  // ─── Shared delete confirmation dialog ────────────────────────────────────
+  const DeleteDialog = () => (
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent className="bg-[#111] border-gray-700">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-white">Delete Event</AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-400">
+            Are you sure you want to delete this event? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="border-gray-600 text-gray-300 hover:bg-gray-800">Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-600 hover:bg-red-700 text-white"
+            onClick={() => deleteEventMutation.mutate()}
+            disabled={deleteEventMutation.isPending}
+          >
+            {deleteEventMutation.isPending ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
+  // ─── Owner action menu ─────────────────────────────────────────────────────
+  const OwnerMenu = ({ className = "" }: { className?: string }) => (
+    isOwner && eventId ? (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className={`h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/10 ${className}`}>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-gray-700">
+          <DropdownMenuItem
+            className="text-white hover:bg-white/10 cursor-pointer gap-2"
+            onClick={() => navigate(`/events/${eventId}/edit`)}
+          >
+            <Pencil className="h-4 w-4 text-[#D4AF37]" />
+            Edit Event
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-red-400 hover:bg-white/10 cursor-pointer gap-2"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete Event
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ) : null
+  );
+
   // ─── LUMA-STYLE EVENT CARD (feed) ─────────────────────────────────────────
   if (isEventPost && !flatLayout) {
     return (
       <>
         {showRsvpModal && <RsvpModal />}
+        <DeleteDialog />
         <div className="bg-[#0A0A0A] rounded-2xl overflow-hidden border border-gray-800">
           {/* Image */}
           {hasImage && (
@@ -249,9 +344,10 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 </Avatar>
                 <span className="text-white text-xs font-medium">{post.ministry?.name || 'Ministry'}</span>
               </div>
-              {/* Event badge top-right */}
-              <div className="absolute top-3 right-3">
+              {/* Event badge + owner menu top-right */}
+              <div className="absolute top-3 right-3 flex items-center gap-1.5">
                 <Badge className="bg-[#D4AF37] text-black text-xs font-semibold">Event</Badge>
+                <OwnerMenu className="bg-black/60 backdrop-blur-sm rounded-full" />
               </div>
             </div>
           )}
@@ -265,10 +361,11 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   <Church className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className="flex-1">
                 <p className="text-white text-sm font-semibold">{post.ministry?.name || 'Ministry'}</p>
                 <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 text-[10px] mt-0.5">Event</Badge>
               </div>
+              <OwnerMenu />
             </div>
           )}
 
@@ -361,6 +458,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
     return (
       <>
         {showRsvpModal && <RsvpModal />}
+        <DeleteDialog />
         <div className="bg-[#0A0A0A]">
           {/* Large image */}
           {hasImage && (
@@ -375,8 +473,11 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
           )}
 
           <div className="p-5 space-y-5">
-            {/* Title */}
-            <h1 className="text-white text-2xl font-bold leading-tight">{cleanTitle || post.title}</h1>
+            {/* Title + owner menu */}
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="text-white text-2xl font-bold leading-tight flex-1">{cleanTitle || post.title}</h1>
+              <OwnerMenu />
+            </div>
 
             {/* Date row */}
             {displayDate && (

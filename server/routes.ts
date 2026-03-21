@@ -3755,6 +3755,27 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
     }
   });
 
+  // Delete a ministry event
+  app.delete('/api/ministries/:id/events/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id, eventId } = req.params;
+      const userId = req.user.id;
+
+      const ministry = await storage.getMinistry(parseInt(id));
+      if (!ministry) return res.status(404).json({ message: "Ministry not found" });
+      if (ministry.userId !== userId) return res.status(403).json({ message: "Not authorized" });
+
+      const event = await storage.getMinistryEventById(parseInt(eventId));
+      if (!event) return res.status(404).json({ message: "Event not found" });
+
+      await storage.deleteMinistryEvent(parseInt(eventId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
   // Follow/unfollow ministry
   app.post('/api/ministries/:id/follow', isAuthenticated, async (req: any, res) => {
     try {
