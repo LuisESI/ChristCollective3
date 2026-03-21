@@ -101,10 +101,10 @@ export default function EventCreatePage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 20 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please select an image smaller than 5MB",
+        description: "Please select an image smaller than 20MB",
         variant: "destructive",
       });
       return;
@@ -336,7 +336,7 @@ export default function EventCreatePage() {
                                     Click to upload or drag and drop your event flyer
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    PNG, JPG, GIF up to 5MB
+                                    PNG, JPG, GIF up to 20MB
                                   </p>
                                   <Button
                                     type="button"

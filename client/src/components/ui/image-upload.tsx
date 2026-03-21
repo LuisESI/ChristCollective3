@@ -40,11 +40,11 @@ export function ImageUpload({
       return;
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please select an image smaller than 5MB",
+        description: "Please select an image smaller than 20MB",
         variant: "destructive",
       });
       return;
@@ -166,7 +166,7 @@ export function ImageUpload({
       />
       
       <p className="text-xs text-gray-500">
-        Supported formats: JPG, PNG, GIF. Max size: 5MB
+        Supported formats: JPG, PNG, GIF. Max size: 20MB
       </p>
     </div>
   );
