@@ -3745,6 +3745,24 @@ ${eventData.requiresRegistration ? 'Registration required!' : 'All are welcome!'
 
       const updateData = insertMinistryEventSchema.partial().parse(req.body);
       const updated = await storage.updateMinistryEvent(parseInt(eventId), updateData);
+
+      // Sync the linked ministry post so the feed card shows updated content
+      const merged = { ...event, ...updateData };
+      const updatedContent = `📅 ${merged.title}
+
+${merged.description || ''}
+
+📍 ${merged.location ? merged.location : 'Location TBD'}
+📅 ${new Date(merged.startDate).toLocaleDateString()} at ${new Date(merged.startDate).toLocaleTimeString()}
+
+${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
+
+      await storage.updateMinistryPostByEventId(parseInt(eventId), {
+        title: `New Event: ${merged.title}`,
+        content: updatedContent,
+        ...(merged.flyerImage ? { mediaUrls: [merged.flyerImage] } : {}),
+      });
+
       res.json(updated);
     } catch (error) {
       console.error("Error updating event:", error);
