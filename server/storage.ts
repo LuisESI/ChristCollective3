@@ -1088,13 +1088,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Ministry post RSVP operations
-  async createOrUpdateRsvp(userId: string, postId: number, status: string, notes?: string): Promise<MinistryPostRsvp> {
+  async createOrUpdateRsvp(userId: string, postId: number, status: string, notes?: string, plusOnes?: number): Promise<MinistryPostRsvp> {
     const [rsvp] = await db
       .insert(ministryPostRsvps)
-      .values({ userId, postId, status, notes })
+      .values({ userId, postId, status, notes, plusOnes: plusOnes ?? 0 })
       .onConflictDoUpdate({
         target: [ministryPostRsvps.userId, ministryPostRsvps.postId],
-        set: { status, notes, updatedAt: new Date() }
+        set: { status, notes, plusOnes: plusOnes ?? 0, updatedAt: new Date() }
       })
       .returning();
     return rsvp;
@@ -1108,11 +1108,12 @@ export class DatabaseStorage implements IStorage {
     return rsvp;
   }
 
-  async getRsvpsForPost(postId: number): Promise<{ status: string; count: number }[]> {
+  async getRsvpsForPost(postId: number): Promise<{ status: string; count: number; totalGuests: number }[]> {
     const result = await db
       .select({
         status: ministryPostRsvps.status,
-        count: sql<number>`count(*)::int`
+        count: sql<number>`count(*)::int`,
+        totalGuests: sql<number>`sum(${ministryPostRsvps.plusOnes})::int`
       })
       .from(ministryPostRsvps)
       .where(eq(ministryPostRsvps.postId, postId))

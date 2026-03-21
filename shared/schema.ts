@@ -386,6 +386,7 @@ export const ministryPostRsvps = pgTable("ministry_post_rsvps", {
   postId: integer("post_id").notNull().references(() => ministryPosts.id),
   status: varchar("status").notNull().default("going"), // going, maybe, not_going
   notes: text("notes"), // Optional notes from user
+  plusOnes: integer("plus_ones").notNull().default(0), // Extra guests the attendee is bringing
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({

@@ -3553,13 +3553,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const postId = parseInt(req.params.id);
-      const { status, notes } = req.body;
+      const { status, notes, plusOnes } = req.body;
 
       if (!["going", "maybe", "not_going"].includes(status)) {
         return res.status(400).json({ message: "Invalid RSVP status" });
       }
 
-      const rsvp = await storage.createOrUpdateRsvp(userId, postId, status, notes);
+      const parsedPlusOnes = Math.max(0, Math.min(9, parseInt(plusOnes ?? 0) || 0));
+      const rsvp = await storage.createOrUpdateRsvp(userId, postId, status, notes, parsedPlusOnes);
       res.json(rsvp);
     } catch (error) {
       console.error("Error creating/updating RSVP:", error);

@@ -73,6 +73,8 @@ function formatEventDateRange(start: string | Date | null | undefined, end: stri
 
 export function MinistryPostCard({ post, disableClick = false, flatLayout = false, onUnauthenticatedRsvp }: MinistryPostCardProps) {
   const [showRsvpModal, setShowRsvpModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string>("going");
+  const [pendingPlusOnes, setPendingPlusOnes] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useAuth();
   const isAuthenticated = !!user;
@@ -125,10 +127,10 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   });
 
   const rsvpMutation = useMutation({
-    mutationFn: async ({ status, notes }: { status: string; notes?: string }) => {
+    mutationFn: async ({ status, notes, plusOnes }: { status: string; notes?: string; plusOnes?: number }) => {
       return apiRequest(`/api/ministry-posts/${post.id}/rsvp`, {
         method: 'POST',
-        data: { status, notes }
+        data: { status, notes, plusOnes: plusOnes ?? 0 }
       });
     },
     onSuccess: () => {
@@ -156,10 +158,18 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       }
       return;
     }
-    if (userRsvp?.status === status) {
+    // Open modal with this status pre-selected; seed plus ones from existing RSVP
+    setPendingStatus(status);
+    setPendingPlusOnes(userRsvp?.plusOnes ?? 0);
+    setShowRsvpModal(true);
+  };
+
+  const confirmRsvp = () => {
+    if (userRsvp?.status === pendingStatus && (userRsvp?.plusOnes ?? 0) === pendingPlusOnes) {
+      // No change — treat as un-RSVP toggle
       removeRsvpMutation.mutate();
     } else {
-      rsvpMutation.mutate({ status });
+      rsvpMutation.mutate({ status: pendingStatus, plusOnes: pendingPlusOnes });
     }
     setShowRsvpModal(false);
   };
@@ -179,7 +189,15 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   const getRsvpCount = (status: string) =>
     Array.isArray(rsvpCounts) ? rsvpCounts.find((r: any) => r.status === status)?.count || 0 : 0;
 
+  const getGoingTotal = () => {
+    if (!Array.isArray(rsvpCounts)) return 0;
+    const row = rsvpCounts.find((r: any) => r.status === 'going');
+    if (!row) return 0;
+    return (row.count || 0) + (row.totalGuests || 0);
+  };
+
   const goingCount = getRsvpCount('going');
+  const goingTotal = getGoingTotal();
 
   // Determine event date to display
   const displayDate = eventData
@@ -213,46 +231,76 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
           </button>
         </div>
 
-        <h3 className="text-white text-lg font-bold text-center mb-6">{cleanTitle}</h3>
+        <h3 className="text-white text-lg font-bold text-center mb-1">{cleanTitle}</h3>
+        <p className="text-gray-500 text-xs text-center mb-6">Confirm your attendance</p>
 
         {/* Going / Maybe circles */}
-        <div className="flex justify-center gap-8 mb-8">
+        <div className="flex justify-center gap-8 mb-6">
           {/* Going */}
           <button
-            onClick={() => handleRsvp('going')}
+            onClick={() => setPendingStatus('going')}
             className={`flex flex-col items-center gap-2 transition-all ${
-              userRsvp?.status === 'going' ? 'scale-110' : 'opacity-80 hover:opacity-100'
+              pendingStatus === 'going' ? 'scale-110' : 'opacity-60 hover:opacity-80'
             }`}
           >
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl border-2 transition-all ${
-              userRsvp?.status === 'going'
+              pendingStatus === 'going'
                 ? 'bg-[#D4AF37]/20 border-[#D4AF37] shadow-lg shadow-[#D4AF37]/20'
-                : 'bg-gray-800 border-gray-600'
+                : 'bg-gray-800 border-gray-700'
             }`}>
               🙌
             </div>
-            <span className="text-white text-sm font-semibold">Going</span>
-            {goingCount > 0 && (
-              <span className="text-gray-400 text-xs">{goingCount} going</span>
-            )}
+            <span className={`text-sm font-semibold ${pendingStatus === 'going' ? 'text-[#D4AF37]' : 'text-gray-400'}`}>Going</span>
           </button>
 
           {/* Maybe */}
           <button
-            onClick={() => handleRsvp('maybe')}
+            onClick={() => setPendingStatus('maybe')}
             className={`flex flex-col items-center gap-2 transition-all ${
-              userRsvp?.status === 'maybe' ? 'scale-110' : 'opacity-80 hover:opacity-100'
+              pendingStatus === 'maybe' ? 'scale-110' : 'opacity-60 hover:opacity-80'
             }`}
           >
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl border-2 transition-all ${
-              userRsvp?.status === 'maybe'
+              pendingStatus === 'maybe'
                 ? 'bg-blue-900/40 border-blue-400 shadow-lg'
-                : 'bg-gray-800 border-gray-600'
+                : 'bg-gray-800 border-gray-700'
             }`}>
               🤔
             </div>
-            <span className="text-gray-300 text-sm font-semibold">Maybe</span>
+            <span className={`text-sm font-semibold ${pendingStatus === 'maybe' ? 'text-blue-300' : 'text-gray-400'}`}>Maybe</span>
           </button>
+        </div>
+
+        {/* Plus ones stepper */}
+        <div className="bg-gray-900 rounded-2xl p-4 mb-5 border border-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white text-sm font-semibold">Extra guests</p>
+              <p className="text-gray-500 text-xs mt-0.5">How many people are you bringing?</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setPendingPlusOnes(Math.max(0, pendingPlusOnes - 1))}
+                disabled={pendingPlusOnes === 0}
+                className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-white font-bold text-lg disabled:opacity-30 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all"
+              >
+                −
+              </button>
+              <span className="text-white font-bold text-xl w-6 text-center">{pendingPlusOnes}</span>
+              <button
+                onClick={() => setPendingPlusOnes(Math.min(9, pendingPlusOnes + 1))}
+                disabled={pendingPlusOnes === 9}
+                className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-white font-bold text-lg disabled:opacity-30 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          {pendingPlusOnes > 0 && (
+            <p className="text-[#D4AF37] text-xs mt-3 text-center">
+              You + {pendingPlusOnes} guest{pendingPlusOnes > 1 ? 's' : ''} = {1 + pendingPlusOnes} total
+            </p>
+          )}
         </div>
 
         {/* RSVP as */}
@@ -275,12 +323,23 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
           </div>
         )}
 
-        <Button
-          className="w-full bg-[#D4AF37] text-black font-bold hover:bg-[#B8941F] h-12 rounded-xl"
-          onClick={() => setShowRsvpModal(false)}
-        >
-          Close
-        </Button>
+        <div className="flex gap-3">
+          {userRsvp?.status && (
+            <Button
+              variant="outline"
+              className="flex-1 border-gray-700 text-gray-400 hover:text-white h-12 rounded-xl"
+              onClick={() => { removeRsvpMutation.mutate(); setShowRsvpModal(false); }}
+            >
+              Remove RSVP
+            </Button>
+          )}
+          <Button
+            className="flex-1 bg-[#D4AF37] text-black font-bold hover:bg-[#B8941F] h-12 rounded-xl"
+            onClick={confirmRsvp}
+          >
+            {pendingStatus === 'going' ? '🙌 Confirm' : '🤔 Confirm'}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -442,9 +501,12 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               >
                 <span className="text-base">🙌</span>
                 Going
-                {goingCount > 0 && (
-                  <span className="text-xs opacity-70">· {goingCount}</span>
-                )}
+                {userRsvp?.status === 'going' && (userRsvp?.plusOnes ?? 0) > 0
+                  ? <span className="text-xs opacity-70">+{userRsvp.plusOnes}</span>
+                  : goingTotal > 0
+                    ? <span className="text-xs opacity-70">· {goingTotal}</span>
+                    : null
+                }
               </button>
 
               <button
@@ -589,8 +651,8 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wide">Guest List</h3>
-                {goingCount > 0 && (
-                  <span className="text-gray-400 text-xs">{goingCount} Going</span>
+                {goingTotal > 0 && (
+                  <span className="text-gray-400 text-xs">{goingTotal} {goingTotal !== goingCount ? `attending (${goingCount} ${goingCount === 1 ? 'person' : 'people'} + guests)` : 'going'}</span>
                 )}
               </div>
               <div className="flex gap-3 mb-3">
