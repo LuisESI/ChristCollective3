@@ -47,6 +47,7 @@ import MinistriesPage from "@/pages/MinistriesPage";
 import MinistryProfileViewPage from "@/pages/MinistryProfileViewPage";
 import EditMinistryProfilePage from "@/pages/EditMinistryProfilePage";
 import EventCreatePage from "@/pages/EventCreatePage";
+import EventPublicPage from "@/pages/EventPublicPage";
 import PostPage from "@/pages/PostPage";
 import DirectChatPage from "@/pages/DirectChatPage";
 import DebugAuthPage from "@/pages/DebugAuthPage";
@@ -113,6 +114,7 @@ function Router() {
       <Route path="/create" component={CreatePage} />
       <Route path="/events/create" component={EventCreatePage} />
       <Route path="/events/:id/edit" component={EventCreatePage} />
+      <Route path="/events/:id" component={EventPublicPage} />
       <Route path="/creators/share" component={CreatorSocialSharePage} />
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />

@@ -198,6 +198,7 @@ export interface IStorage {
   updateMinistryEvent(id: number, data: Partial<InsertMinistryEvent>): Promise<MinistryEvent>;
   deleteMinistryEvent(id: number): Promise<void>;
   updateMinistryPostByEventId(eventId: number, data: { title?: string; content?: string; mediaUrls?: string[] }): Promise<void>;
+  getMinistryPostByEventId(eventId: number): Promise<any>;
   
   // Ministry followers operations
   followMinistry(userId: string, ministryId: number): Promise<void>;
@@ -996,6 +997,33 @@ export class DatabaseStorage implements IStorage {
       .update(ministryPosts)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(ministryPosts.eventId, eventId));
+  }
+
+  async getMinistryPostByEventId(eventId: number): Promise<any> {
+    const [result] = await db
+      .select({
+        id: ministryPosts.id,
+        ministryId: ministryPosts.ministryId,
+        eventId: ministryPosts.eventId,
+        title: ministryPosts.title,
+        content: ministryPosts.content,
+        type: ministryPosts.type,
+        mediaUrls: ministryPosts.mediaUrls,
+        links: ministryPosts.links,
+        isPublished: ministryPosts.isPublished,
+        createdAt: ministryPosts.createdAt,
+        updatedAt: ministryPosts.updatedAt,
+        ministry: {
+          id: ministryProfiles.id,
+          name: ministryProfiles.name,
+          logo: ministryProfiles.logo,
+          denomination: ministryProfiles.denomination,
+        }
+      })
+      .from(ministryPosts)
+      .leftJoin(ministryProfiles, eq(ministryPosts.ministryId, ministryProfiles.id))
+      .where(eq(ministryPosts.eventId, eventId));
+    return result;
   }
 
   // Ministry followers operations

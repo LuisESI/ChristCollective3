@@ -12,7 +12,7 @@ export const useAuthGuard = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const requireAuth = (action: () => void, message?: string) => {
+  const requireAuth = (action: () => void, message?: string, redirectPath?: string) => {
     if (!user) {
       toast({
         title: "Sign in Required",
@@ -20,11 +20,11 @@ export const useAuthGuard = () => {
         variant: "default",
       });
       
-      // Navigate to appropriate auth page based on platform
+      const redirect = redirectPath ? `?redirect=${encodeURIComponent(redirectPath)}` : "";
       if (isNativeApp()) {
-        setLocation("/auth/mobile");
+        setLocation(`/auth/mobile${redirect}`);
       } else {
-        setLocation("/auth");
+        setLocation(`/auth${redirect}`);
       }
       return false;
     }

@@ -3643,6 +3643,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get the ministry post linked to a given event (public)
+  app.get('/api/events/:id/post', async (req, res) => {
+    try {
+      const post = await storage.getMinistryPostByEventId(parseInt(req.params.id));
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event post" });
+    }
+  });
+
   // Single event by ID (with ministry info and attendee count)
   app.get('/api/events/:id', async (req, res) => {
     try {

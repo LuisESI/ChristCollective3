@@ -17,7 +17,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, Clock, Church, ExternalLink, Crown, X, Video, Globe, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Church, ExternalLink, Crown, X, Video, Globe, MoreHorizontal, Pencil, Trash2, Share2 } from "lucide-react";
+import { isNativeApp } from "@/lib/platform";
 import { MinistryPost } from "@shared/schema";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -39,6 +40,7 @@ interface MinistryPostCardProps {
   };
   disableClick?: boolean;
   flatLayout?: boolean;
+  onUnauthenticatedRsvp?: (status: string) => void;
 }
 
 function formatEventDate(dateStr: string | Date | null | undefined): string {
@@ -69,7 +71,7 @@ function formatEventDateRange(start: string | Date | null | undefined, end: stri
   return `${startStr} — ${endStr}`;
 }
 
-export function MinistryPostCard({ post, disableClick = false, flatLayout = false }: MinistryPostCardProps) {
+export function MinistryPostCard({ post, disableClick = false, flatLayout = false, onUnauthenticatedRsvp }: MinistryPostCardProps) {
   const [showRsvpModal, setShowRsvpModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useAuth();
@@ -146,14 +148,32 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   });
 
   const handleRsvp = (status: string) => {
-    requireAuth(() => {
-      if (userRsvp?.status === status) {
-        removeRsvpMutation.mutate();
+    if (!isAuthenticated) {
+      if (onUnauthenticatedRsvp) {
+        onUnauthenticatedRsvp(status);
       } else {
-        rsvpMutation.mutate({ status });
+        requireAuth(() => {}, "Please sign in to RSVP for events");
       }
-      setShowRsvpModal(false);
-    }, "Please sign in to RSVP for events");
+      return;
+    }
+    if (userRsvp?.status === status) {
+      removeRsvpMutation.mutate();
+    } else {
+      rsvpMutation.mutate({ status });
+    }
+    setShowRsvpModal(false);
+  };
+
+  const shareEvent = async () => {
+    const url = `${window.location.origin}/events/${eventId}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: cleanTitle, text: `Join us at ${cleanTitle}!`, url });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied!", description: "Share this link with anyone." });
+    }
   };
 
   const getRsvpCount = (status: string) =>
@@ -195,7 +215,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
 
         <h3 className="text-white text-lg font-bold text-center mb-6">{cleanTitle}</h3>
 
-        {/* Going / Can't Go circles */}
+        {/* Going / Maybe circles */}
         <div className="flex justify-center gap-8 mb-8">
           {/* Going */}
           <button
@@ -209,7 +229,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 ? 'bg-[#D4AF37]/20 border-[#D4AF37] shadow-lg shadow-[#D4AF37]/20'
                 : 'bg-gray-800 border-gray-600'
             }`}>
-              🥳
+              🙌
             </div>
             <span className="text-white text-sm font-semibold">Going</span>
             {goingCount > 0 && (
@@ -217,21 +237,21 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             )}
           </button>
 
-          {/* Can't Go */}
+          {/* Maybe */}
           <button
-            onClick={() => handleRsvp('not_going')}
+            onClick={() => handleRsvp('maybe')}
             className={`flex flex-col items-center gap-2 transition-all ${
-              userRsvp?.status === 'not_going' ? 'scale-110' : 'opacity-80 hover:opacity-100'
+              userRsvp?.status === 'maybe' ? 'scale-110' : 'opacity-80 hover:opacity-100'
             }`}
           >
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl border-2 transition-all ${
-              userRsvp?.status === 'not_going'
-                ? 'bg-gray-700 border-gray-400 shadow-lg'
+              userRsvp?.status === 'maybe'
+                ? 'bg-blue-900/40 border-blue-400 shadow-lg'
                 : 'bg-gray-800 border-gray-600'
             }`}>
-              😓
+              🤔
             </div>
-            <span className="text-gray-300 text-sm font-semibold">Can't Go</span>
+            <span className="text-gray-300 text-sm font-semibold">Maybe</span>
           </button>
         </div>
 
@@ -411,16 +431,16 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
             <div className="border-t border-gray-800" />
 
             {/* RSVP Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
-                onClick={() => requireAuth(() => setShowRsvpModal(true), "Sign in to RSVP")}
+                onClick={() => handleRsvp('going')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                   userRsvp?.status === 'going'
                     ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]'
                     : 'bg-gray-900 border-gray-700 text-white hover:border-[#D4AF37]/50'
                 }`}
               >
-                <span className="text-base">🥳</span>
+                <span className="text-base">🙌</span>
                 Going
                 {goingCount > 0 && (
                   <span className="text-xs opacity-70">· {goingCount}</span>
@@ -428,21 +448,30 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               </button>
 
               <button
-                onClick={() => requireAuth(() => setShowRsvpModal(true), "Sign in to RSVP")}
+                onClick={() => handleRsvp('maybe')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  userRsvp?.status === 'not_going'
-                    ? 'bg-gray-700 border-gray-500 text-gray-300'
+                  userRsvp?.status === 'maybe'
+                    ? 'bg-blue-900/40 border-blue-400 text-blue-300'
                     : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
                 }`}
               >
-                <span className="text-base">😓</span>
-                Can't Go
+                <span className="text-base">🤔</span>
+                Maybe
               </button>
+
+              {eventId && (
+                <button
+                  onClick={shareEvent}
+                  className="flex items-center justify-center w-11 rounded-xl border border-gray-700 bg-gray-900 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all"
+                >
+                  <Share2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             {/* View Event */}
             <button
-              onClick={() => navigate(`/ministry-post/${post.id}`)}
+              onClick={() => navigate(eventId ? `/events/${eventId}` : `/ministry-post/${post.id}`)}
               className="w-full text-center text-[#D4AF37] text-xs font-medium py-1 hover:text-[#B8941F] transition-colors"
             >
               View event details →
@@ -564,30 +593,39 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                   <span className="text-gray-400 text-xs">{goingCount} Going</span>
                 )}
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 mb-3">
                 <button
-                  onClick={() => requireAuth(() => setShowRsvpModal(true), "Sign in to RSVP")}
+                  onClick={() => handleRsvp('going')}
                   className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold border-2 transition-all ${
                     userRsvp?.status === 'going'
                       ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]'
                       : 'bg-gray-900 border-gray-700 text-white hover:border-[#D4AF37]/50'
                   }`}
                 >
-                  <span className="text-xl">🥳</span>
+                  <span className="text-xl">🙌</span>
                   Going
                 </button>
                 <button
-                  onClick={() => requireAuth(() => setShowRsvpModal(true), "Sign in to RSVP")}
+                  onClick={() => handleRsvp('maybe')}
                   className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold border-2 transition-all ${
-                    userRsvp?.status === 'not_going'
-                      ? 'bg-gray-700 border-gray-500 text-gray-200'
+                    userRsvp?.status === 'maybe'
+                      ? 'bg-blue-900/40 border-blue-400 text-blue-300'
                       : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
                   }`}
                 >
-                  <span className="text-xl">😓</span>
-                  Can't Go
+                  <span className="text-xl">🤔</span>
+                  Maybe
                 </button>
               </div>
+              {eventId && (
+                <button
+                  onClick={shareEvent}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border border-gray-700 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/40 transition-all text-sm font-medium"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share Event
+                </button>
+              )}
             </div>
           </div>
         </div>
