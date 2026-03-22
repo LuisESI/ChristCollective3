@@ -223,7 +223,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       onClick={() => setShowRsvpModal(false)}
     >
       <div
-        className="w-full max-w-md bg-[#111] rounded-t-3xl p-6 pb-10"
+        className="w-full max-w-md bg-[#111] rounded-t-3xl p-6 pb-28"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
