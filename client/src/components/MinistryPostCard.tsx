@@ -399,23 +399,31 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
     ) : null
   );
 
-  // ─── LUMA-STYLE EVENT CARD (feed) ─────────────────────────────────────────
+  // ─── EVENT PREVIEW CARD (feed) ─────────────────────────────────────────────
   if (isEventPost && !flatLayout) {
+    const handleCardClick = () => {
+      navigate(eventId ? `/events/${eventId}` : `/ministry-post/${post.id}`);
+    };
+
     return (
       <>
-        {showRsvpModal && <RsvpModal />}
         <DeleteDialog />
-        <div className="bg-[#0A0A0A] rounded-2xl overflow-hidden border border-gray-800">
+        <div
+          className="bg-[#0A0A0A] rounded-2xl overflow-hidden border border-gray-800 cursor-pointer active:scale-[0.99] transition-transform"
+          onClick={handleCardClick}
+        >
           {/* Image */}
           {hasImage && (
             <div className="relative">
               <img
                 src={getImageUrl(post.mediaUrls![0])}
                 alt="Event"
-                className="w-full object-cover max-h-[560px]"
+                className="w-full object-cover max-h-[400px]"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
-              {/* Ministry overlay top-left */}
+              {/* Gradient overlay bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+              {/* Ministry pill top-left */}
               <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1.5">
                 <Avatar className="h-5 w-5">
                   <AvatarImage src={getImageUrl(post.ministry?.logo)} />
@@ -426,14 +434,28 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 <span className="text-white text-xs font-medium">{post.ministry?.name || 'Ministry'}</span>
               </div>
               {/* Event badge + owner menu top-right */}
-              <div className="absolute top-3 right-3 flex items-center gap-1.5">
+              <div className="absolute top-3 right-3 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                 <Badge className="bg-[#D4AF37] text-black text-xs font-semibold">Event</Badge>
                 <OwnerMenu className="bg-black/60 backdrop-blur-sm rounded-full" />
               </div>
+              {/* Date chip bottom-left over gradient */}
+              {displayDate && (
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm rounded-full px-2.5 py-1">
+                  <Calendar className="h-3 w-3 text-[#D4AF37]" />
+                  <span className="text-[#D4AF37] text-xs font-semibold">{displayDate}</span>
+                </div>
+              )}
+              {/* Going count bottom-right */}
+              {goingTotal > 0 && (
+                <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-full px-2.5 py-1">
+                  <span className="text-white text-xs">🙌</span>
+                  <span className="text-white text-xs font-medium">{goingTotal} going</span>
+                </div>
+              )}
             </div>
           )}
 
-          {/* No image: show ministry header */}
+          {/* No image: ministry header row */}
           {!hasImage && (
             <div className="flex items-center gap-3 p-4 pb-0">
               <Avatar className="h-9 w-9">
@@ -446,16 +468,17 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
                 <p className="text-white text-sm font-semibold">{post.ministry?.name || 'Ministry'}</p>
                 <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30 text-[10px] mt-0.5">Event</Badge>
               </div>
-              <OwnerMenu />
+              <div onClick={(e) => e.stopPropagation()}>
+                <OwnerMenu />
+              </div>
             </div>
           )}
 
-          <div className="p-4 space-y-3">
-            {/* Title */}
+          <div className="p-4 space-y-2">
             <h2 className="text-white text-xl font-bold leading-tight">{cleanTitle || post.title}</h2>
 
-            {/* Date */}
-            {displayDate && (
+            {/* Date row (no-image only) */}
+            {!hasImage && displayDate && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-[#D4AF37] flex-shrink-0" />
                 <span className="text-[#D4AF37] text-sm font-medium">{displayDate}</span>
@@ -475,71 +498,16 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               </div>
             ) : null}
 
-            {/* Hosted by */}
-            <div className="flex items-center gap-2">
-              <Crown className="h-3.5 w-3.5 text-[#D4AF37]" />
-              <span className="text-gray-500 text-xs">Hosted by</span>
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={getImageUrl(post.ministry?.logo)} />
-                <AvatarFallback className="bg-[#D4AF37] text-black text-[10px]">
-                  <Church className="h-2.5 w-2.5" />
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-white text-xs font-medium">{post.ministry?.name || 'Ministry'}</span>
+            {/* No-image going count */}
+            {!hasImage && goingTotal > 0 && (
+              <p className="text-gray-500 text-xs">🙌 {goingTotal} going</p>
+            )}
+
+            {/* Tap cue */}
+            <div className="pt-1 border-t border-gray-800/60 flex items-center justify-between">
+              <span className="text-gray-500 text-xs">Tap to see details & RSVP</span>
+              <span className="text-[#D4AF37] text-xs font-medium">View →</span>
             </div>
-
-            {/* Divider */}
-            <div className="border-t border-gray-800" />
-
-            {/* RSVP Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleRsvp('going')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  userRsvp?.status === 'going'
-                    ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]'
-                    : 'bg-gray-900 border-gray-700 text-white hover:border-[#D4AF37]/50'
-                }`}
-              >
-                <span className="text-base">🙌</span>
-                Going
-                {userRsvp?.status === 'going' && (userRsvp?.plusOnes ?? 0) > 0
-                  ? <span className="text-xs opacity-70">+{userRsvp.plusOnes}</span>
-                  : goingTotal > 0
-                    ? <span className="text-xs opacity-70">· {goingTotal}</span>
-                    : null
-                }
-              </button>
-
-              <button
-                onClick={() => handleRsvp('maybe')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  userRsvp?.status === 'maybe'
-                    ? 'bg-blue-900/40 border-blue-400 text-blue-300'
-                    : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
-                }`}
-              >
-                <span className="text-base">🤔</span>
-                Maybe
-              </button>
-
-              {eventId && (
-                <button
-                  onClick={shareEvent}
-                  className="flex items-center justify-center w-11 rounded-xl border border-gray-700 bg-gray-900 text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all"
-                >
-                  <Share2 className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            {/* View Event */}
-            <button
-              onClick={() => navigate(eventId ? `/events/${eventId}` : `/ministry-post/${post.id}`)}
-              className="w-full text-center text-[#D4AF37] text-xs font-medium py-1 hover:text-[#B8941F] transition-colors"
-            >
-              View event details →
-            </button>
           </div>
         </div>
       </>

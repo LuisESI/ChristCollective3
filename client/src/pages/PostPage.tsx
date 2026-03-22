@@ -1,14 +1,14 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
-import { MinistryPostCard } from "@/components/MinistryPostCard";
 
 export default function PostPage() {
   const { id } = useParams();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const postId = parseInt(id || '0');
   
   // Determine if this is a ministry post based on the URL
@@ -20,6 +20,13 @@ export default function PostPage() {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
+
+  // Redirect event posts to the new EventPublicPage
+  useEffect(() => {
+    if (isMinistryPost && post && (post as any).eventId) {
+      navigate(`/events/${(post as any).eventId}`, { replace: true });
+    }
+  }, [isMinistryPost, post]);
 
   const { data: currentUser } = useQuery({
     queryKey: ["/api/user"],
