@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { getImageUrl } from "@/lib/api-config";
+import { getImageUrl, getProfileImageUrl } from "@/lib/api-config";
 import { 
   ArrowLeft, 
   Send, 
@@ -150,82 +150,82 @@ export default function DirectChatPage() {
   const otherUserName = otherUser?.displayName || otherUser?.firstName || otherUser?.username || "User";
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col pb-20">
+    <div className="fixed inset-0 bg-black text-white flex flex-col z-40">
       <Helmet>
         <title>Direct Message - {otherUserName} | Christ Collective</title>
       </Helmet>
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-black border-b border-gray-800 px-4 py-2">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/connect")}
-              className="text-white hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            
-            {otherUser && (
-              <>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={getImageUrl(otherUser.profileImageUrl)} />
-                  <AvatarFallback className="bg-[#D4AF37] text-black">
-                    {otherUserName.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h1 className="text-base font-semibold">{otherUserName}</h1>
-                  <p className="text-xs text-gray-400">@{otherUser.username}</p>
-                </div>
-              </>
-            )}
-            
-            <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </div>
+      <div className="flex-shrink-0 bg-black border-b border-gray-800 px-4 py-3 pt-safe">
+        <div className="max-w-2xl mx-auto flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/connect")}
+            className="text-white hover:bg-gray-800 p-1"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+
+          {otherUser && (
+            <>
+              <Avatar className="w-9 h-9">
+                <AvatarImage src={getProfileImageUrl(otherUser.profileImageUrl, 72)} />
+                <AvatarFallback className="bg-[#D4AF37] text-black text-sm font-semibold">
+                  {otherUserName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-sm font-semibold truncate">{otherUserName}</h1>
+                <p className="text-xs text-gray-400 truncate">@{otherUser.username}</p>
+              </div>
+            </>
+          )}
+
+          <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800 p-1">
+            <MoreVertical className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0 scrollbar-hide px-4 pt-3 pb-2">
+        <div className="max-w-2xl mx-auto">
           {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-2">No messages yet</div>
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-1">No messages yet</div>
               <p className="text-sm text-gray-500">Start the conversation with {otherUserName}!</p>
             </div>
           ) : (
             messages.map((msg, index) => {
               const isOwn = msg.senderId === user.id;
-              const showDate = index === 0 || 
+              const showDate = index === 0 ||
                 formatDate(messages[index - 1].createdAt) !== formatDate(msg.createdAt);
-              
+              const prevMsg = messages[index - 1];
+              const isConsecutive = !showDate && prevMsg && prevMsg.senderId === msg.senderId;
+
               return (
                 <div key={msg.id}>
                   {showDate && (
-                    <div className="text-center text-xs text-gray-500 my-4">
+                    <div className="text-center text-xs text-gray-500 my-3">
                       {formatDate(msg.createdAt)}
                     </div>
                   )}
-                  
-                  <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-3`}>
-                    <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${isOwn ? "flex-row-reverse space-x-reverse" : ""}`}>
+
+                  <div className={`flex ${isOwn ? "justify-end" : "justify-start"} ${isConsecutive ? "mt-0.5" : "mt-3"}`}>
+                    <div className={`flex items-end gap-2 max-w-[75%] ${isOwn ? "flex-row-reverse" : ""}`}>
                       {!isOwn && (
-                        <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarImage src={getImageUrl(msg.sender.profileImageUrl)} />
+                        <Avatar className={`w-7 h-7 flex-shrink-0 ${isConsecutive ? "invisible" : ""}`}>
+                          <AvatarImage src={getProfileImageUrl(msg.sender.profileImageUrl, 56)} />
                           <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
                             {(msg.sender.displayName || msg.sender.firstName || msg.sender.username).charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       )}
-                      
-                      <div className={`${isOwn ? "bg-[#D4AF37] text-black" : "bg-gray-800 text-white"} rounded-lg px-4 py-2`}>
-                        <p className="text-sm break-words">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${isOwn ? "text-black/70" : "text-gray-400"}`}>
+
+                      <div className={`${isOwn ? "bg-[#D4AF37] text-black" : "bg-gray-800 text-white"} rounded-2xl px-3 py-2`}>
+                        <p className="text-sm break-words leading-snug">{msg.message}</p>
+                        <p className={`text-[10px] mt-0.5 ${isOwn ? "text-black/60 text-right" : "text-gray-500"}`}>
                           {formatTime(msg.createdAt)}
                         </p>
                       </div>
@@ -240,21 +240,21 @@ export default function DirectChatPage() {
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0 bg-black border-t border-gray-800 px-4 py-4">
+      <div className="flex-shrink-0 bg-black border-t border-gray-800 px-4 py-2 pb-safe">
         <div className="max-w-2xl mx-auto">
-          <form onSubmit={handleSendMessage} className="flex space-x-3">
+          <form onSubmit={handleSendMessage} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={`Message ${otherUserName}...`}
-              className="flex-1 bg-gray-900 border-gray-700 text-white placeholder-gray-400"
+              className="flex-1 bg-gray-900 border-gray-700 text-white placeholder-gray-400 rounded-full px-4"
               disabled={sendMessageMutation.isPending}
             />
             <Button
               type="submit"
               disabled={!message.trim() || sendMessageMutation.isPending}
-              className="bg-[#D4AF37] text-black hover:bg-[#B8941F] px-6"
+              className="bg-[#D4AF37] text-black hover:bg-[#B8941F] rounded-full w-9 h-9 p-0 flex-shrink-0"
             >
               {sendMessageMutation.isPending ? (
                 <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus";
 import { useQuery } from "@tanstack/react-query";
-import { getImageUrl } from "@/lib/api-config";
+import { getProfileImageUrl } from "@/lib/api-config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,6 +62,9 @@ export default function Header() {
     { name: "Ministries", path: "/ministries" },
     { name: "About", path: "/about" },
   ];
+
+  // Hide header on full-screen chat pages
+  if (path.startsWith('/direct-chat/')) return null;
 
   return (
     <header className="bg-background sticky top-0 z-50 header-gradient-shadow pt-safe">
@@ -120,7 +123,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={getImageUrl(user?.profileImageUrl) || undefined} alt={user?.firstName || "User"} />
+                    <AvatarImage src={getProfileImageUrl(user?.profileImageUrl, 64) || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>

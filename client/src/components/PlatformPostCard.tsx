@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { buildApiUrl, getImageUrl } from "@/lib/api-config";
+import { buildApiUrl, getImageUrl, getProfileImageUrl } from "@/lib/api-config";
 import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag, ChevronLeft, ChevronRight, UserMinus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -481,9 +481,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
 
   // Helper functions for user profile information
   const getUserProfileImage = () => {
-    const imageUrl = postAuthor?.profileImageUrl || "";
-    console.log("Profile image URL:", imageUrl, "for user:", postAuthor?.username);
-    return getImageUrl(imageUrl);
+    return getProfileImageUrl(postAuthor?.profileImageUrl, 80);
   };
 
   const getUserInitials = () => {
@@ -841,7 +839,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                     className="flex gap-2 items-start group hover:bg-gray-800/30 rounded-md p-1 -m-1 transition-colors"
                   >
                     <Avatar className="w-6 h-6">
-                      <AvatarImage src={getImageUrl(comment.user?.profileImageUrl)} alt={comment.user?.firstName} />
+                      <AvatarImage src={getProfileImageUrl(comment.user?.profileImageUrl, 56)} alt={comment.user?.firstName} />
                       <AvatarFallback className="bg-gray-700 text-gray-300 text-xs">
                         {comment.user?.firstName?.[0] || comment.user?.username?.[0] || "U"}
                       </AvatarFallback>
