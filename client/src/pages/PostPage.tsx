@@ -21,12 +21,21 @@ export default function PostPage() {
     refetchOnWindowFocus: true,
   });
 
-  // Redirect event posts to the new EventPublicPage
+  // Redirect event posts to the new EventPublicPage — do it immediately, no flash
   useEffect(() => {
     if (isMinistryPost && post && (post as any).eventId) {
       navigate(`/events/${(post as any).eventId}`, { replace: true });
     }
   }, [isMinistryPost, post]);
+
+  // While we're waiting to redirect an event post, show a spinner — never render flat layout
+  if (isMinistryPost && (isLoading || (post && (post as any).eventId))) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const { data: currentUser } = useQuery({
     queryKey: ["/api/user"],

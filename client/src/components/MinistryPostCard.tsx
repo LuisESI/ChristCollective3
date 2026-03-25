@@ -607,12 +607,12 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               </div>
             ) : null}
 
-            {/* Description */}
-            {(eventData?.description || post.content) && (
+            {/* Description — only show the clean event description, never raw post.content */}
+            {eventData?.description && (
               <div>
                 <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">About</h3>
                 <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                  {eventData?.description || post.content}
+                  {eventData.description}
                 </p>
               </div>
             )}
