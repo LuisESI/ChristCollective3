@@ -104,7 +104,6 @@ export function setupAuth(app: Express) {
     const mobileSessionId = req.headers['x-session-id'] as string;
     if (!mobileSessionId) return next();
     
-    console.log("📱 Mobile session detected - injecting session cookie for ID:", mobileSessionId);
     
     const secret = sessionSettings.secret as string;
     const signed = 's:' + signCookie(mobileSessionId, secret);
@@ -153,11 +152,9 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
-    console.log("🔐 Serializing user:", user.id);
     done(null, user.id);
   });
   passport.deserializeUser(async (id: string, done) => {
-    console.log("🔓 Deserializing user ID:", id);
     const user = await storage.getUser(id);
     done(null, user);
   });
@@ -239,7 +236,6 @@ export function setupAuth(app: Express) {
         return res.status(500).json({ message: "Authentication error" });
       }
       if (!user) {
-        console.log("Authentication failed for user:", req.body.username);
         return res.status(401).json({ message: "Incorrect password" });
       }
       if (!user.emailVerified) {
@@ -263,12 +259,6 @@ export function setupAuth(app: Express) {
           }
           
           const userData = user as SelectUser;
-          
-          // Debug logging for mobile session issues
-          console.log("✅ Login successful for:", userData.username);
-          console.log("📝 Session ID:", req.sessionID);
-          console.log("💾 Session saved to store");
-          console.log("🍪 Session cookie set:", req.session.cookie);
           
           res.status(200).json({ 
             id: userData.id, 
@@ -423,8 +413,6 @@ export function setupAuth(app: Express) {
             });
           }
           
-          console.log("💾 Password reset session saved for:", user.username);
-          
           res.json({ 
             message: "Password reset successfully",
             user: {
@@ -523,27 +511,11 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", async (req, res) => {
-    // Debug logging for session issues
-    const hasSessionHeader = !!req.headers['x-session-id'];
-    const hasCookie = !!req.headers.cookie;
-    
-    console.log("━━━━━ /api/user Request ━━━━━");
-    console.log("Session ID:", req.sessionID);
-    console.log("Has X-Session-ID header:", hasSessionHeader);
-    console.log("Has Cookie:", hasCookie);
-    console.log("Authenticated:", req.isAuthenticated());
-    
-    if (req.isAuthenticated()) {
-      const sessionUser = req.user as SelectUser;
-      console.log("✅ User authenticated:", sessionUser.username);
-    } else {
-      console.log("❌ Not authenticated - returning 401");
-      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    if (!req.isAuthenticated()) {
       return res.sendStatus(401);
     }
-    
+
     const sessionUser = req.user as SelectUser;
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━");
     
     // Fetch fresh user data from database to ensure we have the latest updates
     try {

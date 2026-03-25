@@ -29,9 +29,9 @@ export class YouTubeService {
 
   constructor() {
     if (!process.env.YOUTUBE_API_KEY) {
-      throw new Error('YOUTUBE_API_KEY environment variable is required');
+      console.warn('Warning: YOUTUBE_API_KEY not set. YouTube features will be disabled.');
     }
-    this.apiKey = process.env.YOUTUBE_API_KEY;
+    this.apiKey = process.env.YOUTUBE_API_KEY || '';
   }
 
   extractVideoId(url: string): string | null {

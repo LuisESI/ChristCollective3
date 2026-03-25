@@ -409,7 +409,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
       <>
         <DeleteDialog />
         <div
-          className="bg-[#0A0A0A] rounded-2xl overflow-hidden border border-gray-800 cursor-pointer active:scale-[0.99] transition-transform"
+          className="bg-[#0A0A0A] rounded-2xl overflow-hidden border border-gray-800 cursor-pointer"
           onClick={handleCardClick}
         >
           {/* Image */}
@@ -612,7 +612,7 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
               <div>
                 <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">About</h3>
                 <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                  {eventData.description}
+                  {eventData.description.replace(/([a-z.,!?])nn([A-Z])/g, (_: string, a: string, b: string) => `${a}\n\n${b}`)}
                 </p>
               </div>
             )}

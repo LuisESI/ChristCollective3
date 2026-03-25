@@ -1,9 +1,9 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
+const openai = process.env.AI_INTEGRATIONS_OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+}) : null;
 
 export interface ModerationResult {
   decision: "approved" | "flagged" | "rejected";
@@ -12,6 +12,7 @@ export interface ModerationResult {
 }
 
 export async function moderateText(text: string): Promise<ModerationResult> {
+  if (!openai) return { decision: "approved", flagCategories: [], confidenceScores: {} };
   try {
     const response = await openai.moderations.create({
       input: text,
@@ -49,6 +50,7 @@ export async function moderateText(text: string): Promise<ModerationResult> {
 }
 
 export async function moderateImage(imageUrl: string): Promise<ModerationResult> {
+  if (!openai) return { decision: "approved", flagCategories: [], confidenceScores: {} };
   try {
     let fullUrl = imageUrl;
     if (imageUrl.startsWith("/")) {

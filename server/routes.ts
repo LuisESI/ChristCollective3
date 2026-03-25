@@ -21,7 +21,6 @@ import Stripe from "stripe";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
 import { youtubeService } from "./youtube";
 import { tiktokService } from "./tiktok";
 import { instagramService } from "./instagram";
@@ -36,31 +35,10 @@ import {
   groupChatMessageSchema, directChatMessageSchema, directChatCreateSchema,
   businessProfileCreateSchema, manualDonationSchema
 } from "./security";
-import { ObjectStorageService, objectStorageClient } from "./replit_integrations/object_storage";
-import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { uploadToSupabase } from "./supabaseStorage";
 import { moderateContent } from "./services/moderationService";
 
-async function uploadBufferToObjectStorage(
-  buffer: Buffer,
-  contentType: string,
-  originalName: string
-): Promise<string> {
-  const objService = new ObjectStorageService();
-  const privateDir = objService.getPrivateObjectDir();
-  const objectId = uuidv4();
-  const ext = path.extname(originalName);
-  const fullPath = `${privateDir}/uploads/${objectId}${ext}`;
-
-  const pathParts = fullPath.startsWith('/') ? fullPath.slice(1).split('/') : fullPath.split('/');
-  const bucketName = pathParts[0];
-  const objectName = pathParts.slice(1).join('/');
-
-  const bucket = objectStorageClient.bucket(bucketName);
-  const file = bucket.file(objectName);
-  await file.save(buffer, { contentType, resumable: false });
-
-  return `/objects/uploads/${objectId}${ext}`;
-}
+const uploadBufferToObjectStorage = uploadToSupabase;
 
 let stripe: Stripe | undefined;
 
@@ -88,11 +66,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } 
   });
 
-  // Serve old local uploads for backward compatibility
-  app.use('/uploads', express.static(uploadDir));
-
-  // Register Object Storage routes to serve /objects/* files
-  registerObjectStorageRoutes(app);
+  // Redirect old local /uploads/uuid.ext and /objects/uploads/uuid.ext URLs to Supabase Storage
+  const toSupabase = (req: any, res: any) => {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    if (!supabaseUrl) return res.status(404).json({ error: 'Media not available' });
+    // Extract just the filename (uuid.ext) regardless of path prefix
+    const filename = path.basename(req.path);
+    res.redirect(301, `${supabaseUrl}/storage/v1/object/public/uploads/${filename}`);
+  };
+  app.use('/uploads', toSupabase);
+  app.get('/objects/*', toSupabase);
 
   // Serve favicon files
   app.get('/favicon.png', (req, res) => {
@@ -993,13 +976,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      console.log('PATCH /api/platform-posts/:id - Request body:', JSON.stringify(req.body));
-      console.log('PATCH /api/platform-posts/:id - Current post:', JSON.stringify(post));
-      
       const updatedPost = await storage.updatePlatformPost(postId, req.body);
-      
-      console.log('PATCH /api/platform-posts/:id - Updated post:', JSON.stringify(updatedPost));
-      
+
       // Ensure we're returning valid JSON
       return res.status(200).json(updatedPost);
     } catch (error) {
@@ -1689,8 +1667,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tipAmount = parseFloat(tip) || 0;
       const totalAmount = donationAmount + tipAmount;
 
-      console.log(`Payment Intent Creation - Donation: $${donationAmount}, Tip: $${tipAmount}, Total: $${totalAmount}`);
-
       // Create customer (optional for guest donations)
       let customerId: string | undefined = undefined;
       if (req.user?.id) {
@@ -1825,7 +1801,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Retrieve the payment intent from Stripe to get the details
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-      console.log(`PaymentIntent status: ${paymentIntent.status}, Amount: ${paymentIntent.amount}`);
 
       if (paymentIntent.status !== 'succeeded') {
         return res.status(400).json({ message: "Payment not completed" });
@@ -1837,8 +1812,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const guestFirstName = paymentIntent.metadata.guestFirstName;
       const guestLastName = paymentIntent.metadata.guestLastName;
       const guestEmail = paymentIntent.metadata.guestEmail;
-
-      console.log(`Processing donation - Amount: $${donationAmount}, Tip: $${tipAmount}`);
 
       // Get campaign details
       const campaign = await storage.getCampaign(campaignId);
@@ -1855,12 +1828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAnonymous: !guestFirstName && !guestLastName, // Not anonymous if guest info provided
       };
 
-      console.log('Creating donation record:', donationData);
       const donation = await storage.createDonation(donationData, paymentIntentId);
-      console.log('Donation created with ID:', donation.id);
-
-      // Update campaign total
-      console.log(`Updating campaign total by $${donationAmount}`);
       await storage.updateDonationAmount(campaignId, donationAmount);
 
       // Send confirmation email - to guest or logged-in user
@@ -1879,7 +1847,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (recipientEmail) {
-        console.log(`Sending confirmation email to ${recipientEmail}`);
         try {
           const emailSent = await emailService.sendDonationConfirmation({
             recipientEmail,
@@ -1896,9 +1863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               description: campaign.description,
             },
           });
-          if (emailSent) {
-            console.log('Confirmation email sent successfully');
-          } else {
+          if (!emailSent) {
             console.warn('Failed to send confirmation email');
           }
         } catch (emailError) {
@@ -1918,7 +1883,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stripePaymentId: paymentIntentId,
       };
 
-      console.log('Donation completion successful:', response);
       res.json(response);
 
     } catch (error: any) {
@@ -1951,7 +1915,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAnonymous: true,
       };
 
-      console.log('Creating manual donation record:', donationData);
       const donation = await storage.createDonation(donationData, donationData.stripePaymentId);
 
       // Update campaign total
@@ -2386,7 +2349,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (oldSubId) {
                 try {
                   await stripeClient.subscriptions.cancel(oldSubId);
-                  console.log(`Upgrade: cancelled old Stripe subscription ${oldSubId}`);
                 } catch (cancelErr) {
                   console.error("Error cancelling old subscription during upgrade activation:", cancelErr);
                 }

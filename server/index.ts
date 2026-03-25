@@ -44,9 +44,11 @@ app.use(cors({
     
     if (isAllowed) {
       callback(null, true);
+    } else if (process.env.NODE_ENV !== 'production') {
+      // Allow all origins in development
+      callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
-      callback(null, true); // Allow for now during development
+      callback(new Error(`CORS: origin ${origin} not allowed`));
     }
   },
   credentials: true,
@@ -69,8 +71,6 @@ app.use((req, res, next) => {
 });
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
 app.use((req, res, next) => {
   const start = Date.now();
