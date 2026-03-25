@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
+import { MinistryPostCard } from "@/components/MinistryPostCard";
 
 export default function PostPage() {
   const { id } = useParams();
