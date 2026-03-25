@@ -21,6 +21,7 @@ app.use(cors({
     const allowedOrigins = [
       /\.replit\.dev$/,
       /\.codemagic\.app$/,
+      /\.railway\.app$/,
       /localhost/,
       /127\.0\.0\.1/,
       'capacitor://localhost',
@@ -28,7 +29,10 @@ app.use(cors({
       'http://localhost',
       'https://localhost',
       'http://127.0.0.1:5000',
-      'https://127.0.0.1:5000'
+      'https://127.0.0.1:5000',
+      'https://christcollective.com',
+      'https://www.christcollective.com',
+      ...(process.env.APP_URL ? [process.env.APP_URL] : []),
     ];
     
     // Allow requests with no origin (mobile apps, Postman, etc.)
