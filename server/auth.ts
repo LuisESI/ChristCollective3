@@ -71,7 +71,6 @@ export function setupAuth(app: Express) {
 
   const sessionStore = new PgSession({
     pool: sessionPool,
-    createTableIfMissing: true,
     ttl: 365 * 24 * 60 * 60, // 1 year in seconds
   });
   
