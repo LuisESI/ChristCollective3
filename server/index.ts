@@ -64,6 +64,12 @@ app.use(cors({
 // Global rate limiter for all /api routes — OWASP: prevent brute-force and DoS
 app.use('/api', globalLimiter);
 
+// Prevent browsers and CDNs from caching API responses — ensures all users get fresh data
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 // Skip JSON parsing for Stripe webhook endpoints (they need raw body for signature verification)
 // Body size limit: 1MB max to prevent payload-based DoS (OWASP)
 app.use((req, res, next) => {

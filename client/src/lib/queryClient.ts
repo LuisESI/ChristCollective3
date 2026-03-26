@@ -148,8 +148,8 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true,   // Refetch when user returns to the tab/app
+      staleTime: 30_000,            // Data is fresh for 30s, then refetched on next access
       retry: false,
     },
     mutations: {

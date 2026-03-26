@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { getProfileImageUrl } from "@/lib/api-config";
+import { useLocation } from "wouter";
 import {
   Bell,
   Heart,
@@ -40,43 +41,65 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   chat_message:    { icon: ChatCircle,    color: "text-[#D4AF37]",  bg: "bg-[#D4AF37]" },
 };
 
+const getNotificationUrl = (notification: Notification): string | null => {
+  const { type, relatedId, relatedType } = notification;
+  if (!relatedId) return null;
+  switch (type) {
+    case 'like':
+    case 'comment':
+    case 'post':
+      return `/post/${relatedId}`;
+    case 'follow':
+      return `/profile/${relatedId}`;
+    case 'chat_message':
+      return relatedType === 'direct' ? `/direct-chat/${relatedId}` : `/chat/${relatedId}`;
+    case 'rsvp':
+    case 'campaign_update':
+      return `/campaigns/${relatedId}`;
+    case 'ministry_post':
+      return `/ministries/${relatedId}`;
+    default:
+      return null;
+  }
+};
+
 export function NotificationsList() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
   });
 
+  const invalidateNotifications = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+  };
+
   const markAsReadMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest(`/api/notifications/${id}/read`, { method: "PATCH" });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-    },
+    onSuccess: invalidateNotifications,
+    onError: () => { /* silently ignore — non-critical */ },
   });
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("/api/notifications/mark-all-read", { method: "PATCH" });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-    },
+    onSuccess: invalidateNotifications,
+    onError: () => toast({ title: "Failed to mark all read", variant: "destructive" }),
   });
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest(`/api/notifications/${id}`, { method: "DELETE" });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-    },
+    onSuccess: invalidateNotifications,
+    onError: () => toast({ title: "Failed to delete notification", variant: "destructive" }),
   });
 
   const createTestNotificationsMutation = useMutation({
@@ -152,10 +175,14 @@ export function NotificationsList() {
             return (
               <div
                 key={notification.id}
-                onClick={() => !notification.isRead && markAsReadMutation.mutate(notification.id)}
-                className={`flex items-start gap-3 px-4 py-3 border-b border-gray-800/60 transition-colors cursor-default ${
-                  !notification.isRead ? "bg-gray-900/60" : "hover:bg-gray-900/20"
-                }`}
+                onClick={() => {
+                  if (!notification.isRead) markAsReadMutation.mutate(notification.id);
+                  const url = getNotificationUrl(notification);
+                  if (url) navigate(url);
+                }}
+                className={`flex items-start gap-3 px-4 py-3 border-b border-gray-800/60 transition-colors ${
+                  getNotificationUrl(notification) ? "cursor-pointer" : "cursor-default"
+                } ${!notification.isRead ? "bg-gray-900/60" : "hover:bg-gray-900/20"}`}
               >
                 {/* Avatar with type badge */}
                 <div className="relative flex-shrink-0">

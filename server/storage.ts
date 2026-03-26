@@ -2089,29 +2089,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserDirectChats(userId: string): Promise<(DirectChat & { otherUser: User; lastMessage?: DirectMessage })[]> {
+    // Fetch chats first, then resolve otherUser with a simple eq() — avoids broken CASE JOIN
     const chats = await db
-      .select({
-        id: directChats.id,
-        user1Id: directChats.user1Id,
-        user2Id: directChats.user2Id,
-        lastMessageAt: directChats.lastMessageAt,
-        createdAt: directChats.createdAt,
-        otherUser: users,
-      })
+      .select()
       .from(directChats)
-      .leftJoin(
-        users,
-        sql`${users.id} = CASE WHEN ${directChats.user1Id} = ${userId} THEN ${directChats.user2Id} ELSE ${directChats.user1Id} END`
-      )
-      .where(
-        sql`${directChats.user1Id} = ${userId} OR ${directChats.user2Id} = ${userId}`
-      )
+      .where(sql`${directChats.user1Id} = ${userId} OR ${directChats.user2Id} = ${userId}`)
       .orderBy(desc(directChats.lastMessageAt));
 
-    // Get last message for each chat
-    const chatsWithMessages = await Promise.all(
+    const chatsWithDetails = await Promise.all(
       chats.map(async (chat) => {
-        const lastMessage = await db
+        const otherUserId = chat.user1Id === userId ? chat.user2Id : chat.user1Id;
+
+        const [otherUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, otherUserId))
+          .limit(1);
+
+        const [lastMessage] = await db
           .select()
           .from(directMessages)
           .where(eq(directMessages.chatId, chat.id))
@@ -2120,30 +2115,20 @@ export class DatabaseStorage implements IStorage {
 
         return {
           ...chat,
-          lastMessage: lastMessage[0] || undefined,
+          otherUser: otherUser ?? null,
+          lastMessage: lastMessage ?? undefined,
         };
       })
     );
 
-    return chatsWithMessages;
+    return chatsWithDetails;
   }
 
   async getDirectChatById(chatId: number, userId: string): Promise<any | null> {
     try {
-      const chat = await db
-        .select({
-          id: directChats.id,
-          user1Id: directChats.user1Id,
-          user2Id: directChats.user2Id,
-          lastMessageAt: directChats.lastMessageAt,
-          createdAt: directChats.createdAt,
-          otherUser: users,
-        })
+      const [chat] = await db
+        .select()
         .from(directChats)
-        .leftJoin(
-          users,
-          sql`${users.id} = CASE WHEN ${directChats.user1Id} = ${userId} THEN ${directChats.user2Id} ELSE ${directChats.user1Id} END`
-        )
         .where(
           and(
             eq(directChats.id, chatId),
@@ -2152,7 +2137,16 @@ export class DatabaseStorage implements IStorage {
         )
         .limit(1);
 
-      return chat[0] || null;
+      if (!chat) return null;
+
+      const otherUserId = chat.user1Id === userId ? chat.user2Id : chat.user1Id;
+      const [otherUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, otherUserId))
+        .limit(1);
+
+      return { ...chat, otherUser: otherUser ?? null };
     } catch (error) {
       console.error("Error fetching direct chat by ID:", error);
       throw error;
