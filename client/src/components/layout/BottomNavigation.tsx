@@ -54,10 +54,6 @@ export default function BottomNavigation() {
                   )}>
                     {item.label}
                   </span>
-                  {/* Active indicator dot */}
-                  {isActive && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#D4AF37] animate-scale-in" />
-                  )}
                 </div>
               </Link>
             );
