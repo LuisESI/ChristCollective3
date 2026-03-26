@@ -107,22 +107,14 @@ export default function Header() {
                     weight={notificationCount > 0 ? "fill" : "regular"}
                     className={`transition-all duration-300 ${
                       notificationCount > 0
-                        ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'}`
+                        ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : ''}`
                         : 'text-gray-400 group-hover:text-[#D4AF37] group-hover:scale-110'
                     }`}
                   />
                   {notificationCount > 0 && (
-                    <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-semibold ${
-                      showNotificationAnimation ? 'notification-pop' : 'animate-bounce'
-                    }`}>
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-semibold">
                       {notificationCount > 9 ? '9+' : notificationCount}
                     </span>
-                  )}
-                  {notificationCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-5 w-5 animate-ping opacity-25"></div>
-                  )}
-                  {notificationCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-[#D4AF37] rounded-full h-6 w-6 animate-pulse opacity-20"></div>
                   )}
                 </Button>
               </Link>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,14 @@ export function NotificationsList() {
     onSuccess: invalidateNotifications,
     onError: () => toast({ title: "Failed to delete notification", variant: "destructive" }),
   });
+
+  // Auto-mark all as read when the user opens the notifications view
+  useEffect(() => {
+    if (notifications.length > 0 && notifications.some((n) => !n.isRead)) {
+      markAllAsReadMutation.mutate();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifications.length]);
 
   const createTestNotificationsMutation = useMutation({
     mutationFn: async () => {

@@ -35,8 +35,8 @@
 }
 
 @keyframes notification-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 30px rgba(212, 175, 55, 0.4); }
+  0%, 100% { box-shadow: 0 0 3px rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.4); }
 }
 
 @keyframes notification-pop {
@@ -50,7 +50,7 @@
 }
 
 .notification-glow {
-  animation: notification-glow 2s ease-in-out infinite;
+  animation: notification-glow 5s ease-in-out infinite;
 }
 
 .notification-pop {

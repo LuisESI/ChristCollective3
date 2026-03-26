@@ -42,15 +42,8 @@ export function buildApiUrl(path: string): string {
  * Get a Supabase image URL with optional resize transform.
  * Pass size (e.g. 80) to serve a resized thumbnail instead of the full image.
  */
-export function getProfileImageUrl(imageUrl: string | null | undefined, size = 80): string {
-  const url = getImageUrl(imageUrl);
-  if (!url) return '';
-  // Apply Supabase image transform for storage URLs
-  if (url.includes('/storage/v1/object/public/')) {
-    const transformed = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-    return `${transformed}?width=${size}&height=${size}&resize=cover&quality=75`;
-  }
-  return url;
+export function getProfileImageUrl(imageUrl: string | null | undefined, _size = 80): string {
+  return getImageUrl(imageUrl);
 }
 
 /**
