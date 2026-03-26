@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@shared/schema";
+import { isNativeApp } from "@/lib/platform";
 
 export default function Header() {
+  const isMobile = isNativeApp();
   const [isOpen, setIsOpen] = useState(false);
   const [showNotificationAnimation, setShowNotificationAnimation] = useState(false);
   const [path] = useLocation();
@@ -73,8 +75,8 @@ export default function Header() {
           </div>
         </Link>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-6">
+        {/* Desktop Navigation — hidden on native mobile app */}
+        <nav className={`${isMobile ? 'hidden' : 'hidden lg:flex'} items-center space-x-6`}>
           {navItems.map((item) => (
             <Link key={item.path} href={item.path}>
               <div className={`transition-colors font-semibold cursor-pointer text-sm ${
@@ -167,39 +169,43 @@ export default function Header() {
             </DropdownMenu>
             </>
           ) : (
-            <>
-              <Link href="/auth">
-                <div className="hidden md:block text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
-                  Log In
-                </div>
-              </Link>
-              <Link href="/auth">
-                <div className="hidden md:block bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer">
-                  Sign Up
-                </div>
-              </Link>
-            </>
+            !isMobile && (
+              <>
+                <Link href="/auth">
+                  <div className="hidden md:block text-foreground hover:text-primary transition-colors font-medium cursor-pointer">
+                    Log In
+                  </div>
+                </Link>
+                <Link href="/auth">
+                  <div className="hidden md:block bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer">
+                    Sign Up
+                  </div>
+                </Link>
+              </>
+            )
           )}
-          
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-            data-testid="button-mobile-menu"
-          >
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+
+          {/* Mobile hamburger — hidden on native app */}
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setIsOpen(!isOpen)}
+              data-testid="button-mobile-menu"
+            >
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          )}
         </div>
       </div>
       
-      {/* Mobile Navigation */}
-      {isOpen && (
+      {/* Mobile Navigation — not shown on native app */}
+      {!isMobile && isOpen && (
         <div className="lg:hidden bg-background border-t border-border">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
             {navItems.map((item) => (
