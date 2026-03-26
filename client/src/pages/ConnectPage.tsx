@@ -31,7 +31,8 @@ import {
   HeartHandshake,
   BookOpen,
   Megaphone,
-  Music
+  Music,
+  MessageCircle
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
