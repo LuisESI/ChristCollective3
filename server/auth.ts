@@ -7,7 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import connectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
+import pg from "pg";
 import { emailService } from "./emailService";
 import { authLimiter } from "./security";
 
@@ -67,9 +67,10 @@ export function setupAuth(app: Express) {
   }
 
   const PgSession = connectPgSimple(session);
+  const sessionPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
   const sessionStore = new PgSession({
-    pool,
+    pool: sessionPool,
     createTableIfMissing: true,
     ttl: 365 * 24 * 60 * 60, // 1 year in seconds
   });
