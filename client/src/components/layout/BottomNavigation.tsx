@@ -1,12 +1,12 @@
-import { Home, Compass, Users, User, PlusCircle } from "lucide-react";
+import { House, Compass, PlusCircle, UsersThree, User } from "@phosphor-icons/react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
-  { icon: Home, label: "Feed", href: "/feed" },
+  { icon: House, label: "Feed", href: "/feed" },
   { icon: Compass, label: "Explore", href: "/explore" },
   { icon: PlusCircle, label: "Create", href: "/create", isCreate: true },
-  { icon: Users, label: "Connect", href: "/connect" },
+  { icon: UsersThree, label: "Connect", href: "/connect" },
   { icon: User, label: "Profile", href: "/profile" },
 ];
 
@@ -19,29 +19,29 @@ export default function BottomNavigation() {
         {navigationItems.map((item) => {
           const isActive = location === item.href;
           const Icon = item.icon;
-          
+
           if (item.isCreate) {
             return (
               <Link key={item.href} href={item.href} className="flex-1">
                 <div className="flex flex-col items-center justify-center h-full px-2 py-1">
                   <div className="w-10 h-10 rounded-full bg-[#D4AF37] flex items-center justify-center -mt-1">
-                    <Icon className="h-5 w-5 text-black" />
+                    <Icon size={20} weight="bold" color="black" />
                   </div>
                   <span className="text-[10px] mt-0.5 font-medium text-[#D4AF37]">{item.label}</span>
                 </div>
               </Link>
             );
           }
-          
+
           return (
             <Link key={item.href} href={item.href} className="flex-1">
               <div className={cn(
                 "flex flex-col items-center justify-center h-full px-2 py-1 transition-colors",
-                isActive 
-                  ? "text-[#D4AF37]" 
+                isActive
+                  ? "text-[#D4AF37]"
                   : "text-gray-500 hover:text-white"
               )}>
-                <Icon className={cn("h-6 w-6", isActive && "fill-current")} />
+                <Icon size={24} weight={isActive ? "fill" : "regular"} />
                 <span className="text-[10px] mt-1 font-medium">{item.label}</span>
               </div>
             </Link>

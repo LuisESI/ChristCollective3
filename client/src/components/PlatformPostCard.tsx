@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { buildApiUrl, getImageUrl, getProfileImageUrl } from "@/lib/api-config";
 import { getUserDisplayName as getDisplayName, getUserInitials as getInitials } from "@/lib/user-display";
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Calendar, Trash2, Youtube, Edit, Bookmark, Flag, ChevronLeft, ChevronRight, UserMinus } from "lucide-react";
+import { MoreHorizontal, Calendar, Trash2, Youtube, Edit, Flag, ChevronLeft, ChevronRight, UserMinus } from "lucide-react";
+import { Heart, ChatCircle, ShareNetwork, BookmarkSimple, PaperPlaneTilt } from "@phosphor-icons/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -769,7 +770,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                   isLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"
                 }`}
               >
-                <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                <Heart size={16} weight={isLiked ? "fill" : "regular"} />
                 <span className="text-xs">{likesCount}</span>
               </Button>
 
@@ -785,7 +786,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
                 data-testid="button-comment"
               >
-                <MessageCircle className="w-4 h-4" />
+                <ChatCircle size={16} weight="regular" />
                 <span className="text-xs">{post.commentsCount}</span>
               </Button>
 
@@ -799,7 +800,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 className="flex items-center gap-2 text-gray-400 hover:text-white"
                 data-testid="button-share"
               >
-                <Share2 className="w-4 h-4" />
+                <ShareNetwork size={16} weight="regular" />
                 <span className="text-xs">{post.sharesCount}</span>
               </Button>
             </div>
@@ -821,7 +822,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                 }`}
                 data-testid="button-save"
               >
-                <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+                <BookmarkSimple size={16} weight={isSaved ? "fill" : "regular"} />
               </Button>
             </div>
           </div>
@@ -886,7 +887,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                   disabled={commentMutation.isPending || !newComment.trim()}
                   className="bg-[#D4AF37] text-black hover:bg-[#B8941F] h-8 w-8 p-0 flex items-center justify-center"
                 >
-                  <Send className="w-4 h-4" />
+                  <PaperPlaneTilt size={16} weight="fill" />
                 </Button>
               </div>
             )}

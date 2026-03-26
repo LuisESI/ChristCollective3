@@ -7,15 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getProfileImageUrl } from "@/lib/api-config";
-import { 
-  Send, 
-  Users, 
-  Heart, 
+import {
+  Users,
   ArrowLeft,
   Settings,
   Phone,
   Video
 } from "lucide-react";
+import { PaperPlaneTilt, HandsPraying } from "@phosphor-icons/react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -145,9 +144,9 @@ export default function ChatRoom() {
 
   const getIntentionIcon = () => {
     switch (chat?.intention) {
-      case 'prayer': return Heart;
-      case 'bible_study': return Heart;
-      default: return Heart;
+      case 'prayer': return HandsPraying;
+      case 'bible_study': return HandsPraying;
+      default: return HandsPraying;
     }
   };
 
@@ -210,7 +209,7 @@ export default function ChatRoom() {
                 {chatMembers.map((member, index) => (
                   <Avatar key={member.id} className="w-8 h-8 border-2 border-black hover:z-10 transition-all">
                     {member.profileImage && (
-                      <AvatarImage src={member.profileImage} alt={member.username} />
+                      <AvatarImage src={getProfileImageUrl(member.profileImage, 64)} alt={member.username} />
                     )}
                     <AvatarFallback className={`${member.color} text-white text-xs font-semibold`}>
                       {member.initials}
@@ -292,7 +291,7 @@ export default function ChatRoom() {
             {sendMessageMutation.isPending ? (
               <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <PaperPlaneTilt size={16} weight="fill" />
             )}
           </Button>
         </div>

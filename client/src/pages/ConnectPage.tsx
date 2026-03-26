@@ -17,21 +17,19 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Helmet } from "react-helmet";
-import { 
-  Users, 
-  Plus, 
-  Heart, 
-  BookOpen, 
-  MessageCircle, 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
+import {
+  Users,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  X,
   UserPlus,
   Clock,
   Calendar,
   Camera,
   ImagePlus
 } from "lucide-react";
+import { HandsPraying, BookBookmark, Megaphone, UsersThree, MusicNotes } from "@phosphor-icons/react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl, buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
@@ -44,11 +42,11 @@ const createQueueSchema = insertGroupChatQueueSchema.extend({
 type CreateQueueForm = z.infer<typeof createQueueSchema>;
 
 const intentionOptions = [
-  { value: "prayer", label: "Prayer", icon: Heart, color: "bg-red-500", badgeColor: "bg-red-500/20" },
-  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
-  { value: "evangelizing", label: "Evangelizing", icon: MessageCircle, color: "bg-green-500", badgeColor: "bg-green-500/20" },
-  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
-  { value: "worship", label: "Worship", icon: Calendar, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
+  { value: "prayer", label: "Prayer", icon: HandsPraying, color: "bg-red-500", badgeColor: "bg-red-500/20" },
+  { value: "bible_study", label: "Bible Study", icon: BookBookmark, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
+  { value: "evangelizing", label: "Evangelizing", icon: Megaphone, color: "bg-green-500", badgeColor: "bg-green-500/20" },
+  { value: "fellowship", label: "Fellowship", icon: UsersThree, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
+  { value: "worship", label: "Worship", icon: MusicNotes, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
 ];
 
 export default function ConnectPage() {
@@ -604,13 +602,17 @@ export default function ConnectPage() {
                         onClick={() => navigate(`/chat/${chat.id}`)}
                       >
                         {/* Banner */}
-                        <div className={`h-24 ${bannerImg ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
-                          {bannerImg ? (
-                            <img src={getImageUrl(bannerImg)} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                              <Icon className="w-16 h-16 text-white" />
-                            </div>
+                        <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
+                          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                            <Icon className="w-16 h-16 text-white" />
+                          </div>
+                          {bannerImg && (
+                            <img
+                              src={getImageUrl(bannerImg)}
+                              alt=""
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
                           )}
                           {(user?.isAdmin) && (
                             <button
@@ -626,12 +628,16 @@ export default function ConnectPage() {
                         <div className="px-4 pb-4 -mt-8 relative">
                           <div className="flex items-end gap-3 mb-3">
                             <div className="relative flex-shrink-0">
-                              {profileImg ? (
-                                <img src={getImageUrl(profileImg)} alt="" className="w-16 h-16 rounded-full border-4 border-black object-cover shadow-lg" />
-                              ) : (
-                                <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center shadow-lg`}>
-                                  <Icon className="w-7 h-7 text-white" />
-                                </div>
+                              <div className={`w-16 h-16 rounded-full ${intentionInfo.color} border-4 border-black flex items-center justify-center shadow-lg`}>
+                                <Icon className="w-7 h-7 text-white" />
+                              </div>
+                              {profileImg && (
+                                <img
+                                  src={getImageUrl(profileImg)}
+                                  alt=""
+                                  className="absolute inset-0 w-16 h-16 rounded-full border-4 border-black object-cover shadow-lg"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
                               )}
                               {(user?.isAdmin) && (
                                 <button
@@ -751,13 +757,17 @@ export default function ConnectPage() {
                       return (
                         <div key={queue.id} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72">
                           {/* Mini Banner */}
-                          <div className={`h-16 ${queue.bannerImage ? '' : `bg-gradient-to-r ${gradient}`} relative`}>
-                            {queue.bannerImage ? (
-                              <img src={getImageUrl(queue.bannerImage)} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center opacity-15">
-                                <Icon className="w-10 h-10 text-white" />
-                              </div>
+                          <div className={`h-16 bg-gradient-to-r ${gradient} relative`}>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                              <Icon className="w-10 h-10 text-white" />
+                            </div>
+                            {queue.bannerImage && (
+                              <img
+                                src={getImageUrl(queue.bannerImage)}
+                                alt=""
+                                className="absolute inset-0 w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
                             )}
                             {(user?.isAdmin || isOwner) && (
                               <button
@@ -772,12 +782,16 @@ export default function ConnectPage() {
                           <div className="px-3 pb-3 -mt-5 relative">
                             <div className="flex items-end gap-2 mb-2">
                               <div className="relative flex-shrink-0">
-                                {queue.profileImage ? (
-                                  <img src={getImageUrl(queue.profileImage)} alt="" className="w-10 h-10 rounded-full border-2 border-black object-cover shadow-md" />
-                                ) : (
-                                  <div className={`w-10 h-10 rounded-full ${intentionInfo.color} border-2 border-black flex items-center justify-center shadow-md`}>
-                                    <Icon className="w-4 h-4 text-white" />
-                                  </div>
+                                <div className={`w-10 h-10 rounded-full ${intentionInfo.color} border-2 border-black flex items-center justify-center shadow-md`}>
+                                  <Icon className="w-4 h-4 text-white" />
+                                </div>
+                                {queue.profileImage && (
+                                  <img
+                                    src={getImageUrl(queue.profileImage)}
+                                    alt=""
+                                    className="absolute inset-0 w-10 h-10 rounded-full border-2 border-black object-cover shadow-md"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
                                 )}
                                 {(user?.isAdmin || isOwner) && (
                                   <button

@@ -10,15 +10,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getImageUrl, getProfileImageUrl } from "@/lib/api-config";
-import { 
-  ArrowLeft, 
-  Send, 
+import {
+  ArrowLeft,
   MoreVertical,
   Phone,
   Video,
   Settings,
   Users
 } from "lucide-react";
+import { PaperPlaneTilt } from "@phosphor-icons/react";
 import { Helmet } from "react-helmet";
 
 interface DirectMessage {
@@ -265,7 +265,7 @@ export default function DirectChatPage() {
               {sendMessageMutation.isPending ? (
                 <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <PaperPlaneTilt size={16} weight="fill" />
               )}
             </Button>
           </form>
