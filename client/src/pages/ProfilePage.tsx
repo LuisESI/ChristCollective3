@@ -259,6 +259,7 @@ export default function ProfilePage() {
               src={getImageUrl(displayUser.bannerImageUrl)}
               alt="Profile banner"
               className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
             />
           )}
           {/* Top bar overlaid on banner */}

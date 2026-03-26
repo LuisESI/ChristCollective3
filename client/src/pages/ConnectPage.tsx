@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
-import { getImageUrl, buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
+import { getImageUrl, getProfileImageUrl, buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
 
 const createQueueSchema = insertGroupChatQueueSchema.extend({
   minPeople: z.coerce.number().min(2, "Minimum 2 people").max(12, "Maximum 12 people"),
@@ -929,17 +929,17 @@ export default function ConnectPage() {
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
                         <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
-                            {otherUser?.profileImageUrl ? (
-                              <img 
-                                src={getImageUrl(otherUser.profileImageUrl)} 
+                          <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center relative overflow-hidden">
+                            <span className="text-white text-sm font-bold select-none">
+                              {otherUserName.charAt(0).toUpperCase()}
+                            </span>
+                            {otherUser?.profileImageUrl && (
+                              <img
+                                src={getProfileImageUrl(otherUser.profileImageUrl, 96)}
                                 alt={otherUserName}
-                                className="w-full h-full object-cover rounded-full"
+                                className="absolute inset-0 w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = "none"; }}
                               />
-                            ) : (
-                              <span className="text-white text-sm font-bold">
-                                {otherUserName.charAt(0).toUpperCase()}
-                              </span>
                             )}
                           </div>
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"></div>

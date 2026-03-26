@@ -186,18 +186,17 @@ export function NotificationsList() {
               >
                 {/* Avatar with type badge */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
-                    {notification.actorImage ? (
+                  <div className="w-11 h-11 rounded-full bg-gray-800 flex items-center justify-center relative overflow-hidden">
+                    <span className="text-base font-semibold text-gray-400 select-none">
+                      {(notification.actorName || "?").charAt(0).toUpperCase()}
+                    </span>
+                    {notification.actorImage && (
                       <img
                         src={getProfileImageUrl(notification.actorImage, 88)}
                         alt={notification.actorName || "User"}
-                        className="w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = "none"; }}
                       />
-                    ) : (
-                      <span className="text-base font-semibold text-gray-400">
-                        {(notification.actorName || "?").charAt(0).toUpperCase()}
-                      </span>
                     )}
                   </div>
                   <div className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full ${cfg.bg} flex items-center justify-center border-2 border-black`}>
