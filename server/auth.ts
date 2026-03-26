@@ -6,7 +6,8 @@ import { scrypt, randomBytes, timingSafeEqual, createHash, createHmac } from "cr
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import createMemoryStore from "memorystore";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 import { emailService } from "./emailService";
 import { authLimiter } from "./security";
 
@@ -65,10 +66,12 @@ export function setupAuth(app: Express) {
     throw new Error('SESSION_SECRET environment variable is required. Generate a strong random value (32+ characters).');
   }
 
-  const MemoryStore = createMemoryStore(session);
-  
-  const sessionStore = new MemoryStore({
-    checkPeriod: 86400000, // prune expired entries every 24h
+  const PgSession = connectPgSimple(session);
+
+  const sessionStore = new PgSession({
+    pool,
+    createTableIfMissing: true,
+    ttl: 365 * 24 * 60 * 60, // 1 year in seconds
   });
   
   const sessionSettings: session.SessionOptions = {
