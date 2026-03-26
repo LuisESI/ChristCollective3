@@ -1,11 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Bell, Heart, MessageCircle, UserPlus, Calendar, Gift, Church, Trash2, Check, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { getProfileImageUrl } from "@/lib/api-config";
+import {
+  Bell,
+  Heart,
+  ChatCircle,
+  UserPlus,
+  CalendarCheck,
+  Gift,
+  Church,
+  X,
+  Checks,
+} from "@phosphor-icons/react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Notification {
   id: number;
@@ -20,27 +30,28 @@ interface Notification {
   actorImage?: string;
 }
 
-import { useAuth } from "@/hooks/useAuth";
+const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  like:            { icon: Heart,         color: "text-red-400",    bg: "bg-red-500" },
+  comment:         { icon: ChatCircle,    color: "text-blue-400",   bg: "bg-blue-500" },
+  follow:          { icon: UserPlus,      color: "text-green-400",  bg: "bg-green-500" },
+  rsvp:            { icon: CalendarCheck, color: "text-purple-400", bg: "bg-purple-500" },
+  campaign_update: { icon: Gift,          color: "text-orange-400", bg: "bg-orange-500" },
+  ministry_post:   { icon: Church,        color: "text-[#D4AF37]",  bg: "bg-[#D4AF37]" },
+  chat_message:    { icon: ChatCircle,    color: "text-[#D4AF37]",  bg: "bg-[#D4AF37]" },
+};
 
 export function NotificationsList() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
 
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
   });
 
-  const { data: unreadCount = { count: 0 } } = useQuery<{ count: number }>({
-    queryKey: ["/api/notifications/unread-count"],
-  });
-
   const markAsReadMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/notifications/${id}/read`, {
-        method: 'PATCH',
-      });
+      await apiRequest(`/api/notifications/${id}/read`, { method: "PATCH" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -50,230 +61,154 @@ export function NotificationsList() {
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('/api/notifications/mark-all-read', {
-        method: 'PATCH',
-      });
+      await apiRequest("/api/notifications/mark-all-read", { method: "PATCH" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      toast({
-        title: "Success",
-        description: "All notifications marked as read",
-      });
     },
   });
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest(`/api/notifications/${id}`, {
-        method: 'DELETE',
-      });
+      await apiRequest(`/api/notifications/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      toast({
-        title: "Success",
-        description: "Notification deleted",
-      });
     },
   });
 
   const createTestNotificationsMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('/api/notifications/test-all', {
-        method: 'POST',
-      });
+      await apiRequest("/api/notifications/test-all", { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      toast({
-        title: "Success",
-        description: "Test notifications created! Check your notifications.",
-      });
+      toast({ title: "Test notifications created!" });
     },
   });
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'like':
-        return <Heart className="h-5 w-5 text-red-500" />;
-      case 'comment':
-        return <MessageCircle className="h-5 w-5 text-gray-400" />;
-      case 'follow':
-        return <UserPlus className="h-5 w-5 text-green-500" />;
-      case 'rsvp':
-        return <Calendar className="h-5 w-5 text-purple-500" />;
-      case 'campaign_update':
-        return <Gift className="h-5 w-5 text-orange-500" />;
-      case 'ministry_post':
-        return <Church className="h-5 w-5 text-[#D4AF37]" />;
-      case 'post':
-        return <Bell className="h-5 w-5 text-gray-400" />;
-      case 'chat_message':
-        return <MessageCircle className="h-5 w-5 text-[#D4AF37]" />;
-      default:
-        return <Bell className="h-5 w-5 text-gray-400" />;
-    }
-  };
-
-  const handleMarkAsRead = (id: number) => {
-    markAsReadMutation.mutate(id);
-  };
-
-  const handleDelete = (id: number) => {
-    deleteNotificationMutation.mutate(id);
-  };
-
-  const toggleNotificationSelection = (id: number) => {
-    setSelectedNotifications(prev => 
-      prev.includes(id) 
-        ? prev.filter(notifId => notifId !== id)
-        : [...prev, id]
-    );
-  };
-
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="bg-gray-800 border-gray-700 animate-pulse">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="space-y-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
+            <div className="w-11 h-11 rounded-full bg-gray-800 flex-shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 bg-gray-800 rounded w-3/4" />
+              <div className="h-3 bg-gray-800 rounded w-1/3" />
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
+  const unreadNotifications = notifications.filter((n) => !n.isRead);
+
   return (
-    <div className="space-y-6">
-      {/* Actions header */}
-      <div className="flex justify-between items-center">
-        {user?.isAdmin && (
-          <Button
-            onClick={() => createTestNotificationsMutation.mutate()}
-            disabled={createTestNotificationsMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37]/20"
-          >
-            <Bell className="h-4 w-4 mr-2" />
-            Test Notifications
-          </Button>
-        )}
-        
-        {notifications.length > 0 && (
-          <Button
+    <div>
+      {/* Header actions */}
+      <div className="flex items-center justify-between px-4 pb-3">
+        {unreadNotifications.length > 0 && (
+          <button
             onClick={() => markAllAsReadMutation.mutate()}
             disabled={markAllAsReadMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="text-gray-300 border-gray-600 hover:bg-gray-700"
+            className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-[#B8941F] font-medium transition-colors"
           >
-            <CheckCheck className="h-4 w-4 mr-2" />
-            Mark All Read
-          </Button>
+            <Checks size={14} weight="bold" />
+            Mark all read
+          </button>
+        )}
+        {user?.isAdmin && (
+          <button
+            onClick={() => createTestNotificationsMutation.mutate()}
+            disabled={createTestNotificationsMutation.isPending}
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors ml-auto"
+          >
+            Test notifications
+          </button>
         )}
       </div>
 
-      {/* Notifications list */}
       {notifications.length === 0 ? (
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-8 text-center">
-            <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-300 mb-2">No notifications yet</h3>
-            <p className="text-gray-400">
-              You'll see likes, comments, follows, and updates here when they happen.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+          <div className="w-16 h-16 rounded-full bg-gray-900 flex items-center justify-center mb-4">
+            <Bell size={28} weight="thin" className="text-gray-600" />
+          </div>
+          <h3 className="text-base font-semibold text-gray-300 mb-1">No notifications yet</h3>
+          <p className="text-sm text-gray-500 max-w-xs">
+            You'll see likes, comments, follows, and updates here.
+          </p>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {notifications.map((notification: Notification) => (
-            <Card 
-              key={notification.id} 
-              className={`border transition-all duration-200 hover:shadow-lg ${
-                !notification.isRead 
-                  ? 'bg-gray-800 border-[#D4AF37] shadow-sm' 
-                  : 'bg-gray-800/50 border-gray-700'
-              }`}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  {/* Notification icon */}
-                  <div className="flex-shrink-0 mt-1">
-                    {getNotificationIcon(notification.type)}
-                  </div>
+        <div>
+          {notifications.map((notification: Notification) => {
+            const cfg = typeConfig[notification.type] ?? { icon: Bell, color: "text-gray-400", bg: "bg-gray-600" };
+            const TypeIcon = cfg.icon;
 
-                  {/* Actor image */}
-                  {notification.actorImage && (
-                    <div className="flex-shrink-0">
+            return (
+              <div
+                key={notification.id}
+                onClick={() => !notification.isRead && markAsReadMutation.mutate(notification.id)}
+                className={`flex items-start gap-3 px-4 py-3 border-b border-gray-800/60 transition-colors cursor-default ${
+                  !notification.isRead ? "bg-gray-900/60" : "hover:bg-gray-900/20"
+                }`}
+              >
+                {/* Avatar with type badge */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center">
+                    {notification.actorImage ? (
                       <img
-                        src={notification.actorImage}
-                        alt={notification.actorName || 'User'}
-                        className="w-8 h-8 rounded-full object-cover"
+                        src={getProfileImageUrl(notification.actorImage, 88)}
+                        alt={notification.actorName || "User"}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                       />
-                    </div>
-                  )}
-
-                  {/* Notification content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className={`text-sm font-medium ${
-                          !notification.isRead ? 'text-white' : 'text-gray-300'
-                        }`}>
-                          {notification.title}
-                        </h4>
-                        <p className={`text-sm mt-1 ${
-                          !notification.isRead ? 'text-gray-300' : 'text-gray-400'
-                        }`}>
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                        </p>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex items-center space-x-2 ml-4">
-                        {!notification.isRead && (
-                          <Button
-                            onClick={() => handleMarkAsRead(notification.id)}
-                            disabled={markAsReadMutation.isPending}
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-400 hover:text-white p-1"
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          onClick={() => handleDelete(notification.id)}
-                          disabled={deleteNotificationMutation.isPending}
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-red-400 p-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                    ) : (
+                      <span className="text-base font-semibold text-gray-400">
+                        {(notification.actorName || "?").charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full ${cfg.bg} flex items-center justify-center border-2 border-black`}>
+                    <TypeIcon size={10} weight="fill" color="white" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-200 leading-snug">
+                    {notification.actorName && (
+                      <span className="font-semibold text-white">{notification.actorName} </span>
+                    )}
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                  </p>
+                </div>
+
+                {/* Right: unread dot + delete */}
+                <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+                  {!notification.isRead && (
+                    <div className="w-2 h-2 rounded-full bg-[#D4AF37]" />
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteNotificationMutation.mutate(notification.id);
+                    }}
+                    className="text-gray-600 hover:text-red-400 transition-colors p-0.5"
+                  >
+                    <X size={14} weight="bold" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
