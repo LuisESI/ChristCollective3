@@ -215,6 +215,15 @@ export default function ProfilePage() {
     return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const handleBack = () => {
+    const currentPath = window.location.pathname;
+    window.history.back();
+    // If back() had nowhere to go (first page in session), navigate to feed
+    setTimeout(() => {
+      if (window.location.pathname === currentPath) navigate('/feed');
+    }, 150);
+  };
+
   if (isLoading || (isOwnProfile && !user) || (username && userLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -251,6 +260,7 @@ export default function ProfilePage() {
       <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
 
       <div className="min-h-screen bg-black text-white pb-20">
+      <div className="max-w-[480px] mx-auto">
 
         {/* ── Banner ── */}
         <div className="relative h-32 bg-gradient-to-br from-gray-800 via-gray-900 to-black overflow-hidden">
@@ -264,7 +274,7 @@ export default function ProfilePage() {
           )}
           {/* Top bar overlaid on banner */}
           <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-4 pb-2">
-            <button onClick={() => navigate(-1 as any)} className="text-white bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+            <button onClick={handleBack} className="text-white bg-black/40 backdrop-blur-sm rounded-full p-1.5">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <span className="font-bold text-[15px] tracking-tight truncate max-w-[60%] text-center text-white drop-shadow">
@@ -689,6 +699,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+      </div>
       </div>
     </>
   );
