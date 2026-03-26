@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import { Menu, X, Bell } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { Bell } from "@phosphor-icons/react";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus";
@@ -94,12 +95,22 @@ export default function Header() {
             <>
               {/* Notifications Bell */}
               <Link href="/notifications">
-                <Button variant="ghost" size="sm" className="relative group bg-transparent hover:bg-transparent">
-                  <Bell className={`h-5 w-5 transition-all duration-300 ${
-                    notificationCount > 0 
-                      ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'} notification-glow` 
-                      : 'text-gray-400 group-hover:text-[#D4AF37] group-hover:scale-110'
-                  }`} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`relative group bg-transparent hover:bg-transparent rounded-full transition-all duration-300 ${
+                    notificationCount > 0 && !showNotificationAnimation ? 'notification-glow' : ''
+                  }`}
+                >
+                  <Bell
+                    size={20}
+                    weight={notificationCount > 0 ? "fill" : "regular"}
+                    className={`transition-all duration-300 ${
+                      notificationCount > 0
+                        ? `text-[#D4AF37] ${showNotificationAnimation ? 'bell-animate' : 'animate-pulse'}`
+                        : 'text-gray-400 group-hover:text-[#D4AF37] group-hover:scale-110'
+                    }`}
+                  />
                   {notificationCount > 0 && (
                     <span className={`absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-semibold ${
                       showNotificationAnimation ? 'notification-pop' : 'animate-bounce'
