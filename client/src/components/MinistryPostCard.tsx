@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Calendar, MapPin, Clock, Church, ExternalLink, Crown, X, Video, Globe, MoreHorizontal, Pencil, Trash2, Share2 } from "lucide-react";
 import { isNativeApp } from "@/lib/platform";
+import { Share } from "@capacitor/share";
 import { MinistryPost } from "@shared/schema";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -177,15 +178,18 @@ export function MinistryPostCard({ post, disableClick = false, flatLayout = fals
   };
 
   const shareEvent = async () => {
-    const url = `${window.location.origin}/events/${eventId}`;
-    if (navigator.share) {
-      try {
+    const baseUrl = isNativeApp() ? "https://christcollective.com" : window.location.origin;
+    const url = `${baseUrl}/events/${eventId}`;
+    try {
+      if (isNativeApp()) {
+        await Share.share({ title: cleanTitle, text: `Join us at ${cleanTitle}!`, url });
+      } else if (navigator.share) {
         await navigator.share({ title: cleanTitle, text: `Join us at ${cleanTitle}!`, url });
-      } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast({ title: "Link copied!", description: "Share this link with anyone." });
-    }
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied!", description: "Share this link with anyone." });
+      }
+    } catch { /* cancelled */ }
   };
 
   const getRsvpCount = (status: string) =>
