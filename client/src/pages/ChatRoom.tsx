@@ -12,9 +12,13 @@ import {
   ArrowLeft,
   Settings,
   Phone,
-  Video
+  Video,
+  HeartHandshake,
+  BookOpen,
+  Music,
+  Megaphone
 } from "lucide-react";
-import { PaperPlaneTilt, HandsPraying } from "@phosphor-icons/react";
+import { PaperPlaneTilt } from "@phosphor-icons/react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -144,9 +148,11 @@ export default function ChatRoom() {
 
   const getIntentionIcon = () => {
     switch (chat?.intention) {
-      case 'prayer': return HandsPraying;
-      case 'bible_study': return HandsPraying;
-      default: return HandsPraying;
+      case 'prayer': return HeartHandshake;
+      case 'bible_study': return BookOpen;
+      case 'evangelizing': return Megaphone;
+      case 'worship': return Music;
+      default: return HeartHandshake;
     }
   };
 

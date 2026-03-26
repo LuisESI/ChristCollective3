@@ -27,9 +27,12 @@ import {
   Clock,
   Calendar,
   Camera,
-  ImagePlus
+  ImagePlus,
+  HeartHandshake,
+  BookOpen,
+  Megaphone,
+  Music
 } from "lucide-react";
-import { HandsPraying, BookBookmark, Megaphone, UsersThree, MusicNotes } from "@phosphor-icons/react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl, buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
@@ -42,11 +45,11 @@ const createQueueSchema = insertGroupChatQueueSchema.extend({
 type CreateQueueForm = z.infer<typeof createQueueSchema>;
 
 const intentionOptions = [
-  { value: "prayer", label: "Prayer", icon: HandsPraying, color: "bg-red-500", badgeColor: "bg-red-500/20" },
-  { value: "bible_study", label: "Bible Study", icon: BookBookmark, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
+  { value: "prayer", label: "Prayer", icon: HeartHandshake, color: "bg-red-500", badgeColor: "bg-red-500/20" },
+  { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
   { value: "evangelizing", label: "Evangelizing", icon: Megaphone, color: "bg-green-500", badgeColor: "bg-green-500/20" },
-  { value: "fellowship", label: "Fellowship", icon: UsersThree, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
-  { value: "worship", label: "Worship", icon: MusicNotes, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
+  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
+  { value: "worship", label: "Worship", icon: Music, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
 ];
 
 export default function ConnectPage() {
