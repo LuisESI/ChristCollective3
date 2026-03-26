@@ -64,7 +64,7 @@ export default function Header() {
   ];
 
   // Hide header on full-screen chat pages
-  if (path.startsWith('/direct-chat/')) return null;
+  if (path.startsWith('/direct-chat/') || path.startsWith('/chat/')) return null;
 
   return (
     <header className="bg-background sticky top-0 z-50 header-gradient-shadow pt-safe">
