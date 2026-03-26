@@ -92,15 +92,16 @@ export default function EventPublicPage() {
   }, [user, post, autoRsvpDone]);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/events/${eventId}`;
-    if (navigator.share) {
-      try {
+    const baseUrl = isNativeApp() ? "https://christcollective.com" : window.location.origin;
+    const url = `${baseUrl}/events/${eventId}`;
+    try {
+      if (navigator.share && !isNativeApp()) {
         await navigator.share({ title: event?.title || "Event", text: `Join us at ${event?.title || "this event"}!`, url });
-      } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast({ title: "Link copied!", description: "Share this link with anyone." });
-    }
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied!", description: "Share this link with anyone." });
+      }
+    } catch { /* cancelled */ }
   };
 
   const handleSubmitComment = () => {

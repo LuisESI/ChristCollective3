@@ -117,10 +117,6 @@ export default function DirectChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   if (!user || !chatId) {
     navigate("/connect");
     return null;

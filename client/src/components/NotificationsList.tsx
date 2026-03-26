@@ -92,7 +92,7 @@ export function NotificationsList() {
       await apiRequest("/api/notifications/mark-all-read", { method: "PATCH" });
     },
     onSuccess: invalidateNotifications,
-    onError: () => toast({ title: "Failed to mark all read", variant: "destructive" }),
+    onError: () => { /* silently ignore — non-critical */ },
   });
 
   const deleteNotificationMutation = useMutation({
