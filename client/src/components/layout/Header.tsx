@@ -67,7 +67,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-background sticky top-0 z-50 header-gradient-shadow pt-safe">
+    <header className="glass-dark sticky top-0 z-50 pt-safe">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
           <div className="cursor-pointer">
