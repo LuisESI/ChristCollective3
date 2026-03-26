@@ -64,6 +64,7 @@ import BillingHistoryPage from "@/pages/BillingHistoryPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import BottomNavigation from "@/components/layout/BottomNavigation";
+import AppInstallBanner from "@/components/AppInstallBanner";
 import MobileAuthPage from "@/pages/MobileAuthPage";
 import MobileLandingPage from "@/pages/MobileLandingPage";
 import { isNativeApp } from "@/lib/platform";
@@ -156,6 +157,7 @@ function AppContent() {
       </main>
       {!showBottomNav && <Footer />}
       {showBottomNav && <BottomNavigation />}
+      <AppInstallBanner />
       <Toaster />
     </>
   );

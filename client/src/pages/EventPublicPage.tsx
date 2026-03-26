@@ -10,6 +10,7 @@ import { Share2, ChevronLeft, Send, Trash2, MessageCircle, Users } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { isNativeApp } from "@/lib/platform";
 import { getImageUrl } from "@/lib/api-config";
+import { Share } from "@capacitor/share";
 import { formatDistanceToNow } from "date-fns";
 
 export default function EventPublicPage() {
@@ -95,7 +96,9 @@ export default function EventPublicPage() {
     const baseUrl = isNativeApp() ? "https://christcollective.com" : window.location.origin;
     const url = `${baseUrl}/events/${eventId}`;
     try {
-      if (navigator.share && !isNativeApp()) {
+      if (isNativeApp()) {
+        await Share.share({ title: event?.title || "Event", text: `Join us at ${event?.title || "this event"}!`, url });
+      } else if (navigator.share) {
         await navigator.share({ title: event?.title || "Event", text: `Join us at ${event?.title || "this event"}!`, url });
       } else {
         await navigator.clipboard.writeText(url);
