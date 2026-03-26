@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { buildApiUrl, getMobileAuthHeaders } from "@/lib/api-config";
 import { ArrowLeft, Upload, Save, Building, MapPin, Mail, Phone, Globe, FileText } from "lucide-react";
 import { insertMinistryProfileSchema, type InsertMinistryProfile, type MinistryProfile } from "@shared/schema";
 
@@ -123,10 +124,12 @@ export default function EditMinistryProfilePage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      
-      const response = await fetch("/api/upload", {
+
+      const response = await fetch(buildApiUrl("/api/upload"), {
         method: "POST",
         body: formData,
+        credentials: "include",
+        headers: getMobileAuthHeaders(),
       });
       
       if (!response.ok) throw new Error("Upload failed");

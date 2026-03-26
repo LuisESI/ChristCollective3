@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { buildApiUrl, getImageUrl, getMobileAuthHeaders } from "@/lib/api-config";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 // Post Management Component
@@ -211,6 +212,7 @@ export default function EditProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string>("");
+  const [businessLogoUploading, setBusinessLogoUploading] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -475,6 +477,30 @@ export default function EditProfilePage() {
       });
     },
   });
+
+  const handleBusinessLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusinessLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("logo", file);
+      const res = await fetch(buildApiUrl("/api/upload/business-logo"), {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: getMobileAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      await queryClient.invalidateQueries({ queryKey: ["/api/business-profiles"] });
+      toast({ title: "Logo updated", description: "Business logo uploaded successfully." });
+    } catch {
+      toast({ title: "Upload failed", description: "Could not upload logo. Please try again.", variant: "destructive" });
+    } finally {
+      setBusinessLogoUploading(false);
+      if (e.target) e.target.value = "";
+    }
+  };
 
   const onCreatorSubmit = (data: any) => {
     updateCreatorMutation.mutate(data);
@@ -1196,6 +1222,33 @@ export default function EditProfilePage() {
                 <CardContent>
                   <Form {...businessForm}>
                     <form onSubmit={businessForm.handleSubmit(onBusinessSubmit)} className="space-y-4">
+
+                      {/* Business Logo Upload */}
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-700">
+                          {userBusinessProfile?.logo ? (
+                            <img src={getImageUrl(userBusinessProfile.logo)} alt="Business logo" className="w-full h-full object-cover" />
+                          ) : (
+                            <Briefcase className="w-7 h-7 text-gray-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white mb-1">Business Logo</p>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleBusinessLogoUpload}
+                            className="hidden"
+                            id="business-logo-upload"
+                            disabled={businessLogoUploading}
+                          />
+                          <label htmlFor="business-logo-upload" className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-[#B8941F] cursor-pointer font-medium transition-colors">
+                            <Upload className="h-3.5 w-3.5" />
+                            {businessLogoUploading ? "Uploading..." : "Upload logo"}
+                          </label>
+                        </div>
+                      </div>
+
                       <FormField
                         control={businessForm.control}
                         name="companyName"
