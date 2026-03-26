@@ -238,8 +238,9 @@ export function setupAuth(app: Express) {
       if (!user) {
         return res.status(401).json({ message: "Incorrect password" });
       }
-      if (!user.emailVerified) {
-        return res.status(403).json({ 
+      // Admin accounts bypass email verification (created before verification system)
+      if (!user.emailVerified && !user.isAdmin) {
+        return res.status(403).json({
           message: "Please verify your email before signing in. Check your inbox for a verification link.",
           requiresVerification: true,
           email: user.email
