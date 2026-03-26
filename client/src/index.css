@@ -25,6 +25,15 @@
   }
 }
 
+/* Prevent iOS Safari dynamic toolbar from shifting fixed nav */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: -webkit-fill-available;
+}
+
 /* Bell Animation Keyframes */
 @keyframes bell-ring {
   0%, 50%, 100% { transform: rotate(0deg); }

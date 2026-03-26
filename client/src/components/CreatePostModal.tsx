@@ -49,8 +49,8 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
     queryKey: ["/api/user/creator-status"],
   });
 
-  const { data: businessProfiles } = useQuery({
-    queryKey: ["/api/business-profiles"],
+  const { data: myBusinessProfile } = useQuery({
+    queryKey: ["/api/user/business-profile"],
   });
 
   const { data: ministryProfile } = useQuery({
@@ -179,13 +179,11 @@ export function CreatePostModal({ trigger, onPostCreated }: CreatePostModalProps
       });
     }
 
-    if (Array.isArray(businessProfiles) && businessProfiles.length > 0) {
-      businessProfiles.forEach((business: any) => {
-        options.push({
-          value: "business",
-          label: `Business: ${business.companyName}`,
-          id: business.id,
-        });
+    if (myBusinessProfile && typeof myBusinessProfile === 'object' && 'id' in myBusinessProfile) {
+      options.push({
+        value: "business",
+        label: `Business: ${(myBusinessProfile as any).companyName}`,
+        id: (myBusinessProfile as any).id,
       });
     }
 
