@@ -637,7 +637,7 @@ export default function EditProfilePage() {
       <div className="min-h-screen bg-black text-white pb-20">
         {/* Header */}
         <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-800">
-          <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="max-w-[480px] mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <Button 
                 variant="ghost" 
@@ -652,7 +652,7 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-[480px] mx-auto px-4 py-6">
           {/* Profile Overview */}
           <div className="mb-6">
             <div className="flex items-center gap-4 mb-4">
@@ -681,27 +681,12 @@ export default function EditProfilePage() {
 
           {/* Profile Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-gray-900">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="creator" className="flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Creator
-              </TabsTrigger>
-              <TabsTrigger value="posts" className="flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Posts
-              </TabsTrigger>
-              <TabsTrigger value="business" className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Business
-              </TabsTrigger>
+            <TabsList className="flex w-full overflow-x-auto bg-gray-900 gap-0 h-auto p-1 no-scrollbar">
+              <TabsTrigger value="overview" className="flex-shrink-0 text-xs px-3 py-2">Overview</TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 text-xs px-3 py-2">Profile</TabsTrigger>
+              <TabsTrigger value="creator" className="flex-shrink-0 text-xs px-3 py-2">Creator</TabsTrigger>
+              <TabsTrigger value="posts" className="flex-shrink-0 text-xs px-3 py-2">Posts</TabsTrigger>
+              <TabsTrigger value="business" className="flex-shrink-0 text-xs px-3 py-2">Business</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}

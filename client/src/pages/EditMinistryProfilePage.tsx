@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -193,7 +192,7 @@ export default function EditMinistryProfilePage() {
       <div className="min-h-screen bg-black text-white">
         {/* Header */}
         <div className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-800">
-          <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="max-w-[480px] mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <Button 
                 variant="ghost" 
@@ -209,252 +208,169 @@ export default function EditMinistryProfilePage() {
         </div>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <Card className="bg-gray-900 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Building className="h-5 w-5 text-primary" />
-                Ministry Information
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                Update your ministry profile information. Changes will require admin approval if the ministry was previously approved.
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="max-w-[480px] mx-auto px-4 py-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                   {/* Logo Upload */}
-                  <div className="space-y-4">
-                    <FormLabel className="text-white">Ministry Logo</FormLabel>
-                    <div className="flex items-center gap-4">
-                      {form.watch("logo") && (
-                        <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-600">
-                          <img 
-                            src={form.watch("logo") || ""} 
-                            alt="Ministry logo" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-700">
+                      {form.watch("logo") ? (
+                        <img src={form.watch("logo") || ""} alt="Ministry logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <Building className="w-7 h-7 text-gray-500" />
                       )}
-                      <div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                          className="hidden"
-                          id="logo-upload"
-                          disabled={isUploading}
-                        />
-                        <label htmlFor="logo-upload">
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            disabled={isUploading}
-                            className="cursor-pointer"
-                            asChild
-                          >
-                            <span>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {isUploading ? "Uploading..." : "Upload Logo"}
-                            </span>
-                          </Button>
-                        </label>
-                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white mb-1">Ministry Logo</p>
+                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" disabled={isUploading} />
+                      <label htmlFor="logo-upload" className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-[#B8941F] cursor-pointer font-medium transition-colors">
+                        <Upload className="h-3.5 w-3.5" />
+                        {isUploading ? "Uploading..." : "Upload logo"}
+                      </label>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Basic Information */}
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Ministry Name *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                value={field.value || ""}
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="Enter ministry name"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="denomination"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Denomination</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
-                              <FormControl>
-                                <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
-                                  <SelectValue placeholder="Select denomination" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {denominations.map((denomination) => (
-                                  <SelectItem key={denomination} value={denomination}>
-                                    {denomination}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="location"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Location</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                value={field.value || ""}
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="City, State"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="website"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Website</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                value={field.value || ""}
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="https://yourministry.com"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {/* Contact Information */}
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Contact Email *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                value={field.value || ""}
-                                type="email"
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="contact@ministry.com"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Phone Number *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                value={field.value || ""}
-                                className="bg-gray-800 border-gray-600 text-white"
-                                placeholder="(555) 123-4567"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-white">Address *</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                {...field} 
-                                value={field.value || ""}
-                                className="bg-gray-800 border-gray-600 text-white min-h-[80px]"
-                                placeholder="Full address including street, city, state, and ZIP"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Description */}
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Ministry Description *</FormLabel>
+                        <FormLabel className="text-gray-300 text-sm">Ministry Name *</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            {...field} 
-                            value={field.value || ""}
-                            className="bg-gray-800 border-gray-600 text-white min-h-[120px]"
-                            placeholder="Describe your ministry, mission, and activities..."
-                          />
+                          <Input {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white" placeholder="Enter ministry name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {/* Submit */}
-                  <div className="flex gap-4">
+                  <FormField
+                    control={form.control}
+                    name="denomination"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Denomination</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                              <SelectValue placeholder="Select denomination" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {denominations.map((d) => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Location</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white" placeholder="City, State" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Website</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white" placeholder="https://yourministry.com" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Contact Email *</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ""} type="email" className="bg-gray-900 border-gray-700 text-white" placeholder="contact@ministry.com" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Phone Number *</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white" placeholder="(555) 123-4567" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Address *</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white min-h-[80px]" placeholder="Street, city, state, ZIP" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 text-sm">Ministry Description *</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} value={field.value || ""} className="bg-gray-900 border-gray-700 text-white min-h-[120px]" placeholder="Describe your ministry, mission, and activities..." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-3 pt-2">
                     <Button
                       type="submit"
                       disabled={updateMinistryMutation.isPending}
-                      className="bg-primary hover:bg-primary/90 flex-1"
+                      className="flex-1 bg-[#D4AF37] hover:bg-[#B8941F] text-black font-semibold"
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {updateMinistryMutation.isPending ? "Updating..." : "Update Ministry Profile"}
+                      {updateMinistryMutation.isPending ? "Saving..." : "Save Changes"}
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => navigate("/profile")}
-                      className="border-gray-600 hover:bg-gray-800"
+                      className="text-gray-400 hover:text-white hover:bg-gray-800"
                     >
                       Cancel
                     </Button>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+            </form>
+          </Form>
         </div>
       </div>
     </>
