@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import connectPgSimple from "connect-pg-simple";
 import pg from "pg";
+import { pool } from "./db";
 import { emailService } from "./emailService";
 import { authLimiter } from "./security";
 
@@ -60,10 +61,27 @@ function hashResetToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-export function setupAuth(app: Express) {
+export async function setupAuth(app: Express) {
   // OWASP: Fail fast if session secret is missing — never use a hardcoded fallback
   if (!process.env.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is required. Generate a strong random value (32+ characters).');
+  }
+
+  // Ensure session table exists using the working Neon pool
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "session" (
+        "sid" varchar NOT NULL,
+        "sess" json NOT NULL,
+        "expire" timestamp(6) NOT NULL,
+        CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")
+    `);
+  } catch (err) {
+    console.error('Session table setup error:', err);
   }
 
   const PgSession = connectPgSimple(session);

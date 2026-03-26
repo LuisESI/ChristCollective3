@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth middleware
-  setupAuth(app);
+  await setupAuth(app);
 
   // Update basic user profile (validated by profileUpdateSchema middleware)
   app.put('/api/user/profile', isAuthenticated, writeLimiter, validateBody(profileUpdateSchema), async (req: any, res) => {
