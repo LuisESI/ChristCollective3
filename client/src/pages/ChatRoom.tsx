@@ -165,11 +165,14 @@ export default function ChatRoom() {
 
   return (
     <div
-      className="fixed inset-x-0 top-0 bg-black flex flex-col z-40"
-      style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}
+      className="fixed inset-x-0 bg-black flex flex-col z-40"
+      style={{
+        top: 'calc(60px + env(safe-area-inset-top, 0px))',
+        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       {/* Header */}
-      <div className="flex-shrink-0 bg-black border-b border-gray-800 p-3 pt-safe">
+      <div className="flex-shrink-0 bg-black border-b border-gray-800 p-3">
         <div className="max-w-2xl mx-auto w-full">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">

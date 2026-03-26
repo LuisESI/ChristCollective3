@@ -63,9 +63,6 @@ export default function Header() {
     { name: "About", path: "/about" },
   ];
 
-  // Hide header on full-screen chat pages
-  if (path.startsWith('/direct-chat/') || path.startsWith('/chat/')) return null;
-
   return (
     <header className="bg-background sticky top-0 z-50 header-gradient-shadow pt-safe">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">

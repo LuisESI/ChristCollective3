@@ -151,15 +151,18 @@ export default function DirectChatPage() {
 
   return (
     <div
-      className="fixed inset-x-0 top-0 bg-black text-white flex flex-col z-40"
-      style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}
+      className="fixed inset-x-0 bg-black text-white flex flex-col z-40"
+      style={{
+        top: 'calc(60px + env(safe-area-inset-top, 0px))',
+        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       <Helmet>
         <title>Direct Message - {otherUserName} | Christ Collective</title>
       </Helmet>
 
       {/* Header */}
-      <div className="flex-shrink-0 bg-black border-b border-gray-800 px-4 py-3 pt-safe">
+      <div className="flex-shrink-0 bg-black border-b border-gray-800 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center space-x-2">
           <Button
             variant="ghost"
