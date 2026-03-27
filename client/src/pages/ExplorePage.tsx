@@ -11,60 +11,83 @@ import { getImageUrl } from "@/lib/api-config";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
 function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
+  const formatRelativeTime = (dateStr: string) => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMins = Math.floor((now.getTime() - date.getTime()) / 60000);
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   return (
-    <div 
-      className="bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 cursor-pointer hover:bg-[#111] transition-colors w-full shadow-sm"
+    <div
+      className="border-b border-gray-800/60 px-4 pt-3 pb-1 cursor-pointer active:bg-white/[0.02] w-full"
       onClick={() => navigate(`/post/${post.id}`)}
     >
-      <div className="flex items-center gap-3 mb-3">
-        <Avatar className="w-9 h-9">
+      <div className="flex gap-3">
+        <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
           <AvatarImage src={getImageUrl(post.user?.profileImageUrl)} />
-          <AvatarFallback className="bg-[#D4AF37] text-black text-xs">
+          <AvatarFallback className="bg-[#D4AF37] text-black text-sm font-bold">
             {getUserInitials(post.user)}
           </AvatarFallback>
         </Avatar>
+
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium truncate">
-            {getUserDisplayName(post.user)}
-          </p>
-          <p className="text-gray-500 text-xs">@{post.user?.username || 'user'}</p>
-        </div>
-        <span className="text-gray-600 text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
-      </div>
+          <div className="flex flex-wrap items-baseline gap-x-1 mb-0.5">
+            <span className="font-bold text-white text-[15px] leading-snug">{getUserDisplayName(post.user)}</span>
+            <span className="text-gray-500 text-[14px]">@{post.user?.username || 'user'}</span>
+            <span className="text-gray-600 text-[14px]">·</span>
+            <span className="text-gray-500 text-[14px]">{formatRelativeTime(post.createdAt)}</span>
+          </div>
 
-      {post.title && (
-        <h3 className="text-white font-semibold text-sm mb-1">{post.title}</h3>
-      )}
-      
-      <p className="text-gray-300 text-sm leading-relaxed line-clamp-3 mb-3">{post.content}</p>
-
-      {post.mediaUrls?.[0] && (
-        <div className="rounded-lg overflow-hidden mb-3">
-          {post.mediaType === 'video' || (typeof post.mediaUrls[0] === 'string' && (post.mediaUrls[0].toLowerCase().endsWith('.mp4') || post.mediaUrls[0].toLowerCase().endsWith('.mov') || post.mediaUrls[0].toLowerCase().endsWith('.webm'))) ? (
-            <video 
-              src={getImageUrl(post.mediaUrls[0])} 
-              className="w-full max-h-[300px] object-cover rounded-lg"
-              muted
-              playsInline
-              loop
-              onMouseOver={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-              onMouseOut={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
-            />
-          ) : (
-            <img 
-              src={getImageUrl(post.mediaUrls[0])} 
-              alt={post.title || "Post"}
-              className="w-full max-h-[300px] object-cover rounded-lg"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+          {post.title && (
+            <p className="text-white font-semibold text-[15px] mb-1">{post.title}</p>
           )}
-        </div>
-      )}
 
-      <div className="flex items-center gap-4 text-gray-500 text-xs">
-        <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {post.likesCount || 0}</span>
-        <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" /> {post.commentsCount || 0}</span>
-        <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5" /> {post.sharesCount || 0}</span>
+          <p className="text-[#e7e9ea] text-[15px] leading-snug line-clamp-3 mb-3">{post.content}</p>
+
+          {post.mediaUrls?.[0] && (
+            <div className="rounded-2xl overflow-hidden border border-gray-800 mb-3">
+              {post.mediaType === 'video' || (typeof post.mediaUrls[0] === 'string' && /\.(mp4|mov|webm)$/i.test(post.mediaUrls[0])) ? (
+                <video
+                  src={getImageUrl(post.mediaUrls[0])}
+                  className="w-full max-h-[300px] object-cover"
+                  muted playsInline loop
+                  onMouseOver={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+                  onMouseOut={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
+                />
+              ) : (
+                <img
+                  src={getImageUrl(post.mediaUrls[0])}
+                  alt={post.title || "Post"}
+                  className="w-full max-h-[300px] object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between -mx-1.5 py-0.5 mb-1">
+            <span className="flex items-center gap-1 text-gray-500 p-1.5">
+              <MessageCircle className="w-[18px] h-[18px]" />
+              {post.commentsCount > 0 && <span className="text-xs tabular-nums">{post.commentsCount}</span>}
+            </span>
+            <span className="flex items-center gap-1 text-gray-500 p-1.5">
+              <Heart className="w-[18px] h-[18px]" />
+              {post.likesCount > 0 && <span className="text-xs tabular-nums">{post.likesCount}</span>}
+            </span>
+            <span className="flex items-center gap-1 text-gray-500 p-1.5">
+              <Share2 className="w-[18px] h-[18px]" />
+              {post.sharesCount > 0 && <span className="text-xs tabular-nums">{post.sharesCount}</span>}
+            </span>
+            <span className="p-1.5 text-transparent select-none"><Share2 className="w-[18px] h-[18px]" /></span>
+          </div>
+        </div>
       </div>
     </div>
   );
