@@ -10,6 +10,12 @@ import { isNativeApp } from "@/lib/platform";
 import { getImageUrl } from "@/lib/api-config";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
+// Creative-field filters for the member directory (match the onboarding disciplines).
+const DIRECTORY_DISCIPLINES = [
+  "Founder", "Design + Illustration", "Music / Audio", "Writing",
+  "Photography", "Film + Production", "Content Creation", "Fashion",
+];
+
 function PostPreviewCard({ post, navigate }: { post: any; navigate: (path: string) => void }) {
   const formatRelativeTime = (dateStr: string) => {
     const now = new Date();
@@ -133,7 +139,12 @@ function ProfileCard({ item, navigate }: { item: { type: string; data: any }; na
       case 'creator': return item.data.content || 'Creator';
       case 'business': return item.data.industry || 'Business';
       case 'ministry': return item.data.denomination || 'Ministry';
-      case 'user': return `@${item.data.username}`;
+      case 'user': {
+        const disc = Array.isArray(item.data.disciplines) && item.data.disciplines.length
+          ? item.data.disciplines.slice(0, 2).join(', ')
+          : null;
+        return disc || `@${item.data.username}`;
+      }
       default: return '';
     }
   };
@@ -167,6 +178,9 @@ function ProfileCard({ item, navigate }: { item: { type: string; data: any }; na
       <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium ${badge.color}`}>
         {badge.label}
       </span>
+      {item.type === 'user' && item.data.city && (
+        <p className="text-[#D4AF37] text-[9px] mt-1 truncate w-full">{item.data.city}</p>
+      )}
     </div>
   );
 }
@@ -176,6 +190,7 @@ export default function ExplorePage() {
   const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -278,7 +293,9 @@ export default function ExplorePage() {
       targetUser.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       targetUser.username?.toLowerCase().includes(searchTerm.toLowerCase());
-    return isRegularUser && matchesSearch;
+    const matchesDiscipline = !disciplineFilter ||
+      (Array.isArray(targetUser.disciplines) && targetUser.disciplines.includes(disciplineFilter));
+    return isRegularUser && matchesSearch && matchesDiscipline;
   }) : [];
 
   const allProfiles = [
@@ -309,7 +326,7 @@ export default function ExplorePage() {
     if (selectedCategory === 'creators') return allProfiles.filter(p => p.type === 'creator');
     if (selectedCategory === 'businesses') return allProfiles.filter(p => p.type === 'business');
     if (selectedCategory === 'ministries') return allProfiles.filter(p => p.type === 'ministry');
-    if (selectedCategory === 'users') return allProfiles.filter(p => p.type === 'user');
+    if (selectedCategory === 'users') return filteredUsers.map((u: any) => ({ type: 'user', data: u, date: new Date(u.createdAt || '2025-01-01') }));
     return [];
   };
 
@@ -397,6 +414,25 @@ export default function ExplorePage() {
             );
           })}
         </div>
+
+        {selectedCategory === 'users' && (
+          <div className="flex space-x-2 mb-5 overflow-x-auto pb-2 scrollbar-hide">
+            {[null, ...DIRECTORY_DISCIPLINES].map((d) => {
+              const active = disciplineFilter === d;
+              return (
+                <button
+                  key={d ?? 'all'}
+                  onClick={() => setDisciplineFilter(d)}
+                  className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    active ? "bg-[#D4AF37] text-black" : "bg-transparent border border-gray-800 text-gray-400 hover:border-gray-500"
+                  }`}
+                >
+                  {d ?? 'All fields'}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="space-y-3">
           {feed.length === 0 ? (

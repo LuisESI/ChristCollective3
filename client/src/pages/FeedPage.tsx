@@ -4,8 +4,10 @@ import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
-import { Sparkles, BookOpen } from "lucide-react";
-import { useMemo } from "react";
+import { Sparkles, BookOpen, X, Check, Coffee } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
+import { cn } from "@/lib/utils";
 import { getWordOfTheDay } from "@/lib/bible-verses";
 
 function WordOfTheDayCard() {
@@ -37,6 +39,82 @@ function WordOfTheDayCard() {
           — {reference}
         </p>
       </div>
+    </div>
+  );
+}
+
+// Dismissible "finish your profile" checklist, pinned on Home. Dismissal persists.
+function OnboardingChecklist({ user }: { user: any }) {
+  const [dismissed, setDismissed] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("cc_onboarding_dismissed") === "1",
+  );
+  if (!user || dismissed) return null;
+
+  const tasks = [
+    { label: "Add a profile photo", done: !!user.profileImageUrl },
+    { label: "Write your bio", done: !!user.bio },
+    { label: "Add your creative fields", done: Array.isArray(user.disciplines) && user.disciplines.length > 0 },
+    { label: "Join your first club", done: false },
+  ];
+  const doneCount = tasks.filter((t) => t.done).length;
+  const pct = Math.round((doneCount / tasks.length) * 100);
+
+  const dismiss = () => {
+    localStorage.setItem("cc_onboarding_dismissed", "1");
+    setDismissed(true);
+  };
+
+  return (
+    <div className="relative bg-[#0A0A0A] border border-gray-800 rounded-2xl p-5">
+      <button
+        onClick={dismiss}
+        className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+        aria-label="Dismiss"
+      >
+        <X className="w-4 h-4" />
+      </button>
+      <h3 className="text-white font-semibold text-sm mb-1">Finish your profile</h3>
+      <p className="text-gray-500 text-xs mb-3">{pct}% done — complete it to show up in Matchups.</p>
+      <div className="h-1.5 rounded-full bg-gray-800 overflow-hidden mb-3">
+        <div className="h-full bg-[#D4AF37] transition-all" style={{ width: `${pct}%` }} />
+      </div>
+      <div className="space-y-1.5">
+        {tasks.map((t, i) => (
+          <div key={i} className="flex items-center gap-2.5 text-sm">
+            <div
+              className={cn(
+                "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0",
+                t.done ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-700",
+              )}
+            >
+              {t.done && <Check className="w-3 h-3 text-black" />}
+            </div>
+            <span className={cn(t.done ? "text-gray-500 line-through" : "text-gray-200")}>{t.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Entry point to the Matchup flow, pinned on Home.
+function NextMatchupCard() {
+  const [, setLocation] = useLocation();
+  return (
+    <div className="bg-gradient-to-br from-[#1a1506] to-[#0A0A0A] border border-[#D4AF37]/30 rounded-2xl p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <Coffee className="w-4 h-4 text-[#D4AF37]" />
+        <h3 className="text-[#D4AF37] font-semibold text-sm">Your next Matchup</h3>
+      </div>
+      <p className="text-gray-300 text-sm mb-4">
+        Meet a small circle of Christian creatives near you. Pick a time and an activity — we'll handle the match.
+      </p>
+      <Button
+        onClick={() => setLocation("/connect")}
+        className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold"
+      >
+        Pick your time &amp; activity
+      </Button>
     </div>
   );
 }
@@ -108,6 +186,8 @@ export default function FeedPage() {
 
       <div className="max-w-lg mx-auto px-4 py-4">
         <div className="space-y-4">
+          <OnboardingChecklist user={user} />
+          {user && <NextMatchupCard />}
           <WordOfTheDayCard />
 
           {allPosts.length === 0 ? (
@@ -141,7 +221,7 @@ export default function FeedPage() {
           )}
         </div>
 
-        {posts && (posts as any[]).length >= 50 && (
+        {Array.isArray(posts) && posts.length >= 50 && (
           <div className="text-center my-8">
             <Button 
               variant="outline" 

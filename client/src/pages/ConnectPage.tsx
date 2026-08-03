@@ -32,7 +32,11 @@ import {
   BookOpen,
   Megaphone,
   Music,
-  MessageCircle
+  MessageCircle,
+  Coffee,
+  Mountain,
+  Footprints,
+  Library
 } from "lucide-react";
 import { insertGroupChatQueueSchema, type GroupChatQueue, type GroupChat } from "@shared/schema";
 import { isNativeApp } from "@/lib/platform";
@@ -46,11 +50,15 @@ const createQueueSchema = insertGroupChatQueueSchema.extend({
 type CreateQueueForm = z.infer<typeof createQueueSchema>;
 
 const intentionOptions = [
+  { value: "coffee", label: "Coffee Club", icon: Coffee, color: "bg-amber-600", badgeColor: "bg-amber-600/20" },
+  { value: "book", label: "Book Club", icon: Library, color: "bg-indigo-500", badgeColor: "bg-indigo-500/20" },
+  { value: "hiking", label: "Hiking Club", icon: Mountain, color: "bg-emerald-600", badgeColor: "bg-emerald-600/20" },
+  { value: "run", label: "Run Club", icon: Footprints, color: "bg-rose-500", badgeColor: "bg-rose-500/20" },
+  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
   { value: "prayer", label: "Prayer", icon: HeartHandshake, color: "bg-red-500", badgeColor: "bg-red-500/20" },
   { value: "bible_study", label: "Bible Study", icon: BookOpen, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
-  { value: "evangelizing", label: "Evangelizing", icon: Megaphone, color: "bg-green-500", badgeColor: "bg-green-500/20" },
-  { value: "fellowship", label: "Fellowship", icon: Users, color: "bg-purple-500", badgeColor: "bg-purple-500/20" },
   { value: "worship", label: "Worship", icon: Music, color: "bg-[#D4AF37]", badgeColor: "bg-[#D4AF37]/20" },
+  { value: "evangelizing", label: "Evangelizing", icon: Megaphone, color: "bg-green-500", badgeColor: "bg-green-500/20" },
 ];
 
 export default function ConnectPage() {
@@ -71,7 +79,7 @@ export default function ConnectPage() {
     defaultValues: {
       title: "",
       description: "",
-      intention: "prayer",
+      intention: "coffee",
       minPeople: 4,
       maxPeople: 8,
     },
@@ -111,14 +119,14 @@ export default function ConnectPage() {
       setCreateDialogOpen(false);
       form.reset();
       toast({
-        title: "Queue created!",
-        description: "People can now join your group chat queue.",
+        title: "Club created!",
+        description: "People can now join your club.",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to create queue. Please try again.",
+        description: "Failed to create club. Please try again.",
         variant: "destructive",
       });
     },
@@ -339,7 +347,7 @@ export default function ConnectPage() {
                 : "bg-transparent text-gray-400"
             }`}
           >
-            Communities
+            Clubs
           </button>
           <button
             onClick={() => setActiveTab("messages")}
@@ -359,7 +367,7 @@ export default function ConnectPage() {
             <DialogTrigger asChild>
               <Button className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-medium">
                 <Plus className="w-4 h-4 mr-2" />
-                Start Chat Queue
+                Start a Club
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-black text-white border border-[#D4AF37]/20 shadow-2xl max-w-lg max-h-[85vh] overflow-y-auto">
@@ -370,9 +378,9 @@ export default function ConnectPage() {
                   </div>
                   <div>
                     <DialogTitle className="text-2xl font-bold text-[#D4AF37]">
-                      Create Group Chat Queue
+                      Create a Club
                     </DialogTitle>
-                    <p className="text-sm text-gray-400 mt-1">Bring believers together for meaningful connection</p>
+                    <p className="text-sm text-gray-400 mt-1">Gather people around a shared interest</p>
                   </div>
                 </div>
               </DialogHeader>
@@ -384,7 +392,7 @@ export default function ConnectPage() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#D4AF37] font-medium text-sm">Queue Title</FormLabel>
+                        <FormLabel className="text-[#D4AF37] font-medium text-sm">Club Name</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
@@ -557,7 +565,7 @@ export default function ConnectPage() {
                       ) : (
                         <div className="flex items-center">
                           <Plus className="w-4 h-4 mr-2" />
-                          Create Queue
+                          Create Club
                         </div>
                       )}
                     </Button>
@@ -576,8 +584,8 @@ export default function ConnectPage() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Your Communities</h2>
-                    <p className="text-xs text-gray-400">Active group chats you're part of</p>
+                    <h2 className="text-lg font-semibold text-white">Your Clubs</h2>
+                    <p className="text-xs text-gray-400">Clubs you're part of</p>
                   </div>
                   <Badge variant="outline" className="bg-green-500/10 border-green-500/30 text-green-400">
                     {activeChats.length} Active
@@ -706,8 +714,8 @@ export default function ConnectPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">Chat Queues</h2>
-                  <p className="text-xs text-gray-400">Available queues waiting for people to join</p>
+                  <h2 className="text-lg font-semibold text-white">Clubs Forming</h2>
+                  <p className="text-xs text-gray-400">Open clubs waiting for people to join</p>
                 </div>
                 {queues.length > 0 && (
                   <Badge variant="outline" className="bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]">
@@ -750,6 +758,10 @@ export default function ConnectPage() {
                       const isOwner = queue.creatorId === user?.id;
                       const isMember = joinedQueues.has(queue.id);
                       const bannerGradients: Record<string, string> = {
+                        coffee: "from-amber-900/80 via-amber-800/50 to-black",
+                        book: "from-indigo-900/80 via-indigo-800/50 to-black",
+                        hiking: "from-emerald-900/80 via-emerald-800/50 to-black",
+                        run: "from-rose-900/80 via-rose-800/50 to-black",
                         prayer: "from-red-900/80 via-red-800/50 to-black",
                         bible_study: "from-blue-900/80 via-blue-800/50 to-black",
                         evangelizing: "from-green-900/80 via-green-800/50 to-black",
@@ -841,7 +853,7 @@ export default function ConnectPage() {
                                 disabled={cancelQueueMutation.isPending}
                                 className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 text-xs h-8 rounded-full"
                               >
-                                Cancel Queue
+                                Cancel Club
                               </Button>
                             ) : isMember ? (
                               <Button
@@ -851,7 +863,7 @@ export default function ConnectPage() {
                                 disabled={exitQueueMutation.isPending}
                                 className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 text-xs h-8 rounded-full"
                               >
-                                {exitQueueMutation.isPending ? "Leaving..." : "Exit Queue"}
+                                {exitQueueMutation.isPending ? "Leaving..." : "Leave"}
                               </Button>
                             ) : (
                               <Button
@@ -860,7 +872,7 @@ export default function ConnectPage() {
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
                                 className="w-full bg-[#D4AF37] hover:bg-[#B8941F] text-black font-medium text-xs h-8 rounded-full"
                               >
-                                {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Full" : "Join Queue"}
+                                {joinQueueMutation.isPending ? "Joining..." : queue.currentCount >= queue.maxPeople ? "Full" : "Join"}
                               </Button>
                             )}
                           </div>
