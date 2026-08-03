@@ -44,48 +44,25 @@ const tierInfo: Record<string, { name: string; price: string; period: string; ic
   },
 };
 
+// Paid tiers ($30 Collective / $60 Guild) are removed from the join flow during the free
+// founding-member launch. The Stripe plumbing (checkout, billing portal, tierInfo above) stays
+// intact for existing subscribers and for when paid is reintroduced at ~100 members.
 const tiers = [
   {
     id: "free",
-    name: "Free",
-    price: "$0",
-    description: "Access to Christ Collective App",
+    name: "Founding Member",
+    price: "Free",
+    description: "Full access while we build the founding LA community",
     benefits: [
-      "Connect with other christians",
-      "Explore communities near you",
-      "RSVP for public events",
-      "Post content on Christ Collective",
-      "Exclusive access to pre-released CC content"
+      "Join Clubs — coffee, hiking, book, run & more",
+      "Get matched with a circle of Christian creatives every 2 weeks",
+      "Browse the member directory",
+      "Post & connect with the community",
+      "Lock in founding-member status before paid tiers launch"
     ],
-    icon: <Globe className="w-7 h-7 text-gray-400" />,
-    buttonText: "Get Started",
+    icon: <Globe className="w-7 h-7 text-[#D4AF37]" />,
+    buttonText: "Join Free",
     paid: false
-  },
-  {
-    id: "collective",
-    name: "The Collective",
-    price: "$30",
-    period: "/month",
-    description: "Private community & member directory",
-    benefits: tierInfo.collective.benefits,
-    icon: <HeartHandshake className="w-7 h-7 text-[#D4AF37]" />,
-    buttonText: "Join The Collective",
-    paid: true,
-    popular: true,
-    emoji: "🕊️"
-  },
-  {
-    id: "guild",
-    name: "The Guild",
-    price: "$60",
-    period: "/month",
-    description: "Everything in The Collective plus more",
-    benefits: tierInfo.guild.benefits,
-    icon: <Crown className="w-7 h-7 text-[#D4AF37]" />,
-    buttonText: "Join The Guild",
-    paid: true,
-    elite: true,
-    emoji: "✨"
   }
 ];
 
@@ -302,7 +279,7 @@ export default function MembershipsPage() {
           <p className="text-gray-400 max-w-2xl mx-auto text-sm">
             {hasActiveMembership
               ? "Manage your membership, billing, and benefits below."
-              : "Choose the tier that best fits your journey and help us build a global community of faith."}
+              : "Christ Collective is free while we build the founding LA community. Claim your founding-member spot."}
           </p>
         </div>
 
@@ -314,7 +291,7 @@ export default function MembershipsPage() {
           <MembershipManagement membership={membership} />
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto items-stretch">
+            <div className="grid grid-cols-1 gap-6 max-w-md mx-auto items-stretch">
               {tiers.map((tier) => {
                 const isPaid = tier.paid;
                 const isElite = (tier as any).elite;
@@ -356,7 +333,7 @@ export default function MembershipsPage() {
                       </div>
 
                       <h3 className="text-2xl font-bold flex items-center justify-center gap-2 mb-1">
-                        {tier.emoji && <span>{tier.emoji}</span>}
+                        {(tier as any).emoji && <span>{(tier as any).emoji}</span>}
                         <span className={isPaid ? "text-[#D4AF37]" : "text-white"}>{tier.name}</span>
                       </h3>
                       
@@ -364,8 +341,8 @@ export default function MembershipsPage() {
                         <span className={`text-5xl font-extrabold ${isPaid ? "text-[#D4AF37]" : "text-white"}`}>
                           {tier.price}
                         </span>
-                        {tier.period && (
-                          <span className="text-gray-500 ml-1 text-lg">{tier.period}</span>
+                        {(tier as any).period && (
+                          <span className="text-gray-500 ml-1 text-lg">{(tier as any).period}</span>
                         )}
                       </div>
                       <p className="text-gray-500 text-sm mt-2">{tier.description}</p>

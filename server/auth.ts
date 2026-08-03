@@ -196,13 +196,14 @@ export async function setupAuth(app: Express) {
     try {
       const { username, email, password, firstName, lastName, phone, userType } = req.body;
       
-      if (!username || !password || !phone) {
-        return res.status(400).json({ message: "Username, password, and phone number are required" });
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
       }
 
       if (!email) {
-        return res.status(400).json({ message: "Email is required for account verification" });
+        return res.status(400).json({ message: "Email is required" });
       }
+      // Phone is optional at signup (collected in the onboarding funnel); no longer hard-required.
 
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
@@ -225,7 +226,7 @@ export async function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName: firstName || null,
         lastName: lastName || null,
-        phone: phone,
+        phone: phone || null,
         userType: userType || null,
         emailVerified: false,
         emailVerificationToken: hashedVerificationToken,
@@ -271,14 +272,8 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return res.status(401).json({ message: "Incorrect password" });
       }
-      // Admin accounts bypass email verification (created before verification system)
-      if (!user.emailVerified && !user.isAdmin) {
-        return res.status(403).json({
-          message: "Please verify your email before signing in. Check your inbox for a verification link.",
-          requiresVerification: true,
-          email: user.email
-        });
-      }
+      // Email verification no longer blocks login — cold traffic from ads must be able to
+      // get into the community immediately. Verification can be nudged in-app after the fact.
       req.logIn(user, (err) => {
         if (err) {
           console.error("Login error:", err);

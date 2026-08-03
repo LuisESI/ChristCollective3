@@ -3,6 +3,7 @@ import {
   text,
   varchar,
   timestamp,
+  date,
   jsonb,
   index,
   serial,
@@ -59,6 +60,18 @@ export const users = pgTable("users", {
   emailVerified: boolean("email_verified").default(false),
   emailVerificationToken: varchar("email_verification_token"),
   emailVerificationExpires: timestamp("email_verification_expires"),
+  // Community profile (Clubs + Matchups) — populated by the onboarding funnel
+  birthdate: date("birthdate"),
+  city: varchar("city"),
+  gender: varchar("gender"),
+  instagram: varchar("instagram"),
+  disciplines: text("disciplines").array(),        // creative fields, e.g. ["Founder","Illustration"]
+  interests: text("interests").array(),            // "I love…" tags
+  creativeGoals: text("creative_goals"),
+  faithNote: text("faith_note"),                   // optional faith background
+  matchPreference: varchar("match_preference", { enum: ["same_field", "different_fields", "open"] }),
+  smsOptIn: boolean("sms_opt_in").default(false),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables
