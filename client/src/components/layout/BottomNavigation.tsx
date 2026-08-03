@@ -83,7 +83,7 @@ export default function BottomNavigation() {
                 </div>
               </button>
               <button
-                onClick={() => goTo("/connect")}
+                onClick={() => goTo("/matchups")}
                 className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/[0.06] press-effect text-left"
               >
                 <div className="w-11 h-11 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0">

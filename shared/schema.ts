@@ -72,6 +72,7 @@ export const users = pgTable("users", {
   matchPreference: varchar("match_preference", { enum: ["same_field", "different_fields", "open"] }),
   smsOptIn: boolean("sms_opt_in").default(false),
   onboardingCompleted: boolean("onboarding_completed").default(false),
+  matchupRequest: jsonb("matchup_request"), // { slot, activity, requestedAt } for the current cycle
 });
 
 // Note: User relations are defined at the bottom of this file after all tables

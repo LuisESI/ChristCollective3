@@ -144,6 +144,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save onboarding / community profile (Clubs + Matchups)
+  app.post("/api/user/onboarding", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const b = req.body || {};
+      const updateData: any = { onboardingCompleted: true };
+      if (typeof b.phone === "string") updateData.phone = b.phone;
+      if (typeof b.instagram === "string") updateData.instagram = b.instagram;
+      if (typeof b.gender === "string") updateData.gender = b.gender;
+      if (typeof b.birthdate === "string" && b.birthdate) updateData.birthdate = b.birthdate;
+      if (typeof b.city === "string") updateData.city = b.city;
+      if (Array.isArray(b.disciplines)) updateData.disciplines = b.disciplines.slice(0, 12).map(String);
+      if (Array.isArray(b.interests)) updateData.interests = b.interests.slice(0, 20).map(String);
+      if (typeof b.bio === "string") updateData.bio = b.bio;
+      if (typeof b.creativeGoals === "string") updateData.creativeGoals = b.creativeGoals;
+      if (typeof b.faithNote === "string") updateData.faithNote = b.faithNote;
+      if (["same_field", "different_fields", "open"].includes(b.matchPreference)) updateData.matchPreference = b.matchPreference;
+      if (typeof b.smsOptIn === "boolean") updateData.smsOptIn = b.smsOptIn;
+      const updatedUser = await storage.updateUser(userId, updateData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error saving onboarding:", error);
+      res.status(500).json({ message: "Failed to save onboarding" });
+    }
+  });
+
+  // Matchup request: user picks a time + an activity for the next cycle
+  app.post("/api/matchups/request", isAuthenticated, async (req: any, res) => {
+    try {
+      const { slot, activity } = req.body || {};
+      if (!slot || !activity) return res.status(400).json({ message: "Pick a time and an activity" });
+      const updatedUser = await storage.updateUser(req.user.id, {
+        matchupRequest: { slot: String(slot), activity: String(activity), requestedAt: new Date().toISOString() },
+      });
+      res.json({ ok: true, matchupRequest: (updatedUser as any)?.matchupRequest });
+    } catch (error) {
+      console.error("Error saving matchup request:", error);
+      res.status(500).json({ message: "Failed to save your matchup" });
+    }
+  });
+
   // Profile image upload endpoint (main handler is registered below with DB update)
 
   app.post('/api/upload/banner-image', isAuthenticated, uploadLimiter, upload.single('bannerImage'), async (req: any, res) => {

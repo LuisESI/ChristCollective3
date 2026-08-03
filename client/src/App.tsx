@@ -21,6 +21,8 @@ import MembershipsPage from "@/pages/MembershipsPage";
 import DonationCheckoutPage from "@/pages/DonationCheckoutPage";
 import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import MatchupsPage from "@/pages/MatchupsPage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
 import CreatorsPage from "@/pages/CreatorsPage";
@@ -79,6 +81,8 @@ function Router() {
       <Route path="/auth/mobile" component={MobileAuthPage} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/verify-email" component={VerifyEmailPage} />
+      <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/matchups" component={MatchupsPage} />
       <Route path="/donate" component={DonationsPage} />
       <Route path="/donate/create" component={CreateCampaignPage} />
       <Route path="/donate/edit/:id" component={EditCampaignPage} />

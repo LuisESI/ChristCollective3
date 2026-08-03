@@ -45,6 +45,7 @@ function WordOfTheDayCard() {
 
 // Dismissible "finish your profile" checklist, pinned on Home. Dismissal persists.
 function OnboardingChecklist({ user }: { user: any }) {
+  const [, navigate] = useLocation();
   const [dismissed, setDismissed] = useState(
     () => typeof window !== "undefined" && localStorage.getItem("cc_onboarding_dismissed") === "1",
   );
@@ -65,9 +66,12 @@ function OnboardingChecklist({ user }: { user: any }) {
   };
 
   return (
-    <div className="relative bg-[#0A0A0A] border border-gray-800 rounded-2xl p-5">
+    <div
+      className="relative bg-[#0A0A0A] border border-gray-800 rounded-2xl p-5 cursor-pointer hover:border-gray-700 transition-colors"
+      onClick={() => navigate("/onboarding")}
+    >
       <button
-        onClick={dismiss}
+        onClick={(e) => { e.stopPropagation(); dismiss(); }}
         className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
         aria-label="Dismiss"
       >
@@ -110,7 +114,7 @@ function NextMatchupCard() {
         Meet a small circle of Christian creatives near you. Pick a time and an activity — we'll handle the match.
       </p>
       <Button
-        onClick={() => setLocation("/connect")}
+        onClick={() => setLocation("/matchups")}
         className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold"
       >
         Pick your time &amp; activity
