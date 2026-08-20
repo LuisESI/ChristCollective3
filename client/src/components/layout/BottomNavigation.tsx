@@ -90,7 +90,7 @@ export default function BottomNavigation() {
                   <CalendarBlank size={20} className="text-[#D4AF37]" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm">Set up a meetup</p>
+                  <p className="text-white font-semibold text-sm">Meetup</p>
                   <p className="text-gray-400 text-xs">Pick a time &amp; connect with your circle</p>
                 </div>
               </button>

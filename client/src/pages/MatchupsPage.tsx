@@ -10,20 +10,23 @@ import { Helmet } from "react-helmet";
 
 const SLOTS = [
   { id: "sat", dow: "SAT", d: "09", title: "Saturday afternoon", sub: "Aug 9 · 4:00 PM · Eastside" },
-  { id: "sun", dow: "SUN", d: "10", title: "Sunday coffee", sub: "Aug 10 · 3:00 PM · Mid-City" },
+  { id: "sun", dow: "SUN", d: "10", title: "Sunday afternoon", sub: "Aug 10 · 3:00 PM · Mid-City" },
   { id: "tue", dow: "TUE", d: "12", title: "Tuesday evening", sub: "Aug 12 · 6:30 PM · Westside" },
 ];
+
+// `img` loads from /assets/activities/*.jpg; falls back to the gradient if missing.
 const ACTIVITIES = [
-  { id: "coffee", emoji: "☕", label: "Coffee" },
-  { id: "hiking", emoji: "⛰️", label: "Hiking" },
-  { id: "run", emoji: "🏃", label: "Run" },
-  { id: "book", emoji: "📖", label: "Book" },
-  { id: "open", emoji: "✦", label: "Open to anything" },
+  { id: "coffee", label: "Coffee", emoji: "☕", img: "/assets/activities/coffee.jpg", grad: "from-amber-700 to-amber-950" },
+  { id: "hiking", label: "Hiking", emoji: "⛰️", img: "/assets/activities/hiking.jpg", grad: "from-emerald-700 to-emerald-950" },
+  { id: "run", label: "Run", emoji: "🏃", img: "/assets/activities/run.jpg", grad: "from-rose-700 to-rose-950" },
+  { id: "book", label: "Book", emoji: "📖", img: "/assets/activities/book.jpg", grad: "from-indigo-700 to-indigo-950" },
+  { id: "open", label: "Open to anything", emoji: "✦", img: "/assets/activities/open.jpg", grad: "from-yellow-600 to-yellow-900" },
 ];
 
 export default function MatchupsPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [step, setStep] = useState(0); // 0 = time, 1 = activity, 2 = thank you
   const [slot, setSlot] = useState<string | null>(null);
   const [activity, setActivity] = useState<string | null>(null);
 
@@ -31,99 +34,153 @@ export default function MatchupsPage() {
     mutationFn: async () => apiRequest("/api/matchups/request", { method: "POST", data: { slot, activity } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      toast({ title: "You're in the next Matchup! ☕", description: "We'll text you when your circle is ready." });
-      navigate("/feed");
+      setStep(2);
     },
     onError: () => toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" }),
   });
 
-  const ready = !!slot && !!activity;
+  const pct = Math.round((step / 2) * 100);
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
+    <div className="min-h-screen bg-[#fbfbfa] text-gray-900 flex flex-col">
       <Helmet><title>Your next Matchup — Christ Collective</title></Helmet>
 
-      <div className="container mx-auto px-5 py-6 max-w-md">
-        <button onClick={() => navigate("/feed")} className="text-gray-400 hover:text-white flex items-center gap-1 text-sm mb-4">
-          <ChevronLeft className="w-4 h-4" /> Back
-        </button>
-
-        <h1 className="text-2xl font-extrabold tracking-tight mb-1">Your next Matchup</h1>
-        <p className="text-gray-400 text-sm mb-6">
-          We already have your profile — just pick a time and what you'd like to do. We'll group you with ~7 compatible LA creatives.
-        </p>
-
-        {/* how it works */}
-        <div className="flex items-center justify-between gap-2 bg-[#0A0A0A] border border-gray-800 rounded-xl p-3 mb-6 text-xs text-gray-400 font-medium">
-          <span className="flex items-center gap-1.5"><i className="w-5 h-5 rounded-full bg-gray-800 text-[#D4AF37] not-italic font-bold flex items-center justify-center text-[11px]">1</i>Pick a time</span>
-          <span className="flex items-center gap-1.5"><i className="w-5 h-5 rounded-full bg-gray-800 text-[#D4AF37] not-italic font-bold flex items-center justify-center text-[11px]">2</i>Pick an activity</span>
-          <span className="flex items-center gap-1.5"><i className="w-5 h-5 rounded-full bg-gray-800 text-[#D4AF37] not-italic font-bold flex items-center justify-center text-[11px]">3</i>Get matched</span>
-        </div>
-
-        {/* time */}
-        <p className="text-[11px] font-bold tracking-widest uppercase text-[#D4AF37] mb-3">Pick a time</p>
-        <div className="space-y-2.5 mb-7">
-          {SLOTS.map((s) => {
-            const on = slot === s.id;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setSlot(s.id)}
-                className={cn(
-                  "w-full flex items-center gap-3.5 text-left rounded-xl border p-3 transition-colors",
-                  on ? "bg-[#D4AF37]/10 border-[#D4AF37]" : "bg-[#0A0A0A] border-gray-800 hover:border-[#D4AF37]/50",
-                )}
-              >
-                <div className="w-11 h-11 rounded-lg bg-gray-900 flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-[9px] font-bold text-[#D4AF37] tracking-wide">{s.dow}</span>
-                  <span className="text-lg font-extrabold leading-none">{s.d}</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold">{s.title}</p>
-                  <p className="text-xs text-gray-400">{s.sub}</p>
-                </div>
-                <span className={cn("w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0", on ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-700")}>
-                  {on && <Check className="w-3 h-3 text-black" />}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* activity */}
-        <p className="text-[11px] font-bold tracking-widest uppercase text-[#D4AF37] mb-3">Pick an activity</p>
-        <div className="flex flex-wrap gap-2.5">
-          {ACTIVITIES.map((a) => {
-            const on = activity === a.id;
-            return (
-              <button
-                key={a.id}
-                onClick={() => setActivity(a.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-colors",
-                  on ? "bg-[#D4AF37]/10 border-[#D4AF37]" : "bg-[#0A0A0A] border-gray-800 hover:border-[#D4AF37]/50",
-                )}
-              >
-                <span className="text-base">{a.emoji}</span>
-                <span className="text-white">{a.label}</span>
-              </button>
-            );
-          })}
+      {/* progress + back */}
+      <div className="px-5 pt-6 pb-2 max-w-md w-full mx-auto">
+        {step > 0 && step < 2 ? (
+          <button onClick={() => setStep((s) => s - 1)} className="text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm mb-4">
+            <ChevronLeft className="w-4 h-4" /> Back
+          </button>
+        ) : (
+          <button onClick={() => navigate("/feed")} className="text-gray-500 hover:text-gray-900 flex items-center gap-1 text-sm mb-4">
+            <ChevronLeft className="w-4 h-4" /> {step === 2 ? "Home" : "Back"}
+          </button>
+        )}
+        <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+          <div className="h-full bg-[#D4AF37] transition-all duration-300" style={{ width: `${Math.max(6, pct)}%` }} />
         </div>
       </div>
 
-      {/* footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-gray-900 px-5 py-4">
-        <div className="max-w-md mx-auto">
-          <Button
-            onClick={() => submit.mutate()}
-            disabled={!ready || submit.isPending}
-            className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
-          >
-            {submit.isPending ? "Confirming…" : ready ? "Confirm my spot" : "Pick a time & activity"}
-          </Button>
-        </div>
+      <div className="flex-1 px-5 py-6 pb-28 max-w-md w-full mx-auto">
+        {/* STEP 1 — pick a time */}
+        {step === 0 && (
+          <>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1">Pick a time</h1>
+            <p className="text-gray-500 text-sm mb-6">
+              We already have your profile — choose a time and we'll group you with ~7 compatible LA creatives.
+            </p>
+            <div className="space-y-2.5">
+              {SLOTS.map((s) => {
+                const on = slot === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setSlot(s.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3.5 text-left rounded-xl border p-3 transition-colors shadow-sm",
+                      on ? "bg-[#D4AF37]/10 border-[#D4AF37]" : "bg-white border-gray-200 hover:border-[#D4AF37]/60",
+                    )}
+                  >
+                    <div className="w-11 h-11 rounded-lg bg-gray-100 flex flex-col items-center justify-center flex-shrink-0">
+                      <span className="text-[9px] font-bold text-[#B8941F] tracking-wide">{s.dow}</span>
+                      <span className="text-lg font-extrabold leading-none">{s.d}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold">{s.title}</p>
+                      <p className="text-xs text-gray-500">{s.sub}</p>
+                    </div>
+                    <span className={cn("w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0", on ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-300")}>
+                      {on && <Check className="w-3 h-3 text-black" />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* STEP 2 — pick an activity (picture cards) */}
+        {step === 1 && (
+          <>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1">Pick an activity</h1>
+            <p className="text-gray-500 text-sm mb-6">What would you like to do with your circle?</p>
+            <div className="grid grid-cols-2 gap-3">
+              {ACTIVITIES.map((a) => {
+                const on = activity === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => setActivity(a.id)}
+                    className={cn(
+                      "relative rounded-2xl overflow-hidden aspect-[4/3] border-2 transition-all shadow-sm",
+                      on ? "border-[#D4AF37] scale-[0.98]" : "border-gray-200 hover:border-[#D4AF37]/50",
+                    )}
+                  >
+                    <div className={cn("absolute inset-0 bg-gradient-to-br", a.grad)} />
+                    <img
+                      src={a.img}
+                      alt={a.label}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center gap-2">
+                      <span className="text-lg">{a.emoji}</span>
+                      <span className="text-white font-bold text-sm">{a.label}</span>
+                    </div>
+                    {on && (
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center shadow">
+                        <Check className="w-4 h-4 text-black" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* STEP 3 — thank you */}
+        {step === 2 && (
+          <div className="flex flex-col items-center text-center pt-10">
+            <div className="w-20 h-20 rounded-3xl bg-[#D4AF37] flex items-center justify-center mb-6">
+              <Check className="w-10 h-10 text-black" />
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-2">Thank you!</h1>
+            <p className="text-gray-600 text-[15px] leading-relaxed max-w-xs">
+              We'll contact you soon to confirm your circle and the details of your meetup.
+            </p>
+            <Button onClick={() => navigate("/feed")} className="mt-8 h-12 px-8 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold">
+              Back to home
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* footer (hidden on thank-you) */}
+      {step < 2 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-200 px-5 py-4">
+          <div className="max-w-md mx-auto">
+            {step === 0 ? (
+              <Button
+                onClick={() => setStep(1)}
+                disabled={!slot}
+                className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
+              >
+                {slot ? "Next" : "Pick a time"}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => submit.mutate()}
+                disabled={!activity || submit.isPending}
+                className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
+              >
+                {submit.isPending ? "Confirming…" : activity ? "Confirm my spot" : "Pick an activity"}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
