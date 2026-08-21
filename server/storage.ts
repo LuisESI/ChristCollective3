@@ -99,7 +99,7 @@ import {
   type UserBlock,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, ilike, like, sql, isNull } from "drizzle-orm";
+import { eq, desc, asc, and, ilike, like, sql, isNull, isNotNull } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -403,6 +403,28 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  // Members who have submitted a Matchup request (for manual matching by admins).
+  async getMatchupRequests(): Promise<Array<Pick<User, "id" | "firstName" | "lastName" | "username" | "email" | "phone" | "city" | "disciplines" | "interests" | "matchPreference" | "instagram" | "matchupRequest">>> {
+    return await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        username: users.username,
+        email: users.email,
+        phone: users.phone,
+        city: users.city,
+        disciplines: users.disciplines,
+        interests: users.interests,
+        matchPreference: users.matchPreference,
+        instagram: users.instagram,
+        matchupRequest: users.matchupRequest,
+      })
+      .from(users)
+      .where(isNotNull(users.matchupRequest))
+      .orderBy(desc(users.updatedAt));
   }
 
   async deleteUser(id: string): Promise<void> {

@@ -235,16 +235,31 @@ export async function setupAuth(app: Express) {
 
       await storage.autoFollowChristCollectiveMinistry(user.id);
 
-      await emailService.sendEmailVerification(
-        email,
-        verificationToken,
-        firstName || username
-      );
+      // Verification email is best-effort — never block signup on it.
+      emailService.sendEmailVerification(email, verificationToken, firstName || username)
+        .catch((e) => console.error("Verification email failed (non-blocking):", e instanceof Error ? e.message : e));
 
-      res.status(201).json({ 
-        message: "Account created. Please check your email to verify your account.",
-        requiresVerification: true,
-        email: user.email,
+      // Log the new user in immediately so they flow straight into onboarding.
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("Auto-login after registration failed:", loginErr);
+          return res.status(201).json({ message: "Account created. Please sign in.", requiresLogin: true, email: user.email });
+        }
+        req.session.save((saveErr) => {
+          if (saveErr) console.error("Session save error after registration:", saveErr);
+          res.status(201).json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            isAdmin: user.isAdmin,
+            onboardingCompleted: false,
+            newAccount: true,
+            sessionId: req.sessionID,
+          });
+        });
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -566,6 +581,9 @@ export async function setupAuth(app: Express) {
         profileImageUrl: freshUser.profileImageUrl,
         bannerImageUrl: freshUser.bannerImageUrl,
         isAdmin: freshUser.isAdmin,
+        onboardingCompleted: freshUser.onboardingCompleted,
+        disciplines: freshUser.disciplines,
+        city: freshUser.city,
         stripeCustomerId: freshUser.stripeCustomerId,
         createdAt: freshUser.createdAt,
         updatedAt: freshUser.updatedAt
@@ -586,7 +604,10 @@ export async function setupAuth(app: Express) {
         bio: user.bio,
         profileImageUrl: user.profileImageUrl,
         bannerImageUrl: user.bannerImageUrl,
-        isAdmin: user.isAdmin 
+        isAdmin: user.isAdmin,
+        onboardingCompleted: user.onboardingCompleted,
+        disciplines: user.disciplines,
+        city: user.city
       });
     }
   });

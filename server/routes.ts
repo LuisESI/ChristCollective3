@@ -3274,6 +3274,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get all pending Matchup requests (for manual matching)
+  app.get('/api/admin/matchup-requests', isAdminAuth, async (req, res) => {
+    try {
+      const requests = await storage.getMatchupRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching matchup requests:", error);
+      res.status(500).json({ message: "Failed to fetch matchup requests" });
+    }
+  });
+
   // Admin: Get user details by ID
   app.get('/api/admin/users/:id', isAdminAuth, async (req, res) => {
     try {

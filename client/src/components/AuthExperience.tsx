@@ -185,11 +185,18 @@ export default function AuthExperience({ variant = "desktop", onLoginSuccess }: 
     
     try {
       const { confirmPassword, ...registrationData } = registerData;
-      const result = await registerMutation.mutateAsync(registrationData);
-      
-      if (result.requiresVerification) {
+      const result: any = await registerMutation.mutateAsync(registrationData);
+
+      if (result && result.id) {
+        // Auto-logged-in — send new members straight into onboarding.
+        toast({ title: "Welcome to Christ Collective!", description: "Let's set up your profile." });
+        setTimeout(() => setLocation("/onboarding"), 300);
+      } else if (result.requiresVerification) {
         setVerificationEmail(result.email || registerData.email);
         setVerificationSent(true);
+      } else if (result.requiresLogin) {
+        setMode("login");
+        toast({ title: "Account created", description: "Please sign in to continue." });
       }
     } catch (error: any) {
       toast({

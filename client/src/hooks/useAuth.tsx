@@ -13,9 +13,15 @@ import { registerPushNotifications } from "@/lib/push-notifications";
 import { User } from "@shared/schema";
 
 type RegisterResponse = {
-  message: string;
-  requiresVerification: boolean;
-  email: string;
+  id?: string;
+  username?: string;
+  email?: string;
+  onboardingCompleted?: boolean;
+  newAccount?: boolean;
+  sessionId?: string;
+  requiresLogin?: boolean;
+  requiresVerification?: boolean;
+  message?: string;
 };
 
 type AuthContextType = {
@@ -140,6 +146,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       return await response.json() as RegisterResponse;
+    },
+    onSuccess: (data: RegisterResponse) => {
+      // New flow: registration auto-logs-in and returns the user — cache it so the app knows we're signed in.
+      if (data && data.id) {
+        if (data.sessionId) {
+          secureSet('sessionId', data.sessionId);
+          localStorage.setItem('sessionId', data.sessionId);
+        }
+        queryClient.setQueryData(["/api/user"], data);
+        registerPushNotifications().catch(() => {});
+      }
     },
     onError: (error: Error) => {
       toast({

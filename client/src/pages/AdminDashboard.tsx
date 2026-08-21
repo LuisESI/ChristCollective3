@@ -10,17 +10,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package, Crown, Shield, LayoutDashboard, FileText, Handshake, CreditCard } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Clock, DollarSign, Users, Building, Receipt, UserCheck, Search, Eye, Calendar, Mail, X, Phone, MapPin, ExternalLink, ShoppingBag, Package, Crown, Shield, LayoutDashboard, FileText, Handshake, CreditCard, Coffee, Instagram, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Campaign, User, Donation, SponsorshipApplication, MembershipSubscription } from "@shared/schema";
 import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
 
-type AdminSection = "overview" | "ministries" | "campaigns" | "all-campaigns" | "sponsorships" | "transactions" | "members" | "users";
+type AdminSection = "overview" | "matchups" | "ministries" | "campaigns" | "all-campaigns" | "sponsorships" | "transactions" | "members" | "users";
 
 const sidebarItems: { id: AdminSection; label: string; icon: any; badge?: boolean }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "matchups", label: "Matchup Requests", icon: Sparkles, badge: true },
   { id: "ministries", label: "Ministries", icon: Building, badge: true },
   { id: "campaigns", label: "Pending Campaigns", icon: Clock, badge: true },
   { id: "all-campaigns", label: "All Campaigns", icon: FileText },
@@ -29,6 +30,22 @@ const sidebarItems: { id: AdminSection; label: string; icon: any; badge?: boolea
   { id: "members", label: "Members", icon: Crown },
   { id: "users", label: "Users", icon: Users },
 ];
+
+// Shape of the current-cycle Matchup request stored on each user.
+type MatchupRequest = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  username: string | null;
+  email: string | null;
+  phone: string | null;
+  city: string | null;
+  disciplines: string[] | null;
+  interests: string[] | null;
+  matchPreference: string | null;
+  instagram: string | null;
+  matchupRequest: { slot?: string; activity?: string; requestedAt?: string } | null;
+};
 
 export default function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -77,6 +94,11 @@ export default function AdminDashboard() {
 
   const { data: membershipSubs = [], isLoading: membershipsLoading } = useQuery<MembershipSubscription[]>({
     queryKey: ["/api/admin/membership-subscriptions"],
+    enabled: user?.isAdmin === true,
+  });
+
+  const { data: matchupRequests = [], isLoading: matchupsLoading } = useQuery<MatchupRequest[]>({
+    queryKey: ["/api/admin/matchup-requests"],
     enabled: user?.isAdmin === true,
   });
 
@@ -192,7 +214,10 @@ export default function AdminDashboard() {
   const pendingSponsorshipsCount = Array.isArray(sponsorshipApplications) ? sponsorshipApplications.filter((a: SponsorshipApplication) => a.status === "pending").length : 0;
   const totalRaised = Array.isArray(allTransactions) ? allTransactions.reduce((sum: number, t: Donation) => sum + (Number(t.amount) || 0), 0) : 0;
 
+  const matchupRequestsCount = Array.isArray(matchupRequests) ? matchupRequests.length : 0;
+
   const getBadgeCount = (id: AdminSection): number => {
+    if (id === "matchups") return matchupRequestsCount;
     if (id === "ministries") return pendingMinistriesCount;
     if (id === "campaigns") return pendingCampaignsCount;
     if (id === "sponsorships") return pendingSponsorshipsCount;
@@ -287,6 +312,8 @@ export default function AdminDashboard() {
           {activeSection === "overview" && <OverviewSection
             pendingMinistriesCount={pendingMinistriesCount}
             pendingCampaignsCount={pendingCampaignsCount}
+            matchupRequestsCount={matchupRequestsCount}
+            matchupsLoading={matchupsLoading}
             totalUsers={Array.isArray(allUsers) ? allUsers.length : 0}
             totalRaised={totalRaised}
             membershipSubs={membershipSubs}
@@ -297,6 +324,11 @@ export default function AdminDashboard() {
             transactionsLoading={transactionsLoading}
             membershipsLoading={membershipsLoading}
             setActiveSection={setActiveSection}
+          />}
+
+          {activeSection === "matchups" && <MatchupsSection
+            matchupRequests={matchupRequests}
+            matchupsLoading={matchupsLoading}
           />}
 
           {activeSection === "ministries" && <MinistriesSection
@@ -497,12 +529,13 @@ function LoadingSkeleton({ rows = 3 }: { rows?: number }) {
   );
 }
 
-function OverviewSection({ pendingMinistriesCount, pendingCampaignsCount, totalUsers, totalRaised, membershipSubs, formatCurrency, ministriesLoading, pendingLoading, usersLoading, transactionsLoading, membershipsLoading, setActiveSection }: any) {
+function OverviewSection({ pendingMinistriesCount, pendingCampaignsCount, matchupRequestsCount, matchupsLoading, totalUsers, totalRaised, membershipSubs, formatCurrency, ministriesLoading, pendingLoading, usersLoading, transactionsLoading, membershipsLoading, setActiveSection }: any) {
   const activeMemberships = Array.isArray(membershipSubs) ? membershipSubs.filter((s: MembershipSubscription) => s.status === "active").length : 0;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard icon={Sparkles} label="Matchup Requests" value={matchupRequestsCount} color="bg-[#D4AF37]/10 text-[#D4AF37]" loading={matchupsLoading} onClick={() => setActiveSection("matchups")} />
         <StatCard icon={Building} label="Pending Ministries" value={pendingMinistriesCount} color="bg-green-500/10 text-green-400" loading={ministriesLoading} onClick={() => setActiveSection("ministries")} />
         <StatCard icon={Clock} label="Pending Campaigns" value={pendingCampaignsCount} color="bg-[#D4AF37]/10 text-[#D4AF37]" loading={pendingLoading} onClick={() => setActiveSection("campaigns")} />
         <StatCard icon={Users} label="Total Users" value={totalUsers} color="bg-blue-500/10 text-blue-400" loading={usersLoading} onClick={() => setActiveSection("users")} />
@@ -900,6 +933,113 @@ function MembersSection({ membershipSubs, membershipsLoading }: any) {
           </Table>
         </div>
       </SectionCard>
+    </div>
+  );
+}
+
+function prettifyToken(value?: string | null): string {
+  if (!value) return "";
+  return value
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+function MatchupsSection({ matchupRequests, matchupsLoading }: { matchupRequests: MatchupRequest[]; matchupsLoading: boolean }) {
+  if (matchupsLoading) return <SectionCard><LoadingSkeleton rows={5} /></SectionCard>;
+  if (!Array.isArray(matchupRequests) || matchupRequests.length === 0) {
+    return <EmptyState icon={Sparkles} message="No Matchup requests yet. When members request a matchup, they'll appear here for manual matching." />;
+  }
+
+  const displayName = (m: MatchupRequest) =>
+    [m.firstName, m.lastName].filter(Boolean).join(" ") || m.username || "Member";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 text-sm text-gray-400">
+        <Sparkles className="h-4 w-4 text-[#D4AF37]" />
+        <span>{matchupRequests.length} member{matchupRequests.length === 1 ? "" : "s"} waiting to be matched</span>
+      </div>
+
+      {matchupRequests.map((m) => {
+        const req = m.matchupRequest || {};
+        return (
+          <SectionCard key={m.id}>
+            <div className="p-5">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                <div className="min-w-0">
+                  <h3 className="text-lg font-bold text-white">{displayName(m)}</h3>
+                  {m.username && <p className="text-gray-600 text-xs">@{m.username}</p>}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {req.slot && (
+                    <Badge className="bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 text-xs">
+                      <Calendar className="h-3 w-3 mr-1" /> {prettifyToken(req.slot)}
+                    </Badge>
+                  )}
+                  {req.activity && (
+                    <Badge className="bg-blue-500/10 text-blue-300 border border-blue-500/20 text-xs">
+                      <Coffee className="h-3 w-3 mr-1" /> {prettifyToken(req.activity)}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
+                {m.email && (
+                  <a href={`mailto:${m.email}`} className="flex items-center gap-2 text-gray-300 hover:text-[#D4AF37] transition-colors">
+                    <Mail className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
+                    <span className="break-all">{m.email}</span>
+                  </a>
+                )}
+                {m.phone && (
+                  <a href={`tel:${m.phone}`} className="flex items-center gap-2 text-gray-300 hover:text-[#D4AF37] transition-colors">
+                    <Phone className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
+                    <span>{m.phone}</span>
+                  </a>
+                )}
+                {m.instagram && (
+                  <a
+                    href={`https://instagram.com/${m.instagram.replace(/^@/, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-300 hover:text-[#D4AF37] transition-colors"
+                  >
+                    <Instagram className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
+                    <span>@{m.instagram.replace(/^@/, "")}</span>
+                  </a>
+                )}
+                {m.city && (
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <MapPin className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
+                    <span>{m.city}</span>
+                  </div>
+                )}
+              </div>
+
+              {Array.isArray(m.disciplines) && m.disciplines.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Disciplines</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {m.disciplines.map((d, i) => (
+                      <Badge key={i} variant="outline" className="text-xs border-gray-700 text-gray-300">{d}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-3 border-t border-gray-800/60 text-xs text-gray-600">
+                {m.matchPreference && <span>Prefers: {prettifyToken(m.matchPreference)}</span>}
+                {req.requestedAt && (
+                  <span className="sm:ml-auto">
+                    Requested {new Date(req.requestedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
+              </div>
+            </div>
+          </SectionCard>
+        );
+      })}
     </div>
   );
 }
