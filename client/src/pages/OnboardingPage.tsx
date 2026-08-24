@@ -20,7 +20,7 @@ const INTERESTS = [
   "Running", "Worship", "Deep talks", "Community", "Sunrises",
 ];
 const CITIES = ["Los Angeles", "New York", "San Francisco", "Chicago", "Seattle", "Austin", "Other"];
-const GENDERS = ["Male", "Female", "Prefer not to say"];
+const GENDERS = ["Male", "Female"];
 const MATCH = [
   { v: "same_field", l: "People in the same or similar field" },
   { v: "different_fields", l: "People in different fields" },
