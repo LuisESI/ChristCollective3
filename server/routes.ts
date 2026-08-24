@@ -4010,13 +4010,20 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
     }
   });
 
+  // Strip sensitive columns before returning a user over a public/unauthenticated endpoint.
+  const publicUser = <T extends Record<string, any> | null | undefined>(u: T): T => {
+    if (!u) return u;
+    const { password, emailVerificationToken, emailVerificationExpires, stripeCustomerId, ...safe } = u as any;
+    return safe as T;
+  };
+
   // Get all users for suggestions
   app.get("/api/users", async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       // Filter out users with null or invalid usernames to prevent broken profile links
       const validUsers = users.filter(user => user.username && user.username !== 'null');
-      res.json(validUsers);
+      res.json(validUsers.map(publicUser));
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
@@ -4068,7 +4075,7 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      res.json(publicUser(user));
     } catch (error) {
       console.error("Error fetching user by username:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -4086,7 +4093,7 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      res.json(publicUser(user));
     } catch (error) {
       console.error("Error fetching user by ID:", error);
       res.status(500).json({ message: "Failed to fetch user" });

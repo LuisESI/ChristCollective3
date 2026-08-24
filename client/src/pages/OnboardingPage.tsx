@@ -87,17 +87,40 @@ export default function OnboardingPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { data: user } = useQuery<any>({ queryKey: ["/api/user"] });
+  const isEdit = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("edit") === "1";
   const [step, setStep] = useState(0);
+  const [prefilled, setPrefilled] = useState(false);
   const [form, setForm] = useState<Form>({
     phone: "", smsOptIn: true, instagram: "", gender: "", birthdate: "",
     disciplines: [], interests: [], bio: "", creativeGoals: "", faithNote: "",
     city: "", matchPreference: "",
   });
 
-  // Prefill phone if already on the account
+  // Fill-out-once: someone who already finished onboarding shouldn't re-run the funnel
+  // unless they explicitly chose to edit their profile (?edit=1).
   useEffect(() => {
-    if (user?.phone) setForm((f) => (f.phone ? f : { ...f, phone: user.phone }));
-  }, [user]);
+    if (user && user.onboardingCompleted && !isEdit) navigate("/feed");
+  }, [user, isEdit, navigate]);
+
+  // Prefill from the account. Editing seeds every field; a fresh run only seeds the phone.
+  useEffect(() => {
+    if (!user || prefilled) return;
+    setForm((f) => ({
+      ...f,
+      phone: user.phone || f.phone,
+      instagram: isEdit ? (user.instagram || f.instagram) : f.instagram,
+      gender: isEdit ? (user.gender || f.gender) : f.gender,
+      birthdate: isEdit ? (user.birthdate || f.birthdate) : f.birthdate,
+      disciplines: isEdit && Array.isArray(user.disciplines) ? user.disciplines : f.disciplines,
+      interests: isEdit && Array.isArray(user.interests) ? user.interests : f.interests,
+      bio: isEdit ? (user.bio || f.bio) : f.bio,
+      creativeGoals: isEdit ? (user.creativeGoals || f.creativeGoals) : f.creativeGoals,
+      faithNote: isEdit ? (user.faithNote || f.faithNote) : f.faithNote,
+      city: isEdit ? (user.city || f.city) : f.city,
+      matchPreference: isEdit ? (user.matchPreference || f.matchPreference) : f.matchPreference,
+    }));
+    setPrefilled(true);
+  }, [user, isEdit, prefilled]);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
   const toggleArr = (k: "disciplines" | "interests", v: string) =>
@@ -107,8 +130,13 @@ export default function OnboardingPage() {
     mutationFn: async () => apiRequest("/api/user/onboarding", { method: "POST", data: form }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      toast({ title: "Welcome to Christ Collective! ☕", description: "We'll text you when your first Matchup is ready." });
-      navigate("/feed");
+      if (isEdit) {
+        toast({ title: "Profile updated", description: "Your community profile has been saved." });
+        navigate("/profile");
+      } else {
+        toast({ title: "Welcome to Christ Collective! ☕", description: "We'll text you when your first Matchup is ready." });
+        navigate("/feed");
+      }
     },
     onError: () => toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" }),
   });
@@ -230,7 +258,9 @@ export default function OnboardingPage() {
                 <Check className="w-8 h-8 text-black" />
               </div>
               <p className="text-gray-300 text-[15px] leading-relaxed">
-                That's everything. Tap below and you're in — we'll match you with a circle of LA creatives every two weeks.
+                {isEdit
+                  ? "Looks good — tap below to save your changes."
+                  : "That's everything. Tap below and you're in — we'll match you with a circle of LA creatives every two weeks."}
               </p>
             </div>
           )}
@@ -245,7 +275,7 @@ export default function OnboardingPage() {
             disabled={(!canAdvance && !current.optional) || save.isPending}
             className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
           >
-            {save.isPending ? "Finishing…" : isLast ? "Enter Christ Collective" : current.optional && !canAdvanceHasValue(current, form) ? "Skip" : "Next"}
+            {save.isPending ? "Saving…" : isLast ? (isEdit ? "Save changes" : "Enter Christ Collective") : current.optional && !canAdvanceHasValue(current, form) ? "Skip" : "Next"}
           </Button>
         </div>
       </div>

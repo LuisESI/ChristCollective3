@@ -584,6 +584,15 @@ export async function setupAuth(app: Express) {
         onboardingCompleted: freshUser.onboardingCompleted,
         disciplines: freshUser.disciplines,
         city: freshUser.city,
+        // Community/onboarding fields — the funnel collects these; the app + profile need to read them back.
+        instagram: freshUser.instagram,
+        gender: freshUser.gender,
+        birthdate: freshUser.birthdate,
+        interests: freshUser.interests,
+        creativeGoals: freshUser.creativeGoals,
+        faithNote: freshUser.faithNote,
+        matchPreference: freshUser.matchPreference,
+        smsOptIn: freshUser.smsOptIn,
         stripeCustomerId: freshUser.stripeCustomerId,
         createdAt: freshUser.createdAt,
         updatedAt: freshUser.updatedAt
@@ -607,7 +616,15 @@ export async function setupAuth(app: Express) {
         isAdmin: user.isAdmin,
         onboardingCompleted: user.onboardingCompleted,
         disciplines: user.disciplines,
-        city: user.city
+        city: user.city,
+        instagram: user.instagram,
+        gender: user.gender,
+        birthdate: user.birthdate,
+        interests: user.interests,
+        creativeGoals: user.creativeGoals,
+        faithNote: user.faithNote,
+        matchPreference: user.matchPreference,
+        smsOptIn: user.smsOptIn
       });
     }
   });

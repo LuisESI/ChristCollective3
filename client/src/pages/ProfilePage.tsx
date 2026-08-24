@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Edit, ArrowLeft, Play, Heart, Eye, Bookmark, Camera, AlignLeft, MoreHorizontal, UserMinus } from "lucide-react";
+import { Settings, Edit, ArrowLeft, Play, Heart, Eye, Bookmark, Camera, AlignLeft, MoreHorizontal, UserMinus, MapPin, Instagram } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { FollowersModal } from "@/components/FollowersModal";
@@ -362,6 +362,54 @@ export default function ProfilePage() {
               </p>
             )}
           </div>
+
+          {/* ── Community profile (from onboarding) ── */}
+          {(displayUser?.city || (displayUser?.disciplines?.length ?? 0) > 0 || displayUser?.instagram || (displayUser?.interests?.length ?? 0) > 0) && (
+            <div className="mt-3 space-y-2.5">
+              {(displayUser?.disciplines?.length ?? 0) > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {displayUser.disciplines.map((d: string, i: number) => (
+                    <span key={i} className="text-[11px] font-medium bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/25 rounded-full px-2.5 py-0.5">{d}</span>
+                  ))}
+                </div>
+              )}
+              {(displayUser?.city || displayUser?.instagram) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-gray-400">
+                  {displayUser?.city && (
+                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />{displayUser.city}</span>
+                  )}
+                  {displayUser?.instagram && (
+                    <a
+                      href={`https://instagram.com/${String(displayUser.instagram).replace(/^@/, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-[#D4AF37] transition-colors"
+                    >
+                      <Instagram className="w-3.5 h-3.5 text-[#D4AF37]" />@{String(displayUser.instagram).replace(/^@/, "")}
+                    </a>
+                  )}
+                </div>
+              )}
+              {(displayUser?.interests?.length ?? 0) > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {displayUser.interests.map((it: string, i: number) => (
+                    <span key={i} className="text-[11px] text-gray-300 bg-gray-800/70 rounded-full px-2.5 py-0.5">{it}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Edit / complete community profile (own profile only) */}
+          {isOwnProfile && (
+            <button
+              onClick={() => navigate(user?.onboardingCompleted ? "/onboarding?edit=1" : "/onboarding")}
+              className="mt-2 text-[12px] text-[#D4AF37] hover:underline inline-flex items-center gap-1"
+            >
+              <Edit className="w-3 h-3" />
+              {user?.onboardingCompleted ? "Edit community profile" : "Complete your community profile"}
+            </button>
+          )}
 
           {/* ── Action Buttons ── */}
           <div className="flex gap-2 mt-4">
