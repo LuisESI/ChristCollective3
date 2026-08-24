@@ -62,6 +62,8 @@ import {
   groupChats,
   groupChatMembers,
   groupChatMessages,
+  groupChatEvents,
+  groupChatEventAttendees,
   type GroupChatQueue,
   type InsertGroupChatQueue,
   type GroupChat,
@@ -69,6 +71,8 @@ import {
   type InsertGroupChatMember,
   type GroupChatMessage,
   type InsertGroupChatMessage,
+  type GroupChatEvent,
+  type InsertGroupChatEvent,
   directChats,
   directMessages,
   type DirectChat,
@@ -1825,6 +1829,8 @@ export class DatabaseStorage implements IStorage {
         status: groupChats.status,
         bannerImage: groupChats.bannerImage,
         profileImage: groupChats.profileImage,
+        location: groupChats.location,
+        meetingFrequency: groupChats.meetingFrequency,
         createdAt: groupChats.createdAt,
         updatedAt: groupChats.updatedAt,
       })
@@ -1895,6 +1901,106 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .innerJoin(groupChatMembers, eq(users.id, groupChatMembers.userId))
       .where(eq(groupChatMembers.chatId, chatId));
+  }
+
+  // ---- Club profile helpers (dedicated club profile page) ----
+
+  async getGroupChatQueueById(queueId: number): Promise<GroupChatQueue | undefined> {
+    const [queue] = await db.select().from(groupChatQueues).where(eq(groupChatQueues.id, queueId));
+    return queue;
+  }
+
+  // Members of a club, with role + light community profile, for the members row.
+  // `by` selects whether we match on the forming queue or the active chat.
+  private async getClubMembers(by: "queueId" | "chatId", id: number) {
+    const rows = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        displayName: users.displayName,
+        username: users.username,
+        profileImageUrl: users.profileImageUrl,
+        disciplines: users.disciplines,
+        bio: users.bio,
+        role: groupChatMembers.role,
+        joinedAt: groupChatMembers.joinedAt,
+      })
+      .from(groupChatMembers)
+      .innerJoin(users, eq(users.id, groupChatMembers.userId))
+      .where(by === "queueId" ? eq(groupChatMembers.queueId, id) : eq(groupChatMembers.chatId, id));
+    // Host (creator) first, then by join order.
+    return rows.sort((a, b) => (a.role === "creator" ? -1 : b.role === "creator" ? 1 : 0));
+  }
+
+  getClubMembersByQueue(queueId: number) { return this.getClubMembers("queueId", queueId); }
+  getClubMembersByChat(chatId: number) { return this.getClubMembers("chatId", chatId); }
+
+  async getClubEvents(queueId: number) {
+    const events = await db
+      .select()
+      .from(groupChatEvents)
+      .where(and(eq(groupChatEvents.queueId, queueId), eq(groupChatEvents.status, "scheduled")))
+      .orderBy(desc(groupChatEvents.eventDate));
+    return Promise.all(
+      events.map(async (ev) => {
+        const attendees = await db
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            displayName: users.displayName,
+            username: users.username,
+            profileImageUrl: users.profileImageUrl,
+            status: groupChatEventAttendees.status,
+          })
+          .from(groupChatEventAttendees)
+          .innerJoin(users, eq(users.id, groupChatEventAttendees.userId))
+          .where(eq(groupChatEventAttendees.eventId, ev.id));
+        return { ...ev, attendees, goingCount: attendees.filter((a) => a.status === "going").length };
+      }),
+    );
+  }
+
+  async getClubEventById(eventId: number): Promise<GroupChatEvent | undefined> {
+    const [ev] = await db.select().from(groupChatEvents).where(eq(groupChatEvents.id, eventId));
+    return ev;
+  }
+
+  async createClubEvent(data: InsertGroupChatEvent & { createdBy: string }): Promise<GroupChatEvent> {
+    const [ev] = await db.insert(groupChatEvents).values(data as any).returning();
+    if (ev) {
+      await db.insert(groupChatEventAttendees).values({ eventId: ev.id, userId: data.createdBy, status: "going" });
+    }
+    return ev;
+  }
+
+  async rsvpClubEvent(eventId: number, userId: string, status: string) {
+    const existing = await db
+      .select()
+      .from(groupChatEventAttendees)
+      .where(and(eq(groupChatEventAttendees.eventId, eventId), eq(groupChatEventAttendees.userId, userId)));
+    if (existing.length) {
+      const [row] = await db
+        .update(groupChatEventAttendees)
+        .set({ status })
+        .where(and(eq(groupChatEventAttendees.eventId, eventId), eq(groupChatEventAttendees.userId, userId)))
+        .returning();
+      return row;
+    }
+    const [row] = await db.insert(groupChatEventAttendees).values({ eventId, userId, status }).returning();
+    return row;
+  }
+
+  // Host-editable club details (location / meeting frequency / description). Mirrors to the
+  // active chat too so the profile is consistent whichever entity is being viewed.
+  async updateClubDetails(queueId: number, data: { location?: string; meetingFrequency?: string; description?: string }): Promise<GroupChatQueue> {
+    const set: Record<string, any> = {};
+    if (data.location !== undefined) set.location = data.location;
+    if (data.meetingFrequency !== undefined) set.meetingFrequency = data.meetingFrequency;
+    if (data.description !== undefined) set.description = data.description;
+    const [queue] = await db.update(groupChatQueues).set(set).where(eq(groupChatQueues.id, queueId)).returning();
+    await db.update(groupChats).set(set).where(eq(groupChats.queueId, queueId));
+    return queue;
   }
 
   async updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat> {

@@ -23,6 +23,7 @@ import DonationSuccessPage from "@/pages/DonationSuccessPage";
 import ProfilePage from "@/pages/ProfilePage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import MatchupsPage from "@/pages/MatchupsPage";
+import ClubProfilePage from "@/pages/ClubProfilePage";
 import SponsoredCreatorsPage from "@/pages/SponsoredCreatorsPage";
 import SponsorshipApplicationPage from "@/pages/SponsorshipApplicationPageNew";
 import CreatorsPage from "@/pages/CreatorsPage";
@@ -123,6 +124,8 @@ function Router() {
       <Route path="/creators/share" component={CreatorSocialSharePage} />
       <Route path="/creators/share/:platform" component={CreatorSharePage} />
       <Route path="/connect" component={ConnectPage} />
+      <Route path="/club/queue/:id" component={ClubProfilePage} />
+      <Route path="/club/:id" component={ClubProfilePage} />
       <Route path="/chat/:id" component={ChatRoom} />
       <Route path="/direct-chat/:chatId" component={DirectChatPage} />
       <Route path="/notifications" component={NotificationsPage} />
@@ -149,8 +152,8 @@ function AppContent() {
   const isMobileApp = isNativeApp();
   const [location] = useLocation();
 
-  // Focused funnels hide the app chrome (bottom nav + web footer) for a distraction-free flow.
-  const isFunnel = location === "/onboarding" || location === "/matchups";
+  // Focused funnels + immersive detail pages hide the app chrome (bottom nav + web footer).
+  const isFunnel = location === "/onboarding" || location === "/matchups" || location.startsWith("/club/");
 
   // Show bottom navigation if (mobile app OR logged-in web) AND not inside a funnel.
   const showBottomNav = (isMobileApp || !!user) && !isFunnel;

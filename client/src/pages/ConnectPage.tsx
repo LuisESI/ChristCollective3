@@ -611,7 +611,7 @@ export default function ConnectPage() {
                       <div
                         key={`community-${chat.id}`}
                         className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 cursor-pointer"
-                        onClick={() => navigate(`/chat/${chat.id}`)}
+                        onClick={() => navigate(`/club/${chat.id}`)}
                       >
                         {/* Banner */}
                         <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
@@ -771,7 +771,7 @@ export default function ConnectPage() {
                       const gradient = bannerGradients[queue.intention] || bannerGradients.fellowship;
 
                       return (
-                        <div key={queue.id} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72">
+                        <div key={queue.id} onClick={() => navigate(`/club/queue/${queue.id}`)} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72 cursor-pointer">
                           {/* Mini Banner */}
                           <div className={`h-16 bg-gradient-to-r ${gradient} relative`}>
                             <div className="absolute inset-0 flex items-center justify-center opacity-15">
@@ -849,7 +849,7 @@ export default function ConnectPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => cancelQueueMutation.mutate(queue.id)}
+                                onClick={(e) => { e.stopPropagation(); cancelQueueMutation.mutate(queue.id); }}
                                 disabled={cancelQueueMutation.isPending}
                                 className="w-full text-red-400 border-red-400/50 hover:bg-red-400/10 text-xs h-8 rounded-full"
                               >
@@ -859,7 +859,7 @@ export default function ConnectPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => exitQueueMutation.mutate(queue.id)}
+                                onClick={(e) => { e.stopPropagation(); exitQueueMutation.mutate(queue.id); }}
                                 disabled={exitQueueMutation.isPending}
                                 className="w-full text-orange-400 border-orange-400/50 hover:bg-orange-400/10 text-xs h-8 rounded-full"
                               >
@@ -868,7 +868,7 @@ export default function ConnectPage() {
                             ) : (
                               <Button
                                 size="sm"
-                                onClick={() => joinQueueMutation.mutate(queue.id)}
+                                onClick={(e) => { e.stopPropagation(); joinQueueMutation.mutate(queue.id); }}
                                 disabled={joinQueueMutation.isPending || queue.currentCount >= queue.maxPeople}
                                 className="w-full bg-[#D4AF37] hover:bg-[#B8941F] text-black font-medium text-xs h-8 rounded-full"
                               >

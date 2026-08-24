@@ -684,6 +684,8 @@ export const groupChatQueues = pgTable("group_chat_queues", {
   status: varchar("status").notNull().default("waiting"), // waiting, active, completed, cancelled
   bannerImage: varchar("banner_image"),
   profileImage: varchar("profile_image"),
+  location: varchar("location"),                 // e.g. "Los Angeles, CA" — host-set, shown on the club profile
+  meetingFrequency: varchar("meeting_frequency"), // e.g. "weekly", "biweekly", "monthly"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -698,6 +700,8 @@ export const groupChats = pgTable("group_chats", {
   status: varchar("status").notNull().default("active"), // active, completed, archived
   bannerImage: varchar("banner_image"),
   profileImage: varchar("profile_image"),
+  location: varchar("location"),
+  meetingFrequency: varchar("meeting_frequency"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -765,6 +769,63 @@ export const groupChatMessagesRelations = relations(groupChatMessages, ({ one })
     references: [users.id],
   }),
 }));
+
+// Club events ("kickoffs" and future meetups). Keyed to the queue so events survive
+// the queue -> active-chat transition (a chat always has a parent queueId).
+export const groupChatEvents = pgTable("group_chat_events", {
+  id: serial("id").primaryKey(),
+  queueId: integer("queue_id").notNull().references(() => groupChatQueues.id, { onDelete: "cascade" }),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  title: varchar("title").notNull(),          // e.g. "Club Kickoff"
+  description: text("description"),
+  eventDate: timestamp("event_date").notNull(),
+  location: varchar("location"),
+  coverImage: varchar("cover_image"),
+  status: varchar("status").notNull().default("scheduled"), // scheduled, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const groupChatEventAttendees = pgTable("group_chat_event_attendees", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => groupChatEvents.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: varchar("status").notNull().default("going"), // going, maybe, declined
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const groupChatEventsRelations = relations(groupChatEvents, ({ one, many }) => ({
+  queue: one(groupChatQueues, {
+    fields: [groupChatEvents.queueId],
+    references: [groupChatQueues.id],
+  }),
+  creator: one(users, {
+    fields: [groupChatEvents.createdBy],
+    references: [users.id],
+  }),
+  attendees: many(groupChatEventAttendees),
+}));
+
+export const groupChatEventAttendeesRelations = relations(groupChatEventAttendees, ({ one }) => ({
+  event: one(groupChatEvents, {
+    fields: [groupChatEventAttendees.eventId],
+    references: [groupChatEvents.id],
+  }),
+  user: one(users, {
+    fields: [groupChatEventAttendees.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertGroupChatEventSchema = createInsertSchema(groupChatEvents)
+  .omit({ id: true, createdBy: true, status: true, createdAt: true, updatedAt: true })
+  .extend({
+    title: z.string().min(1).max(120),
+    eventDate: z.coerce.date(),
+  });
+export type InsertGroupChatEvent = z.infer<typeof insertGroupChatEventSchema>;
+export type GroupChatEvent = typeof groupChatEvents.$inferSelect;
+export type GroupChatEventAttendee = typeof groupChatEventAttendees.$inferSelect;
 
 // Insert schemas for group chats
 export const insertGroupChatQueueSchema = createInsertSchema(groupChatQueues)

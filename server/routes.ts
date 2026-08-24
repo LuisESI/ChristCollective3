@@ -14,7 +14,8 @@ import {
   insertMinistryPostSchema,
   insertMinistryEventSchema,
   insertGroupChatQueueSchema,
-  insertGroupChatMessageSchema
+  insertGroupChatMessageSchema,
+  insertGroupChatEventSchema
 } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
@@ -4748,17 +4749,134 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
     }
   });
 
-  app.get("/api/group-chats/:id", async (req, res) => {
+  // Light host projection for the club profile (no email/sensitive fields).
+  const clubHost = (u: any) => (u ? {
+    id: u.id, firstName: u.firstName, lastName: u.lastName,
+    displayName: u.displayName, username: u.username,
+    profileImageUrl: u.profileImageUrl, disciplines: u.disciplines,
+  } : null);
+
+  // Active club (chat) — enhanced to a full profile bundle. Additive: existing callers
+  // (ChatRoom) still read title/memberCount/intention/createdAt off the same object.
+  app.get("/api/group-chats/:id", async (req: any, res) => {
     try {
       const chatId = parseInt(req.params.id);
       const chat = await storage.getGroupChatById(chatId);
       if (!chat) {
         return res.status(404).json({ message: "Chat not found" });
       }
-      res.json(chat);
+      const queue = chat.queueId ? await storage.getGroupChatQueueById(chat.queueId) : undefined;
+      const [members, events] = await Promise.all([
+        storage.getClubMembersByChat(chatId),
+        chat.queueId ? storage.getClubEvents(chat.queueId) : Promise.resolve([]),
+      ]);
+      const host = queue?.creatorId ? await storage.getUser(queue.creatorId) : undefined;
+      const meId = req.isAuthenticated && req.isAuthenticated() ? req.user?.id : undefined;
+      res.json({
+        ...chat,
+        kind: "chat",
+        location: chat.location ?? queue?.location ?? null,
+        meetingFrequency: chat.meetingFrequency ?? queue?.meetingFrequency ?? null,
+        host: clubHost(host),
+        members,
+        events,
+        isMember: !!meId && members.some((m: any) => m.id === meId),
+        isCreator: !!meId && queue?.creatorId === meId,
+      });
     } catch (error) {
       console.error("Error fetching chat:", error);
       res.status(500).json({ message: "Failed to fetch chat" });
+    }
+  });
+
+  // Forming club (queue) — profile bundle.
+  app.get("/api/group-chat-queues/:id", async (req: any, res) => {
+    try {
+      const queueId = parseInt(req.params.id);
+      const queue = await storage.getGroupChatQueueById(queueId);
+      if (!queue) return res.status(404).json({ message: "Club not found" });
+      const [host, members, events] = await Promise.all([
+        storage.getUser(queue.creatorId),
+        storage.getClubMembersByQueue(queueId),
+        storage.getClubEvents(queueId),
+      ]);
+      const meId = req.isAuthenticated && req.isAuthenticated() ? req.user?.id : undefined;
+      res.json({
+        ...queue,
+        kind: "queue",
+        host: clubHost(host),
+        members,
+        events,
+        isMember: !!meId && members.some((m: any) => m.id === meId),
+        isCreator: !!meId && queue.creatorId === meId,
+      });
+    } catch (error) {
+      console.error("Error fetching club queue:", error);
+      res.status(500).json({ message: "Failed to fetch club" });
+    }
+  });
+
+  // Host-only: edit club details (location / meeting frequency / description).
+  app.patch("/api/group-chat-queues/:id/details", isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const queueId = parseInt(req.params.id);
+      const queue = await storage.getGroupChatQueueById(queueId);
+      if (!queue) return res.status(404).json({ message: "Club not found" });
+      if (queue.creatorId !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Only the host can edit this club" });
+      }
+      const updated = await storage.updateClubDetails(queueId, {
+        location: typeof req.body?.location === "string" ? req.body.location : undefined,
+        meetingFrequency: typeof req.body?.meetingFrequency === "string" ? req.body.meetingFrequency : undefined,
+        description: typeof req.body?.description === "string" ? req.body.description : undefined,
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating club details:", error);
+      res.status(500).json({ message: "Failed to update club" });
+    }
+  });
+
+  // Club events ("kickoffs" and meetups), keyed to the club's queue id.
+  app.get("/api/clubs/:queueId/events", async (req, res) => {
+    try {
+      const queueId = parseInt(req.params.queueId);
+      res.json(await storage.getClubEvents(queueId));
+    } catch (error) {
+      console.error("Error fetching club events:", error);
+      res.status(500).json({ message: "Failed to fetch club events" });
+    }
+  });
+
+  app.post("/api/clubs/:queueId/events", isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const queueId = parseInt(req.params.queueId);
+      const queue = await storage.getGroupChatQueueById(queueId);
+      if (!queue) return res.status(404).json({ message: "Club not found" });
+      if (queue.creatorId !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Only the host can add events" });
+      }
+      const data = insertGroupChatEventSchema.parse({ ...req.body, queueId });
+      const event = await storage.createClubEvent({ ...data, createdBy: req.user.id });
+      res.json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid event", errors: error.errors });
+      }
+      console.error("Error creating club event:", error);
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+
+  app.post("/api/club-events/:eventId/rsvp", isAuthenticated, writeLimiter, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const status = ["going", "maybe", "declined"].includes(req.body?.status) ? req.body.status : "going";
+      const row = await storage.rsvpClubEvent(eventId, req.user.id, status);
+      res.json(row);
+    } catch (error) {
+      console.error("Error saving RSVP:", error);
+      res.status(500).json({ message: "Failed to save RSVP" });
     }
   });
 
