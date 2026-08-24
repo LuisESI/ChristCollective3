@@ -9,9 +9,9 @@ import { ChevronLeft, Check } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 const SLOTS = [
-  { id: "sat", dow: "SAT", d: "09", title: "Saturday afternoon", sub: "Aug 9 · 4:00 PM · Eastside" },
-  { id: "sun", dow: "SUN", d: "10", title: "Sunday afternoon", sub: "Aug 10 · 3:00 PM · Mid-City" },
-  { id: "tue", dow: "TUE", d: "12", title: "Tuesday evening", sub: "Aug 12 · 6:30 PM · Westside" },
+  { id: "sat", dow: "SAT", d: "09", title: "Saturday afternoon", sub: "Aug 9 · 4:00 PM" },
+  { id: "sun", dow: "SUN", d: "10", title: "Sunday afternoon", sub: "Aug 10 · 3:00 PM" },
+  { id: "tue", dow: "TUE", d: "12", title: "Tuesday evening", sub: "Aug 12 · 6:30 PM" },
 ];
 
 // `img` loads from /assets/activities/*.jpg; falls back to the gradient if missing.
