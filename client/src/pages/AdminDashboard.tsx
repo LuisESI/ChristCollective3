@@ -284,6 +284,18 @@ export default function AdminDashboard() {
                 <span className="flex-1 text-left">Moderation</span>
               </button>
             </Link>
+            <Link href="/admin/matching">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                <Sparkles className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Matching CRM</span>
+              </button>
+            </Link>
+            <Link href="/admin/venues">
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Venue Directory</span>
+              </button>
+            </Link>
           </div>
         </nav>
       </aside>

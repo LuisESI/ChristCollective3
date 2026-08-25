@@ -73,6 +73,13 @@ import {
   type InsertGroupChatMessage,
   type GroupChatEvent,
   type InsertGroupChatEvent,
+  venues,
+  type Venue,
+  type InsertVenue,
+  matchCircles,
+  matchCircleMembers,
+  type MatchCircle,
+  type InsertMatchCircle,
   directChats,
   directMessages,
   type DirectChat,
@@ -103,7 +110,7 @@ import {
   type UserBlock,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, ilike, like, sql, isNull, isNotNull } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, like, sql, isNull, isNotNull } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -2001,6 +2008,93 @@ export class DatabaseStorage implements IStorage {
     const [queue] = await db.update(groupChatQueues).set(set).where(eq(groupChatQueues.id, queueId)).returning();
     await db.update(groupChats).set(set).where(eq(groupChats.queueId, queueId));
     return queue;
+  }
+
+  // ---- Venue directory ----
+  async getVenues(filter?: { area?: string; activityType?: string }): Promise<Venue[]> {
+    const conds: any[] = [];
+    if (filter?.area) conds.push(eq(venues.area, filter.area));
+    if (filter?.activityType) conds.push(eq(venues.activityType, filter.activityType));
+    const rows = conds.length
+      ? await db.select().from(venues).where(and(...conds))
+      : await db.select().from(venues);
+    return rows.sort((a, b) => a.activityType.localeCompare(b.activityType) || a.sortOrder - b.sortOrder);
+  }
+  async createVenue(data: InsertVenue): Promise<Venue> {
+    const [v] = await db.insert(venues).values(data as any).returning();
+    return v;
+  }
+  async updateVenue(id: number, data: Partial<InsertVenue>): Promise<Venue> {
+    const [v] = await db.update(venues).set({ ...data, updatedAt: new Date() } as any).where(eq(venues.id, id)).returning();
+    return v;
+  }
+  async deleteVenue(id: number): Promise<void> {
+    await db.delete(venues).where(eq(venues.id, id));
+  }
+
+  // ---- Leads CRM + matching circles ----
+  // Leads = members who onboarded or requested a matchup, with the fields we match on.
+  async getLeads() {
+    return db
+      .select({
+        id: users.id, firstName: users.firstName, lastName: users.lastName,
+        displayName: users.displayName, username: users.username, email: users.email,
+        phone: users.phone, profileImageUrl: users.profileImageUrl,
+        city: users.city, disciplines: users.disciplines, interests: users.interests,
+        matchPreference: users.matchPreference, instagram: users.instagram,
+        onboardingCompleted: users.onboardingCompleted, matchupRequest: users.matchupRequest,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(or(eq(users.onboardingCompleted, true), isNotNull(users.matchupRequest)))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getMatchCircles(cycle?: string) {
+    const circles = cycle
+      ? await db.select().from(matchCircles).where(eq(matchCircles.cycle, cycle)).orderBy(desc(matchCircles.createdAt))
+      : await db.select().from(matchCircles).orderBy(desc(matchCircles.createdAt));
+    return Promise.all(circles.map(async (c) => {
+      const members = await db
+        .select({
+          id: users.id, firstName: users.firstName, lastName: users.lastName,
+          displayName: users.displayName, username: users.username, profileImageUrl: users.profileImageUrl,
+          city: users.city, disciplines: users.disciplines, phone: users.phone, email: users.email,
+        })
+        .from(matchCircleMembers)
+        .innerJoin(users, eq(users.id, matchCircleMembers.userId))
+        .where(eq(matchCircleMembers.circleId, c.id));
+      return { ...c, members };
+    }));
+  }
+  async createMatchCircle(data: InsertMatchCircle): Promise<MatchCircle> {
+    const [c] = await db.insert(matchCircles).values(data as any).returning();
+    return c;
+  }
+  async updateMatchCircle(id: number, data: Partial<InsertMatchCircle> & { status?: string }): Promise<MatchCircle> {
+    const [c] = await db.update(matchCircles).set({ ...data, updatedAt: new Date() } as any).where(eq(matchCircles.id, id)).returning();
+    return c;
+  }
+  async deleteMatchCircle(id: number): Promise<void> {
+    await db.delete(matchCircles).where(eq(matchCircles.id, id));
+  }
+  // Assign a lead to a circle. Buckets stay exclusive within a cycle: the lead is first
+  // removed from any circle in the same cycle (which also dedupes the target circle).
+  async assignLeadToCircle(circleId: number, userId: string): Promise<void> {
+    const [circle] = await db.select().from(matchCircles).where(eq(matchCircles.id, circleId));
+    if (!circle) return;
+    if (circle.cycle) {
+      const siblings = await db.select({ id: matchCircles.id }).from(matchCircles).where(eq(matchCircles.cycle, circle.cycle));
+      for (const s of siblings) {
+        await db.delete(matchCircleMembers).where(and(eq(matchCircleMembers.circleId, s.id), eq(matchCircleMembers.userId, userId)));
+      }
+    } else {
+      await db.delete(matchCircleMembers).where(and(eq(matchCircleMembers.circleId, circleId), eq(matchCircleMembers.userId, userId)));
+    }
+    await db.insert(matchCircleMembers).values({ circleId, userId });
+  }
+  async removeLeadFromCircle(circleId: number, userId: string): Promise<void> {
+    await db.delete(matchCircleMembers).where(and(eq(matchCircleMembers.circleId, circleId), eq(matchCircleMembers.userId, userId)));
   }
 
   async updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat> {

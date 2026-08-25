@@ -58,6 +58,8 @@ import ShopPage from "@/pages/ShopPage";
 import ShopProductPage from "@/pages/ShopProductPage";
 import AdminProductsPage from "@/pages/AdminProductsPage";
 import AdminOrdersPage from "@/pages/AdminOrdersPage";
+import AdminVenuesPage from "@/pages/AdminVenuesPage";
+import AdminMatchingPage from "@/pages/AdminMatchingPage";
 import ShopCheckoutPage from "@/pages/ShopCheckoutPage";
 import ShopSuccessPage from "@/pages/ShopSuccessPage";
 
@@ -137,6 +139,8 @@ function Router() {
       <Route path="/admin/products" component={AdminProductsPage} />
       <Route path="/admin/orders" component={AdminOrdersPage} />
       <Route path="/admin/moderation" component={AdminModerationPage} />
+      <Route path="/admin/venues" component={AdminVenuesPage} />
+      <Route path="/admin/matching" component={AdminMatchingPage} />
 
       <Route path="/settings" component={SettingsPage} />
       <Route path="/billing-history" component={BillingHistoryPage} />

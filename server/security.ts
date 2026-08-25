@@ -282,7 +282,7 @@ export const commentSchema = z.object({
 
 // Group chat queue creation
 export const groupChatQueueSchema = z.object({
-  intention: z.enum(['prayer', 'bible_study', 'evangelizing', 'fellowship', 'worship']),
+  intention: z.enum(['prayer', 'bible_study', 'evangelizing', 'fellowship', 'worship', 'coffee', 'book', 'hiking', 'run']),
   topic: safeString(200).optional(),
   description: safeString(1000).optional(),
   maxMembers: z.coerce.number().int().min(2).max(50).optional().default(5),

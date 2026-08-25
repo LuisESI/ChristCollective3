@@ -614,7 +614,7 @@ export default function ConnectPage() {
                         onClick={() => navigate(`/club/${chat.id}`)}
                       >
                         {/* Banner */}
-                        <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
+                        <div className={`h-36 bg-gradient-to-r ${gradient} relative`}>
                           <div className="absolute inset-0 flex items-center justify-center opacity-20">
                             <Icon className="w-16 h-16 text-white" />
                           </div>
@@ -773,7 +773,7 @@ export default function ConnectPage() {
                       return (
                         <div key={queue.id} onClick={() => navigate(`/club/queue/${queue.id}`)} className="rounded-xl bg-black border border-gray-800 overflow-hidden hover:border-[#D4AF37]/40 transition-all duration-300 flex-shrink-0 w-72 cursor-pointer">
                           {/* Mini Banner */}
-                          <div className={`h-16 bg-gradient-to-r ${gradient} relative`}>
+                          <div className={`h-28 bg-gradient-to-r ${gradient} relative`}>
                             <div className="absolute inset-0 flex items-center justify-center opacity-15">
                               <Icon className="w-10 h-10 text-white" />
                             </div>

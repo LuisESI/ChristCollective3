@@ -15,7 +15,9 @@ import {
   insertMinistryEventSchema,
   insertGroupChatQueueSchema,
   insertGroupChatMessageSchema,
-  insertGroupChatEventSchema
+  insertGroupChatEventSchema,
+  insertVenueSchema,
+  insertMatchCircleSchema
 } from "@shared/schema";
 import { generateSlug } from "./utils";
 import Stripe from "stripe";
@@ -4877,6 +4879,112 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
     } catch (error) {
       console.error("Error saving RSVP:", error);
       res.status(500).json({ message: "Failed to save RSVP" });
+    }
+  });
+
+  // ============ Venue directory (admin planning scaffold) ============
+  const isAdminReq = async (req: any): Promise<boolean> => {
+    if (!req.isAuthenticated || !req.isAuthenticated()) return false;
+    const u = await storage.getUser(req.user.id);
+    return !!u?.isAdmin;
+  };
+  const adminGuard = async (req: any, res: any, next: any) => {
+    if (await isAdminReq(req)) return next();
+    return res.status(req.isAuthenticated && req.isAuthenticated() ? 403 : 401).json({ message: "Admin access required" });
+  };
+
+  app.get("/api/admin/venues", adminGuard, async (req, res) => {
+    try {
+      const { area, activityType } = req.query as any;
+      res.json(await storage.getVenues({ area, activityType }));
+    } catch (e) { console.error("venues list", e); res.status(500).json({ message: "Failed to fetch venues" }); }
+  });
+  app.post("/api/admin/venues", adminGuard, async (req, res) => {
+    try { res.json(await storage.createVenue(insertVenueSchema.parse(req.body))); }
+    catch (e) { if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid venue", errors: e.errors }); console.error("venue create", e); res.status(500).json({ message: "Failed to create venue" }); }
+  });
+  app.patch("/api/admin/venues/:id", adminGuard, async (req, res) => {
+    try { res.json(await storage.updateVenue(parseInt(req.params.id), req.body || {})); }
+    catch (e) { console.error("venue update", e); res.status(500).json({ message: "Failed to update venue" }); }
+  });
+  app.delete("/api/admin/venues/:id", adminGuard, async (req, res) => {
+    try { await storage.deleteVenue(parseInt(req.params.id)); res.json({ ok: true }); }
+    catch (e) { console.error("venue delete", e); res.status(500).json({ message: "Failed to delete venue" }); }
+  });
+
+  // ============ Leads CRM + semi-manual matching ============
+  app.get("/api/admin/leads", adminGuard, async (_req, res) => {
+    try { res.json(await storage.getLeads()); }
+    catch (e) { console.error("leads", e); res.status(500).json({ message: "Failed to fetch leads" }); }
+  });
+  app.get("/api/admin/match-circles", adminGuard, async (req, res) => {
+    try { res.json(await storage.getMatchCircles((req.query as any).cycle)); }
+    catch (e) { console.error("circles", e); res.status(500).json({ message: "Failed to fetch circles" }); }
+  });
+  app.post("/api/admin/match-circles", adminGuard, async (req, res) => {
+    try { res.json(await storage.createMatchCircle(insertMatchCircleSchema.parse(req.body))); }
+    catch (e) { if (e instanceof z.ZodError) return res.status(400).json({ message: "Invalid circle", errors: e.errors }); console.error("circle create", e); res.status(500).json({ message: "Failed to create circle" }); }
+  });
+  app.patch("/api/admin/match-circles/:id", adminGuard, async (req, res) => {
+    try { res.json(await storage.updateMatchCircle(parseInt(req.params.id), req.body || {})); }
+    catch (e) { console.error("circle update", e); res.status(500).json({ message: "Failed to update circle" }); }
+  });
+  app.delete("/api/admin/match-circles/:id", adminGuard, async (req, res) => {
+    try { await storage.deleteMatchCircle(parseInt(req.params.id)); res.json({ ok: true }); }
+    catch (e) { console.error("circle delete", e); res.status(500).json({ message: "Failed to delete circle" }); }
+  });
+  app.post("/api/admin/match-circles/:id/members", adminGuard, async (req, res) => {
+    try {
+      const userId = req.body?.userId;
+      if (!userId) return res.status(400).json({ message: "userId required" });
+      await storage.assignLeadToCircle(parseInt(req.params.id), userId);
+      res.json({ ok: true });
+    } catch (e) { console.error("assign", e); res.status(500).json({ message: "Failed to assign" }); }
+  });
+  app.delete("/api/admin/match-circles/:id/members/:userId", adminGuard, async (req, res) => {
+    try { await storage.removeLeadFromCircle(parseInt(req.params.id), req.params.userId); res.json({ ok: true }); }
+    catch (e) { console.error("unassign", e); res.status(500).json({ message: "Failed to remove" }); }
+  });
+
+  // Semi-manual matching algorithm: group leads (by matchup activity + time slot, then by city)
+  // into circles of ~targetSize. Admins refine by moving people afterwards.
+  app.post("/api/admin/matching/auto-group", adminGuard, async (req: any, res) => {
+    try {
+      const cycle = String(req.body?.cycle || "current");
+      const targetSize = Math.min(12, Math.max(2, parseInt(req.body?.targetSize) || 6));
+      const onlyRequests = req.body?.onlyRequests !== false;
+      const cap = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+      let leads = await storage.getLeads();
+      if (onlyRequests) leads = leads.filter((l: any) => l.matchupRequest && (l.matchupRequest as any).slot);
+
+      const groups = new Map<string, any[]>();
+      for (const l of leads) {
+        const mr = (l.matchupRequest as any) || {};
+        const key = `${mr.activity || "any"}|${mr.slot || "any"}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push(l);
+      }
+
+      let createdCount = 0;
+      for (const [key, members] of Array.from(groups.entries())) {
+        const [activity, slot] = key.split("|");
+        members.sort((a, b) => String(a.city || "").localeCompare(String(b.city || "")));
+        for (let i = 0; i < members.length; i += targetSize) {
+          const chunk = members.slice(i, i + targetSize);
+          const idx = Math.floor(i / targetSize) + 1;
+          const label = `${activity !== "any" ? cap(activity) : "Circle"}${slot !== "any" ? " · " + slot : ""} #${idx}`;
+          const circle = await storage.createMatchCircle({
+            name: label, activity: activity !== "any" ? activity : null, slot: slot !== "any" ? slot : null, area: "westside", cycle,
+          } as any);
+          for (const m of chunk) await storage.assignLeadToCircle(circle.id, m.id);
+          createdCount++;
+        }
+      }
+      res.json({ created: createdCount, circles: await storage.getMatchCircles(cycle) });
+    } catch (e) {
+      console.error("auto-group", e);
+      res.status(500).json({ message: "Failed to auto-group" });
     }
   });
 

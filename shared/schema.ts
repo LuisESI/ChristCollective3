@@ -827,6 +827,57 @@ export type InsertGroupChatEvent = z.infer<typeof insertGroupChatEventSchema>;
 export type GroupChatEvent = typeof groupChatEvents.$inferSelect;
 export type GroupChatEventAttendee = typeof groupChatEventAttendees.$inferSelect;
 
+// Venue directory — free/public places we can send clubs & matchups (host-side planning scaffold).
+export const venues = pgTable("venues", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  activityType: varchar("activity_type").notNull(), // coffee, hiking, run, book, general
+  area: varchar("area").notNull().default("westside"), // westside, valley, eastside, southside
+  neighborhood: varchar("neighborhood"),             // Westwood, Hollywood, Beverly Hills, ...
+  address: varchar("address"),
+  mapUrl: varchar("map_url"),
+  capacity: integer("capacity"),                     // approx group size it comfortably fits
+  cost: varchar("cost").notNull().default("free"),   // free, paid, partner
+  isPartner: boolean("is_partner").notNull().default(false),
+  status: varchar("status").notNull().default("candidate"), // candidate, confirmed, outreach, rejected
+  notes: text("notes"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertVenueSchema = createInsertSchema(venues)
+  .omit({ id: true, createdAt: true, updatedAt: true })
+  .extend({ name: z.string().min(1).max(160), activityType: z.string().min(1) });
+export type Venue = typeof venues.$inferSelect;
+export type InsertVenue = z.infer<typeof insertVenueSchema>;
+
+// Match circles ("buckets") — the semi-manual matching CRM groups leads into circles per cycle.
+export const matchCircles = pgTable("match_circles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),                    // e.g. "West Side Coffee — Sat AM"
+  activity: varchar("activity"),                      // coffee, hiking, run, book
+  slot: varchar("slot"),                              // free-text time slot
+  area: varchar("area"),                              // westside, ...
+  venueId: integer("venue_id").references(() => venues.id),
+  cycle: varchar("cycle"),                            // e.g. "2026-W35" grouping label
+  status: varchar("status").notNull().default("draft"), // draft, confirmed, sent, completed
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const matchCircleMembers = pgTable("match_circle_members", {
+  id: serial("id").primaryKey(),
+  circleId: integer("circle_id").notNull().references(() => matchCircles.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertMatchCircleSchema = createInsertSchema(matchCircles)
+  .omit({ id: true, status: true, createdAt: true, updatedAt: true })
+  .extend({ name: z.string().min(1).max(160) });
+export type MatchCircle = typeof matchCircles.$inferSelect;
+export type InsertMatchCircle = z.infer<typeof insertMatchCircleSchema>;
+export type MatchCircleMember = typeof matchCircleMembers.$inferSelect;
+
 // Insert schemas for group chats
 export const insertGroupChatQueueSchema = createInsertSchema(groupChatQueues)
   .omit({ id: true, creatorId: true, currentCount: true, status: true, createdAt: true, updatedAt: true })
