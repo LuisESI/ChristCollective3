@@ -4013,10 +4013,16 @@ ${merged.requiresRegistration ? 'Registration required!' : 'All are welcome!'}`;
     }
   });
 
-  // Strip sensitive columns before returning a user over a public/unauthenticated endpoint.
+  // Strip sensitive + private columns before returning a user over a public/unauthenticated
+  // endpoint. Public profiles show name/photo/city/disciplines/interests/instagram/bio only;
+  // credentials and private community fields (phone, birthdate, gender, faith note, etc.) never leave the server here.
   const publicUser = <T extends Record<string, any> | null | undefined>(u: T): T => {
     if (!u) return u;
-    const { password, emailVerificationToken, emailVerificationExpires, stripeCustomerId, ...safe } = u as any;
+    const {
+      password, emailVerificationToken, emailVerificationExpires, stripeCustomerId,
+      phone, birthdate, gender, faithNote, matchPreference, smsOptIn, matchupRequest,
+      ...safe
+    } = u as any;
     return safe as T;
   };
 

@@ -15,7 +15,7 @@ export default function TermsOfServicePage() {
             <h1 className="text-4xl font-bold">Terms of Service</h1>
           </div>
           <div className="w-16 h-1 bg-primary mb-4"></div>
-          <p className="text-gray-400">Effective Date: January 1, 2025 &nbsp;|&nbsp; Last Updated: February 25, 2026</p>
+          <p className="text-gray-400">Effective Date: January 1, 2025 &nbsp;|&nbsp; Last Updated: August 24, 2026</p>
         </div>
 
         <div className="space-y-10 text-gray-300 leading-relaxed">
@@ -23,29 +23,27 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using the Christ Collective platform ("Platform"), including our website and mobile application,
-              you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access
-              or use the Platform. These Terms constitute a legally binding agreement between you and Christ Collective.
+              By accessing or using the Christ Collective platform ("Platform"), including our website, mobile application, and community
+              features (Clubs and Matchups), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, you may not use
+              the Platform. These Terms are a legally binding agreement between you and Christ Collective.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">2. Eligibility</h2>
             <p>
-              You must be at least 13 years of age to use the Platform. By creating an account, you represent and warrant that
-              you are at least 13 years old and that all information you provide is accurate and complete. If you are under 18,
-              you represent that you have your parent or guardian's permission to use the Platform.
+              You must be at least 13 years old to use the Platform. Because Clubs and Matchups can result in <span className="text-white font-medium">in-person
+              meetings with other members, you must be at least 18 years old to participate in Matchups, join clubs, or attend meetups.</span> By using
+              these features you represent that you are 18 or older. If you are between 13 and 17, you may use general community features only, with
+              your parent or guardian's permission.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">3. Account Registration</h2>
-            <p className="mb-4">
-              To access most features of the Platform, you must register for an account. You agree to:
-            </p>
+            <p className="mb-4">To access most features, you must register for an account. You agree to:</p>
             <ul className="list-disc list-inside space-y-2 ml-2">
-              <li>Provide accurate, current, and complete information during registration</li>
-              <li>Verify your email address before accessing the Platform</li>
+              <li>Provide accurate, current, and complete information, and keep your contact details up to date</li>
               <li>Maintain the security of your password and account credentials</li>
               <li>Notify us immediately of any unauthorized use of your account</li>
               <li>Accept responsibility for all activity that occurs under your account</li>
@@ -54,9 +52,7 @@ export default function TermsOfServicePage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">4. Community Standards and Acceptable Use</h2>
-            <p className="mb-4">
-              Christ Collective is a faith-based community platform. You agree not to post, share, or transmit any content that:
-            </p>
+            <p className="mb-4">Christ Collective is a faith-based community. You agree not to post, share, or transmit content that:</p>
             <ul className="list-disc list-inside space-y-2 ml-2 mb-4">
               <li>Is hateful, discriminatory, harassing, or threatening toward any individual or group</li>
               <li>Is sexually explicit, obscene, or pornographic</li>
@@ -64,114 +60,157 @@ export default function TermsOfServicePage() {
               <li>Infringes on the intellectual property rights of others</li>
               <li>Contains malware, spam, or deceptive content</li>
               <li>Impersonates another person or entity</li>
-              <li>Violates any applicable local, state, national, or international law</li>
+              <li>Violates any applicable law</li>
             </ul>
             <p>
-              All content submitted to the Platform is subject to automated AI moderation and human review. Content that violates
-              these standards may be removed and may result in account suspension or termination.
+              You also agree not to use Clubs, Matchups, direct messages, or member profiles to harass, solicit, defraud, or endanger others.
+              Content and conduct that violate these standards may result in removal, suspension, or termination.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. Membership and Payments</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">5. Clubs, Matchups &amp; In-Person Meetups — Safety and Assumption of Risk</h2>
+            <p className="mb-3">
+              Clubs and Matchups help members find and connect with one another, and may lead to in-person meetups at public venues. <span className="text-white font-medium">Please
+              read this section carefully.</span>
+            </p>
+            <ul className="list-disc list-inside space-y-2 ml-2 mb-3">
+              <li>
+                <span className="text-white font-medium">We do not screen members.</span> Christ Collective does not conduct criminal background checks,
+                identity verification, or other screening of members. We do not vouch for, endorse, or verify any member, host, or venue.
+              </li>
+              <li>
+                <span className="text-white font-medium">Meetups are member-organized.</span> We facilitate connections but do not organize, supervise, control,
+                or attend meetups, and we are not a party to any interaction between members. Venues listed or used are independent third parties we do not control.
+              </li>
+              <li>
+                <span className="text-white font-medium">You are responsible for your own safety.</span> Use good judgment, meet in public places, tell someone
+                where you're going, and stop any interaction that feels unsafe. Never share financial information or send money to other members.
+              </li>
+              <li>
+                <span className="text-white font-medium">Assumption of risk.</span> You voluntarily assume all risks associated with communicating with, and meeting,
+                other members, and with attending any meetup, activity, or venue — including risks of personal injury, property loss, or wrongful conduct by others.
+              </li>
+              <li>
+                <span className="text-white font-medium">Release.</span> To the fullest extent permitted by law, you release and hold harmless Christ Collective, its
+                staff, and volunteers from any and all claims, demands, damages, or liabilities arising out of or related to your interactions with other members or
+                your attendance at any meetup, activity, or venue.
+              </li>
+            </ul>
+            <p>If you feel unsafe or witness harmful behavior, use the in-app reporting tools and, in an emergency, contact local authorities.</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">6. Text Messages (SMS)</h2>
+            <p>
+              If you opt in, you consent to receive text messages from Christ Collective about Matchups and community coordination. Message frequency
+              varies, and message and data rates may apply. Consent is not a condition of any purchase. Reply <span className="text-white font-medium">STOP</span> to
+              opt out or <span className="text-white font-medium">HELP</span> for help. See our <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link> for details.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">7. Membership and Payments</h2>
             <h3 className="text-lg font-semibold text-primary mb-2">Membership Tiers</h3>
             <p className="mb-4">
-              Christ Collective offers free and paid membership tiers. Paid memberships are billed on a monthly basis through Stripe.
-              By subscribing to a paid plan, you authorize us to charge your payment method on a recurring monthly basis.
+              Christ Collective offers free and, where available, paid membership tiers. Paid memberships are billed through Stripe on a recurring basis.
+              By subscribing, you authorize us to charge your payment method for each billing period until you cancel.
             </p>
             <h3 className="text-lg font-semibold text-primary mb-2">Cancellations and Refunds</h3>
             <p className="mb-4">
-              You may cancel your membership at any time through your account settings. Cancellation takes effect at the end of the
-              current billing period. We do not provide partial refunds for unused portions of a billing period except where required by law.
+              You may cancel at any time in your account settings; cancellation takes effect at the end of the current billing period. We do not provide
+              partial refunds except where required by law.
             </p>
             <h3 className="text-lg font-semibold text-primary mb-2">Donations</h3>
             <p>
-              Donations made through the Platform are processed by Stripe. All donations are final and non-refundable unless a
-              campaign is cancelled by its creator or in cases of verified fraud. Christ Collective does not guarantee the use
-              of donated funds by campaign creators and is not responsible for how funds are applied after disbursement.
+              Donations are processed by Stripe and are final and non-refundable unless a campaign is cancelled by its creator or in cases of verified fraud.
+              Christ Collective does not guarantee how campaign creators use donated funds.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Shop and E-Commerce</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">8. Shop and E-Commerce</h2>
             <p>
-              Products sold through the Christ Collective Shop are processed via Stripe. All sales are final unless a product
-              arrives damaged or defective. For order issues, contact us within 14 days of delivery.
-              We reserve the right to cancel any order at our discretion and issue a full refund.
+              Products sold through the Christ Collective Shop are processed via Stripe. All sales are final unless a product arrives damaged or defective.
+              For order issues, contact us within 14 days of delivery. We may cancel any order at our discretion and issue a full refund.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Content Ownership and License</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">9. Content Ownership and License</h2>
             <p className="mb-4">
-              You retain ownership of the content you post on the Platform. By posting content, you grant Christ Collective
-              a non-exclusive, royalty-free, worldwide license to use, display, reproduce, and distribute your content
-              solely for the purpose of operating and improving the Platform.
+              You retain ownership of the content you post. By posting, you grant Christ Collective a non-exclusive, royalty-free, worldwide license to use,
+              display, reproduce, and distribute your content solely to operate and improve the Platform.
             </p>
             <p>
-              Christ Collective retains all rights to the Platform's design, branding, software, and original content.
-              You may not copy, modify, or distribute any part of the Platform without our express written permission.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">8. Content Moderation</h2>
-            <p>
-              We use automated AI tools and human moderators to review content. Posts may be held for review, removed, or
-              rejected without prior notice if they violate these Terms. You may report content that violates these Terms
-              using the in-app reporting feature. We will review all reports and take appropriate action at our discretion.
+              Christ Collective retains all rights to the Platform's design, branding, software, and original content. You may not copy, modify, or distribute
+              any part of the Platform without our written permission.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Termination</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">10. Content Moderation</h2>
             <p>
-              We reserve the right to suspend or terminate your account at any time, with or without notice, for conduct that
-              we believe violates these Terms or is harmful to other users, the Platform, or us. You may delete your account
-              at any time through your account settings. Upon termination, your right to use the Platform ceases immediately.
+              We use automated tools and human moderators to review content. Posts may be held, removed, or rejected without prior notice if they violate these
+              Terms. You may report content or members using the in-app reporting feature, and we will take appropriate action at our discretion.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">10. Disclaimer of Warranties</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">11. Termination</h2>
             <p>
-              The Platform is provided on an "as is" and "as available" basis without warranties of any kind, either express
-              or implied. We do not warrant that the Platform will be uninterrupted, error-free, or free of harmful components.
+              We may suspend or terminate your account at any time, with or without notice, for conduct we believe violates these Terms or is harmful to others,
+              the Platform, or us. You may delete your account at any time in your settings. Upon termination, your right to use the Platform ceases immediately.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">12. Disclaimer of Warranties</h2>
+            <p>
+              The Platform is provided on an "as is" and "as available" basis without warranties of any kind, express or implied. We do not warrant that the
+              Platform will be uninterrupted, error-free, or secure, and we make no warranties regarding other members, hosts, venues, or the outcome of any meetup.
               Your use of the Platform is at your sole risk.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">11. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">13. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, Christ Collective shall not be liable for any indirect, incidental, special,
-              consequential, or punitive damages, including loss of profits, data, or goodwill, arising out of or in connection
-              with your use of the Platform, even if we have been advised of the possibility of such damages.
-              Our total liability to you shall not exceed the amount paid by you to Christ Collective in the 12 months
-              preceding the claim.
+              To the fullest extent permitted by law, Christ Collective shall not be liable for any indirect, incidental, special, consequential, or punitive
+              damages, or for any injury, loss, or damage arising out of your interactions with other members or attendance at any meetup or venue, even if we
+              were advised of the possibility. Our total liability for any claim shall not exceed the greater of the amount you paid us in the 12 months preceding
+              the claim or one hundred U.S. dollars ($100).
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">12. Governing Law</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">14. Indemnification</h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of the United States.
-              Any disputes arising under these Terms shall be resolved through binding arbitration or in the courts
-              of competent jurisdiction.
+              You agree to indemnify and hold harmless Christ Collective, its staff, and volunteers from any claims, damages, losses, or expenses (including
+              reasonable attorneys' fees) arising out of your use of the Platform, your content, your conduct at meetups, or your violation of these Terms or the
+              rights of any third party.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">13. Changes to These Terms</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">15. Governing Law and Disputes</h2>
             <p>
-              We may update these Terms at any time. When we make material changes, we will notify registered users via email
-              and update the "Last Updated" date at the top of this page. Continued use of the Platform after changes
-              constitutes your acceptance of the revised Terms.
+              These Terms are governed by the laws of the State of California, without regard to its conflict-of-laws rules. Any dispute arising under these Terms
+              shall be resolved in the state or federal courts located in Los Angeles County, California, or through binding arbitration where required by law, and
+              you consent to that jurisdiction.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">14. Contact Us</h2>
+            <h2 className="text-2xl font-semibold text-white mb-4">16. Changes to These Terms</h2>
+            <p>
+              We may update these Terms at any time. When we make material changes, we will notify registered users and update the "Last Updated" date above.
+              Continued use of the Platform after changes take effect constitutes acceptance of the revised Terms.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">17. Contact Us</h2>
             <p>If you have any questions about these Terms, please contact us at:</p>
             <div className="mt-4 p-4 bg-[#0A0A0A] border border-primary/20 rounded-lg">
               <p className="text-white font-semibold">Christ Collective</p>

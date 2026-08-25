@@ -188,7 +188,8 @@ export default function OnboardingPage() {
                   {form.smsOptIn && <Check className="w-3 h-3 text-black" />}
                 </span>
                 <span className="text-xs text-gray-400 leading-relaxed">
-                  I opt in to receive SMS about group pairings, invitations, and member events (~4–6/cycle). Reply STOP to cancel.
+                  I agree to receive SMS from Christ Collective about group pairings, invitations, and member events (~4–6/cycle).
+                  Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of joining.
                 </span>
               </label>
             </>
