@@ -30,9 +30,6 @@ export default function ProfilePage() {
   const [bannerUploading, setBannerUploading] = useState(false);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followersModalTab, setFollowersModalTab] = useState<"followers" | "following">("followers");
-  const [welcomeDismissed, setWelcomeDismissed] = useState(() => {
-    return localStorage.getItem('welcomeCardDismissed') === 'true';
-  });
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -351,13 +348,13 @@ export default function ProfilePage() {
                 </Badge>
               </div>
             )}
-            {(creator?.bio || displayUser?.bio) && (
-              <p className="text-[13px] text-gray-200 leading-snug">{creator?.bio || displayUser?.bio}</p>
+            {(displayUser?.bio || creator?.bio) && (
+              <p className="text-[13px] text-gray-200 leading-snug">{displayUser?.bio || creator?.bio}</p>
             )}
-            {(creatorProfile as any)?.isCreator && (
+            {(creatorProfile as any)?.isCreator && (creator?.content || creator?.audience || creator?.sponsorshipStartDate) && (
               <p className="text-[12px] text-gray-500">
-                {creator?.content || "Biblical Education / Podcast"}
-                {creator?.audience && ` · ${creator.audience}`}
+                {creator?.content}
+                {creator?.audience && `${creator?.content ? " · " : ""}${creator.audience}`}
                 {creator?.sponsorshipStartDate && ` · Sponsored since ${formatDate(creator.sponsorshipStartDate)}`}
               </p>
             )}
@@ -509,38 +506,6 @@ export default function ProfilePage() {
             />
           )}
 
-          {/* ── Welcome card ── */}
-          {isOwnProfile && !(creatorProfile as any)?.isCreator && !welcomeDismissed && (
-            <div className="relative mt-5 p-5 bg-gray-900 rounded-xl border border-gray-800">
-              <button
-                onClick={() => { setWelcomeDismissed(true); localStorage.setItem('welcomeCardDismissed', 'true'); }}
-                className="absolute top-3 right-3 text-gray-500 hover:text-white"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-              <h3 className="text-sm font-semibold text-white mb-1">Welcome to Christ Collective!</h3>
-              <p className="text-gray-400 text-xs mb-3">Choose your path to connect with the Christian community.</p>
-              <div className="flex flex-col gap-2">
-                <Button onClick={() => navigate("/sponsorship-application")} className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold text-sm h-9">
-                  Become a Content Creator
-                </Button>
-                <div className="flex gap-2">
-                  <Button onClick={() => navigate("/business")} variant="outline" className="flex-1 border-gray-700 text-white hover:bg-gray-800 text-xs h-8">Business Networking</Button>
-                  <Button onClick={() => navigate("/ministry-profile")} variant="outline" className="flex-1 border-gray-700 text-white hover:bg-gray-800 text-xs h-8">Start a Ministry</Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {isOwnProfile && (creatorProfile as any)?.isCreator && (!creator?.platforms || (creator.platforms as any[]).length === 0) && (
-            <div className="mt-5 p-5 bg-gray-900 rounded-xl border border-gray-800 text-center">
-              <h3 className="text-sm font-semibold text-white mb-1">Connect Your Platforms</h3>
-              <p className="text-gray-400 text-xs mb-3">Link your social media accounts to showcase your content.</p>
-              <Button onClick={() => navigate("/edit-profile")} className="bg-[#D4AF37] text-black hover:bg-[#B8941F] font-semibold text-sm h-9">Add Platforms</Button>
-            </div>
-          )}
         </div>
 
         {/* ── Instagram-style tab bar (underline, icon-only) ── */}
