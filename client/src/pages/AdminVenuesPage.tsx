@@ -87,7 +87,7 @@ export default function AdminVenuesPage() {
            return (
              <div key={key} className="mb-7">
                <div className="flex items-center gap-2 mb-3"><Icon className="w-4 h-4 text-[#D4AF37]" /><h2 className="font-bold">{meta.label}</h2><span className="text-xs text-gray-600">{list.length}</span></div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                  {list.map((v) => (
                    <div key={v.id} className="rounded-xl border border-gray-800/60 bg-[#0A0A0A] p-4">
                      <VenueCarousel images={(v.images && v.images.length ? v.images : (v.imageUrl ? [v.imageUrl] : []))} name={v.name} />
@@ -174,14 +174,14 @@ function VenueCarousel({ images, name }: { images: string[]; name: string }) {
   const [i, setI] = useState(0);
   if (!images.length) {
     return (
-      <div className="w-full h-36 rounded-lg mb-3 bg-gray-900/60 border border-dashed border-gray-800 flex items-center justify-center">
+      <div className="w-full h-52 rounded-lg mb-3 bg-gray-900/60 border border-dashed border-gray-800 flex items-center justify-center">
         <span className="text-[11px] text-gray-600">No photo — add one below</span>
       </div>
     );
   }
   const idx = ((i % images.length) + images.length) % images.length;
   return (
-    <div className="relative w-full h-36 rounded-lg mb-3 overflow-hidden bg-gray-900">
+    <div className="relative w-full h-52 rounded-lg mb-3 overflow-hidden bg-gray-900">
       <img src={images[idx]} alt={name} referrerPolicy="no-referrer" loading="lazy" className="w-full h-full object-cover"
         onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
       {images.length > 1 && (
