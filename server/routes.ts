@@ -188,6 +188,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // A member's own meetups (the circles they've been placed in) + their pending opt-in.
+  app.get("/api/user/meetups", isAuthenticated, async (req: any, res) => {
+    try {
+      const [me, circles] = await Promise.all([
+        storage.getUser(req.user.id),
+        storage.getUserMeetups(req.user.id),
+      ]);
+      res.json({ matchupRequest: (me as any)?.matchupRequest ?? null, circles });
+    } catch (error) {
+      console.error("Error fetching user meetups:", error);
+      res.status(500).json({ message: "Failed to fetch meetups" });
+    }
+  });
+
   // Profile image upload endpoint (main handler is registered below with DB update)
 
   app.post('/api/upload/banner-image', isAuthenticated, uploadLimiter, upload.single('bannerImage'), async (req: any, res) => {

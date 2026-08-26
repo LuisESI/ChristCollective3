@@ -110,7 +110,7 @@ import {
   type UserBlock,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, or, ilike, like, sql, isNull, isNotNull } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, like, sql, isNull, isNotNull, inArray } from "drizzle-orm";
 import { generateSlug } from "./utils";
 
 // Interface for storage operations
@@ -2095,6 +2095,32 @@ export class DatabaseStorage implements IStorage {
   }
   async removeLeadFromCircle(circleId: number, userId: string): Promise<void> {
     await db.delete(matchCircleMembers).where(and(eq(matchCircleMembers.circleId, circleId), eq(matchCircleMembers.userId, userId)));
+  }
+
+  // A member's "meetups" = the match circles they belong to, with co-members + venue.
+  async getUserMeetups(userId: string) {
+    const rows = await db.select({ circleId: matchCircleMembers.circleId }).from(matchCircleMembers).where(eq(matchCircleMembers.userId, userId));
+    const ids = Array.from(new Set(rows.map((r) => r.circleId)));
+    if (!ids.length) return [];
+    const circles = await db.select().from(matchCircles).where(inArray(matchCircles.id, ids)).orderBy(desc(matchCircles.createdAt));
+    return Promise.all(circles.map(async (c) => {
+      const members = await db
+        .select({
+          id: users.id, firstName: users.firstName, lastName: users.lastName,
+          displayName: users.displayName, username: users.username, profileImageUrl: users.profileImageUrl,
+          city: users.city, disciplines: users.disciplines,
+        })
+        .from(matchCircleMembers)
+        .innerJoin(users, eq(users.id, matchCircleMembers.userId))
+        .where(eq(matchCircleMembers.circleId, c.id));
+      let venue: any = null;
+      if (c.venueId) {
+        const [v] = await db.select({ id: venues.id, name: venues.name, imageUrl: venues.imageUrl, neighborhood: venues.neighborhood, activityType: venues.activityType })
+          .from(venues).where(eq(venues.id, c.venueId));
+        venue = v || null;
+      }
+      return { ...c, members, venue };
+    }));
   }
 
   async updateGroupChatImages(chatId: number, data: { bannerImage?: string; profileImage?: string }): Promise<GroupChat> {

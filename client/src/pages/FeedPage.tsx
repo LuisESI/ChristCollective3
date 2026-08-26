@@ -4,11 +4,12 @@ import { PlatformPostCard } from "@/components/PlatformPostCard";
 import { MinistryPostCard } from "@/components/MinistryPostCard";
 import { FollowSuggestions } from "@/components/FollowSuggestions";
 import { Helmet } from "react-helmet";
-import { Sparkles, BookOpen, X, Check, Coffee } from "lucide-react";
+import { Sparkles, BookOpen, X, Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { getWordOfTheDay } from "@/lib/bible-verses";
+import { MeetupBanner } from "@/components/MeetupBanner";
 
 function WordOfTheDayCard() {
   const { verse, reference } = getWordOfTheDay();
@@ -101,28 +102,6 @@ function OnboardingChecklist({ user }: { user: any }) {
   );
 }
 
-// Entry point to the Matchup flow, pinned on Home.
-function NextMatchupCard() {
-  const [, setLocation] = useLocation();
-  return (
-    <div className="bg-gradient-to-br from-[#1a1506] to-[#0A0A0A] border border-[#D4AF37]/30 rounded-2xl p-5">
-      <div className="flex items-center gap-2 mb-1">
-        <Coffee className="w-4 h-4 text-[#D4AF37]" />
-        <h3 className="text-[#D4AF37] font-semibold text-sm">Your next Matchup</h3>
-      </div>
-      <p className="text-gray-300 text-sm mb-4">
-        Meet a small circle of Christian creatives near you. Pick a time and an activity — we'll handle the match.
-      </p>
-      <Button
-        onClick={() => setLocation("/matchups")}
-        className="w-full bg-[#D4AF37] hover:bg-[#C4A030] text-black font-semibold"
-      >
-        Pick your time &amp; activity
-      </Button>
-    </div>
-  );
-}
-
 export default function FeedPage() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ["/api/platform-posts"],
@@ -191,7 +170,7 @@ export default function FeedPage() {
       <div className="max-w-lg mx-auto px-4 py-4">
         <div className="space-y-4">
           <OnboardingChecklist user={user} />
-          {user && <NextMatchupCard />}
+          {user && <MeetupBanner />}
           <WordOfTheDayCard />
 
           {allPosts.length === 0 ? (
