@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Plus, Trash2, ExternalLink, ArrowLeft, Coffee, Mountain, Footprints, BookOpen, Users, Shield } from "lucide-react";
+import { MapPin, Plus, Trash2, ExternalLink, ArrowLeft, Coffee, Mountain, Footprints, BookOpen, Users, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Venue } from "@shared/schema";
 
 const ACTIVITIES: Record<string, { label: string; icon: any }> = {
@@ -87,18 +87,10 @@ export default function AdminVenuesPage() {
            return (
              <div key={key} className="mb-7">
                <div className="flex items-center gap-2 mb-3"><Icon className="w-4 h-4 text-[#D4AF37]" /><h2 className="font-bold">{meta.label}</h2><span className="text-xs text-gray-600">{list.length}</span></div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                  {list.map((v) => (
                    <div key={v.id} className="rounded-xl border border-gray-800/60 bg-[#0A0A0A] p-4">
-                     {v.imageUrl ? (
-                       <img src={v.imageUrl} alt={v.name} referrerPolicy="no-referrer" loading="lazy"
-                         className="w-full h-36 object-cover rounded-lg mb-3 bg-gray-900"
-                         onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                     ) : (
-                       <div className="w-full h-36 rounded-lg mb-3 bg-gray-900/60 border border-dashed border-gray-800 flex items-center justify-center">
-                         <span className="text-[11px] text-gray-600">No photo — add one below</span>
-                       </div>
-                     )}
+                     <VenueCarousel images={(v.images && v.images.length ? v.images : (v.imageUrl ? [v.imageUrl] : []))} name={v.name} />
                      <div className="flex items-start justify-between gap-2">
                        <div className="min-w-0">
                          <h3 className="font-semibold text-white">{v.name}</h3>
@@ -147,10 +139,22 @@ export default function AdminVenuesPage() {
                   {["candidate", "outreach", "confirmed", "rejected"].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </Field>
-              <Field label="Photo URL">
-                <Input value={editing.imageUrl || ""} onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value })} placeholder="Paste an image link (venue site / Google photo)" className="bg-gray-900 border-gray-800 text-white" />
+              <Field label="Photos (one URL per line)">
+                <Textarea
+                  value={(editing.images && editing.images.length ? editing.images : (editing.imageUrl ? [editing.imageUrl] : [])).join("\n")}
+                  onChange={(e) => { const arr = e.target.value.split("\n").map((s) => s.trim()).filter(Boolean); setEditing({ ...editing, images: arr, imageUrl: arr[0] || null }); }}
+                  rows={4}
+                  placeholder="Paste image links, one per line (venue site / Google photo)"
+                  className="bg-gray-900 border-gray-800 text-white font-mono text-xs"
+                />
               </Field>
-              {editing.imageUrl && <img src={editing.imageUrl} referrerPolicy="no-referrer" className="w-full h-32 object-cover rounded-lg border border-gray-800" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />}
+              {(editing.images && editing.images.length > 0) && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {editing.images.map((u, k) => (
+                    <img key={k} src={u} referrerPolicy="no-referrer" className="w-20 h-16 object-cover rounded-md border border-gray-800 shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.2"; }} />
+                  ))}
+                </div>
+              )}
               <Field label="Address / map URL"><Input value={editing.mapUrl || ""} onChange={(e) => setEditing({ ...editing, mapUrl: e.target.value })} placeholder="https://maps.google.com/…" className="bg-gray-900 border-gray-800 text-white" /></Field>
               <Field label="Notes"><Textarea value={editing.notes || ""} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} rows={3} className="bg-gray-900 border-gray-800 text-white" /></Field>
               <Button onClick={() => save.mutate(editing)} disabled={!editing.name || save.isPending} className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A030] font-bold">{save.isPending ? "Saving…" : "Save"}</Button>
@@ -164,4 +168,36 @@ export default function AdminVenuesPage() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="text-xs text-gray-400 mb-1 block">{label}</label>{children}</div>;
+}
+
+function VenueCarousel({ images, name }: { images: string[]; name: string }) {
+  const [i, setI] = useState(0);
+  if (!images.length) {
+    return (
+      <div className="w-full h-36 rounded-lg mb-3 bg-gray-900/60 border border-dashed border-gray-800 flex items-center justify-center">
+        <span className="text-[11px] text-gray-600">No photo — add one below</span>
+      </div>
+    );
+  }
+  const idx = ((i % images.length) + images.length) % images.length;
+  return (
+    <div className="relative w-full h-36 rounded-lg mb-3 overflow-hidden bg-gray-900">
+      <img src={images[idx]} alt={name} referrerPolicy="no-referrer" loading="lazy" className="w-full h-full object-cover"
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
+      {images.length > 1 && (
+        <>
+          <button onClick={(e) => { e.stopPropagation(); setI(idx - 1); }} className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/55 hover:bg-black/80 text-white flex items-center justify-center">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setI(idx + 1); }} className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/55 hover:bg-black/80 text-white flex items-center justify-center">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <span className="absolute top-1.5 right-1.5 text-[10px] bg-black/55 text-white rounded-full px-1.5 py-0.5">{idx + 1}/{images.length}</span>
+          <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1">
+            {images.map((_, k) => <span key={k} className={`w-1.5 h-1.5 rounded-full ${k === idx ? "bg-white" : "bg-white/40"}`} />)}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
