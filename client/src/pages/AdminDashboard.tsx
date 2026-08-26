@@ -178,6 +178,20 @@ export default function AdminDashboard() {
     onError: handleMutationError,
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async ({ userId, status }: { userId: string; status: string }) => {
+      const res = await apiRequest(`/api/admin/users/${userId}/status`, { method: "PATCH", data: { status } });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Failed to update status"); }
+    },
+    onSuccess: (_d, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setSelectedUser((u) => (u ? ({ ...u, accountStatus: vars.status } as any) : u));
+      const label = vars.status === "banned" ? "banned" : vars.status === "frozen" ? "frozen" : "reactivated";
+      toast({ title: `Member ${label}` });
+    },
+    onError: handleMutationError,
+  });
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -451,6 +465,16 @@ export default function AdminDashboard() {
                         {selectedUser.isAdmin ? "Admin" : "User"}
                       </Badge>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Status</span>
+                      <Badge className={
+                        (selectedUser as any).accountStatus === "banned" ? "bg-red-500/10 text-red-400 border border-red-500/30" :
+                        (selectedUser as any).accountStatus === "frozen" ? "bg-orange-500/10 text-orange-400 border border-orange-500/30" :
+                        "bg-green-500/10 text-green-400 border border-green-500/30"
+                      }>
+                        {(selectedUser as any).accountStatus || "active"}
+                      </Badge>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Joined</span>
                       <span className="text-gray-300">{formatDate(selectedUser.createdAt || new Date())}</span>
@@ -510,16 +534,38 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
-                  <Mail className="h-3.5 w-3.5 mr-1.5" /> Send Email
-                </Button>
-                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
-                  <UserCheck className="h-3.5 w-3.5 mr-1.5" /> Toggle Admin
-                </Button>
-                <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
-                  <Eye className="h-3.5 w-3.5 mr-1.5" /> View Activity
-                </Button>
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-800/60 mt-2">
+                {selectedUser.email && (
+                  <a href={`mailto:${selectedUser.email}`}>
+                    <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                      <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
+                    </Button>
+                  </a>
+                )}
+                {selectedUser.isAdmin || selectedUser.id === user?.id ? (
+                  <span className="text-xs text-gray-600 self-center">Admins &amp; your own account can't be moderated.</span>
+                ) : (
+                  <>
+                    {(selectedUser as any).accountStatus !== "active" && (
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={statusMutation.isPending}
+                        onClick={() => statusMutation.mutate({ userId: selectedUser.id, status: "active" })}>
+                        <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Reactivate
+                      </Button>
+                    )}
+                    {(selectedUser as any).accountStatus !== "frozen" && (selectedUser as any).accountStatus !== "banned" && (
+                      <Button size="sm" variant="outline" className="border-orange-500/40 text-orange-400 hover:bg-orange-900/20" disabled={statusMutation.isPending}
+                        onClick={() => statusMutation.mutate({ userId: selectedUser.id, status: "frozen" })}>
+                        <Clock className="h-3.5 w-3.5 mr-1.5" /> Freeze
+                      </Button>
+                    )}
+                    {(selectedUser as any).accountStatus !== "banned" && (
+                      <Button size="sm" variant="destructive" disabled={statusMutation.isPending}
+                        onClick={() => { if (confirm(`Ban ${getUserDisplayName(selectedUser)}? They will be locked out of the platform.`)) statusMutation.mutate({ userId: selectedUser.id, status: "banned" }); }}>
+                        <XCircle className="h-3.5 w-3.5 mr-1.5" /> Ban
+                      </Button>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </DialogContent>
@@ -1146,9 +1192,13 @@ function UsersSection({ filteredUsers, usersLoading, searchQuery, setSearchQuery
                     <TableCell className="text-gray-400 text-sm">{user.email}</TableCell>
                     <TableCell className="text-gray-500 text-sm">{formatDate(user.createdAt || new Date())}</TableCell>
                     <TableCell>
-                      <Badge className={user.isAdmin ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 text-xs" : "bg-gray-800 text-gray-400 border border-gray-700 text-xs"}>
-                        {user.isAdmin ? "Admin" : "User"}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Badge className={user.isAdmin ? "bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 text-xs" : "bg-gray-800 text-gray-400 border border-gray-700 text-xs"}>
+                          {user.isAdmin ? "Admin" : "User"}
+                        </Badge>
+                        {(user as any).accountStatus === "banned" && <Badge className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs">Banned</Badge>}
+                        {(user as any).accountStatus === "frozen" && <Badge className="bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs">Frozen</Badge>}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" className="text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/10" onClick={() => setSelectedUser(user)}>

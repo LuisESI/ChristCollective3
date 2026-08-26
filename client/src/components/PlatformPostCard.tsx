@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { useAuthGuard } from "@/lib/auth-guard";
+import { useAuth } from "@/hooks/useAuth";
 import { renderContentWithMentions } from "@/components/MentionTextarea";
 
 interface PlatformPostProps {
@@ -104,6 +105,8 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { requireAuth } = useAuthGuard();
+  const { user: authUser } = useAuth();
+  const isAdmin = authUser?.isAdmin === true;
 
   // Check if post is saved by current user
   const { data: savedData } = useQuery({
@@ -405,7 +408,7 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       return;
     }
 
-    if (post.userId !== currentUserId) {
+    if (post.userId !== currentUserId && !isAdmin) {
       toast({
         title: "Not authorized",
         description: "You can only delete your own posts",
@@ -414,7 +417,8 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
       return;
     }
 
-    if (confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+    const isOthers = post.userId !== currentUserId;
+    if (confirm(isOthers ? "Delete this member's post as an admin? This cannot be undone." : "Are you sure you want to delete this post? This action cannot be undone.")) {
       deletePostMutation.mutate();
     }
   };
@@ -595,6 +599,15 @@ export function PlatformPostCard({ post, currentUserId, showActions = true, expa
                     >
                       <UserMinus className="w-4 h-4 mr-2" />Block User
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                        onClick={(e) => { e.stopPropagation(); handleDeletePost(); }}
+                        disabled={deletePostMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />Delete Post (admin)
+                      </DropdownMenuItem>
+                    )}
                   </>
                 )}
               </DropdownMenuContent>

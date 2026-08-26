@@ -178,6 +178,8 @@ export async function setupAuth(app: Express) {
       
       if (!user || !user.password || !(await comparePasswords(password, user.password))) {
         return done(null, false);
+      } else if ((user as any).accountStatus === "banned") {
+        return done(null, false, { message: "Your account has been suspended." });
       } else {
         return done(null, user);
       }
@@ -634,6 +636,14 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated = (req: any, res: any, next: any) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
+  }
+  const status = req.user?.accountStatus;
+  if (status === "banned") {
+    return res.status(403).json({ message: "Your account has been suspended.", accountStatus: "banned" });
+  }
+  // Frozen members can browse (GET) but cannot post, comment, message, or create anything.
+  if (status === "frozen" && req.method !== "GET") {
+    return res.status(403).json({ message: "Your account is frozen — you can browse but can't post or message right now.", accountStatus: "frozen" });
   }
   next();
 };

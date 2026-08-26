@@ -113,7 +113,7 @@ export default function BottomNavigation() {
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
         <div className="glass-dark border-t-0 mx-0">
-          <div className="flex justify-around items-center h-16 px-1">
+          <div className="container mx-auto flex justify-around items-center h-16 px-1">
             {renderTab(tabs[0])}
             {renderTab(tabs[1])}
 

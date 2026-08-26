@@ -3288,6 +3288,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: freeze / ban / reactivate a member
+  app.patch('/api/admin/users/:id/status', isAdminAuth, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const status = req.body?.status;
+      if (!["active", "frozen", "banned"].includes(status)) {
+        return res.status(400).json({ message: "status must be active, frozen, or banned" });
+      }
+      if (id === req.user.id) {
+        return res.status(400).json({ message: "You can't change your own status." });
+      }
+      const target = await storage.getUser(id);
+      if (!target) return res.status(404).json({ message: "User not found" });
+      if (target.isAdmin && status !== "active") {
+        return res.status(403).json({ message: "You can't freeze or ban another admin." });
+      }
+      const updated = await storage.updateUser(id, { accountStatus: status } as any);
+      res.json({ id, accountStatus: (updated as any)?.accountStatus ?? status });
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      res.status(500).json({ message: "Failed to update status" });
+    }
+  });
+
   // Admin: Get user details by ID
   app.get('/api/admin/users/:id', isAdminAuth, async (req, res) => {
     try {

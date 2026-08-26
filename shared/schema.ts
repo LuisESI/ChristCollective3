@@ -73,6 +73,8 @@ export const users = pgTable("users", {
   smsOptIn: boolean("sms_opt_in").default(false),
   onboardingCompleted: boolean("onboarding_completed").default(false),
   matchupRequest: jsonb("matchup_request"), // { slot, activity, requestedAt } for the current cycle
+  // Moderation: active = normal; frozen = can browse but not post/comment/message; banned = locked out
+  accountStatus: varchar("account_status").notNull().default("active"),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables
