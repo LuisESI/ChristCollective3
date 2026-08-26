@@ -837,6 +837,7 @@ export const venues = pgTable("venues", {
   area: varchar("area").notNull().default("westside"), // westside, valley, eastside, southside
   neighborhood: varchar("neighborhood"),             // Westwood, Hollywood, Beverly Hills, ...
   address: varchar("address"),
+  imageUrl: varchar("image_url"),                    // photo of the venue (from its website / Google profile)
   mapUrl: varchar("map_url"),
   capacity: integer("capacity"),                     // approx group size it comfortably fits
   cost: varchar("cost").notNull().default("free"),   // free, paid, partner

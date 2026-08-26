@@ -90,6 +90,15 @@ export default function AdminVenuesPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                  {list.map((v) => (
                    <div key={v.id} className="rounded-xl border border-gray-800/60 bg-[#0A0A0A] p-4">
+                     {v.imageUrl ? (
+                       <img src={v.imageUrl} alt={v.name} referrerPolicy="no-referrer" loading="lazy"
+                         className="w-full h-36 object-cover rounded-lg mb-3 bg-gray-900"
+                         onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                     ) : (
+                       <div className="w-full h-36 rounded-lg mb-3 bg-gray-900/60 border border-dashed border-gray-800 flex items-center justify-center">
+                         <span className="text-[11px] text-gray-600">No photo — add one below</span>
+                       </div>
+                     )}
                      <div className="flex items-start justify-between gap-2">
                        <div className="min-w-0">
                          <h3 className="font-semibold text-white">{v.name}</h3>
@@ -138,6 +147,10 @@ export default function AdminVenuesPage() {
                   {["candidate", "outreach", "confirmed", "rejected"].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </Field>
+              <Field label="Photo URL">
+                <Input value={editing.imageUrl || ""} onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value })} placeholder="Paste an image link (venue site / Google photo)" className="bg-gray-900 border-gray-800 text-white" />
+              </Field>
+              {editing.imageUrl && <img src={editing.imageUrl} referrerPolicy="no-referrer" className="w-full h-32 object-cover rounded-lg border border-gray-800" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />}
               <Field label="Address / map URL"><Input value={editing.mapUrl || ""} onChange={(e) => setEditing({ ...editing, mapUrl: e.target.value })} placeholder="https://maps.google.com/…" className="bg-gray-900 border-gray-800 text-white" /></Field>
               <Field label="Notes"><Textarea value={editing.notes || ""} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} rows={3} className="bg-gray-900 border-gray-800 text-white" /></Field>
               <Button onClick={() => save.mutate(editing)} disabled={!editing.name || save.isPending} className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A030] font-bold">{save.isPending ? "Saving…" : "Save"}</Button>
