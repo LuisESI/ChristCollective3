@@ -20,7 +20,7 @@ export function MeetupBanner() {
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
 
-  const { data } = useQuery<{ matchupRequest: any; circles: any[] }>({
+  const { data } = useQuery<{ matchupRequest: any; circles: any[]; waitlisted?: boolean }>({
     queryKey: ["/api/user/meetups"],
     enabled: !!user?.id,
   });
@@ -29,6 +29,7 @@ export function MeetupBanner() {
 
   const circles = data?.circles || [];
   const optedIn = !!data?.matchupRequest;
+  const waitlisted = !!data?.waitlisted;
 
   // ── State A: never opted in ──
   if (circles.length === 0 && !optedIn) {
@@ -61,9 +62,11 @@ export function MeetupBanner() {
           <Check className="w-5 h-5 text-[#D4AF37]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">You're on the list ✓</p>
+          <p className="text-white font-semibold text-sm">{waitlisted ? "You're on the waitlist" : "You're on the list ✓"}</p>
           <p className="text-gray-400 text-xs truncate">
-            We'll text you when your {req.activity ? prettyActivity(req.activity).toLowerCase() : ""} circle is ready. Tap to change.
+            {waitlisted
+              ? "We're launching in LA first — we'll reach out when we're in your area."
+              : `We'll text you when your ${req.activity ? prettyActivity(req.activity).toLowerCase() + " " : ""}circle is ready. Tap to change.`}
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-gray-500 shrink-0" />

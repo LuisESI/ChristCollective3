@@ -75,6 +75,8 @@ export const users = pgTable("users", {
   matchupRequest: jsonb("matchup_request"), // { slot, activity, requestedAt } for the current cycle
   // Moderation: active = normal; frozen = can browse but not post/comment/message; banned = locked out
   accountStatus: varchar("account_status").notNull().default("active"),
+  // Founding launch: true = outside our launch area (LA County), held on a waitlist
+  waitlisted: boolean("waitlisted").notNull().default(false),
 });
 
 // Note: User relations are defined at the bottom of this file after all tables

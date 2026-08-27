@@ -173,6 +173,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Founding-launch signup: profile + GENERAL availability (no fixed date yet) + geo waitlist.
+  // Drops the member into the matching queue (via matchupRequest) in one call.
+  app.post("/api/founding-signup", isAuthenticated, async (req: any, res) => {
+    try {
+      const b = req.body || {};
+      const waitlisted = !!b.waitlisted;
+      const update: any = { onboardingCompleted: true, waitlisted };
+      if (typeof b.city === "string" && b.city) update.city = b.city;
+      if (Array.isArray(b.disciplines)) update.disciplines = b.disciplines.slice(0, 12).map(String);
+      if (["same_field", "different_fields", "open"].includes(b.matchPreference)) update.matchPreference = b.matchPreference;
+      if (typeof b.phone === "string" && b.phone) update.phone = b.phone;
+      if (typeof b.smsOptIn === "boolean") update.smsOptIn = b.smsOptIn;
+      const availability = Array.isArray(b.availability) ? b.availability.slice(0, 12).map(String) : [];
+      update.matchupRequest = {
+        activity: typeof b.activity === "string" && b.activity ? b.activity : "open",
+        slot: availability.join(", "),
+        availability,
+        general: true,
+        waitlisted,
+        requestedAt: new Date().toISOString(),
+      };
+      await storage.updateUser(req.user.id, update);
+      res.json({ ok: true, waitlisted });
+    } catch (error) {
+      console.error("Error in founding signup:", error);
+      res.status(500).json({ message: "Failed to save your signup" });
+    }
+  });
+
   // Matchup request: user picks a time + an activity for the next cycle
   app.post("/api/matchups/request", isAuthenticated, async (req: any, res) => {
     try {
@@ -195,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getUser(req.user.id),
         storage.getUserMeetups(req.user.id),
       ]);
-      res.json({ matchupRequest: (me as any)?.matchupRequest ?? null, circles });
+      res.json({ matchupRequest: (me as any)?.matchupRequest ?? null, waitlisted: !!(me as any)?.waitlisted, circles });
     } catch (error) {
       console.error("Error fetching user meetups:", error);
       res.status(500).json({ message: "Failed to fetch meetups" });
