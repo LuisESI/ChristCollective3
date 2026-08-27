@@ -161,9 +161,12 @@ export default function JoinFoundingPage() {
                 </label>
               )}
             </div>
-            <button onClick={() => setAuthMode((m) => (m === "login" ? "register" : "login"))} className="mt-4 text-sm text-[#D4AF37] hover:underline">
-              {authMode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
-            </button>
+            <div className="mt-6 pt-4 border-t border-gray-900 text-center">
+              <button onClick={() => setAuthMode((m) => (m === "login" ? "register" : "login"))} className="text-sm text-gray-400 hover:text-white">
+                {authMode === "login" ? "New here? " : "Already have an account? "}
+                <span className="text-[#D4AF37] font-semibold underline">{authMode === "login" ? "Create an account" : "Log in"}</span>
+              </button>
+            </div>
           </div>
         )}
 
