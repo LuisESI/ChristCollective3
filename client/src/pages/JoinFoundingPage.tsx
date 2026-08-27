@@ -21,12 +21,13 @@ const ORDER = ["intro", "register", "city", "disciplines", "availability", "acti
 type Phase = (typeof ORDER)[number];
 
 export default function JoinFoundingPage() {
-  const { user, registerMutation } = useAuth();
+  const { user, registerMutation, loginMutation } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const loggedIn = !!user?.id;
 
   const [phase, setPhase] = useState<Phase>("intro");
+  const [authMode, setAuthMode] = useState<"register" | "login">("register");
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     firstName: "", email: "", phone: "", password: "", smsOptIn: true,
@@ -64,6 +65,16 @@ export default function JoinFoundingPage() {
     setSaving(false);
   };
 
+  const doLogin = async () => {
+    setSaving(true);
+    try {
+      await loginMutation.mutateAsync({ usernameOrEmail: form.email, password: form.password });
+      setPhase("city"); // logged in — continue the funnel
+    } catch {
+      /* loginMutation.onError shows the toast */
+    } finally { setSaving(false); }
+  };
+
   const submit = async () => {
     setSaving(true);
     try {
@@ -88,7 +99,9 @@ export default function JoinFoundingPage() {
 
   const canNext =
     phase === "intro" ? true :
-    phase === "register" ? form.email.includes("@") && form.password.length >= 6 && !!form.firstName && form.phone.trim().length >= 7 && form.smsOptIn :
+    phase === "register" ? (authMode === "login"
+      ? form.email.trim().length > 0 && form.password.length >= 1
+      : form.email.includes("@") && form.password.length >= 6 && !!form.firstName && form.phone.trim().length >= 7 && form.smsOptIn) :
     phase === "city" ? (!!form.city || (form.waitlisted && form.otherCity.trim().length > 0)) :
     phase === "disciplines" ? true :
     phase === "availability" ? form.availability.length > 0 :
@@ -120,27 +133,37 @@ export default function JoinFoundingPage() {
             <p className="text-gray-400 text-[14px] leading-relaxed">
               We're <span className="text-white font-medium">not matching people into circles just yet</span> — we want to build the group first. Tell us who you are and when you're generally free, and we'll bring you in as soon as there are enough people near you.
             </p>
+            {!loggedIn && (
+              <button onClick={() => { setAuthMode("login"); setPhase("register"); }} className="mt-6 text-sm text-[#D4AF37] hover:underline">
+                Already have an account? Log in
+              </button>
+            )}
           </div>
         )}
 
         {phase === "register" && (
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-1">Create your account</h1>
-            <p className="text-gray-400 text-sm mb-5">Takes 30 seconds.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1">{authMode === "login" ? "Welcome back" : "Create your account"}</h1>
+            <p className="text-gray-400 text-sm mb-5">{authMode === "login" ? "Log in to continue joining." : "Takes 30 seconds."}</p>
             <div className="space-y-3">
-              <Input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} placeholder="First name" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
-              <Input value={form.email} onChange={(e) => set("email", e.target.value)} type="email" placeholder="Email" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
-              <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} type="tel" placeholder="Phone (for your Matchup texts)" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
-              <Input value={form.password} onChange={(e) => set("password", e.target.value)} type="password" placeholder="Password (6+ characters)" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
-              <label className="flex items-start gap-3 p-3 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/[0.04] cursor-pointer" onClick={() => set("smsOptIn", !form.smsOptIn)}>
-                <span className={cn("w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5", form.smsOptIn ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-600")}>
-                  {form.smsOptIn && <Check className="w-3 h-3 text-black" />}
-                </span>
-                <span className="text-xs text-gray-400 leading-relaxed">
-                  I agree to receive SMS from Christ Collective about Matchups (~4–6/cycle). Msg &amp; data rates may apply. Reply STOP to cancel. Consent isn't a condition of joining.
-                </span>
-              </label>
+              {authMode === "register" && <Input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} placeholder="First name" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />}
+              <Input value={form.email} onChange={(e) => set("email", e.target.value)} type={authMode === "login" ? "text" : "email"} placeholder={authMode === "login" ? "Email or username" : "Email"} className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
+              {authMode === "register" && <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} type="tel" placeholder="Phone (for your Matchup texts)" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />}
+              <Input value={form.password} onChange={(e) => set("password", e.target.value)} type="password" placeholder={authMode === "login" ? "Password" : "Password (6+ characters)"} className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
+              {authMode === "register" && (
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/[0.04] cursor-pointer" onClick={() => set("smsOptIn", !form.smsOptIn)}>
+                  <span className={cn("w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5", form.smsOptIn ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-600")}>
+                    {form.smsOptIn && <Check className="w-3 h-3 text-black" />}
+                  </span>
+                  <span className="text-xs text-gray-400 leading-relaxed">
+                    I agree to receive SMS from Christ Collective about Matchups (~4–6/cycle). Msg &amp; data rates may apply. Reply STOP to cancel. Consent isn't a condition of joining.
+                  </span>
+                </label>
+              )}
             </div>
+            <button onClick={() => setAuthMode((m) => (m === "login" ? "register" : "login"))} className="mt-4 text-sm text-[#D4AF37] hover:underline">
+              {authMode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
+            </button>
           </div>
         )}
 
@@ -220,14 +243,14 @@ export default function JoinFoundingPage() {
           <div className="max-w-md mx-auto">
             <Button
               onClick={() => {
-                if (phase === "register") return doRegister();
+                if (phase === "register") return authMode === "login" ? doLogin() : doRegister();
                 if (phase === "activity") return submit();
                 next();
               }}
               disabled={!canNext || saving}
               className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
             >
-              {saving ? "Saving…" : phase === "intro" ? "Get started" : phase === "activity" ? "Join the founding group" : phase === "disciplines" && form.disciplines.length === 0 ? "Skip" : "Continue"}
+              {saving ? (phase === "register" && authMode === "login" ? "Logging in…" : "Saving…") : phase === "intro" ? "Get started" : phase === "register" && authMode === "login" ? "Log in & continue" : phase === "activity" ? "Join the founding group" : phase === "disciplines" && form.disciplines.length === 0 ? "Skip" : "Continue"}
             </Button>
           </div>
         </div>
