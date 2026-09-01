@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MapPin, Plus, Trash2, ExternalLink, ArrowLeft, Coffee, Mountain, Footprints, BookOpen, Users, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Venue } from "@shared/schema";
-import { TerritoryMap } from "@/components/TerritoryMap";
+
+// Lazy so MapLibre (~600KB gzip) only loads on this admin page, not in the main bundle.
+const TerritoryMap = lazy(() => import("@/components/TerritoryMap").then((m) => ({ default: m.TerritoryMap })));
 
 const ACTIVITIES: Record<string, { label: string; icon: any }> = {
   hiking: { label: "Hiking spots", icon: Mountain },
@@ -73,7 +75,9 @@ export default function AdminVenuesPage() {
       </header>
 
       <div className="px-5 py-4">
-        <TerritoryMap />
+        <Suspense fallback={<div className="h-[460px] rounded-2xl border border-gray-800/60 bg-[#060606] mb-5 flex items-center justify-center text-gray-600 text-sm">Loading map…</div>}>
+          <TerritoryMap />
+        </Suspense>
         <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar">
           {AREAS.map((a) => (
             <button key={a.value} onClick={() => setArea(a.value)} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap border ${area === a.value ? "bg-[#D4AF37] text-black border-transparent" : "bg-transparent border-gray-700 text-gray-300"}`}>{a.label}</button>

@@ -10,6 +10,7 @@ import {
   integer,
   boolean,
   decimal,
+  doublePrecision,
   uuid,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -841,6 +842,8 @@ export const venues = pgTable("venues", {
   address: varchar("address"),
   imageUrl: varchar("image_url"),                    // primary photo (kept in sync with images[0])
   images: text("images").array(),                    // photo gallery to cycle through
+  lat: doublePrecision("lat"),                       // geocoded (Nominatim) for the map
+  lng: doublePrecision("lng"),
   mapUrl: varchar("map_url"),
   capacity: integer("capacity"),                     // approx group size it comfortably fits
   cost: varchar("cost").notNull().default("free"),   // free, paid, partner
