@@ -14,18 +14,22 @@ const TYPE_LABELS: Record<string, string> = {
   coffee: "Coffee", hiking: "Hiking", run: "Running", book: "Book club", general: "General",
 };
 
-// Rough West LA / Westside outline (our served territory).
-const TERRITORY = {
-  type: "Feature" as const,
-  properties: { name: "West LA" },
-  geometry: {
-    type: "Polygon" as const,
-    coordinates: [[
-      [-118.53, 34.06], [-118.42, 34.115], [-118.35, 34.085], [-118.355, 34.00],
-      [-118.47, 33.975], [-118.535, 34.02], [-118.53, 34.06],
-    ]],
-  },
+// Candidate launch areas (our members are concentrated in these two).
+const TERRITORIES = {
+  type: "FeatureCollection" as const,
+  features: [
+    { type: "Feature" as const, properties: { name: "West LA" }, geometry: { type: "Polygon" as const, coordinates: [[
+      [-118.53, 34.06], [-118.42, 34.115], [-118.35, 34.085], [-118.355, 34.00], [-118.47, 33.975], [-118.535, 34.02], [-118.53, 34.06],
+    ]] } },
+    { type: "Feature" as const, properties: { name: "Santa Clarita" }, geometry: { type: "Polygon" as const, coordinates: [[
+      [-118.61, 34.45], [-118.47, 34.47], [-118.43, 34.41], [-118.46, 34.34], [-118.58, 34.35], [-118.62, 34.40], [-118.61, 34.45],
+    ]] } },
+  ],
 };
+const TERRITORY_LABELS: { name: string; at: [number, number] }[] = [
+  { name: "West LA", at: WEST_LA },
+  { name: "Santa Clarita", at: [-118.53, 34.405] },
+];
 
 // Free, no-API-key dark basemap (Esri World Dark Gray) rendered on a globe.
 const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
@@ -57,10 +61,10 @@ export function TerritoryMap() {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: STYLE,
-      center: WEST_LA,
-      zoom: 10.3,
-      pitch: 40,
-      bearing: -12,
+      center: [-118.49, 34.21],
+      zoom: 9,
+      pitch: 28,
+      bearing: -8,
       attributionControl: false,
     });
     mapRef.current = map;
@@ -69,17 +73,25 @@ export function TerritoryMap() {
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
 
     map.on("load", () => {
-      map.addSource("territory", { type: "geojson", data: TERRITORY as any });
+      map.addSource("territory", { type: "geojson", data: TERRITORIES as any });
       map.addLayer({ id: "territory-fill", type: "fill", source: "territory", paint: { "fill-color": "#D4AF37", "fill-opacity": 0.10 } });
       // glowing boundary: a soft wide underlay + a crisp bright border on top
       map.addLayer({ id: "territory-glow", type: "line", source: "territory", paint: { "line-color": "#D4AF37", "line-width": 9, "line-opacity": 0.22, "line-blur": 5 } });
       map.addLayer({ id: "territory-line", type: "line", source: "territory", paint: { "line-color": "#F4D577", "line-width": 3, "line-opacity": 1 } });
       map.on("click", "territory-fill", (e: any) => {
+        const nm = e.features?.[0]?.properties?.name || "Area";
         new maplibregl.Popup({ offset: 8, className: "cc-pop" }).setLngLat(e.lngLat)
-          .setHTML('<div style="font-weight:700;color:#D4AF37">West LA</div><div style="color:#aaa;font-size:11px">Serving now</div>').addTo(map);
+          .setHTML(`<div style="font-weight:700;color:#D4AF37">${nm}</div><div style="color:#aaa;font-size:11px">Candidate launch area</div>`).addTo(map);
       });
       map.on("mouseenter", "territory-fill", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "territory-fill", () => { map.getCanvas().style.cursor = ""; });
+      // area name labels
+      TERRITORY_LABELS.forEach((t) => {
+        const el = document.createElement("div");
+        el.className = "cc-territory-label";
+        el.textContent = t.name;
+        new maplibregl.Marker({ element: el }).setLngLat(t.at).addTo(map);
+      });
       setReady(true);
     });
 
@@ -121,6 +133,7 @@ export function TerritoryMap() {
       <style>{`
         .cc-venue-pin{width:14px;height:14px;border-radius:50%;background:#F2D479;border:2px solid #0a0a0a;box-shadow:0 0 0 2px rgba(212,175,55,0.45),0 0 10px 2px rgba(212,175,55,0.55);cursor:pointer;transition:transform .15s}
         .cc-venue-pin:hover{transform:scale(1.25)}
+        .cc-territory-label{color:#F4D577;font:700 12px ui-sans-serif,system-ui,sans-serif;text-shadow:0 1px 4px #000,0 0 8px rgba(0,0,0,.9);white-space:nowrap;pointer-events:none;letter-spacing:.3px}
         .cc-pop .maplibregl-popup-content{background:#0d0d0f;border:1px solid #2a2a2a;border-radius:12px;color:#fff;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
         .cc-pop .maplibregl-popup-tip{border-top-color:#0d0d0f !important;border-bottom-color:#0d0d0f !important}
         .cc-pop .maplibregl-popup-close-button{color:#888;font-size:16px}
@@ -130,7 +143,7 @@ export function TerritoryMap() {
       <div className="flex items-center justify-between px-4 pt-4">
         <div>
           <h2 className="text-sm font-bold text-white tracking-wide">Territory Map</h2>
-          <p className="text-[11px] text-[#D4AF37]">Serving West LA · {venues.length} spots</p>
+          <p className="text-[11px] text-[#D4AF37]">Weighing West LA &amp; Santa Clarita · {venues.length} spots</p>
         </div>
       </div>
       <div className="relative w-full mt-3">
@@ -149,7 +162,7 @@ export function TerritoryMap() {
           </div>
         )}
       </div>
-      <div className="px-4 py-2 text-[11px] text-gray-500">Drag to rotate · scroll to zoom · ⛶ fullscreen. West LA is live; new territories light up as we expand.</div>
+      <div className="px-4 py-2 text-[11px] text-gray-500">Drag to rotate · scroll to zoom · ⛶ fullscreen. Two candidate launch areas — click an area to select.</div>
     </div>
   );
 }
