@@ -6,6 +6,14 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 const WEST_LA: [number, number] = [-118.45, 34.03];
 
+// Venue-type colors + labels for the pins and legend.
+const TYPE_COLORS: Record<string, string> = {
+  coffee: "#E0A867", hiking: "#43C46B", run: "#F0607E", book: "#7C86EC", general: "#D4AF37",
+};
+const TYPE_LABELS: Record<string, string> = {
+  coffee: "Coffee", hiking: "Hiking", run: "Running", book: "Book club", general: "General",
+};
+
 // Rough West LA / Westside outline (our served territory).
 const TERRITORY = {
   type: "Feature" as const,
@@ -62,8 +70,10 @@ export function TerritoryMap() {
 
     map.on("load", () => {
       map.addSource("territory", { type: "geojson", data: TERRITORY as any });
-      map.addLayer({ id: "territory-fill", type: "fill", source: "territory", paint: { "fill-color": "#D4AF37", "fill-opacity": 0.16 } });
-      map.addLayer({ id: "territory-line", type: "line", source: "territory", paint: { "line-color": "#D4AF37", "line-width": 2.5, "line-opacity": 0.9 } });
+      map.addLayer({ id: "territory-fill", type: "fill", source: "territory", paint: { "fill-color": "#D4AF37", "fill-opacity": 0.10 } });
+      // glowing boundary: a soft wide underlay + a crisp bright border on top
+      map.addLayer({ id: "territory-glow", type: "line", source: "territory", paint: { "line-color": "#D4AF37", "line-width": 9, "line-opacity": 0.22, "line-blur": 5 } });
+      map.addLayer({ id: "territory-line", type: "line", source: "territory", paint: { "line-color": "#F4D577", "line-width": 3, "line-opacity": 1 } });
       map.on("click", "territory-fill", (e: any) => {
         new maplibregl.Popup({ offset: 8, className: "cc-pop" }).setLngLat(e.lngLat)
           .setHTML('<div style="font-weight:700;color:#D4AF37">West LA</div><div style="color:#aaa;font-size:11px">Serving now</div>').addTo(map);
@@ -91,6 +101,9 @@ export function TerritoryMap() {
       const jy = n === 1 ? 0 : (Math.random() - 0.5) * 0.006;
       const el = document.createElement("div");
       el.className = "cc-venue-pin";
+      const color = TYPE_COLORS[v.activityType] || "#D4AF37";
+      el.style.background = color;
+      el.style.boxShadow = `0 0 0 2px ${color}66, 0 0 10px 2px ${color}99`;
       const img = v.imageUrl ? `<img src="${v.imageUrl}" referrerpolicy="no-referrer" style="width:100%;height:88px;object-fit:cover;border-radius:8px;margin-bottom:6px" onerror="this.style.display='none'"/>` : "";
       const popup = new maplibregl.Popup({ offset: 16, className: "cc-pop" }).setHTML(
         `<div style="width:184px">${img}<div style="font-weight:700;color:#fff;font-size:13px">${v.name}</div><div style="color:#9a9a9a;font-size:11px;margin-top:2px">${[v.neighborhood, v.status].filter(Boolean).join(" · ")}</div></div>`,
@@ -99,6 +112,9 @@ export function TerritoryMap() {
       markersRef.current.push(marker);
     }
   }, [venues, ready]);
+
+  const legendTypes = Array.from(new Set((venues as any[]).map((v) => v.activityType).filter(Boolean)))
+    .sort((a, b) => (TYPE_LABELS[a] || a).localeCompare(TYPE_LABELS[b] || b));
 
   return (
     <div className="rounded-2xl border border-gray-800/60 bg-[#060606] overflow-hidden mb-5">
@@ -116,12 +132,23 @@ export function TerritoryMap() {
           <h2 className="text-sm font-bold text-white tracking-wide">Territory Map</h2>
           <p className="text-[11px] text-[#D4AF37]">Serving West LA · {venues.length} spots</p>
         </div>
-        <span className="flex items-center gap-2 text-[10px] text-gray-400">
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#D4AF37]" style={{ boxShadow: "0 0 6px #D4AF37" }} /> Venue</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#D4AF37]/30 border border-[#D4AF37]" /> Territory</span>
-        </span>
       </div>
-      <div ref={containerRef} className="w-full mt-3" style={{ height: 400 }} />
+      <div className="relative w-full mt-3">
+        <div ref={containerRef} className="w-full" style={{ height: 400 }} />
+        {legendTypes.length > 0 && (
+          <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-black/75 backdrop-blur border border-gray-800 px-3 py-2.5 space-y-1.5">
+            {legendTypes.map((t) => (
+              <div key={t} className="flex items-center gap-2 text-[11px] text-gray-200">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: TYPE_COLORS[t] || "#D4AF37", boxShadow: `0 0 5px ${TYPE_COLORS[t] || "#D4AF37"}` }} />
+                {TYPE_LABELS[t] || t}
+              </div>
+            ))}
+            <div className="flex items-center gap-2 text-[11px] text-gray-200 pt-1.5 mt-0.5 border-t border-gray-800">
+              <span className="w-3.5 h-2 rounded-sm border-2 border-[#F4D577] bg-[#D4AF37]/15" /> Served area
+            </div>
+          </div>
+        )}
+      </div>
       <div className="px-4 py-2 text-[11px] text-gray-500">Drag to rotate · scroll to zoom · ⛶ fullscreen. West LA is live; new territories light up as we expand.</div>
     </div>
   );
