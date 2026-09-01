@@ -7,7 +7,7 @@ const REGIONS: { name: string; pts: string; served?: boolean; lx: number; ly: nu
   { name: "THE VALLEY", pts: "30,8 114,8 114,26 33,26", lx: 72, ly: 18 },
   { name: "CENTRAL", pts: "53,26 84,26 84,51 53,51", lx: 68, ly: 40 },
   { name: "EAST LA", pts: "84,26 116,30 114,56 84,51", lx: 99, ly: 43 },
-  { name: "WEST LA", pts: "14,31 53,26 53,52 31,58 14,50", served: true, lx: 31, ly: 44 },
+  { name: "WEST LA", pts: "14,31 53,26 53,52 31,58 14,50", served: true, lx: 24, ly: 33 },
   { name: "SOUTH LA", pts: "53,52 88,55 84,77 55,75", lx: 69, ly: 66 },
   { name: "SOUTH BAY", pts: "31,58 53,52 55,75 35,79 21,68", lx: 37, ly: 69 },
 ];
@@ -46,13 +46,14 @@ export function TerritoryMap() {
         </div>
       </div>
 
-      <div className="relative h-[260px] flex items-start justify-center pt-6" style={{ perspective: "1400px" }}>
+      <div className="relative mx-auto max-w-xl rounded-xl overflow-hidden my-2" style={{ perspective: "1200px" }}>
         {/* horizon glow */}
-        <div className="absolute inset-x-0 top-6 h-24 bg-gradient-to-b from-[#D4AF37]/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#D4AF37]/12 to-transparent pointer-events-none z-10" />
         <svg
           viewBox="0 0 128 84"
-          className="w-[112%] max-w-none drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]"
-          style={{ transform: "rotateX(30deg)", transformOrigin: "center 30%" }}
+          preserveAspectRatio="xMidYMid meet"
+          className="w-full block drop-shadow-[0_16px_28px_rgba(0,0,0,0.6)]"
+          style={{ height: "300px", transform: "rotateX(15deg)", transformOrigin: "center 55%" }}
         >
           <defs>
             <filter id="tmGlow" x="-60%" y="-60%" width="220%" height="220%">
