@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MapPin, Plus, Trash2, ExternalLink, ArrowLeft, Coffee, Mountain, Footprints, BookOpen, Users, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Venue } from "@shared/schema";
+import { TerritoryMap } from "@/components/TerritoryMap";
 
 const ACTIVITIES: Record<string, { label: string; icon: any }> = {
   hiking: { label: "Hiking spots", icon: Mountain },
@@ -72,6 +73,7 @@ export default function AdminVenuesPage() {
       </header>
 
       <div className="px-5 py-4">
+        <TerritoryMap />
         <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar">
           {AREAS.map((a) => (
             <button key={a.value} onClick={() => setArea(a.value)} className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap border ${area === a.value ? "bg-[#D4AF37] text-black border-transparent" : "bg-transparent border-gray-700 text-gray-300"}`}>{a.label}</button>
