@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Venue } from "@shared/schema";
 import * as maplibregl from "maplibre-gl";
@@ -40,15 +40,19 @@ export function TerritoryMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const [ready, setReady] = useState(false);
 
-  // init once
+  // init once — start zoomed on West LA (its territory + pins are visible immediately);
+  // zoom out and it becomes a globe.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: STYLE,
-      center: [-98, 38],
-      zoom: 2.1,
+      center: WEST_LA,
+      zoom: 10.3,
+      pitch: 40,
+      bearing: -12,
       attributionControl: false,
     });
     mapRef.current = map;
@@ -58,25 +62,24 @@ export function TerritoryMap() {
 
     map.on("load", () => {
       map.addSource("territory", { type: "geojson", data: TERRITORY as any });
-      map.addLayer({ id: "territory-fill", type: "fill", source: "territory", paint: { "fill-color": "#D4AF37", "fill-opacity": 0.12 } });
-      map.addLayer({ id: "territory-line", type: "line", source: "territory", paint: { "line-color": "#D4AF37", "line-width": 2, "line-opacity": 0.85 } });
+      map.addLayer({ id: "territory-fill", type: "fill", source: "territory", paint: { "fill-color": "#D4AF37", "fill-opacity": 0.16 } });
+      map.addLayer({ id: "territory-line", type: "line", source: "territory", paint: { "line-color": "#D4AF37", "line-width": 2.5, "line-opacity": 0.9 } });
       map.on("click", "territory-fill", (e: any) => {
         new maplibregl.Popup({ offset: 8, className: "cc-pop" }).setLngLat(e.lngLat)
           .setHTML('<div style="font-weight:700;color:#D4AF37">West LA</div><div style="color:#aaa;font-size:11px">Serving now</div>').addTo(map);
       });
       map.on("mouseenter", "territory-fill", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "territory-fill", () => { map.getCanvas().style.cursor = ""; });
-      placeMarkers();
-      // intro: swoop from the globe into West LA
-      window.setTimeout(() => map.flyTo({ center: WEST_LA, zoom: 11, pitch: 45, bearing: -12, duration: 4200, essential: true }), 900);
+      setReady(true);
     });
 
-    return () => { map.remove(); mapRef.current = null; };
+    return () => { map.remove(); mapRef.current = null; markersRef.current = []; };
   }, []);
 
-  function placeMarkers() {
+  // place/refresh venue pins once the map is loaded AND venues are in
+  useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !ready) return;
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
     const used: Record<string, number> = {};
@@ -84,8 +87,8 @@ export function TerritoryMap() {
       if (v.lat == null || v.lng == null) continue;
       const key = `${(+v.lat).toFixed(4)},${(+v.lng).toFixed(4)}`;
       const n = (used[key] = (used[key] || 0) + 1);
-      const jx = n === 1 ? 0 : (Math.random() - 0.5) * 0.005;
-      const jy = n === 1 ? 0 : (Math.random() - 0.5) * 0.005;
+      const jx = n === 1 ? 0 : (Math.random() - 0.5) * 0.006;
+      const jy = n === 1 ? 0 : (Math.random() - 0.5) * 0.006;
       const el = document.createElement("div");
       el.className = "cc-venue-pin";
       const img = v.imageUrl ? `<img src="${v.imageUrl}" referrerpolicy="no-referrer" style="width:100%;height:88px;object-fit:cover;border-radius:8px;margin-bottom:6px" onerror="this.style.display='none'"/>` : "";
@@ -95,14 +98,7 @@ export function TerritoryMap() {
       const marker = new maplibregl.Marker({ element: el }).setLngLat([+v.lng + jx, +v.lat + jy]).setPopup(popup).addTo(map);
       markersRef.current.push(marker);
     }
-  }
-
-  // refresh markers when venues load/change
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (map.isStyleLoaded && map.isStyleLoaded()) placeMarkers();
-  }, [venues]);
+  }, [venues, ready]);
 
   return (
     <div className="rounded-2xl border border-gray-800/60 bg-[#060606] overflow-hidden mb-5">
