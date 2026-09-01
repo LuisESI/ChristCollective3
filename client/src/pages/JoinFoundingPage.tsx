@@ -30,7 +30,7 @@ export default function JoinFoundingPage() {
   const [authMode, setAuthMode] = useState<"register" | "login">("register");
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    firstName: "", email: "", phone: "", password: "", smsOptIn: true,
+    firstName: "", email: "", phone: "", password: "", smsOptIn: false,
     city: "", waitlisted: false, otherCity: "",
     disciplines: [] as string[], availability: [] as string[], activity: "",
   });
@@ -101,7 +101,7 @@ export default function JoinFoundingPage() {
     phase === "intro" ? true :
     phase === "register" ? (authMode === "login"
       ? form.email.trim().length > 0 && form.password.length >= 1
-      : form.email.includes("@") && form.password.length >= 6 && !!form.firstName && form.phone.trim().length >= 7 && form.smsOptIn) :
+      : form.email.includes("@") && form.password.length >= 6 && !!form.firstName && form.phone.trim().length >= 7) :
     phase === "city" ? (!!form.city || (form.waitlisted && form.otherCity.trim().length > 0)) :
     phase === "disciplines" ? true :
     phase === "availability" ? form.availability.length > 0 :
@@ -150,16 +150,6 @@ export default function JoinFoundingPage() {
               <Input value={form.email} onChange={(e) => set("email", e.target.value)} type={authMode === "login" ? "text" : "email"} placeholder={authMode === "login" ? "Email or username" : "Email"} className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
               {authMode === "register" && <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} type="tel" placeholder="Phone (for your Matchup texts)" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />}
               <Input value={form.password} onChange={(e) => set("password", e.target.value)} type="password" placeholder={authMode === "login" ? "Password" : "Password (6+ characters)"} className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
-              {authMode === "register" && (
-                <label className="flex items-start gap-3 p-3 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/[0.04] cursor-pointer" onClick={() => set("smsOptIn", !form.smsOptIn)}>
-                  <span className={cn("w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5", form.smsOptIn ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-600")}>
-                    {form.smsOptIn && <Check className="w-3 h-3 text-black" />}
-                  </span>
-                  <span className="text-xs text-gray-400 leading-relaxed">
-                    I agree to receive SMS from Christ Collective about Matchups (~4–6/cycle). Msg &amp; data rates may apply. Reply STOP to cancel. Consent isn't a condition of joining.
-                  </span>
-                </label>
-              )}
             </div>
             <div className="mt-6 pt-4 border-t border-gray-900 text-center">
               <button onClick={() => setAuthMode((m) => (m === "login" ? "register" : "login"))} className="text-sm text-gray-400 hover:text-white">
@@ -215,6 +205,16 @@ export default function JoinFoundingPage() {
             <div className="space-y-2.5">
               {ACTIVITIES.map((a) => <Row key={a.v} label={a.l} on={form.activity === a.v} onClick={() => set("activity", a.v)} />)}
             </div>
+            {form.activity && (
+              <label className="flex items-start gap-3 mt-5 p-3 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/[0.04] cursor-pointer" onClick={() => set("smsOptIn", !form.smsOptIn)}>
+                <span className={cn("w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5", form.smsOptIn ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-600")}>
+                  {form.smsOptIn && <Check className="w-3 h-3 text-black" />}
+                </span>
+                <span className="text-xs text-gray-400 leading-relaxed">
+                  Matchups are coordinated by text — I agree to receive SMS from Christ Collective about my Matchups so we can match me (~4–6/cycle). Msg &amp; data rates may apply. Reply STOP to cancel.
+                </span>
+              </label>
+            )}
           </div>
         )}
 

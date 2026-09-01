@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, Check } from "lucide-react";
 import { Helmet } from "react-helmet";
@@ -26,12 +27,16 @@ const ACTIVITIES = [
 export default function MatchupsPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [step, setStep] = useState(0); // 0 = time, 1 = activity, 2 = thank you
   const [slot, setSlot] = useState<string | null>(null);
   const [activity, setActivity] = useState<string | null>(null);
+  // SMS is required to be matched (matchups run over text). Skip the prompt if they've already consented.
+  const alreadyConsented = (user as any)?.smsOptIn === true;
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const submit = useMutation({
-    mutationFn: async () => apiRequest("/api/matchups/request", { method: "POST", data: { slot, activity } }),
+    mutationFn: async () => apiRequest("/api/matchups/request", { method: "POST", data: { slot, activity, smsOptIn: smsConsent || undefined } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setStep(2);
@@ -137,6 +142,16 @@ export default function MatchupsPage() {
                 );
               })}
             </div>
+            {!alreadyConsented && activity && (
+              <label className="flex items-start gap-3 mt-5 p-3 rounded-xl border border-[#D4AF37]/50 bg-[#D4AF37]/10 cursor-pointer" onClick={() => setSmsConsent((v) => !v)}>
+                <span className={cn("w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5", smsConsent ? "bg-[#D4AF37] border-[#D4AF37]" : "border-gray-400")}>
+                  {smsConsent && <Check className="w-3 h-3 text-black" />}
+                </span>
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  Matchups are coordinated by text — I agree to receive SMS from Christ Collective about my Matchups so we can match me. Msg &amp; data rates may apply. Reply STOP to cancel.
+                </span>
+              </label>
+            )}
           </>
         )}
 
@@ -172,10 +187,10 @@ export default function MatchupsPage() {
             ) : (
               <Button
                 onClick={() => submit.mutate()}
-                disabled={!activity || submit.isPending}
+                disabled={!activity || submit.isPending || (!alreadyConsented && !smsConsent)}
                 className="w-full h-12 bg-[#D4AF37] hover:bg-[#C4A030] text-black font-bold disabled:opacity-40"
               >
-                {submit.isPending ? "Confirming…" : activity ? "Confirm my spot" : "Pick an activity"}
+                {submit.isPending ? "Confirming…" : !activity ? "Pick an activity" : (!alreadyConsented && !smsConsent) ? "Agree to texts to continue" : "Confirm my spot"}
               </Button>
             )}
           </div>

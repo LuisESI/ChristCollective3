@@ -36,7 +36,7 @@ type Form = {
 type Step = { id: keyof Form | "review"; title: string; optional?: boolean; valid: (f: Form) => boolean };
 
 const STEPS: Step[] = [
-  { id: "phone", title: "What's your phone number?", valid: (f) => f.phone.trim().length >= 7 && f.smsOptIn },
+  { id: "phone", title: "What's your phone number?", valid: (f) => f.phone.trim().length >= 7 },
   { id: "instagram", title: "What's your Instagram or portfolio?", optional: true, valid: () => true },
   { id: "gender", title: "How do you identify?", valid: (f) => !!f.gender },
   { id: "birthdate", title: "When's your birthday?", valid: (f) => !!f.birthdate },

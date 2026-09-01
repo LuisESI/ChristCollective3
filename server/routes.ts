@@ -179,6 +179,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const b = req.body || {};
       const waitlisted = !!b.waitlisted;
+      // Being placed in the queue = a matchup opt-in, so SMS consent is required here.
+      const me = await storage.getUser(req.user.id);
+      const consented = (me as any)?.smsOptIn === true || b.smsOptIn === true;
+      if (!consented) return res.status(400).json({ message: "SMS consent is required to be matched.", needsSmsConsent: true });
       const update: any = { onboardingCompleted: true, waitlisted };
       if (typeof b.city === "string" && b.city) update.city = b.city;
       if (Array.isArray(b.disciplines)) update.disciplines = b.disciplines.slice(0, 12).map(String);
@@ -205,11 +209,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Matchup request: user picks a time + an activity for the next cycle
   app.post("/api/matchups/request", isAuthenticated, async (req: any, res) => {
     try {
-      const { slot, activity } = req.body || {};
+      const { slot, activity, smsOptIn } = req.body || {};
       if (!slot || !activity) return res.status(400).json({ message: "Pick a time and an activity" });
-      const updatedUser = await storage.updateUser(req.user.id, {
-        matchupRequest: { slot: String(slot), activity: String(activity), requestedAt: new Date().toISOString() },
-      });
+      // SMS is required to be MATCHED (matchups are coordinated by text), but not to have an account.
+      const me = await storage.getUser(req.user.id);
+      const consented = (me as any)?.smsOptIn === true || smsOptIn === true;
+      if (!consented) return res.status(400).json({ message: "SMS consent is required to be matched.", needsSmsConsent: true });
+      const update: any = { matchupRequest: { slot: String(slot), activity: String(activity), requestedAt: new Date().toISOString() } };
+      if (smsOptIn === true) update.smsOptIn = true;
+      const updatedUser = await storage.updateUser(req.user.id, update);
       res.json({ ok: true, matchupRequest: (updatedUser as any)?.matchupRequest });
     } catch (error) {
       console.error("Error saving matchup request:", error);
