@@ -7,12 +7,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, Sparkles, MapPin, CalendarClock, Coffee } from "lucide-react";
-
-const LA_AREAS = [
-  "West LA / Westside", "Hollywood / Central LA", "Beverly Hills / Mid-City",
-  "The Valley", "East LA / Eastside", "South LA / South Bay", "Elsewhere in LA County",
-];
+import { Check, ChevronLeft, Sparkles, CalendarClock, Coffee, Search } from "lucide-react";
+import { LA_CITIES } from "@/lib/laCities";
 const DISCIPLINES = ["Founder", "Music", "Film / Video", "Photography", "Design", "Illustration", "Writing", "Fashion", "Worship + Ministry Arts", "Content / Social", "Dance", "Other"];
 const WINDOWS = ["Weekday mornings", "Weekday afternoons", "Weekday evenings", "Saturday mornings", "Saturday afternoons", "Sunday afternoons", "Sunday evenings", "I'm flexible"];
 const ACTIVITIES = [{ v: "coffee", l: "Coffee ☕" }, { v: "hiking", l: "Hiking 🥾" }, { v: "run", l: "Running 🏃" }, { v: "book", l: "Book club 📚" }, { v: "open", l: "Open to anything ✨" }];
@@ -162,17 +158,24 @@ export default function JoinFoundingPage() {
 
         {phase === "city" && (
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-1">Where are you based?</h1>
-            <p className="text-gray-400 text-sm mb-5">We're launching in LA first.</p>
-            <div className="space-y-2.5">
-              {LA_AREAS.map((a) => (
-                <Row key={a} label={a} on={form.city === a && !form.waitlisted} onClick={() => setForm((f) => ({ ...f, city: a, waitlisted: false }))} icon={<MapPin className="w-4 h-4 text-[#D4AF37]" />} />
-              ))}
-              <Row label="Outside LA County" on={form.waitlisted} onClick={() => setForm((f) => ({ ...f, waitlisted: true, city: "" }))} />
-              {form.waitlisted && (
-                <Input value={form.otherCity} onChange={(e) => set("otherCity", e.target.value)} placeholder="What city are you in?" className="bg-[#0A0A0A] border-gray-800 text-white h-11 mt-1" />
-              )}
-            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1">Where in LA are you?</h1>
+            <p className="text-gray-400 text-sm mb-5">We're launching across LA County first — pick your city.</p>
+            {!form.waitlisted ? (
+              <>
+                <CitySelect value={form.city} onChange={(c) => set("city", c)} />
+                <button onClick={() => setForm((f) => ({ ...f, waitlisted: true, city: "" }))} className="mt-4 text-sm text-[#D4AF37] hover:underline">
+                  Not in LA County? Join the waitlist →
+                </button>
+              </>
+            ) : (
+              <>
+                <Input value={form.otherCity} onChange={(e) => set("otherCity", e.target.value)} placeholder="What city are you in?" className="bg-[#0A0A0A] border-gray-800 text-white h-12" />
+                <p className="text-xs text-gray-500 mt-2">We're LA-first, so you'll be on the waitlist until we reach your area.</p>
+                <button onClick={() => setForm((f) => ({ ...f, waitlisted: false, otherCity: "" }))} className="mt-4 text-sm text-[#D4AF37] hover:underline">
+                  ← Actually, I'm in LA County
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -256,6 +259,51 @@ export default function JoinFoundingPage() {
               {saving ? (phase === "register" && authMode === "login" ? "Logging in…" : "Saving…") : phase === "intro" ? "Get started" : phase === "register" && authMode === "login" ? "Log in & continue" : phase === "activity" ? "Join the founding group" : phase === "disciplines" && form.disciplines.length === 0 ? "Skip" : "Continue"}
             </Button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Searchable, select-only city picker — you can only pick a real LA County city/community.
+function CitySelect({ value, onChange }: { value: string; onChange: (c: string) => void }) {
+  const [q, setQ] = useState(value);
+  const [open, setOpen] = useState(false);
+  const query = q.trim().toLowerCase();
+  const matches = (query ? LA_CITIES.filter((c) => c.toLowerCase().includes(query)) : LA_CITIES).slice(0, 60);
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <Input
+          value={q}
+          onChange={(e) => {
+            const t = e.target.value;
+            setQ(t); setOpen(true);
+            const exact = LA_CITIES.find((c) => c.toLowerCase() === t.trim().toLowerCase());
+            onChange(exact || "");
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="Search your city…"
+          className="bg-[#0A0A0A] border-gray-800 text-white h-12 pl-9"
+        />
+        {value && <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#D4AF37]" />}
+      </div>
+      {open && (
+        <div className="absolute z-30 mt-1 w-full max-h-64 overflow-y-auto rounded-xl border border-gray-800 bg-[#0A0A0A] shadow-2xl">
+          {matches.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-gray-500">No LA County city matches that. Try another, or use the waitlist below.</div>
+          ) : matches.map((c) => (
+            <button
+              key={c}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { onChange(c); setQ(c); setOpen(false); }}
+              className={cn("w-full text-left px-4 py-2.5 text-[15px] hover:bg-[#D4AF37]/10", value === c ? "text-[#D4AF37]" : "text-gray-200")}
+            >
+              {c}
+            </button>
+          ))}
         </div>
       )}
     </div>

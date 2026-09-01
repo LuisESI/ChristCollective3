@@ -19,25 +19,18 @@ const TERRITORY = {
   },
 };
 
-// Free, no-API-key dark basemap (CARTO) as a raster source, rendered on a globe.
+// Free, no-API-key dark basemap (Esri World Dark Gray) rendered on a globe.
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
 const STYLE: any = {
   version: 8,
   sources: {
-    carto: {
-      type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution: '© OpenStreetMap · © CARTO',
-    },
+    base: { type: "raster", tiles: [`${ESRI}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`], tileSize: 256, attribution: "Esri, HERE, Garmin, © OpenStreetMap contributors" },
+    labels: { type: "raster", tiles: [`${ESRI}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`], tileSize: 256 },
   },
   layers: [
     { id: "bg", type: "background", paint: { "background-color": "#05070b" } },
-    { id: "carto", type: "raster", source: "carto" },
+    { id: "base", type: "raster", source: "base" },
+    { id: "labels", type: "raster", source: "labels" },
   ],
   projection: { type: "globe" },
 };
