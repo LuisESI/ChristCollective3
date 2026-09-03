@@ -10,7 +10,7 @@ import connectPgSimple from "connect-pg-simple";
 import pg from "pg";
 import { pool } from "./db";
 import { emailService } from "./emailService";
-import { authLimiter } from "./security";
+import { authLimiter, loginLimiter } from "./security";
 
 declare global {
   namespace Express {
@@ -274,7 +274,7 @@ export async function setupAuth(app: Express) {
     res.redirect("/auth");
   });
 
-  app.post("/api/login", authLimiter, (req, res, next) => {
+  app.post("/api/login", loginLimiter, (req, res, next) => {
     // Transform usernameOrEmail to username for passport compatibility
     if (req.body.usernameOrEmail) {
       req.body.username = req.body.usernameOrEmail;

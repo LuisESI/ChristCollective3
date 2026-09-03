@@ -20,24 +20,63 @@ function userAwareKeyGenerator(req: Request): string {
   return ipKeyGenerator(req.ip!);
 }
 
-// Global rate limiter — applies to all /api routes
-// 200 requests per 15-minute window per IP (uses default IP-based key generator)
+// Per-device key: each browser/device gets its own budget even when many people share
+// one public IP (everyone on the same venue/office WiFi sits behind one NAT address).
+// This is critical for an in-person community app — without it, a few active clients
+// exhaust the whole room's request budget and 429 everybody at once (which the frontend
+// reads as being logged out). Web clients are identified by the connect.sid session
+// cookie, mobile clients by the X-Session-ID header; brand-new visitors with neither
+// fall back to their IP.
+function sessionOrIpKey(req: Request): string {
+  const mobile = req.headers['x-session-id'];
+  if (typeof mobile === 'string' && mobile) return `sess_${mobile}`;
+  const cookie = req.headers.cookie || '';
+  const m = cookie.match(/connect\.sid=([^;]+)/);
+  if (m) return `sess_${m[1]}`;
+  return `ip_${ipKeyGenerator(req.ip!)}`;
+}
+
+// Global rate limiter — applies to all /api routes.
+// 800 requests per 15-minute window per DEVICE/session (not per IP), so a crowd on a
+// shared network doesn't share a single budget.
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 800,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: sessionOrIpKey,
   handler: rateLimitHandler,
   skip: (req) => {
     return req.path === '/api/shop/webhook' || req.path === '/api/donations/webhook';
   },
 });
 
-// Strict limiter for authentication endpoints (login, register, password reset)
-// 10 attempts per 15-minute window per IP (uses default IP-based key generator)
+// Login limiter — protects a single account from brute force without punishing other
+// people on the same network. Keyed by IP + the account being targeted, and only FAILED
+// attempts count (skipSuccessfulRequests), so a correct password never consumes budget
+// and normal logins can never lock a shared-IP group out.
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req: Request): string => {
+    const ip = ipKeyGenerator(req.ip!);
+    const acct = String(req.body?.usernameOrEmail ?? req.body?.username ?? '')
+      .toLowerCase()
+      .trim();
+    return acct ? `login_${ip}_${acct}` : `login_${ip}`;
+  },
+  handler: rateLimitHandler,
+});
+
+// Strict limiter for other sensitive auth endpoints (register, password reset, email
+// verification). 30 per 15-minute window per IP — raised from 10 so group sign-ups on
+// one venue WiFi aren't blocked, while still throttling abuse.
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitHandler,
